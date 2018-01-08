@@ -35,29 +35,25 @@ class SynchronisationClient extends ConfigurableService
 
     const SERVICE_ID = 'taoSync/client';
 
-    public function getRemoteClassTree()
+    public function getRemoteClassTree($classUri)
     {
-        $url = '/taoSync/SynchronisationApi/getClassChecksum';
+        $url = '/taoSync/SynchronisationApi/getClassChecksum?class-uri= ' . urlencode($classUri);
         $method = 'GET';
-        $body = 'test';
 
         /** @var Response $response */
-        $response = $this->call($url, $method, $body);
+        $response = $this->call($url, $method);
+        $data = json_decode($response->getBody()->getContents(), true);
 
-        if ($response->getStatusCode() == 200) {
-            $content = json_decode($response->getBody()->getContents(), true);
-            if (isset($content['success']) && $content['success']) {
-                $data = $content['data'];
-
-            }
-        }
+        return $data;
     }
 
     protected function call($url, $method = 'GET', $body = false)
     {
         $request = new Request($method, $url);
         if ($body) {
-            if (is_string($body)) {
+            if (is_array($body)) {
+                $body = stream_for(http_build_query($body));
+            } elseif (is_string($body)) {
                 $body = stream_for($body);
             }
             $request = $request->withBody($body);

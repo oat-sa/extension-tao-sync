@@ -16,7 +16,6 @@ class SynchronisationApi extends \tao_actions_RestController
 
     public function getClassChecksum()
     {
-        return $this->returnJson('test');
         try {
             // Check if it's post method
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
@@ -32,10 +31,16 @@ class SynchronisationApi extends \tao_actions_RestController
             }
 
             if (!$classToSynchronize) {
-//                throw new \InvalidArgumentException('A valid "' . self::CLASS_URI . '" parameter is required to fetch class checksum.');
+                throw new \InvalidArgumentException('A valid "' . self::CLASS_URI . '" parameter is required to fetch class checksum.');
             }
 
             $classChecksum = $this->getSyncService()->getLocalClassTree($classToSynchronize->getUri());
+
+            foreach ($classChecksum as $remoteResource) {
+                \common_Logger::e(print_r(__FUNCTION__, true));
+                \common_Logger::i(print_r($remoteResource, true));
+                continue;
+            }
 
             $this->returnJson($classChecksum);
 

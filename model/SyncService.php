@@ -41,7 +41,8 @@ class SyncService extends ConfigurableService
 
         $localResources = $this->getLocalClassTree($classUri);
         $remoteResources = $this->getRemoteClassTreeChecksum($classUri);
-        die();
+
+        var_dump($remoteResources);
         foreach ($remoteResources as $remoteResource) {
             if (array_key_exists($remoteResource['uri'], $localResources)) {
                 $localResource = $localResources[$remoteResource['uri']];
@@ -70,6 +71,7 @@ class SyncService extends ConfigurableService
 
         /** @var \core_kernel_classes_Resource $resource */
         foreach ($class->getInstances() as $resource) {
+            $value['uri'] = $resource->getUri();
             $value['type'] = 'resource';
             $value['checksum'] = md5(serialize($resource->getRdfTriples()->toArray()));
             $value['childrenChecksum'] = null;
@@ -79,6 +81,7 @@ class SyncService extends ConfigurableService
 
         /** @var \core_kernel_classes_Class $subClass */
         foreach ($class->getSubClasses() as $subClass) {
+            $value['uri'] = $resource->getUri();
             $value['type'] = 'class';
             $value['checksum'] = md5(serialize($subClass->getRdfTriples()->toArray()));
             $value['childrenChecksum'] = '';//md5(serialize($resource->getRdfTriples()->toArray()));
@@ -92,7 +95,7 @@ class SyncService extends ConfigurableService
     protected function getRemoteClassTreeChecksum($classUri)
     {
         $client = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
-        $client->getRemoteClassTree();
+        return $client->getRemoteClassTree($classUri);
     }
 
     /**
@@ -101,7 +104,9 @@ class SyncService extends ConfigurableService
     protected function addResources(array $remoteResources = [])
     {
         foreach ($remoteResources as $remoteResource) {
-
+            \common_Logger::e(print_r(__FUNCTION__, true));
+            \common_Logger::i(print_r($remoteResource, true));
+            continue;
             $resource = $this->getResource($remoteResource['uri']);
             if ($resource->isClass()) {
                 /** @var \core_kernel_classes_Class $resource */
@@ -110,8 +115,8 @@ class SyncService extends ConfigurableService
             }
         }
 
-        $remoteResourceProperties = $this->getRemoteInstances($remoteResources);
-        $this->insertMultiples($remoteResourceProperties);
+//        $remoteResourceProperties = $this->getRemoteInstances($remoteResources);
+//        $this->insertMultiples($remoteResourceProperties);
     }
 
     /**
@@ -120,7 +125,9 @@ class SyncService extends ConfigurableService
     protected function updateResources(array $remoteResources = [])
     {
         foreach ($remoteResources as $remoteResource) {
-
+            \common_Logger::e(print_r(__FUNCTION__, true));
+            \common_Logger::i(print_r($remoteResource, true));
+            continue;
             $resource = $this->getResource($remoteResource['uri']);
             if ($resource->isClass()) {
                 /** @var \core_kernel_classes_Class $resource */
@@ -129,8 +136,8 @@ class SyncService extends ConfigurableService
             }
         }
 
-        $remoteResourceProperties = $this->getRemoteInstances($remoteResources);
-        $this->updateMultiples($remoteResourceProperties);
+//        $remoteResourceProperties = $this->getRemoteInstances($remoteResources);
+//        $this->updateMultiples($remoteResourceProperties);
     }
 
     /**
@@ -139,6 +146,9 @@ class SyncService extends ConfigurableService
     protected function removeResources(array $resources = [])
     {
         foreach ($resources as $resource) {
+            \common_Logger::e(print_r(__FUNCTION__, true));
+            \common_Logger::i(print_r($resource, true));
+            continue;
             $this->getResource($resource['uri'])->delete();
         }
     }
