@@ -1,0 +1,34 @@
+{
+    "name": "oat-sa/extension-tao-sync",
+    "description": "TAO synchronisation for offline client data.",
+    "authors": [
+        {
+            "name": "Open Assessment Technologies S.A.",
+            "homepage": "http://www.taotesting.com"
+        },
+        {
+            "name": "Moyon Camille",
+            "role": "Developer"
+        }
+    ],
+    "homepage" : "http://www.taotesting.com",
+    "license" : "GPL-2.0",
+    "keywords": [
+        "tao",
+        "computer-based-assessment",
+        "oat",
+    ],
+    "type": "tao-extension",
+    "extra": {
+        "tao-extension-name": "taoSync"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php" : ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "oat\\taoSync\\": ""
+        }
+    }
+}
