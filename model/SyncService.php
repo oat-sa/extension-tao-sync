@@ -23,13 +23,15 @@ namespace oat\taoSync\model;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\TaoOntology;
+use oat\taoSync\model\api\SynchronisationApi;
+use oat\taoSync\model\api\SynchronisationClient;
 use oat\taoSync\model\synchronizer\TestTakerSynchronizer;
 
 class SyncService extends ConfigurableService
 {
     use OntologyAwareTrait;
 
-    const SERVICE_ID = 'taoSync/SyncService';
+    const SERVICE_ID = 'taoSync/syncService';
 
     public function synchronizeData($options)
     {
@@ -38,8 +40,8 @@ class SyncService extends ConfigurableService
         $resourcesToUpdate = $resourcesToAdd = $childrenToUpdate = [];
 
         $localResources = $this->getLocalClassTree($classUri);
-        var_dump($localResources);die();
         $remoteResources = $this->getRemoteClassTreeChecksum($classUri);
+        die();
         foreach ($remoteResources as $remoteResource) {
             if (array_key_exists($remoteResource['uri'], $localResources)) {
                 $localResource = $localResources[$remoteResource['uri']];
@@ -61,22 +63,36 @@ class SyncService extends ConfigurableService
         $this->addResources($resourcesToAdd);
     }
 
-    protected function getLocalClassTree($classUri)
+    public function getLocalClassTree($classUri)
     {
-        $resources = $this->getClass($classUri)->getInstances();
+        $class = $this->getClass($classUri);
         $values = [];
+
         /** @var \core_kernel_classes_Resource $resource */
-        foreach ($resources as $resource) {
-            if ($resource->isClass()) {
-                $values[] = $this->getLocalClassTree($classUri);
-            }
+        foreach ($class->getInstances() as $resource) {
+            $value['type'] = 'resource';
             $value['checksum'] = md5(serialize($resource->getRdfTriples()->toArray()));
+            $value['childrenChecksum'] = null;
+            $value['properties'] = $resource->getRdfTriples()->toArray();
+            $values[$resource->getUri()] = $value;
+        }
+
+        /** @var \core_kernel_classes_Class $subClass */
+        foreach ($class->getSubClasses() as $subClass) {
+            $value['type'] = 'class';
+            $value['checksum'] = md5(serialize($subClass->getRdfTriples()->toArray()));
             $value['childrenChecksum'] = '';//md5(serialize($resource->getRdfTriples()->toArray()));
-            $value['properties'] = [];
+            $value['properties'] = $resource->getRdfTriples()->toArray();
             $values[$resource->getUri()] = $value;
         }
 
         return $values;
+    }
+
+    protected function getRemoteClassTreeChecksum($classUri)
+    {
+        $client = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+        $client->getRemoteClassTree();
     }
 
     /**
@@ -125,6 +141,11 @@ class SyncService extends ConfigurableService
         foreach ($resources as $resource) {
             $this->getResource($resource['uri'])->delete();
         }
+    }
+
+    protected function getSynchronisationApi()
+    {
+        $this->getServiceLocator()->get(SynchronisationApi::SERVICE_ID);
     }
 
     protected function getSynchronizers()

@@ -40,7 +40,7 @@ return array(
     ),
     'update' => oat\taoSync\scripts\update\Updater::class,
     'routes' => array(
-        '/taoTaskQueue' => 'oat\\taoSync\\controller'
+        '/taoSync' => 'oat\\taoSync\\controller'
     ),
     'constants' => array(
         # views directory
