@@ -1,9 +1,21 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: siwane
- * Date: 08/01/18
- * Time: 16:00
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; under version 2
+ * of the License (non-upgradable).
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ *
+ * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ *
  */
 
 namespace oat\taoSync\controller;
@@ -13,6 +25,81 @@ use oat\taoSync\model\SyncService;
 class SynchronisationApi extends \tao_actions_RestController
 {
     const CLASS_URI = 'class-uri';
+
+    const TYPE = 'type';
+    const LIMIT = 'limit';
+    const OFFSET = 'offset';
+
+    public function fetch()
+    {
+        try {
+            if ($this->getRequestMethod() != \Request::HTTP_GET) {
+                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+            }
+
+            if (!$this->hasRequestParameter(self::TYPE)) {
+                throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
+            }
+            $type = $this->getRequestParameter(self::TYPE);
+
+            $limit = $this->hasRequestParameter(self::LIMIT) ? $this->getRequestParameter(self::LIMIT) : 100;
+            $offset = $this->hasRequestParameter(self::OFFSET) ? $this->getRequestParameter(self::OFFSET) : 0;
+
+            $entities = $this->getSyncService()->fetch($type, $limit, $offset);
+
+            $this->returnJson($entities);
+
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+    public function count()
+    {
+        try {
+            if ($this->getRequestMethod() != \Request::HTTP_GET) {
+                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+            }
+
+            if (!$this->hasRequestParameter(self::TYPE)) {
+                throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
+            }
+            $type = $this->getRequestParameter(self::TYPE);
+
+            $this->returnJson($this->getSyncService()->count($type));
+
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+    public function fetchClassDetails()
+    {
+        try {
+            if ($this->getRequestMethod() != \Request::HTTP_GET) {
+                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+            }
+
+            if (!$this->hasRequestParameter(self::TYPE)) {
+                throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
+            }
+            $type = $this->getRequestParameter(self::TYPE);
+
+            if (!$this->hasRequestParameter('requestedClasses')) {
+                return $this->returnJson('No requested class provided.');
+            }
+
+            $requestedClasses = $this->getRequestParameter('requestedClasses');
+            if (!is_array($requestedClasses)) {
+                return $this->returnJson('Requested classes is malformed.');
+            }
+
+            $this->returnJson($this->getSyncService()->fetchMissingClasses($type, $requestedClasses));
+
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
 
     public function getClassChecksum()
     {
@@ -35,12 +122,6 @@ class SynchronisationApi extends \tao_actions_RestController
             }
 
             $classChecksum = $this->getSyncService()->getLocalClassTree($classToSynchronize->getUri());
-
-            foreach ($classChecksum as $remoteResource) {
-                \common_Logger::e(print_r(__FUNCTION__, true));
-                \common_Logger::i(print_r($remoteResource, true));
-                continue;
-            }
 
             $this->returnJson($classChecksum);
 

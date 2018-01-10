@@ -14,33 +14,21 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
-namespace oat\taoSync\scripts\tool;
+namespace oat\taoSync\scripts\install;
 
-use oat\oatbox\extension\AbstractAction;
-use oat\taoSync\model\synchronizer\testtaker\TestTakerSynchronizer;
-use oat\taoSync\model\SyncService;
+use oat\oatbox\extension\InstallAction;
+use oat\taoSync\model\api\SynchronisationClient;
 
-class SyncDeliveryData extends AbstractAction
+class RegisterSyncClient extends InstallAction
 {
     public function __invoke($params)
     {
-        $type = TestTakerSynchronizer::SYNC_ID;
-
-        $this->getSyncService()->synchronizeAll();
-//        $this->getSyncService()->synchronizeData($type);
-
-        return \common_report_Report::createInfo('Done.');
+        $this->registerService(SynchronisationClient::SERVICE_ID, new SynchronisationClient());
+        return \common_report_Report::createSuccess('SyncService successfully registered.');
     }
 
-    /**
-     * @return SyncService
-     */
-    protected function getSyncService()
-    {
-        return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
-    }
 }

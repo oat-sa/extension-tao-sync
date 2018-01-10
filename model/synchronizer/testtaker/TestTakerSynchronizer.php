@@ -18,17 +18,11 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer\testtaker;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+use oat\taoSync\model\synchronizer\Synchronizer;
+
+interface TestTakerSynchronizer extends Synchronizer
 {
-    public function update($initialVersion)
-    {
-
-    }
+    const SYNC_ID = 'test-taker';
 }

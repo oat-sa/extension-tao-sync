@@ -14,33 +14,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
-namespace oat\taoSync\scripts\tool;
+namespace oat\taoSync\model\synchronizer\testcenter;
 
-use oat\oatbox\extension\AbstractAction;
-use oat\taoSync\model\synchronizer\testtaker\TestTakerSynchronizer;
-use oat\taoSync\model\SyncService;
+use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoTestCenter\model\TestCenterService;
 
-class SyncDeliveryData extends AbstractAction
+class RdfTestCenterSynchronizer extends AbstractResourceSynchronizer implements TestCenterSynchronizer
 {
-    public function __invoke($params)
+    /**
+     * Get the synchronizer identifier
+     *
+     * @return string
+     */
+    public function getId()
     {
-        $type = TestTakerSynchronizer::SYNC_ID;
-
-        $this->getSyncService()->synchronizeAll();
-//        $this->getSyncService()->synchronizeData($type);
-
-        return \common_report_Report::createInfo('Done.');
+        return self::SYNC_ID;
     }
 
     /**
-     * @return SyncService
+     * Get the root class of entity to synchronize
+     *
+     * @return \core_kernel_classes_Class
      */
-    protected function getSyncService()
+    protected function getRootClass()
     {
-        return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
+        return $this->getClass('http://www.tao.lu/Ontologies/TAOTestCenter.rdf#TestCenter');
     }
 }

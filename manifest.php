@@ -26,7 +26,8 @@ return array(
     'version' => '0.0.1',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'tao' => '>=14.16.0'
+        'tao' => '>=14.16.0',
+        'taoPublishing' => '>=0.5.1'
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => array(
@@ -34,6 +35,9 @@ return array(
     ),
     'install' => array(
         'php' => [
+            \oat\taoSync\scripts\install\RegisterSyncService::class,
+            \oat\taoSync\scripts\install\RegisterSyncPublishingAction::class,
+            \oat\taoSync\scripts\install\RegisterSyncClient::class
         ]
     ),
     'uninstall' => array(

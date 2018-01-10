@@ -14,13 +14,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
-namespace oat\taoSync\model\synchronizer;
+namespace oat\taoSync\model\synchronizer\testcenter;
 
-class TestTakerSynchronizer
+use oat\taoSync\model\synchronizer\Synchronizer;
+
+interface TestCenterSynchronizer extends Synchronizer
 {
-
+    const SYNC_ID = 'test-center';
 }

@@ -35,16 +35,34 @@ class SynchronisationClient extends ConfigurableService
 
     const SERVICE_ID = 'taoSync/client';
 
-    public function getRemoteClassTree($classUri)
+    public function fetchRemoteEntities($type, $limit=100, $offset=0)
     {
-        $url = '/taoSync/SynchronisationApi/getClassChecksum?class-uri= ' . urlencode($classUri);
+        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, 'limit' => $limit, 'offset' => $offset]);
         $method = 'GET';
 
         /** @var Response $response */
         $response = $this->call($url, $method);
-        $data = json_decode($response->getBody()->getContents(), true);
+        return json_decode($response->getBody()->getContents(), true);
+    }
 
-        return $data;
+    public function count($type)
+    {
+        $url = '/taoSync/SynchronisationApi/count?' . http_build_query(['type' => $type]);
+        $method = 'GET';
+
+        /** @var Response $response */
+        $response = $this->call($url, $method);
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    public function getMissingClasses($type, array $classes)
+    {
+        $url = '/taoSync/SynchronisationApi/fetchClassDetails?' . http_build_query(['type' => $type, 'requestedClasses' => $classes]);
+        $method = 'GET';
+
+        /** @var Response $response */
+        $response = $this->call($url, $method);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     protected function call($url, $method = 'GET', $body = false)
@@ -78,11 +96,18 @@ class SynchronisationClient extends ConfigurableService
         foreach ($environments as $env) {
             $property = $this->getProperty(PublishingService::PUBLISH_ACTIONS);
             $actionProperties = $env->getPropertyValues($property);
-            if ($actionProperties && in_array(addslashes(SyncDeliveryData::class), $actionProperties)) {
-                return $env;
+
+            foreach ($actionProperties as $actionProperty) {
+                if ($actionProperty) {
+                    $actionProperty = preg_replace('/(\/|\\\\)+/', '\\', $actionProperty);
+                    $syncAction = preg_replace('/(\/|\\\\)+/', '\\', SyncDeliveryData::class);
+                    if ($actionProperty == $syncAction) {
+                        return $env;
+                    }
+                }
             }
         }
-        return false;
+        throw new \common_exception_NotImplemented('No environment was associated to synchronisation. Process cancelled');
     }
 
 }
