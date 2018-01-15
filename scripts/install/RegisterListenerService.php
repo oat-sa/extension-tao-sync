@@ -18,30 +18,16 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\testcenter;
+namespace oat\taoSync\scripts\install;
 
-use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
-use oat\taoTestCenter\model\TestCenterService;
+use oat\oatbox\extension\InstallAction;
+use oat\taoSync\model\listener\ListenerService;
 
-class RdfTestCenterSynchronizer extends AbstractResourceSynchronizer implements TestCenterSynchronizer
+class RegisterListenerService extends InstallAction
 {
-    /**
-     * Get the synchronizer identifier
-     *
-     * @return string
-     */
-    public function getId()
+    public function __invoke($params)
     {
-        return self::SYNC_ID;
-    }
-
-    /**
-     * Get the root class of entity to synchronize
-     *
-     * @return \core_kernel_classes_Class
-     */
-    protected function getRootClass()
-    {
-        return $this->getClass(TestCenterService::CLASS_URI);
+        $this->registerService(ListenerService::SERVICE_ID, new ListenerService());
+        return \common_report_Report::createSuccess('SyncService successfully registered.');
     }
 }

@@ -20,6 +20,8 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\tao\scripts\update\OntologyUpdater;
+
 /**
  * Class Updater
  *
@@ -29,6 +31,6 @@ class Updater extends \common_ext_ExtensionUpdater
 {
     public function update($initialVersion)
     {
-
+        OntologyUpdater::syncModels();
     }
 }

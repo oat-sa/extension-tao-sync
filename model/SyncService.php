@@ -35,14 +35,37 @@ class SyncService extends ConfigurableService
 
     protected $synchronizers = array();
 
-    public function synchronizeAll()
+    public function synchronize($orgId, $type = null, array $options = [])
     {
-        $this->synchronize('test-center');
-//        $this->synchronize('test-taker');
+        $allTypes = [
+            'test-center',
+            'test-taker',
+            'administrator',
+            'proctor',
+            'eligibility',
+            'delivery',
+//            'sub-test-center'
+        ];
+
+        $report = \common_report_Report::createInfo('Starting synchronization...');
+
+        if (is_null($type)) {
+            foreach($allTypes as $type) {
+                $report->add($this->synchronizeType($orgId, $type));
+            }
+        } else {
+            $report->add($this->synchronizeType($orgId, $type));
+        }
+
+        return $report;
     }
 
-    public function synchronize($type, $limit=100, $offset=0)
+    protected function synchronizeType($orgId, $type, $limit=100, $offset=0)
     {
+        $this->orgId = $orgId;
+
+        $report = \common_report_Report::createSuccess('Synchronizing org "' . $orgId . '", type "' . $type . '"');
+
         $count = $this->getRemoteCount($type);
 
         $entities = array(
@@ -58,24 +81,19 @@ class SyncService extends ConfigurableService
             foreach ($remoteInstances as $remoteInstance) {
                 $id = $remoteInstance['id'];
                 $entities['exist'][$id] = $id;
-                echo PHP_EOL . $id . ' : ';
                 try {
                     $localInstance = $this->getSynchronizer($type)->fetchOne($id);
                     if ($localInstance['checksum'] != $remoteInstance['checksum']) {
-
                         //TO UPDATE
                         $entities['update'][$id] = $remoteInstance;
-                        echo 'update';
+                        $report->add(\common_report_Report::createInfo('Resource "' . $id . '" does not match, UPDATE'));
                     } else {
-                        // ALREADY SYNC
-                        echo 'sync';
+                        $report->add(\common_report_Report::createInfo('Resource "' . $id . '" is up to date, SYNC'));
                     }
                 } catch (\common_exception_NotFound $e) {
                     //TO CREATE
                     $entities['create'][$id] = $remoteInstance;
-                    echo 'create';
                 }
-//                echo PHP_EOL . print_r($remoteInstance, true) . ' : ';
 
             }
             $count -= $limit;
@@ -85,28 +103,32 @@ class SyncService extends ConfigurableService
         $count = $this->count($type);
         $deleteOffset = $offset;
         while ($count > 0) {
-            $resources = $this->fetch($type, $limit, $deleteOffset);
+            $resources = $this->fetch($type, ['limit' => $limit, 'offset' => $deleteOffset]);
             foreach ($resources as $resource) {
                 if (!in_array($resource['id'], $entities['exist'])) {
                     $entities['delete'][] = $resource['id'];
+                    $report->add(\common_report_Report::createInfo('Resource "' . $id . '" does not exist anymore, DELETE'));
+
                 }
             }
             $count -= $limit;
             $deleteOffset += $limit;
         }
-        echo PHP_EOL;
+
+        $report->add(\common_report_Report::createInfo('Resource to DELETE : ' . count($entities['delete'])));
+        $report->add(\common_report_Report::createInfo('Resource to CREATE : ' . count($entities['create'])));
+        $report->add(\common_report_Report::createInfo('Resource to UPDATE : ' . count($entities['update'])));
+
         $this->getSynchronizer($type)->before($entities);
         $this->getSynchronizer($type)->deleteMultiple($entities['delete']);
         $this->getSynchronizer($type)->insertMultiple($entities['create']);
         $this->getSynchronizer($type)->updateMultiple($entities['update']);
+
+        return $report;
     }
 
-    public function fetch($type, $limit=100, $offset=0)
+    public function fetch($type, $options)
     {
-        $options = [
-            'limit' => $limit,
-            'offset' => $offset
-        ];
         return $this->getSynchronizer($type)->fetch($options);
     }
 
@@ -118,9 +140,9 @@ class SyncService extends ConfigurableService
     public function fetchMissingClasses($type, array $requestedClasses)
     {
         $synchronizer = $this->getSynchronizer($type);
-        if ($synchronizer instanceof RdfSynchronizer) {
-            throw new \common_exception_NotImplemented();
-        }
+//        if ($synchronizer instanceof RdfSynchronizer) {
+//            throw new \common_exception_NotImplemented();
+//        }
         return $synchronizer->fetchMissingClasses($requestedClasses);
     }
 

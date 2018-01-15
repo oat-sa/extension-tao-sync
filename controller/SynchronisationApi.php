@@ -45,7 +45,10 @@ class SynchronisationApi extends \tao_actions_RestController
             $limit = $this->hasRequestParameter(self::LIMIT) ? $this->getRequestParameter(self::LIMIT) : 100;
             $offset = $this->hasRequestParameter(self::OFFSET) ? $this->getRequestParameter(self::OFFSET) : 0;
 
-            $entities = $this->getSyncService()->fetch($type, $limit, $offset);
+            $filters = array();
+            $options = array();
+            $organistationId = '123456';
+            $entities = $this->getSyncService()->fetch($type, $options, $filters);
 
             $this->returnJson($entities);
 
@@ -61,9 +64,12 @@ class SynchronisationApi extends \tao_actions_RestController
                 throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
             }
 
+            \common_Logger::i(print_r($this->getRequestParameters(),true));
             if (!$this->hasRequestParameter(self::TYPE)) {
                 throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
             }
+
+            \common_Logger::i(__METHOD__);
             $type = $this->getRequestParameter(self::TYPE);
 
             $this->returnJson($this->getSyncService()->count($type));

@@ -218,11 +218,6 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
         }
     }
 
-    /**
-     * Get default options for fetch query
-     *
-     * @return array
-     */
     protected function getDefaultOptions()
     {
         return [

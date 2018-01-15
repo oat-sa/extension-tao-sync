@@ -23,21 +23,27 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.0.1',
+    'version' => '0.0.2',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=14.16.0',
-        'taoPublishing' => '>=0.5.1'
+        'taoPublishing' => '>=0.5.1',
+        'taoTestCenter' => '>=3.7.0',
+        'taoRevision' => '>=4.1.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => array(
         array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', array('ext'=>'taoSync')),
     ),
     'install' => array(
+        'rdf' => [
+            dirname(__FILE__) . '/model/ontology/testcenter.rdf',
+        ],
         'php' => [
             \oat\taoSync\scripts\install\RegisterSyncService::class,
             \oat\taoSync\scripts\install\RegisterSyncPublishingAction::class,
-            \oat\taoSync\scripts\install\RegisterSyncClient::class
+            \oat\taoSync\scripts\install\RegisterSyncClient::class,
+            \oat\taoSync\scripts\install\RegisterListenerService::class
         ]
     ),
     'uninstall' => array(

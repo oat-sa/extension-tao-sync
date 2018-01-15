@@ -28,14 +28,42 @@ class SyncDeliveryData extends AbstractAction
 {
     public function __invoke($params)
     {
-        $type = TestTakerSynchronizer::SYNC_ID;
+        $this->checkToken();
+        $token = $this->getOrgIdFromToken();
+        $type = $orgId = null;
 
-        $this->getSyncService()->synchronizeAll();
-//        $this->getSyncService()->synchronizeData($type);
+        foreach ($params as $param) {
+            list($option, $value) = explode('=', $param);
 
-        return \common_report_Report::createInfo('Done.');
+            switch ($option) {
+                case '--orgId':
+                    $orgId = $value;
+                    break;
+
+                case '--type':
+                    $type = $value;
+                    break;
+            }
+        }
+
+        if (is_null($orgId)) {
+            throw new \common_exception_RestApi('Expected "--orgId" argument is missing.');
+        }
+
+        $report = $this->getSyncService()->synchronize($orgId, $type);
+
+        return $report;
     }
 
+    protected function getOrgIdFromToken()
+    {
+        return '123456';
+    }
+
+    protected function checkToken()
+    {
+        return true;
+    }
     /**
      * @return SyncService
      */
