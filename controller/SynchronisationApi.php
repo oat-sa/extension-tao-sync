@@ -14,21 +14,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
 namespace oat\taoSync\controller;
 
+use GuzzleHttp\Psr7\MultipartStream;
+use function GuzzleHttp\Psr7\stream_for;
+use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
 class SynchronisationApi extends \tao_actions_RestController
 {
+    const URI = 'uri';
+
     const CLASS_URI = 'class-uri';
 
     const TYPE = 'type';
-    const LIMIT = 'limit';
-    const OFFSET = 'offset';
 
     public function fetch()
     {
@@ -41,14 +44,9 @@ class SynchronisationApi extends \tao_actions_RestController
                 throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
             }
             $type = $this->getRequestParameter(self::TYPE);
+            $options = $this->hasRequestParameter('options') ? $this->getRequestParameter('options') : [];
 
-            $limit = $this->hasRequestParameter(self::LIMIT) ? $this->getRequestParameter(self::LIMIT) : 100;
-            $offset = $this->hasRequestParameter(self::OFFSET) ? $this->getRequestParameter(self::OFFSET) : 0;
-
-            $filters = array();
-            $options = array();
-            $organistationId = '123456';
-            $entities = $this->getSyncService()->fetch($type, $options, $filters);
+            $entities = $this->getSyncService()->fetch($type, $options);
 
             $this->returnJson($entities);
 
@@ -64,15 +62,13 @@ class SynchronisationApi extends \tao_actions_RestController
                 throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
             }
 
-            \common_Logger::i(print_r($this->getRequestParameters(),true));
             if (!$this->hasRequestParameter(self::TYPE)) {
                 throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
             }
-
-            \common_Logger::i(__METHOD__);
             $type = $this->getRequestParameter(self::TYPE);
+            $options = $this->hasRequestParameter('options') ? $this->getRequestParameter('options') : [];
 
-            $this->returnJson($this->getSyncService()->count($type));
+            $this->returnJson($this->getSyncService()->count($type, $options));
 
         } catch (\Exception $e) {
             $this->returnFailure($e);
@@ -134,6 +130,35 @@ class SynchronisationApi extends \tao_actions_RestController
         } catch (\Exception $e) {
             $this->returnFailure($e);
         }
+    }
+
+    public function getDeliveryTest()
+    {
+        try {
+            // Check if it's post method
+            if ($this->getRequestMethod() != \Request::HTTP_GET) {
+                throw new \BadMethodCallException('Only get method is accepted for ' . __METHOD__ . '.');
+            }
+
+            if (!$this->hasRequestParameter(self::URI)) {
+                throw new \InvalidArgumentException('A valid "' . self::URI . '" parameter is required for ' . __METHOD__ .'.');
+            }
+
+            $deliveryPackage = $this->getDeliverySynchronisationService()->getDeliveryTestPackage(
+                $this->getResource($this->getRequestParameter(self::URI))
+            );
+
+            $body = $deliveryPackage['testPackage']->readPsrStream();
+            \tao_helpers_Http::returnStream($body);
+
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+    protected function getDeliverySynchronisationService()
+    {
+        return $this->propagate(new DeliverySynchronizerService());
     }
 
     /**

@@ -18,20 +18,11 @@
  *
  */
 
-namespace oat\taoSync\scripts\install;
+namespace oat\taoSync\model\synchronizer\user\administrator;
 
-use oat\oatbox\extension\InstallAction;
-use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
-use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
-use oat\taoSync\model\listener\ListenerService;
+use oat\taoSync\model\synchronizer\Synchronizer;
 
-class RegisterDeliveryRevisionListener extends InstallAction
+interface AdministratorSynchronizer extends Synchronizer
 {
-    public function __invoke($params)
-    {
-        $this->registerEvent(DeliveryCreatedEvent::class, [ListenerService::SERVICE_ID, 'listen']);
-        $this->registerEvent(DeliveryUpdatedEvent::class, [ListenerService::SERVICE_ID, 'listen']);
-
-        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Delivery revision listener registered');
-    }
+    const SYNC_ADMINISTRATOR = 'administrator';
 }

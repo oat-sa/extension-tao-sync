@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -28,16 +28,34 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\scripts\tool\SyncDeliveryData;
+use \Psr\Http\Message\StreamInterface;
 
+/**
+ * Class SynchronisationClient
+ *
+ * The Http client to send request to synchronisation
+ *
+ * @package oat\taoSync\model\api
+ */
 class SynchronisationClient extends ConfigurableService
 {
     use OntologyAwareTrait;
 
     const SERVICE_ID = 'taoSync/client';
 
-    public function fetchRemoteEntities($type, $limit=100, $offset=0)
+    /**
+     * Get list of remote entities associated to the given type
+     * Option parameters can be passed to remote
+     *
+     * @param $type
+     * @param $options
+     * @return mixed
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
+    public function fetchRemoteEntities($type, $options)
     {
-        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, 'limit' => $limit, 'offset' => $offset]);
+        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, 'options' => $options]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -45,9 +63,19 @@ class SynchronisationClient extends ConfigurableService
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    public function count($type)
+    /**
+     * Get count remote entities associated to the given type
+     * Option parameters can be passed to remote
+     *
+     * @param $type
+     * @param $options
+     * @return mixed
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
+    public function count($type, $options)
     {
-        $url = '/taoSync/SynchronisationApi/count?' . http_build_query(['type' => $type]);
+        $url = '/taoSync/SynchronisationApi/count?' . http_build_query(['type' => $type, 'options' => $options]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -55,6 +83,18 @@ class SynchronisationClient extends ConfigurableService
         return json_decode($response->getBody()->getContents(), true);
     }
 
+    /**
+     * Get the classes locally missing
+     *
+     * Classes are scoped to the $type
+     * Option parameters can be passed to remote
+     *
+     * @param $type
+     * @param array $classes
+     * @return mixed
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
     public function getMissingClasses($type, array $classes)
     {
         $url = '/taoSync/SynchronisationApi/fetchClassDetails?' . http_build_query(['type' => $type, 'requestedClasses' => $classes]);
@@ -65,10 +105,36 @@ class SynchronisationClient extends ConfigurableService
         return json_decode($response->getBody()->getContents(), true);
     }
 
-    protected function call($url, $method = 'GET', $body = false)
+    /**
+     * Get a remote test package as stream, associated to the delivery uri
+     *
+     * @param $deliveryUri
+     * @return StreamInterface
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
+    public function getRemoteDeliveryTest($deliveryUri)
+    {
+        $url = '/taoSync/SynchronisationApi/getDeliveryTest?' . http_build_query(['uri' => $deliveryUri]);
+        $method = 'GET';
+
+        return $this->call($url, $method)->getBody();
+    }
+
+    /**
+     * Process an http call to a remote environment
+     *
+     * @param $url
+     * @param string $method
+     * @param null $body
+     * @return \Psr\Http\Message\ResponseInterface
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
+    protected function call($url, $method = 'GET', $body = null)
     {
         $request = new Request($method, $url);
-        if ($body) {
+        if (!is_null($body)) {
             if (is_array($body)) {
                 $body = stream_for(http_build_query($body));
             } elseif (is_string($body)) {
@@ -84,6 +150,13 @@ class SynchronisationClient extends ConfigurableService
         return PlatformService::singleton()->callApi($env->getUri(), $request);
     }
 
+    /**
+     * Get the remote environment to process the synchronisation
+     *
+     * @return \core_kernel_classes_Resource
+     * @throws \common_exception_NotFound If no environment has been set
+     * @throws \common_exception_NotImplemented If action is not set in environment
+     */
     protected function getSyncEnvironment()
     {
         $environments = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getEnvironments();

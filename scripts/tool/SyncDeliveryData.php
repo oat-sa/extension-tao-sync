@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -50,7 +50,11 @@ class SyncDeliveryData extends AbstractAction
             throw new \common_exception_RestApi('Expected "--orgId" argument is missing.');
         }
 
-        $report = $this->getSyncService()->synchronize($orgId, $type);
+        $options = [
+            'orgId' => $orgId
+        ];
+
+        $report = $this->getSyncService()->synchronize($type, $options);
 
         return $report;
     }

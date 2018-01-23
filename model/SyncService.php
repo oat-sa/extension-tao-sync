@@ -35,13 +35,13 @@ class SyncService extends ConfigurableService
 
     protected $synchronizers = array();
 
-    public function synchronize($orgId, $type = null, array $options = [])
+    public function synchronize($type = null, array $options = [])
     {
         $allTypes = [
             'test-center',
-            'test-taker',
             'administrator',
             'proctor',
+            'test-taker',
             'eligibility',
             'delivery',
 //            'sub-test-center'
@@ -51,22 +51,25 @@ class SyncService extends ConfigurableService
 
         if (is_null($type)) {
             foreach($allTypes as $type) {
-                $report->add($this->synchronizeType($orgId, $type));
+                $report->add($this->synchronizeType($type, $options));
             }
         } else {
-            $report->add($this->synchronizeType($orgId, $type));
+            $report->add($this->synchronizeType($type, $options));
         }
 
         return $report;
     }
 
-    protected function synchronizeType($orgId, $type, $limit=100, $offset=0)
+    protected function synchronizeType($type, array $options = [])
     {
-        $this->orgId = $orgId;
+        $limit = isset($options['limit']) ? $options['limit'] : 100;
+        $offset = isset($options['offset']) ? $options['offset'] : 0;
+        $options['limit'] = $limit;
+        $options['offset'] = $offset;
 
-        $report = \common_report_Report::createSuccess('Synchronizing org "' . $orgId . '", type "' . $type . '"');
+        $report = \common_report_Report::createSuccess('Synchronizing type "' . $type . '"');
 
-        $count = $this->getRemoteCount($type);
+        $count = $this->getRemoteCount($type, $options);
 
         $entities = array(
             'create' => [],
@@ -75,14 +78,20 @@ class SyncService extends ConfigurableService
             'exist' => [],
         );
 
+//        \common_Logger::i('remote count : ' . $count);
         $insertOffset = $offset;
         while ($count > 0) {
-            $remoteInstances = $this->getRemoteInstances($type, $limit, $insertOffset);
+            $options['offset'] = $insertOffset;
+            $remoteInstances = $this->getRemoteInstances($type, $options);
+
             foreach ($remoteInstances as $remoteInstance) {
+//                \common_Logger::i('Remote instance :: ' . print_r($remoteInstance,true));
+
                 $id = $remoteInstance['id'];
                 $entities['exist'][$id] = $id;
                 try {
-                    $localInstance = $this->getSynchronizer($type)->fetchOne($id);
+                    $localInstance = $this->getSynchronizer($type)->fetchOne($id, $options);
+//                    \common_Logger::i('Local instance :: ' . print_r($localInstance,true));
                     if ($localInstance['checksum'] != $remoteInstance['checksum']) {
                         //TO UPDATE
                         $entities['update'][$id] = $remoteInstance;
@@ -100,15 +109,19 @@ class SyncService extends ConfigurableService
             $insertOffset += $limit;
         }
 
-        $count = $this->count($type);
+        /*
+         * Delete entities existing on remote but no locally
+         * Waiting for business rules
+         */
+        $count = $this->count($type, $options);
         $deleteOffset = $offset;
         while ($count > 0) {
-            $resources = $this->fetch($type, ['limit' => $limit, 'offset' => $deleteOffset]);
+            $options['offset'] = $deleteOffset;
+            $resources = $this->fetchAll($type);
             foreach ($resources as $resource) {
                 if (!in_array($resource['id'], $entities['exist'])) {
                     $entities['delete'][] = $resource['id'];
-                    $report->add(\common_report_Report::createInfo('Resource "' . $id . '" does not exist anymore, DELETE'));
-
+                    $report->add(\common_report_Report::createInfo('Resource "' . $resource['id'] . '" does not exist anymore, DELETE'));
                 }
             }
             $count -= $limit;
@@ -123,6 +136,8 @@ class SyncService extends ConfigurableService
         $this->getSynchronizer($type)->deleteMultiple($entities['delete']);
         $this->getSynchronizer($type)->insertMultiple($entities['create']);
         $this->getSynchronizer($type)->updateMultiple($entities['update']);
+        $this->getSynchronizer($type)->after($entities);
+
 
         return $report;
     }
@@ -132,9 +147,14 @@ class SyncService extends ConfigurableService
         return $this->getSynchronizer($type)->fetch($options);
     }
 
-    public function count($type)
+    public function fetchAll($type)
     {
-        return $this->getSynchronizer($type)->count();
+        return $this->getSynchronizer($type)->fetchAll();
+    }
+
+    public function count($type, $options)
+    {
+        return $this->getSynchronizer($type)->count($options);
     }
 
     public function fetchMissingClasses($type, array $requestedClasses)
@@ -146,14 +166,14 @@ class SyncService extends ConfigurableService
         return $synchronizer->fetchMissingClasses($requestedClasses);
     }
 
-    protected function getRemoteInstances($type, $limit=100, $offset=0)
+    protected function getRemoteInstances($type, array $options = [])
     {
-        return $this->getSynchronisationClient()->fetchRemoteEntities($type, $limit, $offset);
+        return $this->getSynchronisationClient()->fetchRemoteEntities($type, $options);
     }
 
-    protected function getRemoteCount($type)
+    protected function getRemoteCount($type, $options)
     {
-        return $this->getSynchronisationClient()->count($type);
+        return $this->getSynchronisationClient()->count($type, $options);
     }
 
     /**
@@ -169,7 +189,7 @@ class SyncService extends ConfigurableService
      * @return Synchronizer
      * @throws \common_exception_BadRequest
      */
-    protected function getSynchronizer($type)
+    public function getSynchronizer($type)
     {
         if (!isset($this->synchronizers[$type])) {
             if ($this->hasOption(self::OPTION_SYNCHRONIZERS)) {

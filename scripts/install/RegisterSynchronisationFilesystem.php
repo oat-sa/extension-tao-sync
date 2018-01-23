@@ -18,11 +18,21 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\testtaker;
+namespace oat\taoSync\scripts\install;
 
-use oat\taoSync\model\synchronizer\Synchronizer;
 
-interface TestTakerSynchronizer extends Synchronizer
+use oat\oatbox\extension\InstallAction;
+use oat\oatbox\filesystem\FileSystemService;
+
+class RegisterSynchronisationFilesystem extends InstallAction
 {
-    const SYNC_ID = 'test-taker';
+    public function __invoke($params)
+    {
+        /** @var FileSystemService $fileSystemService */
+        $fileSystemService = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
+        $fileSystemService->createFileSystem('synchronisation');
+        $this->registerService(FileSystemService::SERVICE_ID, $fileSystemService);
+        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronization filesystem was registered.');
+    }
+
 }

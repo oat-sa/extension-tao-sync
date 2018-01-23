@@ -20,17 +20,10 @@
         <tao:TAOGUIOrder><![CDATA[1]]></tao:TAOGUIOrder>
     </rdf:Description>
 
-    <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision">
+    <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#OriginTestPackage">
         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
         <rdfs:label xml:lang="en-US"><![CDATA[Origin test resource id]]></rdfs:label>
         <rdfs:comment xml:lang="en-US"><![CDATA[Origin test of compiled delivery]]></rdfs:comment>
-        <rdfs:domain rdf:resource="http://www.tao.lu/Ontologies/TAODelivery.rdf#AssembledDelivery"/>
-    </rdf:Description>
-
-    <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#OriginTestVersionRevision">
-        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
-        <rdfs:label xml:lang="en-US"><![CDATA[Origin test revision version]]></rdfs:label>
-        <rdfs:comment xml:lang="en-US"><![CDATA[The revision of the test state of compiled delivery]]></rdfs:comment>
         <rdfs:domain rdf:resource="http://www.tao.lu/Ontologies/TAODelivery.rdf#AssembledDelivery"/>
     </rdf:Description>
 

@@ -18,13 +18,13 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\testtaker;
+namespace oat\taoSync\model\synchronizer\user\testtaker;
 
 use oat\generis\model\GenerisRdf;
 use oat\tao\model\TaoOntology;
-use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoSync\model\synchronizer\user\UserSynchronizer;
 
-class RdfTestTakerSynchronizer extends AbstractResourceSynchronizer implements TestTakerSynchronizer
+class RdfTestTakerSynchronizer extends UserSynchronizer implements TestTakerSynchronizer
 {
     /**
      * Get the synchronizer identifier

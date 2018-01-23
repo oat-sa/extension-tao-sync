@@ -37,12 +37,26 @@ interface Synchronizer
     public function before(array $entities);
 
     /**
+     * This method is call after synchronization process
+     *
+     * @param array $entities
+     */
+    public function after(array $entities);
+
+    /**
      * Get a list of instances
      *
      * @param array $options array of query options
      * @return array
      */
     public function fetch(array $options = []);
+
+    /**
+     * Get a list of instances with default $options
+     *
+     * @return array
+     */
+    public function fetchAll();
 
     /**
      * Fetch an entity associated to the given id in Rdf storage
@@ -58,7 +72,7 @@ interface Synchronizer
      *
      * @return int
      */
-    public function count();
+    public function count(array $options = []);
 
     /**
      * Delete multiple entities

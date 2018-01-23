@@ -24,65 +24,74 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\event\Event;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\service\ServiceManager;
-use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
-use oat\taoRevision\model\Repository;
-use oat\taoRevision\model\RepositoryService;
+use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 
+/**
+ * Class ListenerService
+ *
+ * Service to listen events to prepare synchronisation
+ *
+ * @package oat\taoSync\model\listener
+ */
 class ListenerService extends ConfigurableService
 {
     use OntologyAwareTrait;
 
     const SERVICE_ID = 'taoSync/listenerService';
 
+    /**
+     * Generic method to wrap an event listener to a method
+     *
+     * @param Event $event
+     * @return \common_report_Report
+     */
     public static function listen(Event $event)
     {
         $listenerService = ServiceManager::getServiceManager()->get(self::SERVICE_ID);
-        $shortName = (new \ReflectionClass($event))->getShortName();
-        $listener = 'on' . ucfirst($shortName);
+        $eventName = $event->getName();
+        $listener = 'on' . $eventName;
         if (method_exists($listenerService, $listener)) {
             ServiceManager::getServiceManager()->propagate($listenerService);
             return $listenerService->$listener($event);
         }
-        return \common_report_Report::createInfo('ListenerService for synchronisation does not handle the event "' . $event->getName() . '".');
+        return \common_report_Report::createInfo(__CLASS__ . ' does not handle the event "' . $event->getName() . '".');
 
     }
 
+    /**
+     * Create a test package backup when a delivery is created
+     *
+     * @param DeliveryCreatedEvent $event
+     * @return \common_report_Report
+     */
     public function onDeliveryCreatedEvent(DeliveryCreatedEvent $event)
     {
-        $delivery = $this->getResource($event->getDeliveryUri());
-        /** @var \core_kernel_classes_Resource $test */
-        $test = $delivery->getOnePropertyValue($this->getProperty(DeliveryAssemblyService::PROPERTY_ORIGIN));
-        if ($test->exists()) {
-            /** @var RepositoryService $revisionRepository */
-            $revisionRepository = $this->getServiceLocator()->get(Repository::SERVICE_ID);
-            $revision = $revisionRepository->commit($test->getUri(), __('Test origin for delivery %s', $delivery->getUri()));
-            $delivery->setPropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision'), $revision->getResourceId());
-            $delivery->setPropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestVersionRevision'), $revision->getVersion());
-        }
-        $report = \common_report_Report::createSuccess();
-
-        return $report;
+        return $this->getDeliverySyncService()->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
     }
 
+    /**
+     * Create a test package backup when a delivery is updated
+     *
+     * The package is created only if it does not exist.
+     *
+     * @param DeliveryUpdatedEvent $event
+     * @return \common_report_Report
+     */
     public function onDeliveryUpdatedEvent(DeliveryUpdatedEvent $event)
     {
-        $delivery = $this->getResource($event->getDeliveryUri());
-        /** @var \core_kernel_classes_Resource $test */
-        if (is_null($delivery->getOnePropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#TestOriginRevision')))) {
-            $test = $delivery->getOnePropertyValue($this->getProperty(DeliveryAssemblyService::PROPERTY_ORIGIN));
-            if ($test->exists()) {
-                /** @var RepositoryService $revisionRepository */
-                $revisionRepository = $this->getServiceLocator()->get(Repository::SERVICE_ID);
-                $revision = $revisionRepository->commit($test->getUri(), __('Test origin for delivery %s', $delivery->getUri()));
-                $delivery->setPropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision'), $revision->getResourceId());
-                $delivery->setPropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestVersionRevision'), $revision->getVersion());
-            }
-        }
-
-        $report = \common_report_Report::createSuccess();
-
-        return $report;
+        return $this->getDeliverySyncService()->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
     }
+
+    /**
+     * Get the service to synchronize delivery tests
+     *
+     * @return DeliverySynchronizerService
+     */
+    protected function getDeliverySyncService()
+    {
+        return $this->getServiceLocator()->get(DeliverySynchronizerService::DELIVERY_TEST_PACKAGE_URI);
+    }
+
 }

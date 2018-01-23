@@ -20,16 +20,17 @@
 
 namespace oat\taoSync\model\synchronizer;
 
-use oat\generis\model\GenerisRdf;
+use oat\generis\model\kernel\persistence\smoothsql\search\ComplexSearchService;
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdf;
 use oat\generis\model\OntologyRdfs;
-use oat\oatbox\Configurable;
+use oat\oatbox\service\ConfigurableService;
+use oat\search\base\exception\SearchGateWayExeption;
 use oat\taoSync\model\api\SynchronisationClient;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
-abstract class AbstractResourceSynchronizer extends Configurable implements ServiceLocatorAwareInterface, Synchronizer
+abstract class AbstractResourceSynchronizer extends ConfigurableService implements ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
     use OntologyAwareTrait;
@@ -71,6 +72,16 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
                 }
             }
         }
+    }
+
+    /**
+     * This method is call after synchronization process
+     *
+     * @param array $entities
+     */
+    public function after(array $entities)
+    {
+
     }
 
     /**
@@ -129,13 +140,59 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
      */
     public function fetch(array $options = [])
     {
-        $resources = $this->getRootClass()->getInstances(true, $this->getDefaultOptions());
+        /** @var ComplexSearchService $search */
+        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
+        $queryBuilder = $search->query();
+
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $this->applyQueryOptions($query, $options);
+
+        $queryBuilder->setCriteria($query);
+
         $values = [];
-        /** @var \core_kernel_classes_Resource $resource */
-        foreach ($resources as $resource) {
-            $instance = $this->format($resource);
-            $values[$instance['id']] = $instance;
-        }
+
+        try {
+            $results = $search->getGateway()->search($queryBuilder);
+            if ($results->total() > 0) {
+                foreach ($results as $resource) {
+                    $instance = $this->format($resource);
+                    $values[$instance['id']] = $instance;
+                }
+            }
+        } catch (SearchGateWayExeption $e) {}
+
+        return $values;
+    }
+
+    /**
+     * Get a list of instances with default $options
+     *
+     * @return array
+     */
+    public function fetchAll()
+    {
+        $options = $this->getDefaultOptions();
+
+        /** @var ComplexSearchService $search */
+        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
+        $queryBuilder = $search->query();
+
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $this->applyQueryOptions($query, $options);
+
+        $queryBuilder->setCriteria($query);
+
+        $values = [];
+
+        try {
+            $results = $search->getGateway()->search($queryBuilder);
+            if ($results->total() > 0) {
+                foreach ($results as $resource) {
+                    $instance = $this->format($resource);
+                    $values[$instance['id']] = $instance;
+                }
+            }
+        } catch (SearchGateWayExeption $e) {}
 
         return $values;
     }
@@ -159,11 +216,23 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
     /**
      * Return count of instances
      *
+     * @param array $options
      * @return int
+     * @throws \oat\search\base\exception\SearchGateWayExeption
      */
-    public function count()
+    public function count(array $options = [])
     {
-        return $this->getRootClass()->countInstances([], ['recursive' => true]);
+        /** @var ComplexSearchService $search */
+        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
+        $queryBuilder = $search->query();
+
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $this->applyQueryOptions($query, $options);
+
+        $queryBuilder->setCriteria($query);
+        $results = $search->getGateway()->search($queryBuilder);
+
+        return $results->count();
     }
 
     /**
@@ -218,6 +287,11 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
         }
     }
 
+    protected function applyQueryOptions($query, array $options)
+    {
+
+    }
+
     protected function getDefaultOptions()
     {
         return [
@@ -236,7 +310,7 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
      * @param \core_kernel_classes_Resource $resource
      * @return array
      */
-    protected function format(\core_kernel_classes_Resource $resource)
+    public function format(\core_kernel_classes_Resource $resource)
     {
         $properties = $this->filterProperties($resource->getRdfTriples()->toArray());
         $value = [];
@@ -267,12 +341,30 @@ abstract class AbstractResourceSynchronizer extends Configurable implements Serv
 
         /** @var \core_kernel_classes_Triple $triple */
         foreach ($triples as $triple) {
-            if (!empty($fields) && in_array($triple->predicate, $fields)) {
-                $properties[$triple->predicate] = $triple->object;
+            $predicate = $object = null;
+            if (!empty($fields)) {
+                if (in_array($triple->predicate, $fields)) {
+                    $predicate = $triple->predicate;
+                    $object = $triple->object;
+                }
             } else {
                 if (!in_array($triple->predicate, $excludedFields)) {
-                    $properties[$triple->predicate] = $triple->object;
+                    $predicate = $triple->predicate;
+                    $object = $triple->object;
                 }
+            }
+
+            if (!is_null($predicate) && !is_null($object)) {
+                if (array_key_exists($predicate, $properties)) {
+                    if ($properties[$predicate] == $object) {
+                        continue;
+                    }
+                    $value = is_array($properties[$predicate]) ? $properties[$predicate] : [$properties[$predicate]];
+                    $value[] = $object;
+                } else {
+                    $value = $object;
+                }
+                $properties[$predicate] = $value;
             }
         }
 
