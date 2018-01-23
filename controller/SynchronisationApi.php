@@ -20,8 +20,11 @@
 
 namespace oat\taoSync\controller;
 
+<<<<<<< Updated upstream
 use GuzzleHttp\Psr7\MultipartStream;
 use function GuzzleHttp\Psr7\stream_for;
+=======
+>>>>>>> Stashed changes
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
@@ -32,6 +35,11 @@ class SynchronisationApi extends \tao_actions_RestController
     const CLASS_URI = 'class-uri';
 
     const TYPE = 'type';
+<<<<<<< Updated upstream
+=======
+
+    const PARAMS = 'params';
+>>>>>>> Stashed changes
 
     public function fetch()
     {
@@ -46,6 +54,11 @@ class SynchronisationApi extends \tao_actions_RestController
             $type = $this->getRequestParameter(self::TYPE);
             $options = $this->hasRequestParameter('options') ? $this->getRequestParameter('options') : [];
 
+<<<<<<< Updated upstream
+=======
+            $options = $this->hasRequestParameter(self::PARAMS) ? $this->getRequestParameter(self::PARAMS) : [];
+
+>>>>>>> Stashed changes
             $entities = $this->getSyncService()->fetch($type, $options);
 
             $this->returnJson($entities);
@@ -66,7 +79,11 @@ class SynchronisationApi extends \tao_actions_RestController
                 throw new \InvalidArgumentException('A valid "' . self::TYPE . '" parameter is required to access ' . __FUNCTION__);
             }
             $type = $this->getRequestParameter(self::TYPE);
+<<<<<<< Updated upstream
             $options = $this->hasRequestParameter('options') ? $this->getRequestParameter('options') : [];
+=======
+            $options = $this->hasRequestParameter(self::PARAMS) ? $this->getRequestParameter(self::PARAMS) : [];
+>>>>>>> Stashed changes
 
             $this->returnJson($this->getSyncService()->count($type, $options));
 
@@ -103,34 +120,34 @@ class SynchronisationApi extends \tao_actions_RestController
         }
     }
 
-    public function getClassChecksum()
-    {
-        try {
-            // Check if it's post method
-            if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to fetch class checksum.');
-            }
-
-            $classToSynchronize = false;
-            if ($this->hasRequestParameter(self::CLASS_URI)) {
-                $class = $this->getClass($this->getRequestParameter(self::CLASS_URI));
-                if ($class->isClass()) {
-                    $classToSynchronize = $class;
-                }
-            }
-
-            if (!$classToSynchronize) {
-                throw new \InvalidArgumentException('A valid "' . self::CLASS_URI . '" parameter is required to fetch class checksum.');
-            }
-
-            $classChecksum = $this->getSyncService()->getLocalClassTree($classToSynchronize->getUri());
-
-            $this->returnJson($classChecksum);
-
-        } catch (\Exception $e) {
-            $this->returnFailure($e);
-        }
-    }
+//    public function getClassChecksum()
+//    {
+//        try {
+//            // Check if it's post method
+//            if ($this->getRequestMethod() != \Request::HTTP_GET) {
+//                throw new \BadMethodCallException('Only get method is accepted to fetch class checksum.');
+//            }
+//
+//            $classToSynchronize = false;
+//            if ($this->hasRequestParameter(self::CLASS_URI)) {
+//                $class = $this->getClass($this->getRequestParameter(self::CLASS_URI));
+//                if ($class->isClass()) {
+//                    $classToSynchronize = $class;
+//                }
+//            }
+//
+//            if (!$classToSynchronize) {
+//                throw new \InvalidArgumentException('A valid "' . self::CLASS_URI . '" parameter is required to fetch class checksum.');
+//            }
+//
+//            $classChecksum = $this->getSyncService()->getLocalClassTree($classToSynchronize->getUri());
+//
+//            $this->returnJson($classChecksum);
+//
+//        } catch (\Exception $e) {
+//            $this->returnFailure($e);
+//        }
+//    }
 
     public function getDeliveryTest()
     {
@@ -156,6 +173,33 @@ class SynchronisationApi extends \tao_actions_RestController
         }
     }
 
+<<<<<<< Updated upstream
+    public function getDeliveryTest()
+    {
+        try {
+            // Check if it's post method
+            if ($this->getRequestMethod() != \Request::HTTP_GET) {
+                throw new \BadMethodCallException('Only get method is accepted for ' . __METHOD__ . '.');
+            }
+
+            if (!$this->hasRequestParameter(self::URI)) {
+                throw new \InvalidArgumentException('A valid "' . self::URI . '" parameter is required for ' . __METHOD__ .'.');
+            }
+
+            $deliveryPackage = $this->getDeliverySynchronisationService()->getDeliveryTestPackage(
+                $this->getResource($this->getRequestParameter(self::URI))
+            );
+
+            $body = $deliveryPackage['testPackage']->readPsrStream();
+            \tao_helpers_Http::returnStream($body);
+
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+=======
+>>>>>>> Stashed changes
     protected function getDeliverySynchronisationService()
     {
         return $this->propagate(new DeliverySynchronizerService());

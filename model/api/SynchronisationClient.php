@@ -27,6 +27,7 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\scripts\tool\SyncDeliveryData;
 use \Psr\Http\Message\StreamInterface;
 
@@ -43,6 +44,16 @@ class SynchronisationClient extends ConfigurableService
 
     const SERVICE_ID = 'taoSync/client';
 
+    public function fetch($type, $options)
+    {
+        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $options]);
+        $method = 'GET';
+
+        /** @var Response $response */
+        $response = $this->call($url, $method);
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
     /**
      * Get list of remote entities associated to the given type
      * Option parameters can be passed to remote
@@ -55,7 +66,7 @@ class SynchronisationClient extends ConfigurableService
      */
     public function fetchRemoteEntities($type, $options)
     {
-        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, 'options' => $options]);
+        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $options]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -75,7 +86,7 @@ class SynchronisationClient extends ConfigurableService
      */
     public function count($type, $options)
     {
-        $url = '/taoSync/SynchronisationApi/count?' . http_build_query(['type' => $type, 'options' => $options]);
+        $url = '/taoSync/SynchronisationApi/count?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $options]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -113,6 +124,7 @@ class SynchronisationClient extends ConfigurableService
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
+
     public function getRemoteDeliveryTest($deliveryUri)
     {
         $url = '/taoSync/SynchronisationApi/getDeliveryTest?' . http_build_query(['uri' => $deliveryUri]);

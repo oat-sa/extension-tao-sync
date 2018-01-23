@@ -139,7 +139,18 @@ class DeliverySynchronizer extends AbstractResourceSynchronizer
 
     public function after(array $entities)
     {
-
+//        \common_Logger::i(' *** Delivery to import *** : ' . print_r($this->testToImport, true));
+//
+//        foreach ($this->testToImport as $deliveryId => $serial) {
+//            $delivery = $this->
+//            /** @var SynchronisationClient $client */
+//            $client = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+//            $response = $client->getRemoteTestPackageByDelivery();
+//            $this->compileTest($delivery, $response['stream'])
+//            fclose($zipStream);
+//
+//            \common_Logger::i(print_r($response, true));
+//        }
     }
 
     protected function getDeliverySynchronizerService()

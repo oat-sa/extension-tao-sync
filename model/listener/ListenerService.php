@@ -20,13 +20,19 @@
 
 namespace oat\taoSync\model\listener;
 
+use oat\generis\model\fileReference\UrlFileSerializer;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\event\Event;
+use oat\oatbox\filesystem\File;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\service\ServiceManager;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
+<<<<<<< Updated upstream
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
+=======
+>>>>>>> Stashed changes
 
 /**
  * Class ListenerService
@@ -68,6 +74,7 @@ class ListenerService extends ConfigurableService
      */
     public function onDeliveryCreatedEvent(DeliveryCreatedEvent $event)
     {
+<<<<<<< Updated upstream
         return $this->getDeliverySyncService()->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
     }
 
@@ -92,6 +99,63 @@ class ListenerService extends ConfigurableService
     protected function getDeliverySyncService()
     {
         return $this->getServiceLocator()->get(DeliverySynchronizerService::DELIVERY_TEST_PACKAGE_URI);
+=======
+        return $this->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
+    }
+
+    public function onDeliveryUpdatedEvent(DeliveryUpdatedEvent $event)
+    {
+        $delivery = $this->getResource($event->getDeliveryUri());
+        /** @var \core_kernel_classes_Resource $test */
+        if (is_null($delivery->getOnePropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision')))) {
+            $this->backupDeliveryTest($delivery);
+        }
+
+        $report = \common_report_Report::createSuccess();
+
+        return $report;
+    }
+
+    protected function backupDeliveryTest(\core_kernel_classes_Resource $delivery)
+    {
+        /** @var \core_kernel_classes_Resource $test */
+        $test = $delivery->getOnePropertyValue($this->getProperty(DeliveryAssemblyService::PROPERTY_ORIGIN));
+        if ($test->exists()) {
+
+            $exportDir = \tao_helpers_File::createTempDir();
+            $exportFile = 'export.zip';
+            $exporter = new \taoQtiTest_models_classes_export_TestExport();
+            $report = $exporter->export(
+                array(
+                    'filename' => $exportFile,
+                    'instances' => $test->getUri()
+                ),
+                $exportDir
+            );
+            \common_Logger::d('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
+            $source = fopen($report->getData(), 'r');
+
+            /** @var File $file */
+            $file = $this->getServiceLocator()
+                ->get(FileSystemService::SERVICE_ID)
+                ->getDirectory('synchronisation')
+                ->getFile(\tao_helpers_Uri::getUniqueId($delivery->getUri()) . DIRECTORY_SEPARATOR . 'export.zip');
+
+            $file->write($source);
+            fclose($source);
+            @unlink($exportFile);
+            @rmdir($exportDir);
+
+            $serializer = $this->propagate(new UrlFileSerializer());
+            $serial = $serializer->serialize($file);
+            $delivery->setPropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision'), $serial);
+        }
+    }
+
+    protected function restoreDeliveryTest()
+    {
+
+>>>>>>> Stashed changes
     }
 
 }

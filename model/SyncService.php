@@ -22,6 +22,7 @@ namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\api\SynchronisationClient;
 use oat\taoSync\model\synchronizer\Synchronizer;
 
@@ -35,7 +36,9 @@ class SyncService extends ConfigurableService
 
     protected $synchronizers = array();
 
-    public function synchronize($type = null, array $options = [])
+    protected $report;
+
+    public function synchronize($type = null/*, array $options = []*/)
     {
         $allTypes = [
             'test-center',
@@ -44,23 +47,94 @@ class SyncService extends ConfigurableService
             'test-taker',
             'eligibility',
             'delivery',
-//            'sub-test-center'
         ];
 
-        $report = \common_report_Report::createInfo('Starting synchronization...');
+        $this->report = \common_report_Report::createInfo('Starting synchronization...');
 
         if (is_null($type)) {
             foreach($allTypes as $type) {
-                $report->add($this->synchronizeType($type, $options));
+                $this->synchronizeType($type);
             }
         } else {
-            $report->add($this->synchronizeType($type, $options));
+            $this->synchronizeType($type);
         }
 
-        return $report;
+        return $this->report;
     }
 
-    protected function synchronizeType($type, array $options = [])
+    protected function synchronizeType($type, array $params = [])
+    {
+        $this->log('About synchronization for type "' . $type .'"');
+
+        $response = $this->getSynchronisationClient()->fetch($type, $params);
+
+        $remoteEntities = isset($response['entities']) ? $response['entities'] : [];
+        $nextCallUrl = isset($response['nextCallUrl']) ? $response['nextCallUrl'] : null;
+
+        $this->synchronizeEntities($this->getSynchronizer($type), $remoteEntities);
+
+        if (!is_null($nextCallUrl)) {
+            $nextCall = $this->getSynchronisationClient()->callNext($nextCallUrl);
+            $this->synchronizeType($nextCall['type']);
+        }
+
+        return $this->report;
+    }
+
+    protected function synchronizeEntities(Synchronizer $synchronizer, array $remoteEntities)
+    {
+        $entities = array(
+            'create' => [],
+            'update' => [],
+        );
+
+        foreach ($remoteEntities as $remoteEntity) {
+            $id = $remoteEntity['id'];
+            try {
+                $localEntity= $synchronizer->fetchOne($id);
+                if ($localEntity['checksum'] == $remoteEntity['checksum']) {
+                    // up to date
+                    $this->log('(' . $synchronizer->getId() . ') Entity "' . $id . '" is already up to date.');
+                } else {
+                    // update
+                    $entities['update'][] = $remoteEntity;
+                    $this->log('(' . $synchronizer->getId() . ') Entity "' . $id . '" does not match. To be synchronized...');
+                }
+            } catch (\common_exception_NotFound $e) {
+                // create
+                $entities['create'][] = $remoteEntity;
+                $this->log('(' . $synchronizer->getId() . ') Entity "' . $id . '" does not exist. To be synchronized...');
+            }
+        }
+
+        return $this->persist($synchronizer, $entities);
+    }
+
+    protected function persist(Synchronizer $synchronizer, array $entities)
+    {
+        $synchronizer->before($entities);
+
+        if (!empty($entities['create'])) {
+            $synchronizer->insertMultiple($entities['create']);
+        }
+
+        if (!empty($entities['update'])) {
+            $synchronizer->updateMultiple($entities['update']);
+        }
+
+        $synchronizer->after($entities);
+    }
+
+    protected function log($message, $level='')
+    {
+        parent::logInfo($message);
+        if (!$this->report) {
+            $this->report = \common_report_Report::createInfo('About synchronisation');
+        }
+        $this->report->add(\common_report_Report::createInfo($message));
+    }
+
+    protected function sync($type, array $options = [])
     {
         $limit = isset($options['limit']) ? $options['limit'] : 100;
         $offset = isset($options['offset']) ? $options['offset'] : 0;
@@ -142,15 +216,27 @@ class SyncService extends ConfigurableService
         return $report;
     }
 
-    public function fetch($type, $options)
+    public function fetch($type, $params)
     {
-        return $this->getSynchronizer($type)->fetch($options);
+        if (isset($options['lastResourceUri'])) {
+            $lastResourceUri = $options['lastResourceUri'];
+        }
+
+        return [
+            'entities' => $this->getSynchronizer($type)->fetch($params),
+            'nextCall' => _url(__FUNCTION__, 'SynchronisationApi', 'taoSync', $this->getNextParams())
+        ];
     }
 
-    public function fetchAll($type)
+    protected function getNextParams(array $params)
     {
-        return $this->getSynchronizer($type)->fetchAll();
+
     }
+
+    //    public function fetchAll($type)
+//    {
+//        return $this->getSynchronizer($type)->fetchAll();
+//    }
 
     public function count($type, $options)
     {
