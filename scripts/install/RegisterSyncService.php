@@ -22,11 +22,6 @@ namespace oat\taoSync\scripts\install;
 
 use oat\oatbox\extension\InstallAction;
 use oat\tao\model\TaoOntology;
-use oat\taoSync\model\custom\synchronizer\AdministratorByOrganisationID;
-use oat\taoSync\model\custom\synchronizer\EligibilityByOrganisationId;
-use oat\taoSync\model\custom\synchronizer\ProctorByOrganisationID;
-use oat\taoSync\model\custom\synchronizer\TestCenterByOrganisationID;
-use oat\taoSync\model\custom\synchronizer\TestTakerByOrganisationID;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;
@@ -53,7 +48,7 @@ class RegisterSyncService extends InstallAction
     public function __invoke($params)
     {
         $options = array(
-            SyncService::OPTION_CHUNK_SIZE => 1,
+            SyncService::OPTION_CHUNK_SIZE => SyncService::DEFAULT_CHUNK_SIZE,
             SyncService::OPTION_SYNCHRONIZERS => array(
                 TestCenterSynchronizer::SYNC_ID => new RdfTestCenterSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(

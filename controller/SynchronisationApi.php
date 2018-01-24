@@ -108,7 +108,7 @@ class SynchronisationApi extends \tao_actions_RestController
 
     protected function getDeliverySynchronisationService()
     {
-        return $this->propagate(new DeliverySynchronizerService());
+        return $this->getServiceLocator()->get(DeliverySynchronizerService::)
     }
 
     /**
