@@ -86,9 +86,7 @@ class DeliverySynchronizerService extends ConfigurableService
      * Create a test package from delivery test origin
      *
      * @param \core_kernel_classes_Resource $delivery
-     * @throws \League\Flysystem\FileExistsException
      * @throws \common_Exception
-     * @throws \core_kernel_persistence_Exception
      */
     public function backupDeliveryTest(\core_kernel_classes_Resource $delivery)
     {

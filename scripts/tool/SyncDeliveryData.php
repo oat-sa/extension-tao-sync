@@ -54,9 +54,7 @@ class SyncDeliveryData extends AbstractAction
             'orgId' => $orgId
         ];
 
-        $report = $this->getSyncService()->synchronize($type, $options);
-
-        return $report;
+        return $this->getSyncService()->synchronize($type, $options);
     }
 
     protected function getOrgIdFromToken()

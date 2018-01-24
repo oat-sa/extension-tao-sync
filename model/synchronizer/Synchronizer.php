@@ -52,13 +52,6 @@ interface Synchronizer
     public function fetch(array $options = []);
 
     /**
-     * Get a list of instances with default $options
-     *
-     * @return array
-     */
-    public function fetchAll();
-
-    /**
      * Fetch an entity associated to the given id in Rdf storage
      *
      * @param $id
@@ -66,13 +59,6 @@ interface Synchronizer
      * @throws \common_exception_NotFound If entity is not found
      */
     public function fetchOne($id);
-
-    /**
-     * Return count of instances
-     *
-     * @return int
-     */
-    public function count(array $options = []);
 
     /**
      * Delete multiple entities

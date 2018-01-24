@@ -45,9 +45,4 @@ class RdfTestTakerSynchronizer extends UserSynchronizer implements TestTakerSync
     {
         return $this->getClass(TaoOntology::CLASS_URI_SUBJECT);
     }
-
-    protected function getDefaultOptions()
-    {
-        return array_merge(parent::getDefaultOptions(), array('order' => GenerisRdf::PROPERTY_USER_LOGIN));
-    }
 }

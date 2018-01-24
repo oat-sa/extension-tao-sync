@@ -8,10 +8,11 @@ use oat\generis\model\kernel\persistence\smoothsql\search\QueryJoiner;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoSync\model\api\SynchronisationClient;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoSync\model\synchronizer\Synchronizer;
 use oat\taoTestCenter\model\EligibilityService;
 use oat\taoTestCenter\model\TestCenterService;
 
-class DeliverySynchronizer extends AbstractResourceSynchronizer
+class DeliverySynchronizer extends AbstractResourceSynchronizer implements Synchronizer
 {
     /** @var \core_kernel_classes_Resource[] */
     protected $testToImport = [];

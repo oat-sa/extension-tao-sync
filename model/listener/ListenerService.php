@@ -20,19 +20,18 @@
 
 namespace oat\taoSync\model\listener;
 
-use oat\generis\model\fileReference\UrlFileSerializer;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use oat\generis\model\data\event\ResourceCreated;
+use oat\generis\model\data\event\ResourceUpdated;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\event\Event;
-use oat\oatbox\filesystem\File;
-use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\service\ServiceManager;
+use oat\tao\model\TaoOntology;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
-<<<<<<< Updated upstream
+use oat\taoSync\model\Entity;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
-=======
->>>>>>> Stashed changes
 
 /**
  * Class ListenerService
@@ -56,7 +55,7 @@ class ListenerService extends ConfigurableService
     public static function listen(Event $event)
     {
         $listenerService = ServiceManager::getServiceManager()->get(self::SERVICE_ID);
-        $eventName = $event->getName();
+        $eventName = (new \ReflectionClass($event))->getShortName();
         $listener = 'on' . $eventName;
         if (method_exists($listenerService, $listener)) {
             ServiceManager::getServiceManager()->propagate($listenerService);
@@ -70,11 +69,10 @@ class ListenerService extends ConfigurableService
      * Create a test package backup when a delivery is created
      *
      * @param DeliveryCreatedEvent $event
-     * @return \common_report_Report
+     * @throws \common_Exception
      */
     public function onDeliveryCreatedEvent(DeliveryCreatedEvent $event)
     {
-<<<<<<< Updated upstream
         return $this->getDeliverySyncService()->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
     }
 
@@ -85,10 +83,26 @@ class ListenerService extends ConfigurableService
      *
      * @param DeliveryUpdatedEvent $event
      * @return \common_report_Report
+     * @throws \common_Exception
      */
     public function onDeliveryUpdatedEvent(DeliveryUpdatedEvent $event)
     {
         return $this->getDeliverySyncService()->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
+    }
+
+    public function onResourceCreated(ResourceCreated $event)
+    {
+        $resource = $event->getResource();
+        $createdAtProperty = $this->getProperty(Entity::CREATED_AT);
+        $createdAt = $resource->getOnePropertyValue($createdAtProperty);
+        if (is_null($createdAt)) {
+            $resource->setPropertyValue($createdAtProperty, $this->getNowExpression());
+        }
+    }
+
+    protected function getNowExpression()
+    {
+        return microtime(true);
     }
 
     /**
@@ -99,63 +113,6 @@ class ListenerService extends ConfigurableService
     protected function getDeliverySyncService()
     {
         return $this->getServiceLocator()->get(DeliverySynchronizerService::DELIVERY_TEST_PACKAGE_URI);
-=======
-        return $this->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
-    }
-
-    public function onDeliveryUpdatedEvent(DeliveryUpdatedEvent $event)
-    {
-        $delivery = $this->getResource($event->getDeliveryUri());
-        /** @var \core_kernel_classes_Resource $test */
-        if (is_null($delivery->getOnePropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision')))) {
-            $this->backupDeliveryTest($delivery);
-        }
-
-        $report = \common_report_Report::createSuccess();
-
-        return $report;
-    }
-
-    protected function backupDeliveryTest(\core_kernel_classes_Resource $delivery)
-    {
-        /** @var \core_kernel_classes_Resource $test */
-        $test = $delivery->getOnePropertyValue($this->getProperty(DeliveryAssemblyService::PROPERTY_ORIGIN));
-        if ($test->exists()) {
-
-            $exportDir = \tao_helpers_File::createTempDir();
-            $exportFile = 'export.zip';
-            $exporter = new \taoQtiTest_models_classes_export_TestExport();
-            $report = $exporter->export(
-                array(
-                    'filename' => $exportFile,
-                    'instances' => $test->getUri()
-                ),
-                $exportDir
-            );
-            \common_Logger::d('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
-            $source = fopen($report->getData(), 'r');
-
-            /** @var File $file */
-            $file = $this->getServiceLocator()
-                ->get(FileSystemService::SERVICE_ID)
-                ->getDirectory('synchronisation')
-                ->getFile(\tao_helpers_Uri::getUniqueId($delivery->getUri()) . DIRECTORY_SEPARATOR . 'export.zip');
-
-            $file->write($source);
-            fclose($source);
-            @unlink($exportFile);
-            @rmdir($exportDir);
-
-            $serializer = $this->propagate(new UrlFileSerializer());
-            $serial = $serializer->serialize($file);
-            $delivery->setPropertyValue($this->getProperty('http://www.taotesting.com/ontologies/synchro.rdf#OriginTestIdRevision'), $serial);
-        }
-    }
-
-    protected function restoreDeliveryTest()
-    {
-
->>>>>>> Stashed changes
     }
 
 }

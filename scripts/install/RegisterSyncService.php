@@ -30,6 +30,11 @@ use oat\taoSync\model\custom\synchronizer\TestTakerByOrganisationID;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;
+use oat\taoSync\model\synchronizer\eligibility\RdfEligibilitySynchronizer;
+use oat\taoSync\model\synchronizer\testcenter\RdfTestCenterSynchronizer;
+use oat\taoSync\model\synchronizer\user\administrator\RdfAdministratorSynchronizer;
+use oat\taoSync\model\synchronizer\user\proctor\RdfProctorSynchronizer;
+use oat\taoSync\model\synchronizer\user\testtaker\RdfTestTakerSynchronizer;
 use oat\taoSync\model\synchronizer\user\testtaker\TestTakerSynchronizer;
 use oat\taoSync\model\synchronizer\user\administrator\AdministratorSynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
@@ -48,28 +53,29 @@ class RegisterSyncService extends InstallAction
     public function __invoke($params)
     {
         $options = array(
+            SyncService::OPTION_CHUNK_SIZE => 1,
             SyncService::OPTION_SYNCHRONIZERS => array(
-                TestCenterSynchronizer::SYNC_ID => new TestCenterByOrganisationID(array(
+                TestCenterSynchronizer::SYNC_ID => new RdfTestCenterSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT
                     )
                 )),
-                AdministratorSynchronizer::SYNC_ADMINISTRATOR => new AdministratorByOrganisationID(array(
+                AdministratorSynchronizer::SYNC_ADMINISTRATOR => new RdfAdministratorSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT
                     )
                 )),
-                ProctorSynchronizer::SYNC_PROCTOR => new ProctorByOrganisationID(array(
+                ProctorSynchronizer::SYNC_PROCTOR => new RdfProctorSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT
                     )
                 )),
-                TestTakerSynchronizer::SYNC_ID => new TestTakerByOrganisationID(array(
+                TestTakerSynchronizer::SYNC_ID => new RdfTestTakerSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT
                     )
                 )),
-                EligibilitySynchronizer::SYNC_ELIGIBILITY => new EligibilityByOrganisationId(array(
+                EligibilitySynchronizer::SYNC_ELIGIBILITY => new RdfEligibilitySynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT
                     )

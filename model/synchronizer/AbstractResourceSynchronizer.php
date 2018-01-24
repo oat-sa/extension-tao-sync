@@ -26,7 +26,10 @@ use oat\generis\model\OntologyRdf;
 use oat\generis\model\OntologyRdfs;
 use oat\oatbox\service\ConfigurableService;
 use oat\search\base\exception\SearchGateWayExeption;
+use oat\search\base\QueryBuilderInterface;
+use oat\search\helper\SupportedOperatorHelper;
 use oat\taoSync\model\api\SynchronisationClient;
+use oat\taoSync\model\Entity;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -135,52 +138,23 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     /**
      * Get a list of instances
      *
-     * @param array $options
+     * @param array $params
      * @return array
      */
-    public function fetch(array $options = [])
+    public function fetch(array $params = [])
     {
         /** @var ComplexSearchService $search */
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
         $queryBuilder = $search->query();
 
         $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
-        $this->applyQueryOptions($query, $options);
+
+        if (isset($params['startCreatedAt'])) {
+            $query->addCriterion(Entity::CREATED_AT, SupportedOperatorHelper::GREATER_THAN_EQUAL, $params['startCreatedAt']);
+        }
 
         $queryBuilder->setCriteria($query);
-
-        $values = [];
-
-        try {
-            $results = $search->getGateway()->search($queryBuilder);
-            if ($results->total() > 0) {
-                foreach ($results as $resource) {
-                    $instance = $this->format($resource);
-                    $values[$instance['id']] = $instance;
-                }
-            }
-        } catch (SearchGateWayExeption $e) {}
-
-        return $values;
-    }
-
-    /**
-     * Get a list of instances with default $options
-     *
-     * @return array
-     */
-    public function fetchAll()
-    {
-        $options = $this->getDefaultOptions();
-
-        /** @var ComplexSearchService $search */
-        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
-        $queryBuilder = $search->query();
-
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
-        $this->applyQueryOptions($query, $options);
-
-        $queryBuilder->setCriteria($query);
+        $this->applyQueryOptions($queryBuilder, $params);
 
         $values = [];
 
@@ -211,28 +185,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             throw new \common_exception_NotFound('No resource found for id : ' . $id);
         }
         return $this->format($resource);
-    }
-
-    /**
-     * Return count of instances
-     *
-     * @param array $options
-     * @return int
-     * @throws \oat\search\base\exception\SearchGateWayExeption
-     */
-    public function count(array $options = [])
-    {
-        /** @var ComplexSearchService $search */
-        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
-        $queryBuilder = $search->query();
-
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
-        $this->applyQueryOptions($query, $options);
-
-        $queryBuilder->setCriteria($query);
-        $results = $search->getGateway()->search($queryBuilder);
-
-        return $results->count();
     }
 
     /**
@@ -287,18 +239,25 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         }
     }
 
-    protected function applyQueryOptions($query, array $options)
+    protected function applyQueryOptions(QueryBuilderInterface $queryBuilder, array $params = [])
     {
-
-    }
-
-    protected function getDefaultOptions()
-    {
-        return [
-            'limit' => 100,
-            'offset' => 0,
-            'orderdir' => 'asc'
-        ];
+        if (isset($params['limit'])) {
+            $queryBuilder->setLimit($params['limit']);
+        }
+        if (isset($params['offset'])) {
+            $queryBuilder->setOffset($params['offset']);
+        }
+        if (isset($params['order']) && is_array($params['order'])) {
+            $sorting = [];
+            foreach ($params['order'] as $sort => $order) {
+                if (in_array($order, array('desc','asc'))) {
+                    $sorting[$sort] = $order;
+                }
+            }
+            if (!empty($sorting)) {
+                $queryBuilder->sort($sorting);
+            }
+        }
     }
 
     /**

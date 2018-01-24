@@ -20,6 +20,12 @@
         <tao:TAOGUIOrder><![CDATA[1]]></tao:TAOGUIOrder>
     </rdf:Description>
 
+    <rdf:Description rdf:about="http://www.taotesting.com/Ontologies/TAO.rdf#CreatedAt">
+        <rdfs:subClassOf rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#TAOObject"/>
+        <rdfs:label xml:lang="en-US"><![CDATA[Created]]></rdfs:label>
+        <rdfs:comment xml:lang="en-US"><![CDATA[Creation data (in milliseconds)]]></rdfs:comment>
+    </rdf:Description>
+
     <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#OriginTestPackage">
         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
         <rdfs:label xml:lang="en-US"><![CDATA[Origin test resource id]]></rdfs:label>

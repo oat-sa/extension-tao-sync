@@ -44,49 +44,19 @@ class SynchronisationClient extends ConfigurableService
 
     const SERVICE_ID = 'taoSync/client';
 
-    public function fetch($type, $options)
-    {
-        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $options]);
-        $method = 'GET';
-
-        /** @var Response $response */
-        $response = $this->call($url, $method);
-        return json_decode($response->getBody()->getContents(), true);
-    }
-
     /**
      * Get list of remote entities associated to the given type
-     * Option parameters can be passed to remote
+     * Parameters can be passed to remote
      *
      * @param $type
-     * @param $options
+     * @param $params
      * @return mixed
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
-    public function fetchRemoteEntities($type, $options)
+    public function fetch($type, $params)
     {
-        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $options]);
-        $method = 'GET';
-
-        /** @var Response $response */
-        $response = $this->call($url, $method);
-        return json_decode($response->getBody()->getContents(), true);
-    }
-
-    /**
-     * Get count remote entities associated to the given type
-     * Option parameters can be passed to remote
-     *
-     * @param $type
-     * @param $options
-     * @return mixed
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
-     */
-    public function count($type, $options)
-    {
-        $url = '/taoSync/SynchronisationApi/count?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $options]);
+        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $params]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -131,6 +101,13 @@ class SynchronisationClient extends ConfigurableService
         $method = 'GET';
 
         return $this->call($url, $method)->getBody();
+    }
+
+    public function callUrl($url, $method = 'GET', $body = null)
+    {
+        /** @var Response $response */
+        $response = $this->call($url, $method, $body);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
