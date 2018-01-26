@@ -63,6 +63,10 @@ class SyncService extends ConfigurableService
      * @param null $type
      * @param array $params
      * @return \common_report_Report
+     * @throws \common_Exception
+     * @throws \common_exception_BadRequest
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
      */
     public function synchronize($type = null, array $params = [])
     {
@@ -236,7 +240,6 @@ class SyncService extends ConfigurableService
 
         foreach ($remoteEntities as $remoteEntity) {
             $id = $remoteEntity['id'];
-//            $this->getResource($id)->delete(true);continue;
             try {
                 $localEntity = $synchronizer->fetchOne($id);
                 if ($localEntity['checksum'] == $remoteEntity['checksum']) {
