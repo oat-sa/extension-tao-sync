@@ -236,6 +236,7 @@ class SyncService extends ConfigurableService
 
         foreach ($remoteEntities as $remoteEntity) {
             $id = $remoteEntity['id'];
+//            $this->getResource($id)->delete(true);continue;
             try {
                 $localEntity = $synchronizer->fetchOne($id);
                 if ($localEntity['checksum'] == $remoteEntity['checksum']) {
