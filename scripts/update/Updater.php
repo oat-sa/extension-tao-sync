@@ -55,6 +55,11 @@ use oat\taoSync\model\SyncService;
  */
 class Updater extends \common_ext_ExtensionUpdater
 {
+    /**
+     * @param $initialVersion
+     * @return string|void
+     * @throws \Exception
+     */
     public function update($initialVersion)
     {
         if ($this->isVersion('0.0.1')) {
@@ -140,7 +145,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $fileSystemService->createFileSystem('synchronisation');
             $this->getServiceManager()->register(FileSystemService::SERVICE_ID, $fileSystemService);
 
-            $this->setVersion('0.2.0');
+            $this->setVersion('0.1.0');
         }
     }
 }
