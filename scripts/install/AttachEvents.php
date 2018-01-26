@@ -20,22 +20,27 @@
 
 namespace oat\taoSync\scripts\install;
 
+use oat\generis\model\data\event\ResourceCreated;
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
+use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
+use oat\taoSync\model\listener\ListenerService;
 
 /**
- * Class RegisterSyncClient
+ * Class RegisterListenerService
  *
- * Register the http client use to send request to remote host
+ * Register the sync listener service and attach events needed for synchronsiation
  *
  * @package oat\taoSync\scripts\install
  */
-class RegisterSyncClient extends InstallAction
+class AttachEvents extends InstallAction
 {
     public function __invoke($params)
     {
-        $this->registerService(SynchronisationClient::SERVICE_ID, new SynchronisationClient());
+        $this->registerEvent(DeliveryCreatedEvent::class, [ListenerService::SERVICE_ID, 'listen']);
+        $this->registerEvent(DeliveryUpdatedEvent::class, [ListenerService::SERVICE_ID, 'listen']);
+        $this->registerEvent(ResourceCreated::class, [ListenerService::SERVICE_ID, 'listen']);
+
         return \common_report_Report::createSuccess('SyncService successfully registered.');
     }
-
 }

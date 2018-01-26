@@ -116,6 +116,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(SynchronisationClient::SERVICE_ID, new SynchronisationClient());
             $this->getServiceManager()->register(DeliverySynchronizerService::SERVICE_ID, new DeliverySynchronizerService());
 
+            // Register sync action
             /** @var PublishingService $service */
             $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);
             $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
@@ -133,6 +134,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $eventManager->attach(ResourceCreated::class, [ListenerService::SERVICE_ID, 'listen']);
             $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
 
+            // Register filesystem
             /** @var FileSystemService $fileSystemService */
             $fileSystemService = $this->getServiceManager()->get(FileSystemService::SERVICE_ID);
             $fileSystemService->createFileSystem('synchronisation');
