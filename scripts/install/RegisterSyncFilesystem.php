@@ -20,11 +20,17 @@
 
 namespace oat\taoSync\scripts\install;
 
-
 use oat\oatbox\extension\InstallAction;
 use oat\oatbox\filesystem\FileSystemService;
 
-class RegisterSynchronisationFilesystem extends InstallAction
+/**
+ * Class RegisterSynchronisationFilesystem
+ *
+ * Register the filesystem used to store test package created at delivery creation
+ *
+ * @package oat\taoSync\scripts\install
+ */
+class RegisterSyncFilesystem extends InstallAction
 {
     public function __invoke($params)
     {

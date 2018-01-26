@@ -18,41 +18,18 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\user\testtaker;
+namespace oat\taoSync\model\synchronizer;
 
-use oat\tao\model\TaoOntology;
-use oat\tao\model\user\TaoRoles;
-use oat\taoSync\model\synchronizer\user\UserSynchronizer;
 
-class RdfTestTakerSynchronizer extends UserSynchronizer implements TestTakerSynchronizer
+interface RdfClassSynchronizer
 {
     /**
-     * Get the synchronizer identifier
+     * Get the requested class triples with associated tree
      *
-     * @return string
-     */
-    public function getId()
-    {
-        return self::SYNC_ID;
-    }
-
-    /**
-     * Get the root class of entity to synchronize
+     * Fetch the class itself and all parents to the root class
      *
-     * @return \core_kernel_classes_Class
+     * @param $requestedClasses
+     * @return array
      */
-    protected function getRootClass()
-    {
-        return $this->getClass(TaoOntology::CLASS_URI_SUBJECT);
-    }
-
-    /**
-     * Get the role defining what a test taker is
-     *
-     * @return string
-     */
-    protected function getUserRole()
-    {
-        return TaoRoles::DELIVERY;
-    }
+    public function fetchMissingClasses($requestedClasses);
 }

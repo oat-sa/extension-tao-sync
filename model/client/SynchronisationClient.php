@@ -18,7 +18,7 @@
  *
  */
 
-namespace oat\taoSync\model\api;
+namespace oat\taoSync\model\client;
 
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
@@ -51,16 +51,44 @@ class SynchronisationClient extends ConfigurableService
      * @param $type
      * @param $params
      * @return mixed
+     * @throws \common_Exception
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
-    public function fetch($type, $params)
+    public function fetchEntityChecksums($type, $params)
     {
-        $url = '/taoSync/SynchronisationApi/fetch?' . http_build_query(['type' => $type, SynchronisationApi::PARAMS => $params]);
+        $url = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_PARAMETERS => $params]);
         $method = 'GET';
 
         /** @var Response $response */
         $response = $this->call($url, $method);
+        if ($response->getStatusCode() != 200) {
+            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        }
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Get list of remote properties with properties
+     * Requested entity ids have to passed as 'entityIds' parameters
+     *
+     * @param $type
+     * @param $entityIds
+     * @return mixed
+     * @throws \common_Exception
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
+    public function fetchEntityDetails($type, $entityIds)
+    {
+        $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_ENTITY_IDS => $entityIds]);
+        $method = 'GET';
+
+        /** @var Response $response */
+        $response = $this->call($url, $method);
+        if ($response->getStatusCode() != 200) {
+            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        }
         return json_decode($response->getBody()->getContents(), true);
     }
 
@@ -73,16 +101,20 @@ class SynchronisationClient extends ConfigurableService
      * @param $type
      * @param array $classes
      * @return mixed
+     * @throws \common_Exception
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
     public function getMissingClasses($type, array $classes)
     {
-        $url = '/taoSync/SynchronisationApi/fetchClassDetails?' . http_build_query(['type' => $type, 'requestedClasses' => $classes]);
+        $url = '/taoSync/SynchronisationApi/fetchClassDetails?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_REQUESTED_CLASSES => $classes]);
         $method = 'GET';
 
         /** @var Response $response */
         $response = $this->call($url, $method);
+        if ($response->getStatusCode() != 200) {
+            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        }
         return json_decode($response->getBody()->getContents(), true);
     }
 
@@ -91,22 +123,44 @@ class SynchronisationClient extends ConfigurableService
      *
      * @param $deliveryUri
      * @return StreamInterface
+     * @throws \common_Exception
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
 
     public function getRemoteDeliveryTest($deliveryUri)
     {
-        $url = '/taoSync/SynchronisationApi/getDeliveryTest?' . http_build_query(['uri' => $deliveryUri]);
+        $url = '/taoSync/SynchronisationApi/getDeliveryTest?' . http_build_query([SynchronisationApi::PARAM_DELIVERY_URI => $deliveryUri]);
         $method = 'GET';
 
-        return $this->call($url, $method)->getBody();
+        $response = $this->call($url, $method);
+        if ($response->getStatusCode() != 200) {
+            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        }
+        return $response->getBody();
     }
 
+    /**
+     * Allow to call directly an url
+     *
+     * Used to chain split requests with 'nextCallUrl' param on response
+     * This params has the responsibility and should not be altered
+     *
+     * @param $url
+     * @param string $method
+     * @param null $body
+     * @return mixed
+     * @throws \common_Exception
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
     public function callUrl($url, $method = 'GET', $body = null)
     {
         /** @var Response $response */
         $response = $this->call($url, $method, $body);
+        if ($response->getStatusCode() != 200) {
+            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        }
         return json_decode($response->getBody()->getContents(), true);
     }
 

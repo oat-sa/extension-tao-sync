@@ -21,8 +21,15 @@
 namespace oat\taoSync\scripts\install;
 
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\api\SynchronisationClient;
+use oat\taoSync\model\client\SynchronisationClient;
 
+/**
+ * Class RegisterSyncClient
+ *
+ * Register the http client use to send request to remote host
+ *
+ * @package oat\taoSync\scripts\install
+ */
 class RegisterSyncClient extends InstallAction
 {
     public function __invoke($params)

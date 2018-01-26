@@ -24,6 +24,13 @@ use oat\oatbox\extension\InstallAction;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\scripts\tool\SyncDeliveryData;
 
+/**
+ * Class RegisterSyncPublishingAction
+ *
+ * Register the sync action against taoPublishing environments to allow http client creation
+ *
+ * @package oat\taoSync\scripts\install
+ */
 class RegisterSyncPublishingAction extends InstallAction
 {
     public function __invoke($params)

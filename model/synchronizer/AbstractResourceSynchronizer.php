@@ -28,12 +28,23 @@ use oat\oatbox\service\ConfigurableService;
 use oat\search\base\exception\SearchGateWayExeption;
 use oat\search\base\QueryBuilderInterface;
 use oat\search\helper\SupportedOperatorHelper;
-use oat\taoSync\model\api\SynchronisationClient;
+use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\Entity;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
-abstract class AbstractResourceSynchronizer extends ConfigurableService implements ServiceLocatorAwareInterface
+/**
+ * Class AbstractResourceSynchronizer
+ *
+ * An abstract class to help to synchronize resource properties
+ *
+ * Allow fetch, fetchOne, insert/update/delete multiple resource
+ * Format method he checksum
+ * Manage the resource class tree and synchronize remote missing class
+ *
+ * @package oat\taoSync\model\synchronizer
+ */
+abstract class AbstractResourceSynchronizer extends ConfigurableService implements ServiceLocatorAwareInterface, RdfClassSynchronizer
 {
     use ServiceLocatorAwareTrait;
     use OntologyAwareTrait;
@@ -66,13 +77,12 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         }
 
         if (!empty($requestedClasses)) {
+            $requestedClasses = array_unique($requestedClasses);
             $missingClasses = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID)->getMissingClasses($this->getId(), $requestedClasses);
             foreach ($missingClasses as $remoteEntity) {
                 try {
                     $this->createClassRecursively($remoteEntity['id'], $remoteEntity['properties'], $missingClasses);
-                } catch (\common_Exception $e) {
-
-                }
+                } catch (\common_Exception $e) {}
             }
         }
     }
@@ -85,30 +95,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     public function after(array $entities)
     {
 
-    }
-
-    /**
-     * Create a class and the tree of his parents
-     *
-     * @param $id
-     * @param array $params
-     * @param array $missingClasses
-     * @throws \common_exception_NotFound If parent class does not exist
-     */
-    protected function createClassRecursively($id, array $params,  array &$missingClasses = [])
-    {
-        $parent = $this->getClass($params[OntologyRdfs::RDFS_SUBCLASSOF]);
-        if ($this->getRootClass()->getUri() != $parent->getUri() && !$parent->exists()) {
-            if (!in_array($parent->getUri(), array_keys($missingClasses))) {
-                throw new \common_exception_NotFound('Class "' . $id . '" cannot be created, parent "' . $parent->getUri() . '" does not exists.');
-            }
-            $this->createClassRecursively($parent->getUri(), $missingClasses[$parent->getUri()]['properties'], $missingClasses);
-        }
-
-        $label = isset($params[OntologyRdfs::RDFS_LABEL]) ? $params[OntologyRdfs::RDFS_LABEL] : null;
-        $comment = isset($params[OntologyRdfs::RDFS_COMMENT]) ? $params[OntologyRdfs::RDFS_COMMENT] : null;
-        $parent->createSubClass($label, $comment, $id);
-        unset($missingClasses[$id]);
     }
 
     /**
@@ -125,18 +111,18 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             /** @var \core_kernel_classes_Class $parent */
             foreach ($class->getParentClasses(true) as $parent) {
                 if (!in_array($parent->getUri(), array_keys($classes)) && !in_array($parent->getUri(), $this->getExcludedClasses())) {
-                    $classes[$parent->getUri()] = $this->format($parent);
+                    $classes[$parent->getUri()] = $this->format($parent, true);
                 }
             }
             if (!in_array($class->getUri(), array_keys($classes)) && !in_array($class->getUri(), $this->getExcludedClasses())) {
-                $classes[$class->getUri()] = $this->format($class);
+                $classes[$class->getUri()] = $this->format($class, true);
             }
         }
         return $classes;
     }
 
     /**
-     * Get a list of instances
+     * Get a list of entities
      *
      * @param array $params
      * @return array
@@ -161,8 +147,9 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         try {
             $results = $search->getGateway()->search($queryBuilder);
             if ($results->total() > 0) {
+                $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
                 foreach ($results as $resource) {
-                    $instance = $this->format($resource);
+                    $instance = $this->format($resource, $withProperties);
                     $values[$instance['id']] = $instance;
                 }
             }
@@ -175,16 +162,20 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      * Fetch an entity associated to the given id in Rdf storage
      *
      * @param $id
+     * @param array $params
      * @return array
      * @throws \common_exception_NotFound If entity is not found
      */
-    public function fetchOne($id)
+    public function fetchOne($id, array $params = [])
     {
+        $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
+
         $resource = $this->getResource($id);
         if (!$resource->exists()) {
             throw new \common_exception_NotFound('No resource found for id : ' . $id);
         }
-        return $this->format($resource);
+
+        return $this->format($resource, $withProperties);
     }
 
     /**
@@ -216,7 +207,12 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
 
             $label = isset($properties[OntologyRdfs::RDFS_LABEL]) ? $properties[OntologyRdfs::RDFS_LABEL] : null;
             $comment = isset($properties[OntologyRdfs::RDFS_COMMENT]) ? $properties[OntologyRdfs::RDFS_COMMENT] : null;
+
             $resource = $class->createInstance($label, $comment, $entity['id']);
+            $triples = $resource->getRdfTriples();
+            foreach ($triples as $triple) {
+                $resource->removePropertyValues($this->getProperty($triple->predicate));
+            }
             $resource->setPropertiesValues($properties);
         }
     }
@@ -229,6 +225,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     public function updateMultiple(array $entities)
     {
         foreach ($entities as $entity) {
+
             $properties = isset($entity['properties']) ? $entity['properties'] : [];
             $resource = $this->getResource($entity['id']);
             $triples = $resource->getRdfTriples();
@@ -239,6 +236,56 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         }
     }
 
+    /**
+     * Format a resource to an array
+     *
+     * Add a checksum to identify the resource content
+     * Add resource triples as properties if $withProperties param is true
+     *
+     * @param \core_kernel_classes_Resource $resource
+     * @param $withProperty
+     * @return array
+     */
+    public function format(\core_kernel_classes_Resource $resource, $withProperty = false)
+    {
+        $properties = $this->filterProperties($resource->getRdfTriples()->toArray());
+        return [
+            'id' => $resource->getUri(),
+            'checksum' => md5(serialize($properties)),
+            'properties' => ($withProperty === true) ? $properties : [],
+        ];
+    }
+
+    /**
+     * Create a class and the tree of his parents
+     *
+     * @param $id
+     * @param array $params
+     * @param array $missingClasses
+     * @throws \common_exception_NotFound If parent class does not exist
+     */
+    protected function createClassRecursively($id, array $params,  array &$missingClasses = [])
+    {
+        $parent = $this->getClass($params[OntologyRdfs::RDFS_SUBCLASSOF]);
+        if ($this->getRootClass()->getUri() != $parent->getUri() && !$parent->exists()) {
+            if (!in_array($parent->getUri(), array_keys($missingClasses))) {
+                throw new \common_exception_NotFound('Class "' . $id . '" cannot be created, parent "' . $parent->getUri() . '" does not exists.');
+            }
+            $this->createClassRecursively($parent->getUri(), $missingClasses[$parent->getUri()]['properties'], $missingClasses);
+        }
+
+        $label = isset($params[OntologyRdfs::RDFS_LABEL]) ? $params[OntologyRdfs::RDFS_LABEL] : null;
+        $comment = isset($params[OntologyRdfs::RDFS_COMMENT]) ? $params[OntologyRdfs::RDFS_COMMENT] : null;
+        $parent->createSubClass($label, $comment, $id);
+        unset($missingClasses[$id]);
+    }
+
+    /**
+     * Update the query based on $param
+     *
+     * @param QueryBuilderInterface $queryBuilder
+     * @param array $params
+     */
     protected function applyQueryOptions(QueryBuilderInterface $queryBuilder, array $params = [])
     {
         if (isset($params['limit'])) {
@@ -258,26 +305,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
                 $queryBuilder->sort($sorting);
             }
         }
-    }
-
-    /**
-     * Format a resource to an array
-     *
-     * Add a checksum to identify the resource content
-     * Add resource triples as properties
-     *
-     * @param \core_kernel_classes_Resource $resource
-     * @return array
-     */
-    public function format(\core_kernel_classes_Resource $resource)
-    {
-        $properties = $this->filterProperties($resource->getRdfTriples()->toArray());
-        $value = [];
-        $value['id'] = $resource->getUri();
-        $value['type'] = $resource->isClass() ? 'class' : 'resource';
-        $value['checksum'] = md5(serialize($properties));
-        $value['properties'] = $properties;
-        return $value;
     }
 
     /**
@@ -338,8 +365,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     protected function getExcludedClasses()
     {
         return [
-            'http://www.tao.lu/Ontologies/TAO.rdf#User',
-            'http://www.tao.lu/Ontologies/generis.rdf#User',
             'http://www.tao.lu/Ontologies/generis.rdf#generis_Ressource',
             'http://www.w3.org/2000/01/rdf-schema#Resource',
             $this->getRootClass()->getUri(),

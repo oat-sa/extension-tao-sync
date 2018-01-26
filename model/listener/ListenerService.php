@@ -20,14 +20,11 @@
 
 namespace oat\taoSync\model\listener;
 
-use Doctrine\DBAL\Platforms\AbstractPlatform;
 use oat\generis\model\data\event\ResourceCreated;
-use oat\generis\model\data\event\ResourceUpdated;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\event\Event;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\service\ServiceManager;
-use oat\tao\model\TaoOntology;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
 use oat\taoSync\model\Entity;
@@ -90,16 +87,25 @@ class ListenerService extends ConfigurableService
         return $this->getDeliverySyncService()->backupDeliveryTest($this->getResource($event->getDeliveryUri()));
     }
 
+    /**
+     * Resource created listener
+     *
+     * Create the property CreatedAt at resource creation
+     *
+     * @param ResourceCreated $event
+     */
     public function onResourceCreated(ResourceCreated $event)
     {
         $resource = $event->getResource();
         $createdAtProperty = $this->getProperty(Entity::CREATED_AT);
-        $createdAt = $resource->getOnePropertyValue($createdAtProperty);
-        if (is_null($createdAt)) {
-            $resource->setPropertyValue($createdAtProperty, $this->getNowExpression());
-        }
+        $resource->setPropertyValue($createdAtProperty, $this->getNowExpression());
     }
 
+    /**
+     * Get the current time in milliseconds
+     *
+     * @return float
+     */
     protected function getNowExpression()
     {
         return microtime(true);
@@ -112,7 +118,7 @@ class ListenerService extends ConfigurableService
      */
     protected function getDeliverySyncService()
     {
-        return $this->getServiceLocator()->get(DeliverySynchronizerService::DELIVERY_TEST_PACKAGE_URI);
+        return $this->getServiceLocator()->get(DeliverySynchronizerService::SERVICE_ID);
     }
 
 }

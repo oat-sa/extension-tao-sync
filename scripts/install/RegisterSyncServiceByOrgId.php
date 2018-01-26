@@ -28,7 +28,7 @@ use oat\taoSync\model\custom\synchronizer\ProctorByOrganisationID;
 use oat\taoSync\model\custom\synchronizer\TestCenterByOrganisationID;
 use oat\taoSync\model\custom\synchronizer\TestTakerByOrganisationID;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
-use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
+use oat\taoSync\model\synchronizer\delivery\RdfDeliverySynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;
 use oat\taoSync\model\synchronizer\user\testtaker\TestTakerSynchronizer;
 use oat\taoSync\model\synchronizer\user\administrator\AdministratorSynchronizer;
@@ -74,7 +74,7 @@ class RegisterSyncServiceByOrgId extends InstallAction
                         TaoOntology::PROPERTY_UPDATED_AT
                     )
                 )),
-                'delivery' => new DeliverySynchronizer(array(
+                'delivery' => new RdfDeliverySynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_FIELDS => array(
                         'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
                         'http://www.w3.org/2000/01/rdf-schema#label',

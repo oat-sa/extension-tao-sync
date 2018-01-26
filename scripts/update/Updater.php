@@ -27,12 +27,15 @@ use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\api\SynchronisationClient;
+use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\Entity;
 use oat\taoSync\model\listener\ListenerService;
+use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
+use oat\taoSync\model\synchronizer\delivery\RdfDeliverySynchronizer;
+use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\scripts\tool\SyncDeliveryData;
 use oat\tao\model\TaoOntology;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
-use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\RdfEligibilitySynchronizer;
 use oat\taoSync\model\synchronizer\testcenter\RdfTestCenterSynchronizer;
@@ -62,30 +65,35 @@ class Updater extends \common_ext_ExtensionUpdater
                 SyncService::OPTION_SYNCHRONIZERS => array(
                     TestCenterSynchronizer::SYNC_ID => new RdfTestCenterSynchronizer(array(
                         AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
-                            TaoOntology::PROPERTY_UPDATED_AT
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
                         )
                     )),
                     AdministratorSynchronizer::SYNC_ADMINISTRATOR => new RdfAdministratorSynchronizer(array(
                         AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
-                            TaoOntology::PROPERTY_UPDATED_AT
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
                         )
                     )),
                     ProctorSynchronizer::SYNC_PROCTOR => new RdfProctorSynchronizer(array(
                         AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
-                            TaoOntology::PROPERTY_UPDATED_AT
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
                         )
                     )),
                     TestTakerSynchronizer::SYNC_ID => new RdfTestTakerSynchronizer(array(
                         AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
-                            TaoOntology::PROPERTY_UPDATED_AT
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
                         )
                     )),
                     EligibilitySynchronizer::SYNC_ELIGIBILITY => new RdfEligibilitySynchronizer(array(
                         AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
-                            TaoOntology::PROPERTY_UPDATED_AT
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
                         )
                     )),
-                    'delivery' => new DeliverySynchronizer(array(
+                    DeliverySynchronizer::SYNC_DELIVERY => new RdfDeliverySynchronizer(array(
                         AbstractResourceSynchronizer::OPTIONS_FIELDS => array(
                             'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
                             'http://www.w3.org/2000/01/rdf-schema#label',
@@ -106,6 +114,7 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->getServiceManager()->register(ListenerService::SERVICE_ID, new ListenerService());
             $this->getServiceManager()->register(SynchronisationClient::SERVICE_ID, new SynchronisationClient());
+            $this->getServiceManager()->register(DeliverySynchronizerService::SERVICE_ID, new DeliverySynchronizerService());
 
             /** @var PublishingService $service */
             $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);

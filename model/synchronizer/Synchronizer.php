@@ -46,19 +46,20 @@ interface Synchronizer
     /**
      * Get a list of instances
      *
-     * @param array $options array of query options
+     * @param array $params array of query options
      * @return array
      */
-    public function fetch(array $options = []);
+    public function fetch(array $params = []);
 
     /**
      * Fetch an entity associated to the given id in Rdf storage
      *
      * @param $id
+     * @param array $params
      * @return array
      * @throws \common_exception_NotFound If entity is not found
      */
-    public function fetchOne($id);
+    public function fetchOne($id, array $params = []);
 
     /**
      * Delete multiple entities

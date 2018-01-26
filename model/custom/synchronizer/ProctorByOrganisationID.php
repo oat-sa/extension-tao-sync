@@ -57,30 +57,4 @@ class ProctorByOrganisationID extends RdfProctorSynchronizer
 
         return $values;
     }
-
-    public function count(array $options = [])
-    {
-        $id = $this->getOrganisationIdFromOption($options);
-
-        /** @var ComplexSearchService $search */
-        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
-
-        $queryBuilder = $search->query();
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
-        $queryBuilder->setCriteria($query);
-
-        $queryBuilder2 = $search->query();
-        $query2 = $search->searchType($queryBuilder2, TestCenterService::CLASS_URI, true)->add('http://www.taotesting.com/ontologies/synchro.rdf#organisationId')->equals($id);
-        $queryBuilder2->setCriteria($query2);
-
-        /** @var QueryJoiner $joiner */
-        $joiner = $search->getGateway()->getJoiner();
-        $joiner->setQuery($queryBuilder)
-            ->join($queryBuilder2)
-            ->on(ProctorManagementService::PROPERTY_ASSIGNED_PROCTOR_URI);
-
-        $results = $search->getGateway()->join($joiner);
-        return $results->count();
-    }
-
 }
