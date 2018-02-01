@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE structures SYSTEM "../doc/structures.dtd">
+<structures>
+    <structure id="synchronization" name="Data Synchronization" level="8" group="main">
+        <description/>
+        <icon id="icon-loop" src=""/>
+        <sections>
+            <section id="taoSync_synchronizer" name="Data Synchronization" url="/taoSync/Synchronizer/index"/>
+        </sections>
+    </structure>
+</structures>

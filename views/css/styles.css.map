@@ -1,7 +1,7 @@
 {
 "version": 3,
-"mappings": "AAEA,EAAG,CCiOK,SAAS,CAAE,IAAc,CACzB,SAAS,CAAE,MAAoB,CDhOnC,WAAW,CEKD,qDAAwD",
-"sources": ["../scss/styles.scss","../../../tao/views/scss/inc/_functions.scss","../../../tao/views/scss/inc/_variables.scss"],
+"mappings": "AAEA,mBAAoB,CAChB,SAAS,CAAE,MAAM,CACjB,KAAK,CAAE,IAAI,CACX,MAAM,CAAE,IAAI,CAGhB,UAAW,CCgHP,MAAM,CAAE,cAAgB,CACxB,aAAa,CAAE,GAAG,CAClB,qBAAqB,CAAE,GAAG,CDhH1B,UAAU,CEmBS,OAAO,CFlB1B,aAAa,CAAE,IAAI,CACnB,OAAO,CAAC,IAAI,CACZ,QAAQ,CAAE,QAAQ,CAElB,iBAAM,CACF,MAAM,CAAE,IAAI,CACZ,WAAW,CAAE,GAAG,CAIxB,EAAG,CC8MK,SAAS,CAAE,IAAc,CACzB,SAAS,CAAE,MAAoB,CD7MnC,WAAW,CGdD,qDAAwD",
+"sources": ["../scss/styles.scss","../../../tao/views/scss/inc/_functions.scss","../../../tao/views/scss/inc/_colors.scss","../../../tao/views/scss/inc/_variables.scss"],
 "names": [],
 "file": "styles.css"
 }

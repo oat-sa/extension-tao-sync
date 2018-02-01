@@ -1,5 +1,24 @@
 @import "inc/bootstrap";
 
+.tao-sync-container {
+    max-width: 1024px;
+    width: 100%;
+    margin: auto;
+}
+
+.button-bg {
+    @include simple-border();
+    background: $uiClickableDefaultBg;
+    margin-bottom: 20px;
+    padding:20px;
+    position: relative;
+
+    button{
+        height: auto;
+        line-height: 1.2
+    }
+}
+
 h2 {
     @include font-size(23);
     font-family: $headingFont;

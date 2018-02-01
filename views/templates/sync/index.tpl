@@ -1,7 +1,7 @@
 <?php
 use oat\tao\helpers\Template;
 ?>
-<link rel="stylesheet" href="<?= Template::css('styles.css', 'taoIave') ?>"/>
+<link rel="stylesheet" href="<?= Template::css('styles.css', 'taoSync') ?>"/>
 <div class="tao-sync-container">
   <header class="section-header flex-container-full">
     <h2><?=__('Data Synchronization')?></h2>
