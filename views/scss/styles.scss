@@ -1,0 +1,6 @@
+@import "inc/bootstrap";
+
+h2 {
+    @include font-size(23);
+    font-family: $headingFont;
+}
