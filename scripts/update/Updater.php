@@ -20,15 +20,17 @@
 
 namespace oat\taoSync\scripts\update;
 
+
 /**
  * Class Updater
  *
- * @author Moyon Camille <camille@taotesting.com>
+ * @author Camille Moyon <camille@taotesting.com>
+ * @author Dieter Raber <dieter@taotesting.com>
  */
 class Updater extends \common_ext_ExtensionUpdater
 {
+
     public function update($initialVersion)
     {
-
     }
 }

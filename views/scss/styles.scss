@@ -1,25 +1,131 @@
 @import "inc/bootstrap";
 
-.tao-sync-container {
-    max-width: 1024px;
+#tao-sync-container {
+    max-width: 900px;
     width: 100%;
     margin: auto;
-}
 
-.button-bg {
-    @include simple-border();
-    background: $uiClickableDefaultBg;
-    margin-bottom: 20px;
-    padding:20px;
-    position: relative;
+    .intro {
+        margin-bottom: 30px;
+    }
+    .custom-fields {
+        max-width: 300px;
+        margin: 0 auto 25px auto;
+        div {
+            margin-bottom: 5px;
+        }
+        label {
+            display:block;
+            white-space: nowrap;
+        }
+        input {
+            width: 100%;
+            @include font-size(20);
+            max-width: none;
+        }
+    }
+
+    [class^="feedback-"], [class*=" feedback-"] {
+        display:none;
+        padding-left: 60px;
+        max-width: 600px;
+        margin: 10px auto;
+        [class^="icon-"], [class*=" icon-"]  {
+            @include font-size(25);
+            &.icon-loop {
+                color: $info;
+            }
+            &.icon-result-ok {
+                color: $success;
+            }
+            &.icon-error {
+                color: $error;
+            }
+        }
+    }
 
     button{
         height: auto;
-        line-height: 1.2
+        line-height: 1.2;
+        padding: 15px 25px;
+        @include font-size(20, true);
+        margin: auto !important;
+        display: block;
+        .icon-loop {
+            @include font-size(20);
+            color: currentColor;
+        }
     }
-}
 
-h2 {
-    @include font-size(23);
-    font-family: $headingFont;
+    strong {
+        color: $info;
+        font-weight: normal;
+
+    }
+    &[class^="state-"], &[class*=" state-"] {
+        button {
+            display:none;
+        }
+        .custom-fields {
+            display:none;
+        }
+    }
+    &.state-failure {
+        .error-failure {
+            display: block;
+        }
+        .intro {
+            visibility: hidden;
+        }
+    }
+    &.state-timeout {
+        .error-timeout {
+            display: block;
+        }
+        .intro {
+            visibility: hidden;
+        }
+    }
+    &.state-success {
+        .feedback-success {
+            display: block;
+        }
+        .intro {
+            visibility: hidden;
+        }
+    }
+    &.state-progress {
+        .feedback-info {
+            display: block;
+            .spinner-icon {
+                display: block;
+                @include vendor-prefix(transform, translateZ(0));
+                @include vendor-prefix(transform-origin, 50% 50%);
+                @include keyframes(icon-rotation) {
+                    0% {
+                        @include vendor-prefix(transform, rotate(0deg));
+                    }
+                    100% {
+                        @include vendor-prefix(transform, rotate(360deg));
+                    }
+                }
+                @include animation(icon-rotation 1.4s infinite linear);
+            }
+        }
+    }
+
+    .action-area {
+        @include simple-border();
+        background: $uiClickableDefaultBg;
+        margin: 20px auto;
+        padding:20px;
+        position: relative;
+        min-height: 330px;
+        @include font-size(16)
+    }
+
+    h2 {
+        @include font-size(23);
+        font-family: $headingFont;
+    }
 }

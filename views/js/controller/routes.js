@@ -18,6 +18,13 @@
  *
  */
 define(function(){
+    'use strict';
+
     return {
+        'Synchronizer': {
+            'actions' : {
+                'index' : 'taoSync/controller/synchronizer'
+            }
+        }
     };
 });

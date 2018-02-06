@@ -19,13 +19,56 @@
 
 namespace oat\taoSync\controller;
 
+use oat\oatbox\service\ServiceManager;
+use oat\taoTaskQueue\model\QueueDispatcherInterface;
+
 class Synchronizer extends \tao_actions_CommonModule
 {
+
+    const EXTENSION_ID = 'taoSync';
+
     /**
      * Entry page.
      */
     public function index()
     {
+        $this->setData('form-fields', $this->getFormFields());
         $this->setView('sync/index.tpl', 'taoSync');
+    }
+
+    public function createTask() {
+        $queueService = ServiceManager::getServiceManager()->get(QueueDispatcherInterface::SERVICE_ID);
+        $task = $queueService->createTask($this, [], 'Synchronize Data');
+        if ($task->isEnqueued()) {
+            echo 'Successfully published';
+        }
+    }
+
+
+    /**
+     * Retrieve custom form fields
+     *
+     * @return array
+     */
+    protected function getFormFields() {
+        $defaults = [
+            'element' => 'input',
+            'attributes' => []
+        ];
+        $extension = $this->getServiceManager()
+                          ->get(\common_ext_ExtensionsManager::SERVICE_ID)
+                          ->getExtensionById(self::EXTENSION_ID);
+        $formFields = array_filter((array)$extension->getConfig('formFields'));
+
+        foreach($formFields as $key => &$formField) {
+            $formField = array_merge($defaults, $formField);
+            if(empty($formField['attributes']['name'])) {
+                $formField['attributes']['name'] = $key;
+            }
+            if(empty($formField['attributes']['id'])) {
+                $formField['attributes']['id'] = $key;
+            }
+        }
+        return $formFields;
     }
 }

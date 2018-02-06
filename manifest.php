@@ -23,19 +23,20 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.0.1',
+    'version' => '0.1.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=14.16.0'
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
-    'acl' => array(
-        array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', array('ext'=>'taoSync')),
-    ),
-    'install' => array(
+    'acl' => [
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoTaskQueue']]
+    ],
+    'install' => [
         'php' => [
         ]
-    ),
+    ],
     'uninstall' => array(
     ),
     'update' => oat\taoSync\scripts\update\Updater::class,
