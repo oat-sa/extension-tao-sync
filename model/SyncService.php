@@ -25,6 +25,7 @@ use oat\generis\model\OntologyRdfs;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\history\SyncHistoryService;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
 use Psr\Log\LogLevel;
@@ -70,7 +71,8 @@ class SyncService extends ConfigurableService
      */
     public function synchronize($type = null, array $params = [])
     {
-        $this->report = \common_report_Report::createInfo('Starting synchronization...');
+        $syncId = $this->getSyncHistoryService()->createSynchronisation();
+        $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
         if (is_null($type)) {
             foreach($this->getAllTypes() as $type) {
@@ -94,7 +96,6 @@ class SyncService extends ConfigurableService
      * @param $params
      * @return array
      * @throws \common_exception_BadRequest
-     * @throws \core_kernel_persistence_Exception
      */
     public function fetch($type, $params)
     {
@@ -112,10 +113,9 @@ class SyncService extends ConfigurableService
         $options['limit'] = $limit;
 
         if (isset($options['nextResource'])) {
-            $resource = $this->getResource($options['nextResource']);
-            $startEpoch = $resource->getOnePropertyValue($this->getProperty(Entity::CREATED_AT));
+            $startEpoch = $this->getSynchronizer($type)->getEntityProperty($options['nextResource'], Entity::CREATED_AT);
             if (!is_null($startEpoch)) {
-                $options['startCreatedAt'] = $startEpoch->literal;
+                $options['startCreatedAt'] = $startEpoch;
             }
         }
 
@@ -187,7 +187,7 @@ class SyncService extends ConfigurableService
      */
     protected function synchronizeType($type, array $params = [])
     {
-        $this->report('About synchronization for type "' . $type .'"', LogLevel::INFO);
+        $this->report('Synchronizing "' . $type .'"', LogLevel::INFO);
 
         $response = $this->getSynchronisationClient()->fetchEntityChecksums($type, $params);
 
@@ -208,6 +208,8 @@ class SyncService extends ConfigurableService
                 break;
             }
         }
+
+        $this->deleteEntities($type);
     }
 
     /**
@@ -231,6 +233,7 @@ class SyncService extends ConfigurableService
         $entities = array(
             'create' => [],
             'update' => [],
+            'existing' => [],
         );
 
         if (empty($remoteEntities)) {
@@ -245,6 +248,7 @@ class SyncService extends ConfigurableService
                 if ($localEntity['checksum'] == $remoteEntity['checksum']) {
                     // up to date
                     $this->report('(' . $synchronizer->getId() . ') Entity "' . $id . '" is already up to date.');
+                    $entities['existing'][] = $id;
                 } else {
                     // update
                     $entities['update'][] = $remoteEntity;
@@ -258,6 +262,25 @@ class SyncService extends ConfigurableService
         }
 
         return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities));
+    }
+
+    /**
+     * Delete entities once the synchronisation process is done.
+     *
+     * Fetch all entities not processed by synchro. It means that there are not in remote server.
+     * Then delete it
+     *
+     * @param $type
+     * @throws \common_exception_BadRequest
+     * @throws \common_exception_Error
+     * @throws \core_kernel_persistence_Exception
+     */
+    protected function deleteEntities($type)
+    {
+        $entityIds = $this->getSyncHistoryService()->getNotUpdatedEntityIds($type);
+        $this->getSynchronizer($type)->deleteMultiple($entityIds);
+        $this->getSyncHistoryService()->logDeletedEntities($type, $entityIds);
+        $this->report(count($entityIds) . ' deleted.', LogLevel::INFO);
     }
 
     /**
@@ -296,7 +319,7 @@ class SyncService extends ConfigurableService
     }
 
     /**
-     * Persist entites through synchronizer
+     * Persist entities through synchronizer
      *
      * Entities to update and insert are separated to allow multiple operations
      *
@@ -309,14 +332,22 @@ class SyncService extends ConfigurableService
     {
         $synchronizer->before($entities);
 
+        if (!empty($entities['existing'])) {
+            $this->getSyncHistoryService()->logNotChangedEntities($synchronizer->getId(), $entities['existing']);
+        }
+
         if (!empty($entities['create'])) {
             $synchronizer->insertMultiple($entities['create']);
             $this->report('(' . $synchronizer->getId() . ') ' . count($entities['create']) . ' entities created.', LogLevel::INFO);
+            $entityIds = array_column($entities['create'], 'id');
+            $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $entityIds);
         }
 
         if (!empty($entities['update'])) {
             $synchronizer->updateMultiple($entities['update']);
             $this->report('(' . $synchronizer->getId() . ') ' . count($entities['update']) . ' entities updated.', LogLevel::INFO);
+            $entityIds = array_column($entities['update'], 'id');
+            $this->getSyncHistoryService()->logUpdatedEntities($synchronizer->getId(), $entityIds);
         }
 
         $synchronizer->after($entities);
@@ -378,6 +409,14 @@ class SyncService extends ConfigurableService
     protected function getSynchronisationClient()
     {
         return $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+    }
+
+    /**
+     * @return SyncHistoryService
+     */
+    protected function getSyncHistoryService()
+    {
+        return $this->getServiceLocator()->get(SyncHistoryService::SERVICE_ID);
     }
 
     /**

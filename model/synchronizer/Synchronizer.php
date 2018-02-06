@@ -62,6 +62,15 @@ interface Synchronizer
     public function fetchOne($id, array $params = []);
 
     /**
+     * Get value of entity property
+     *
+     * @param $id
+     * @param $property
+     * @return string
+     */
+    public function getEntityProperty($id, $property);
+
+    /**
      * Delete multiple entities
      *
      * @param array $entityIds Array of entity id

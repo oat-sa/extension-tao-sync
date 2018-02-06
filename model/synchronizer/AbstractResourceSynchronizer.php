@@ -257,6 +257,19 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     }
 
     /**
+     * Get value of entity property
+     *
+     * @param $id
+     * @param $property
+     * @return string
+     * @throws \core_kernel_persistence_Exception
+     */
+    public function getEntityProperty($id, $property)
+    {
+        return (string) $this->getResource($id)->getOnePropertyValue($this->getProperty($property));
+    }
+
+    /**
      * Create a class and the tree of his parents
      *
      * @param $id

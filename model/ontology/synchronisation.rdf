@@ -3,6 +3,7 @@
         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
         xml:base="http://www.taotesting.com/ontologies/blueprint.rdf#"
+        xmlns:generis="http://www.tao.lu/Ontologies/generis.rdf#"
 >
 
     <rdf:Description rdf:about="http://www.taotesting.com/Ontologies/TAO.rdf#CreatedAt">
@@ -16,6 +17,21 @@
         <rdfs:label xml:lang="en-US"><![CDATA[Origin test resource id]]></rdfs:label>
         <rdfs:comment xml:lang="en-US"><![CDATA[Origin test of compiled delivery]]></rdfs:comment>
         <rdfs:domain rdf:resource="http://www.tao.lu/Ontologies/TAODelivery.rdf#AssembledDelivery"/>
+    </rdf:Description>
+
+    <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#synchro">
+        <rdfs:label xml:lang="en-US"><![CDATA[Synchronisation]]></rdfs:label>
+        <rdfs:comment xml:lang="en-US"><![CDATA[Synchronisation object]]></rdfs:comment>
+        <rdfs:subClassOf rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#TAOObject"/>
+    </rdf:Description>
+
+    <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#identifier">
+        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+        <rdfs:label xml:lang="en-US"><![CDATA[Identifier]]></rdfs:label>
+        <rdfs:comment xml:lang="en-US"><![CDATA[A synchronisation identifier]]></rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.taotesting.com/ontologies/synchro.rdf#synchro"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <generis:is_language_dependent rdf:resource="http://www.tao.lu/Ontologies/generis.rdf#False"/>
     </rdf:Description>
 
 </rdf:RDF>

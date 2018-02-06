@@ -27,12 +27,9 @@ class SyncDeliveryData extends AbstractAction
 {
     public function __invoke($params)
     {
-        $this->checkToken();
         $type = null;
-
         foreach ($params as $param) {
             list($option, $value) = explode('=', $param);
-
             switch ($option) {
                 case '--type':
                     $type = $value;
@@ -43,10 +40,6 @@ class SyncDeliveryData extends AbstractAction
         return $this->getSyncService()->synchronize($type);
     }
 
-    protected function checkToken()
-    {
-        return true;
-    }
     /**
      * @return SyncService
      */

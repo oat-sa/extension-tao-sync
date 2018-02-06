@@ -18,27 +18,24 @@
  *
  */
 
-namespace oat\taoSync\scripts\install;
+namespace oat\taoSync\scripts\tool;
 
-use oat\oatbox\extension\InstallAction;
-use oat\oatbox\filesystem\FileSystemService;
+use oat\oatbox\extension\AbstractAction;
+use oat\taoSync\model\ResultService;
 
-/**
- * Class RegisterSynchronisationFilesystem
- *
- * Register the filesystem used to store test package created at delivery creation
- *
- * @package oat\taoSync\scripts\install
- */
-class RegisterSyncFilesystem extends InstallAction
+class SynchronizeResult extends AbstractAction
 {
     public function __invoke($params)
     {
-        /** @var FileSystemService $fileSystemService */
-        $fileSystemService = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
-        $fileSystemService->createFileSystem('synchronisation');
-        $this->registerService(FileSystemService::SERVICE_ID, $fileSystemService);
-        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronization filesystem was registered.');
+        return $this->getSyncResultService()->synchronizeResults();
+    }
+
+    /**
+     * @return ResultService
+     */
+    protected function getSyncResultService()
+    {
+        return $this->propagate(new ResultService());
     }
 
 }

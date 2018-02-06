@@ -27,6 +27,7 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\controller\ResultApi;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\scripts\tool\SyncDeliveryData;
 use \Psr\Http\Message\StreamInterface;
@@ -158,6 +159,27 @@ class SynchronisationClient extends ConfigurableService
     {
         /** @var Response $response */
         $response = $this->call($url, $method, $body);
+        if ($response->getStatusCode() != 200) {
+            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        }
+        return json_decode($response->getBody()->getContents(), true);
+    }
+
+    /**
+     * Send results to be synchronized to remote host
+     *
+     * @param array $results
+     * @return mixed
+     * @throws \common_Exception
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
+    public function sendResults(array $results)
+    {
+        $url = '/taoSync/ResultApi/syncResults';
+        $method = 'POST';
+
+        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_RESULTS => $results]));
         if ($response->getStatusCode() != 200) {
             throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
         }
