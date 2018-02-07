@@ -36,12 +36,29 @@ class Synchronizer extends \tao_actions_CommonModule
         $this->setView('sync/index.tpl', 'taoSync');
     }
 
+    /**
+     * Create a task
+     */
     public function createTask() {
         $queueService = ServiceManager::getServiceManager()->get(QueueDispatcherInterface::SERVICE_ID);
         $task = $queueService->createTask($this, [], 'Synchronize Data');
-        if ($task->isEnqueued()) {
-            echo 'Successfully published';
-        }
+        $data = [
+            'status' => $task->isEnqueued(),
+            'task' => $task,
+
+        ];
+        echo json_encode($data);
+    }
+
+    /**
+     * Poll Queue
+     */
+    public function pollQueue() {
+        $data = [
+            'status' => 'test',
+            'task' => 'test'
+        ];
+        echo json_encode($data);
     }
 
 

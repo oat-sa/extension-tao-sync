@@ -35,6 +35,7 @@ return array(
     ],
     'install' => [
         'php' => [
+            \oat\taoIave\scripts\install\SetupDataSynchronization::class
         ]
     ],
     'uninstall' => array(

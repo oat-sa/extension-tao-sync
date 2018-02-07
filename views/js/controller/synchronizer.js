@@ -21,8 +21,9 @@ define([
     'lodash',
     'moment',
     'util/url',
-    'taoTaskQueue/model/taskQueueModel'
-], function($, _, moment, urlHelper, taskQueueModelFactory) {
+    'taoTaskQueue/model/taskQueueModel',
+    'layout/loading-bar'
+], function($, _, moment, urlHelper, taskQueueModelFactory, loadingBar) {
     'use strict';
 
     /**
@@ -40,6 +41,33 @@ define([
      * Launch button
      */
     var $launchButton = $container.find('button');
+
+    /**
+     * Controller access
+     */
+    var urls = {
+        creation: urlHelper.route('createTask', 'Synchronizer', 'taoSync'),
+        poll: urlHelper.route('pollQueue', 'Synchronizer', 'taoSync')
+    };
+
+    /**
+     * Task Queue object
+     */
+    var taskQueue = taskQueueModelFactory({
+        url : {
+            get: urlHelper.route('get', 'TaskQueueWebApi', 'taoTaskQueue'),
+            archive: urlHelper.route('archive', 'TaskQueueWebApi', 'taoTaskQueue'),
+            all : urlHelper.route('getAll', 'TaskQueueWebApi', 'taoTaskQueue'),
+            download : urlHelper.route('download', 'TaskQueueWebApi', 'taoTaskQueue')
+        },
+        pollSingleIntervals : [
+            {iteration: 3, interval: 1000}
+        ],
+        pollAllIntervals : [
+            {iteration: 1, interval: 8000},
+            {iteration: 0, interval: 5000}
+        ]
+    });
 
 
     /**
@@ -81,36 +109,40 @@ define([
         // avoids unwanted flicker caused by the late loading of the CSS
         $container.find('.messages').removeClass('viewport-hidden');
 
-        // check if all form fields are valid, if applicable
-        $formFields.on('keyup paste blur', toggleLaunchButtonState);
+        taskQueue.getAll().then(function(status) {
+            if(!status.length) {
+                setState('progress');
+            }
+            else {
+                // check if all form fields are valid, if applicable
+                $formFields.on('keyup paste blur', toggleLaunchButtonState);
 
-        // there might be no form fields at all
-        // or they might have received valid entries by other means
-        toggleLaunchButtonState();
+                // there might be no form fields at all
+                // or they might have received valid entries by other means
+                toggleLaunchButtonState();
 
-        $launchButton.on('click', function() {
-            var $startTime = $container.find('#start-time');
-            $startTime.text(moment().format('LT'));
-            setState('progress');
+                $launchButton.on('click', function() {
+                    var $startTime = $container.find('#start-time');
+                    loadingBar.start();
+                    taskQueue.pollAllStop();
+                    taskQueue.create(urls.creation).then(function (result) {
+                        if (result.finished) {
+                            //immediately archive the finished task as there is no need to display this task in the queue list
+                            taskQueue.archive(result.task.id).then(function () {
+                                taskQueue.pollAll();
+                                setState('success');
+                            });
+                        } else {
+                            //enqueuing process:
+                            $startTime.text(moment().format('LT'));
+                            setState('progress');
+                        }
+                        loadingBar.stop();
+                    });
+                });
+            }
         });
     }
 
     init();
-
-
-    return taskQueueModelFactory({
-        url : {
-            get: urlHelper.route('get', 'TaskQueueWebApi', 'taoTaskQueue'),
-            archive: urlHelper.route('archive', 'TaskQueueWebApi', 'taoTaskQueue'),
-            all : urlHelper.route('getAll', 'TaskQueueWebApi', 'taoTaskQueue'),
-            download : urlHelper.route('download', 'TaskQueueWebApi', 'taoTaskQueue')
-        },
-        pollSingleIntervals : [
-            {iteration: 3, interval:1000}
-        ],
-        pollAllIntervals : [
-            {iteration: 1, interval:8000},
-            {iteration: 0, interval:5000}
-        ]
-    });
 });
