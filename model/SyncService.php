@@ -25,7 +25,7 @@ use oat\generis\model\OntologyRdfs;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
-use oat\taoSync\model\history\SyncHistoryService;
+use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
 use Psr\Log\LogLevel;
@@ -412,11 +412,11 @@ class SyncService extends ConfigurableService
     }
 
     /**
-     * @return SyncHistoryService
+     * @return DataSyncHistoryService
      */
     protected function getSyncHistoryService()
     {
-        return $this->getServiceLocator()->get(SyncHistoryService::SERVICE_ID);
+        return $this->getServiceLocator()->get(DataSyncHistoryService::SERVICE_ID);
     }
 
     /**

@@ -30,10 +30,11 @@ use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\Entity;
 use oat\taoSync\model\listener\ListenerService;
+use oat\taoSync\model\ResultService;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\synchronizer\delivery\RdfDeliverySynchronizer;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
-use oat\taoSync\scripts\tool\SyncDeliveryData;
+use oat\taoSync\scripts\tool\SynchronizeData;
 use oat\tao\model\TaoOntology;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;
@@ -117,6 +118,11 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->getServiceManager()->register(SyncService::SERVICE_ID, new SyncService($options));
 
+            $this->getServiceManager()->register(ResultService::SERVICE_ID, new ResultService(array(
+                ResultService::OPTION_CHUNK_SIZE => ResultService::DEFAULT_CHUNK_SIZE,
+                ResultService::OPTION_DELETE_AFTER_SEND => false
+            )));
+
             $this->getServiceManager()->register(ListenerService::SERVICE_ID, new ListenerService());
             $this->getServiceManager()->register(SynchronisationClient::SERVICE_ID, new SynchronisationClient());
             $this->getServiceManager()->register(DeliverySynchronizerService::SERVICE_ID, new DeliverySynchronizerService());
@@ -125,8 +131,8 @@ class Updater extends \common_ext_ExtensionUpdater
             /** @var PublishingService $service */
             $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);
             $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
-            if (!in_array(SyncDeliveryData::class, $actions)) {
-                $actions[] = SyncDeliveryData::class;
+            if (!in_array(SynchronizeData::class, $actions)) {
+                $actions[] = SynchronizeData::class;
                 $service->setOption(PublishingService::OPTIONS_ACTIONS, $actions);
                 $this->getServiceManager()->register(PublishingService::SERVICE_ID, $service);
             }

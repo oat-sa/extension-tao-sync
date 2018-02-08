@@ -23,7 +23,7 @@ namespace oat\taoSync\scripts\tool;
 use oat\oatbox\extension\AbstractAction;
 use oat\taoSync\model\SyncService;
 
-class SyncDeliveryData extends AbstractAction
+class SynchronizeData extends AbstractAction
 {
     public function __invoke($params)
     {

@@ -32,6 +32,9 @@ class ResultApi extends \tao_actions_RestController
     const PARAM_RESULTS = 'results';
 
     /**
+     * Api endpoint to receive results
+     * An acknowledgment list is returned to confirm which results are imported
+     *
      * @throws \common_exception_NotImplemented
      */
     public function syncResults()

@@ -29,7 +29,7 @@ use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\ResultApi;
 use oat\taoSync\controller\SynchronisationApi;
-use oat\taoSync\scripts\tool\SyncDeliveryData;
+use oat\taoSync\scripts\tool\SynchronizeData;
 use \Psr\Http\Message\StreamInterface;
 
 /**
@@ -192,9 +192,11 @@ class SynchronisationClient extends ConfigurableService
      * @param $url
      * @param string $method
      * @param null $body
-     * @return \Psr\Http\Message\ResponseInterface
+     * @return mixed|\Psr\Http\Message\ResponseInterface
+     * @throws \common_Exception
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
+     * @throws \core_kernel_classes_EmptyProperty
      */
     protected function call($url, $method = 'GET', $body = null)
     {
@@ -238,7 +240,7 @@ class SynchronisationClient extends ConfigurableService
             foreach ($actionProperties as $actionProperty) {
                 if ($actionProperty) {
                     $actionProperty = preg_replace('/(\/|\\\\)+/', '\\', $actionProperty);
-                    $syncAction = preg_replace('/(\/|\\\\)+/', '\\', SyncDeliveryData::class);
+                    $syncAction = preg_replace('/(\/|\\\\)+/', '\\', SynchronizeData::class);
                     if ($actionProperty == $syncAction) {
                         return $env;
                     }

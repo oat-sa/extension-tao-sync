@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\install;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\scripts\tool\SyncDeliveryData;
+use oat\taoSync\scripts\tool\SynchronizeData;
 
 /**
  * Class RegisterSyncPublishingAction
@@ -37,8 +37,8 @@ class RegisterSyncPublishingAction extends InstallAction
     {
         $service = $this->getServiceLocator()->get(PublishingService::SERVICE_ID);
         $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
-        if (!in_array(SyncDeliveryData::class, $actions)) {
-            $actions[] = SyncDeliveryData::class;
+        if (!in_array(SynchronizeData::class, $actions)) {
+            $actions[] = SynchronizeData::class;
             $service->setOption(PublishingService::OPTIONS_ACTIONS, $actions);
             $this->registerService(PublishingService::SERVICE_ID, $service);
         }

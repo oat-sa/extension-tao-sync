@@ -31,7 +31,7 @@ use oat\oatbox\service\ConfigurableService;
  *
  * @package oat\taoSync\model\history
  */
-class SyncHistoryService extends ConfigurableService
+class DataSyncHistoryService extends ConfigurableService
 {
     use OntologyAwareTrait;
 
@@ -67,6 +67,9 @@ class SyncHistoryService extends ConfigurableService
      */
     public function logCreatedEntities($type, array $entityIds)
     {
+        if (empty($entityIds)) {
+            return true;
+        }
         return $this->insert($type, self::ACTION_CREATED, $entityIds);
     }
 
@@ -80,6 +83,9 @@ class SyncHistoryService extends ConfigurableService
      */
     public function logNotChangedEntities($type, array $entityIds)
     {
+        if (empty($entityIds)) {
+            return true;
+        }
         return $this->update($type, self::ACTION_TOUCHED, $entityIds);
     }
 
@@ -93,6 +99,9 @@ class SyncHistoryService extends ConfigurableService
      */
     public function logUpdatedEntities($type, array $entityIds)
     {
+        if (empty($entityIds)) {
+            return true;
+        }
         return $this->update($type, self::ACTION_UPDATED, $entityIds);
     }
 
@@ -106,6 +115,9 @@ class SyncHistoryService extends ConfigurableService
      */
     public function logDeletedEntities($type, array $entityIds)
     {
+        if (empty($entityIds)) {
+            return true;
+        }
         return $this->update($type, self::ACTION_DELETED, $entityIds);
     }
 
@@ -165,7 +177,12 @@ class SyncHistoryService extends ConfigurableService
     {
         if (!$this->synchroId) {
             $synchro = $this->getResource(self::SYNCHRO_ID);
-            $this->synchroId = (int) $synchro->getOnePropertyValue($this->getProperty(self::SYNCHRO_ID))->literal;
+            $synchroIdProperty = $synchro->getOnePropertyValue($this->getProperty(self::SYNCHRO_ID));
+            if (is_null($synchroIdProperty)) {
+                $this->synchroId = 0;
+            } else {
+                $this->synchroId = (int) $synchroIdProperty->literal;
+            }
         }
         return $this->synchroId;
     }
