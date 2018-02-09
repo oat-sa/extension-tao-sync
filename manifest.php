@@ -28,12 +28,15 @@ return array(
     'requires' => array(
         'tao' => '>=14.16.0'
     ),
-    'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
+    'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole',
     'acl' => [
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoTaskQueue']]
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole', ['ext'=>'taoSync']],
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole', ['ext'=>'taoTaskQueue']]
     ],
     'install' => [
+        'rdf' => [
+            dirname(__FILE__). '/model/ontology/taosync.rdf'
+        ],
         'php' => [
             \oat\taoIave\scripts\install\SetupDataSynchronization::class
         ]

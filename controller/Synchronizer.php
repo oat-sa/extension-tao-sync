@@ -21,10 +21,16 @@ namespace oat\taoSync\controller;
 
 use oat\oatbox\service\ServiceManager;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
+use oat\taoTaskQueue\model\TaskLogActionTrait;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
 
+    use TaskLogActionTrait;
+
+    /**
+     * Extension ID
+     */
     const EXTENSION_ID = 'taoSync';
 
     /**
@@ -33,59 +39,63 @@ class Synchronizer extends \tao_actions_CommonModule
     public function index()
     {
         $this->setData('form-fields', $this->getFormFields());
-        $this->setView('sync/index.tpl', 'taoSync');
+        $this->setData('form-action', _url('createTask', basename(__CLASS__)));
+        $this->setView('sync/index.tpl', self::EXTENSION_ID);
     }
 
     /**
      * Create a task
      */
-    public function createTask() {
-        $queueService = ServiceManager::getServiceManager()->get(QueueDispatcherInterface::SERVICE_ID);
-        $task = $queueService->createTask($this, [], 'Synchronize Data');
-        $data = [
-            'status' => $task->isEnqueued(),
-            'task' => $task,
+    public function createTask()
+    {
+        try{
+            $data  = $this->getRequestParameters();
+            $label = $data['label'];
+            unset($data['label']);
 
-        ];
-        echo json_encode($data);
+            //@todo do something useful here
+            $callable = function(){
+                return true;
+            };
+
+            $queueService = ServiceManager::getServiceManager()->get(QueueDispatcherInterface::SERVICE_ID);
+
+            return $this->returnTaskJson($queueService->createTask($callable, $data, $label));
+        } catch(\Exception $e){
+            return $this->returnJson([
+                'success'   => false,
+                'errorMsg'  => $e->getMessage(),
+                'errorCode' => $e->getCode()
+            ]);
+        }
     }
-
-    /**
-     * Poll Queue
-     */
-    public function pollQueue() {
-        $data = [
-            'status' => 'test',
-            'task' => 'test'
-        ];
-        echo json_encode($data);
-    }
-
 
     /**
      * Retrieve custom form fields
      *
      * @return array
      */
-    protected function getFormFields() {
-        $defaults = [
-            'element' => 'input',
+    protected function getFormFields()
+    {
+        $defaults   = [
+            'element'    => 'input',
             'attributes' => []
         ];
-        $extension = $this->getServiceManager()
-                          ->get(\common_ext_ExtensionsManager::SERVICE_ID)
-                          ->getExtensionById(self::EXTENSION_ID);
+        $extension  = $this->getServiceManager()
+                           ->get(\common_ext_ExtensionsManager::SERVICE_ID)
+                           ->getExtensionById(self::EXTENSION_ID);
         $formFields = array_filter((array)$extension->getConfig('formFields'));
 
-        foreach($formFields as $key => &$formField) {
+        foreach($formFields as $key => &$formField){
             $formField = array_merge($defaults, $formField);
-            if(empty($formField['attributes']['name'])) {
+            if(empty($formField['attributes']['name'])){
                 $formField['attributes']['name'] = $key;
             }
-            if(empty($formField['attributes']['id'])) {
+            if(empty($formField['attributes']['id'])){
                 $formField['attributes']['id'] = $key;
             }
         }
+
         return $formFields;
     }
 }

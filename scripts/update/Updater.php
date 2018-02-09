@@ -20,15 +20,25 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\tao\scripts\update\OntologyUpdater;
+
 /**
  * Class Updater
  *
  * @author Moyon Camille <camille@taotesting.com>
+ * @author Dieter Raber <dieter@taotesting.com>
  */
 class Updater extends \common_ext_ExtensionUpdater
 {
     public function update($initialVersion)
     {
-        $this->skip('0.0.1','0.1.0');
+        $this->skip('0.0.1','0.0.2');
+
+        if ($this->isVersion('0.0.2')) {
+
+            // include the Sync master role
+            OntologyUpdater::syncModels();
+            $this->setVersion('0.1.0');
+        }
     }
 }

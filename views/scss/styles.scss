@@ -7,10 +7,14 @@
 
     .intro {
         margin-bottom: 30px;
+        // toggle visibility rather than state to avoid differences
+        // in positioning of the button and the feedback boxes
+        visibility: hidden;
     }
     .custom-fields {
         max-width: 300px;
         margin: 0 auto 25px auto;
+        display:none;
         div {
             margin-bottom: 5px;
         }
@@ -23,6 +27,10 @@
             @include font-size(20);
             max-width: none;
         }
+    }
+    .msg {
+        display:none;
+        margin-bottom: 5px;
     }
 
     [class^="feedback-"], [class*=" feedback-"] {
@@ -47,13 +55,19 @@
     button{
         height: auto;
         line-height: 1.2;
-        padding: 15px 25px;
+        padding: 15px 20px 15px 55px;
         @include font-size(20, true);
         margin: auto !important;
-        display: block;
+        display: none;
+        position: relative;
         .icon-loop {
             @include font-size(20);
             color: currentColor;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            left: 17px;
+            top: 17px;
         }
     }
 
@@ -70,53 +84,51 @@
             display:none;
         }
     }
-    &.state-failure {
-        .error-failure {
-            display: block;
-        }
-        .intro {
-            visibility: hidden;
-        }
-    }
-    &.state-timeout {
-        .error-timeout {
-            display: block;
-        }
-        .intro {
-            visibility: hidden;
-        }
-    }
-    &.state-success {
-        .feedback-success {
-            display: block;
-        }
-        .intro {
-            visibility: hidden;
-        }
-    }
-    &.state-progress {
-        .feedback-info {
-            display: block;
-            .spinner-icon {
+    &.state {
+        &-form {
+            .custom-fields, button {
                 display: block;
-                @include vendor-prefix(transform, translateZ(0));
-                @include vendor-prefix(transform-origin, 50% 50%);
-                @include keyframes(icon-rotation) {
-                    0% {
-                        @include vendor-prefix(transform, rotate(0deg));
-                    }
-                    100% {
-                        @include vendor-prefix(transform, rotate(360deg));
-                    }
-                }
-                @include animation(icon-rotation 1.4s infinite linear);
+            }
+            .intro {
+                visibility: visible;
+            }
+        }
+        &-progress {
+            .feedback-info {
+                display: block;
+            }
+            .intro {
+                visibility: visible;
+            }
+        }
+        &-success {
+            .feedback-success {
+                display: block;
+            }
+        }
+        &-error {
+            .feedback-error {
+                display: block;
             }
         }
     }
 
+    .spinner-icon {
+        display: block;
+        @include vendor-prefix(transform, translateZ(0));
+        @include vendor-prefix(transform-origin, 50% 50%);
+        @include keyframes(icon-rotation) {
+            0% {
+                @include vendor-prefix(transform, rotate(0deg));
+            }
+            100% {
+                @include vendor-prefix(transform, rotate(360deg));
+            }
+        }
+        @include animation(icon-rotation 1.4s infinite linear);
+    }
+
     .action-area {
-        @include simple-border();
-        background: $uiClickableDefaultBg;
         margin: 20px auto;
         padding:20px;
         position: relative;

@@ -23,7 +23,7 @@ define(function(){
     return {
         'Synchronizer': {
             'actions' : {
-                'index' : 'taoSync/controller/synchronizer'
+                'index' : 'taoSync/controller/synchronizer/index'
             }
         }
     };
