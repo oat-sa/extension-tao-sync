@@ -19,7 +19,7 @@
 
 namespace oat\taoSync\controller;
 
-use oat\oatbox\service\ServiceManager;
+use oat\taoSync\scripts\tool\SynchronizeAll;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
 use oat\taoTaskQueue\model\TaskLogActionTrait;
 
@@ -39,7 +39,7 @@ class Synchronizer extends \tao_actions_CommonModule
     public function index()
     {
         $this->setData('form-fields', $this->getFormFields());
-        $this->setData('form-action', _url('createTask', basename(__CLASS__)));
+        $this->setData('form-action', _url('createTask'));
         $this->setView('sync/index.tpl', self::EXTENSION_ID);
     }
 
@@ -53,12 +53,9 @@ class Synchronizer extends \tao_actions_CommonModule
             $label = $data['label'];
             unset($data['label']);
 
-            //@todo do something useful here
-            $callable = function(){
-                return true;
-            };
+            $callable = $this->propagate(new SynchronizeAll());
 
-            $queueService = ServiceManager::getServiceManager()->get(QueueDispatcherInterface::SERVICE_ID);
+            $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
 
             return $this->returnTaskJson($queueService->createTask($callable, $data, $label));
         } catch(\Exception $e){
@@ -81,7 +78,7 @@ class Synchronizer extends \tao_actions_CommonModule
             'element'    => 'input',
             'attributes' => []
         ];
-        $extension  = $this->getServiceManager()
+        $extension  = $this->getServiceLocator()
                            ->get(\common_ext_ExtensionsManager::SERVICE_ID)
                            ->getExtensionById(self::EXTENSION_ID);
         $formFields = array_filter((array)$extension->getConfig('formFields'));

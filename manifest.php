@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -26,7 +26,9 @@ return array(
     'version' => '0.1.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'tao' => '>=14.16.0'
+        'tao' => '>=14.16.0',
+        'taoPublishing' => '>=0.5.1',
+        'taoTestCenter' => '>=3.7.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole',
     'acl' => [
@@ -35,10 +37,15 @@ return array(
     ],
     'install' => [
         'rdf' => [
-            dirname(__FILE__). '/model/ontology/taosync.rdf'
+            dirname(__FILE__). '/model/ontology/taosync.rdf',
+            dirname(__FILE__) . '/model/ontology/synchronisation.rdf',
         ],
         'php' => [
-            \oat\taoIave\scripts\install\SetupDataSynchronization::class
+            \oat\taoSync\scripts\install\RegisterSyncService::class,
+            \oat\taoSync\scripts\install\RegisterSyncPublishingAction::class,
+            \oat\taoSync\scripts\install\AttachEvents::class,
+            \oat\taoSync\scripts\install\RegisterSyncFilesystem::class,
+            \oat\taoSync\scripts\install\InstallSynchronisationHistory::class,
         ]
     ],
     'uninstall' => array(
