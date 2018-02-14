@@ -53,7 +53,7 @@ $formFields = get_data('form-fields');
       <div class="feedback-success">
         <span class="icon-result-ok"></span>
         <div class="messages">
-          <p><?= __('The synchronization process has been finished. You can now close the browser window.') ?></p>
+          <p><?= __('The synchronization process has been finished.') ?></p>
         </div>
       </div>
 
