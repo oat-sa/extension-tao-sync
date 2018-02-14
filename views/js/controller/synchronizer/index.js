@@ -110,7 +110,7 @@ define([
         ]
     }).on('pollSingleFinished', function(taskId, taskData) {
         if(taskData.status === 'completed') {
-            taskQueue.archive(taskData.id).then(function () {
+            taskQueue.archive(encodeURIComponent(taskData.id)).then(function () {
                 taskQueue.pollAll();
                 setState('success');
             });
