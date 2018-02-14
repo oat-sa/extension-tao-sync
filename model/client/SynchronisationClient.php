@@ -25,7 +25,6 @@ use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\ResultApi;
 use oat\taoSync\controller\SynchronisationApi;
@@ -213,41 +212,8 @@ class SynchronisationClient extends ConfigurableService
         $request = $request->withHeader('Accept', 'application/json');
         $request = $request->withHeader('Content-type', 'application/json');
 
-        $env = $this->getSyncEnvironment();
-        return PlatformService::singleton()->callApi($env->getUri(), $request);
-    }
 
-    /**
-     * Get the remote environment to process the synchronisation
-     *
-     * @return \core_kernel_classes_Resource
-     * @throws \common_exception_NotFound If no environment has been set
-     * @throws \common_exception_NotImplemented If action is not set in environment
-     */
-    protected function getSyncEnvironment()
-    {
-        $environments = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getEnvironments();
-
-        if (empty($environments)) {
-            throw new \common_exception_NotFound('No environment has been set.');
-        }
-
-        /** @var \core_kernel_classes_Resource $env */
-        foreach ($environments as $env) {
-            $property = $this->getProperty(PublishingService::PUBLISH_ACTIONS);
-            $actionProperties = $env->getPropertyValues($property);
-
-            foreach ($actionProperties as $actionProperty) {
-                if ($actionProperty) {
-                    $actionProperty = preg_replace('/(\/|\\\\)+/', '\\', $actionProperty);
-                    $syncAction = preg_replace('/(\/|\\\\)+/', '\\', SynchronizeData::class);
-                    if ($actionProperty == $syncAction) {
-                        return $env;
-                    }
-                }
-            }
-        }
-        throw new \common_exception_NotImplemented('No environment was associated to synchronisation. Process cancelled');
+        return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->callEnvironment(SynchronizeData::class, $request);
     }
 
 }

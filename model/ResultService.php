@@ -271,18 +271,22 @@ class ResultService extends ConfigurableService
      * Check if $result has the correct keys to be processed
      *
      * @param array $data
-     * @throws \common_Exception
+     * @throws \InvalidArgumentException
      */
-    protected function checkResultFormat(array $data)
+    protected function checkResultFormat($data)
     {
+        if (!is_array($data)) {
+            throw new \InvalidArgumentException('Result is not correctly formatted, should be an array.');
+        }
+
         $global = array('deliveryId', 'deliveryExecutionId', 'details', 'variables',);
         if (!empty(array_diff_key(array_flip($global), $data))) {
-            throw new \common_Exception('Result is not correctly formatted, should contains : ' . implode(', ', $global));
+            throw new \InvalidArgumentException('Result is not correctly formatted, should contains : ' . implode(', ', $global));
         }
 
         $details = array('identifier', 'label', 'test-taker', 'starttime', 'finishtime', 'state',);
         if (!empty(array_diff_key(array_flip($details), $data['details']))) {
-            throw new \common_Exception('Result details are not correctly formatted, should contains : ' . implode(', ', $details));
+            throw new \InvalidArgumentException('Result details are not correctly formatted, should contains : ' . implode(', ', $details));
         }
     }
 
