@@ -14,13 +14,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
 namespace oat\taoSync\scripts\update;
 
 use oat\tao\scripts\update\OntologyUpdater;
+use oat\taoSync\model\ui\FormFieldsService;
 
 /**
  * Class Updater
@@ -30,11 +31,17 @@ use oat\tao\scripts\update\OntologyUpdater;
  */
 class Updater extends \common_ext_ExtensionUpdater
 {
+    /**
+     * @param $initialVersion
+     * @return string|void
+     * @throws \Exception
+     */
     public function update($initialVersion)
     {
         $this->skip('0.0.1','0.0.2');
 
         if ($this->isVersion('0.0.2')) {
+            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
 
             // include the Sync master role
             OntologyUpdater::syncModels();

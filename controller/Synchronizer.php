@@ -19,13 +19,14 @@
 
 namespace oat\taoSync\controller;
 
-use oat\oatbox\service\ServiceManager;
+use oat\tao\scripts\tools\maintenance\Status;
+use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
+use oat\taoTaskQueue\model\Task\TaskInterface;
 use oat\taoTaskQueue\model\TaskLogActionTrait;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
-
     use TaskLogActionTrait;
 
     /**
@@ -38,8 +39,8 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     public function index()
     {
-        $this->setData('form-fields', $this->getFormFields());
-        $this->setData('form-action', _url('createTask', basename(__CLASS__)));
+        $this->setData('form-fields', $this->getFormFieldsService()->getFormFields());
+        $this->setData('form-action', _url('createTask'));
         $this->setView('sync/index.tpl', self::EXTENSION_ID);
     }
 
@@ -50,16 +51,12 @@ class Synchronizer extends \tao_actions_CommonModule
     {
         try{
             $data  = $this->getRequestParameters();
+
             $label = $data['label'];
             unset($data['label']);
 
-            //@todo do something useful here
-            $callable = function(){
-                return true;
-            };
-
-            $queueService = ServiceManager::getServiceManager()->get(QueueDispatcherInterface::SERVICE_ID);
-
+            $callable = $this->propagate(new Status());
+            $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
             return $this->returnTaskJson($queueService->createTask($callable, $data, $label));
         } catch(\Exception $e){
             return $this->returnJson([
@@ -71,31 +68,10 @@ class Synchronizer extends \tao_actions_CommonModule
     }
 
     /**
-     * Retrieve custom form fields
-     *
-     * @return array
+     * @return FormFieldsService
      */
-    protected function getFormFields()
+    protected function getFormFieldsService()
     {
-        $defaults   = [
-            'element'    => 'input',
-            'attributes' => []
-        ];
-        $extension  = $this->getServiceManager()
-                           ->get(\common_ext_ExtensionsManager::SERVICE_ID)
-                           ->getExtensionById(self::EXTENSION_ID);
-        $formFields = array_filter((array)$extension->getConfig('formFields'));
-
-        foreach($formFields as $key => &$formField){
-            $formField = array_merge($defaults, $formField);
-            if(empty($formField['attributes']['name'])){
-                $formField['attributes']['name'] = $key;
-            }
-            if(empty($formField['attributes']['id'])){
-                $formField['attributes']['id'] = $key;
-            }
-        }
-
-        return $formFields;
+        return $this->getServiceLocator()->get(FormFieldsService::SERVICE_ID);
     }
 }

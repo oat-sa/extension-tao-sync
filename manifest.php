@@ -38,7 +38,6 @@ return array(
             dirname(__FILE__). '/model/ontology/taosync.rdf'
         ],
         'php' => [
-            \oat\taoIave\scripts\install\SetupDataSynchronization::class
         ]
     ],
     'uninstall' => array(
