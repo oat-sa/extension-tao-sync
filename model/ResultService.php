@@ -425,16 +425,16 @@ class ResultService extends ConfigurableService
     {
         switch ($level) {
             case LogLevel::INFO:
-//                $this->logInfo($message);
+                $this->logInfo($message);
                 $reportLevel = \common_report_Report::TYPE_SUCCESS;
                 break;
             case LogLevel::ERROR:
-//                $this->logError($message);
+                $this->logError($message);
                 $reportLevel = \common_report_Report::TYPE_ERROR;
                 break;
             case LogLevel::DEBUG:
             default:
-//                $this->logDebug($message);
+                $this->logDebug($message);
                 $reportLevel = \common_report_Report::TYPE_INFO;
                 break;
         }
