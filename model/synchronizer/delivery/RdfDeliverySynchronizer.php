@@ -58,15 +58,25 @@ class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements De
      * Insert multiple deliveries and import remote associated test as compiled delivery
      *
      * @param array $entities
-     * @throws \common_Exception
-     * @throws \core_kernel_persistence_Exception
+     * @return array
      */
     public function insertMultiple(array $entities)
     {
         parent::insertMultiple($entities);
+        $errors = $created = [];
         foreach ($entities as $entity) {
-            $this->getDeliverySyncService()->synchronizeDelivery($entity['id']);
+            try {
+                $this->getDeliverySyncService()->synchronizeDelivery($entity['id']);
+                $created[] = $entity['id'];
+            } catch (\common_Exception $e) {
+                $errors[] = $entity['id'];
+            }
         }
+        if (!empty($errors)) {
+            $this->deleteMultiple($errors);
+        }
+
+        return $created;
     }
 
     /**

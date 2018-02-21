@@ -23,6 +23,7 @@ namespace oat\taoSync\model;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultServerService;
@@ -60,9 +61,7 @@ class ResultService extends ConfigurableService
      * @return \common_report_Report
      * @throws \common_Exception
      * @throws \common_exception_Error
-     * @throws \common_exception_NoImplementation
      * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     public function synchronizeResults(array $params = [])
     {
@@ -73,7 +72,8 @@ class ResultService extends ConfigurableService
         /** @var \core_kernel_classes_Resource $delivery */
         foreach ($this->getDeliveryAssemblyService()->getAllAssemblies() as $delivery) {
             $deliveryId = $delivery->getUri();
-            foreach ($this->getDeliveryExecutionService()->getExecutionsByDelivery($delivery) as $deliveryExecution) {
+            /** @var DeliveryExecution $deliveryExecution */
+            foreach ($this->getDeliveryExecutionByDelivery($delivery) as $deliveryExecution) {
                 $deliveryExecutionId = $deliveryExecution->getIdentifier();
 
                 // Skip non finished delivery executions
@@ -132,8 +132,6 @@ class ResultService extends ConfigurableService
      * @param $results
      * @throws \common_Exception
      * @throws \common_exception_Error
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     protected function sendResults($results)
     {
@@ -192,8 +190,8 @@ class ResultService extends ConfigurableService
 
                 $deliveryExecution = $this->spawnDeliveryExecution($delivery, $testtaker);
 
-                $this->getResultService($deliveryId)->storeRelatedTestTaker($deliveryExecution->getIdentifier(), $testtaker->getUri());
-                $this->getResultService($deliveryId)->storeRelatedDelivery($deliveryExecution->getIdentifier(), $delivery->getUri());
+                $this->getResultStorage($deliveryId)->storeRelatedTestTaker($deliveryExecution->getIdentifier(), $testtaker->getUri());
+                $this->getResultStorage($deliveryId)->storeRelatedDelivery($deliveryExecution->getIdentifier(), $delivery->getUri());
 
 
                 foreach ($variables as $variable) {
@@ -205,7 +203,7 @@ class ResultService extends ConfigurableService
 
                     if (is_null($callIdItem)) {
                         $callIdTest = $variable['callIdTest'];
-                        $this->getResultService($deliveryId)->storeTestVariable(
+                        $this->getResultStorage($deliveryId)->storeTestVariable(
                             $deliveryExecution->getIdentifier(),
                             $test,
                             $resultVariable,
@@ -214,7 +212,7 @@ class ResultService extends ConfigurableService
 
                     } else {
                         $item = $variable['item'];
-                        $this->getResultService($deliveryId)->storeItemVariable(
+                        $this->getResultStorage($deliveryId)->storeItemVariable(
                             $deliveryExecution->getIdentifier(),
                             $test,
                             $item,
@@ -299,7 +297,7 @@ class ResultService extends ConfigurableService
      */
     protected function getDeliveryExecutionVariables($deliveryId, $deliveryExecutionId)
     {
-        $variables = $this->getResultService($deliveryId)->getDeliveryVariables($deliveryExecutionId);
+        $variables = $this->getResultStorage($deliveryId)->getDeliveryVariables($deliveryExecutionId);
         $deliveryExecutionVariables = [];
         foreach ($variables as $variable) {
             $variable = (array) $variable[0];
@@ -375,10 +373,32 @@ class ResultService extends ConfigurableService
     {
         foreach ($successfullyExportedResults as $deliveryExecutionId => $deliveryId) {
             $this->report('Delete delivery id : ' . $deliveryExecutionId);
-            $this->getResultService($deliveryId)->deleteResult($deliveryExecutionId);
+            $this->getResultStorage($deliveryId)->deleteResult($deliveryExecutionId);
         }
 
         $this->report(count($successfullyExportedResults) . ' deleted.', LogLevel::INFO);
+    }
+
+    /**
+     * Get delivery executions by delivery
+     *
+     * @param \core_kernel_classes_Resource $delivery
+     * @return array|DeliveryExecution[]
+     */
+    protected function getDeliveryExecutionByDelivery(\core_kernel_classes_Resource $delivery)
+    {
+        $serviceProxy = $this->getDeliveryExecutionService();
+        if (!$serviceProxy instanceof Monitoring) {
+            $resultStorage = $this->getResultStorage($delivery->getUri());
+            $results = $resultStorage->getResultByDelivery([$delivery->getUri()]);
+            $executions = [];
+            foreach ($results as $result) {
+                $executions[] = $serviceProxy->getDeliveryExecution($result['deliveryResultIdentifier']);
+            }
+        } else{
+            $executions = $serviceProxy->getExecutionsByDelivery($delivery);
+        }
+        return $executions;
     }
 
     /**
@@ -447,7 +467,7 @@ class ResultService extends ConfigurableService
      * @param $deliveryId
      * @return mixed
      */
-    protected function getResultService($deliveryId)
+    protected function getResultStorage($deliveryId)
     {
         return $this->getServiceLocator()->get(ResultServerService::SERVICE_ID)->getResultStorage($deliveryId);
     }
