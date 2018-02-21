@@ -208,22 +208,10 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
                 $class = $this->getRootClass();
             }
 
-            $label = $comment = null;
-            if (isset($properties[OntologyRdfs::RDFS_LABEL])) {
-                $label = $properties[OntologyRdfs::RDFS_LABEL];
-                unset($properties[OntologyRdfs::RDFS_LABEL]);
-            }
-            if (isset($properties[OntologyRdfs::RDFS_COMMENT])) {
-                $comment = $properties[OntologyRdfs::RDFS_COMMENT];
-                unset($properties[OntologyRdfs::RDFS_COMMENT]);
-            }
-
-            $resource = $class->createInstance($label, $comment, $entity['id']);
-            $triples = $resource->getRdfTriples();
-            foreach ($triples as $triple) {
-                $resource->removePropertyValues($this->getProperty($triple->predicate));
-            }
+            $resource = $this->getResource($entity['id']);
+            $resource->setType($class);
             $resource->setPropertiesValues($properties);
+
             $created[] = $entity['id'];
         }
 
