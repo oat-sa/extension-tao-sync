@@ -52,8 +52,6 @@ class SynchronisationClient extends ConfigurableService
      * @param $params
      * @return mixed
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     public function fetchEntityChecksums($type, $params)
     {
@@ -76,8 +74,6 @@ class SynchronisationClient extends ConfigurableService
      * @param $entityIds
      * @return mixed
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     public function fetchEntityDetails($type, $entityIds)
     {
@@ -102,8 +98,6 @@ class SynchronisationClient extends ConfigurableService
      * @param array $classes
      * @return mixed
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     public function getMissingClasses($type, array $classes)
     {
@@ -124,8 +118,6 @@ class SynchronisationClient extends ConfigurableService
      * @param $deliveryUri
      * @return StreamInterface
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
 
     public function getRemoteDeliveryTest($deliveryUri)
@@ -151,8 +143,6 @@ class SynchronisationClient extends ConfigurableService
      * @param null $body
      * @return mixed
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     public function callUrl($url, $method = 'GET', $body = null)
     {
@@ -170,8 +160,6 @@ class SynchronisationClient extends ConfigurableService
      * @param array $results
      * @return mixed
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     public function sendResults(array $results)
     {
@@ -193,9 +181,6 @@ class SynchronisationClient extends ConfigurableService
      * @param null $body
      * @return mixed|\Psr\Http\Message\ResponseInterface
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
-     * @throws \core_kernel_classes_EmptyProperty
      */
     protected function call($url, $method = 'GET', $body = null)
     {
@@ -212,8 +197,11 @@ class SynchronisationClient extends ConfigurableService
         $request = $request->withHeader('Accept', 'application/json');
         $request = $request->withHeader('Content-type', 'application/json');
 
-
-        return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->callEnvironment(SynchronizeData::class, $request);
+        try {
+            return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->callEnvironment(SynchronizeData::class, $request);
+        } catch (\Exception $e) {
+            throw new \common_Exception($e->getMessage(), 0, $e);
+        }
     }
 
 }

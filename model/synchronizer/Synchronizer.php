@@ -81,6 +81,7 @@ interface Synchronizer
      * Insert multiple entities
      *
      * @param array $entities
+     * @return array list of inserted entity id
      */
     public function insertMultiple(array $entities);
 

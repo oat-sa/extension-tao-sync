@@ -298,8 +298,6 @@ class SyncService extends ConfigurableService
      * @param array $entities
      * @return array
      * @throws \common_Exception
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
      */
     protected function getEntityDetails($type, array $entities = [])
     {
@@ -343,10 +341,18 @@ class SyncService extends ConfigurableService
         }
 
         if (!empty($entities['create'])) {
-            $synchronizer->insertMultiple($entities['create']);
-            $this->report('(' . $synchronizer->getId() . ') ' . count($entities['create']) . ' entities created.', LogLevel::INFO);
-            $entityIds = array_column($entities['create'], 'id');
-            $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $entityIds);
+            $created = $synchronizer->insertMultiple($entities['create']);
+
+            $toCreate = array_column($entities['create'], 'id');
+            if (count($created) != count($toCreate)) {
+                $notCreated = array_diff($toCreate, $created);
+                foreach ($notCreated as $id) {
+                    $this->report('(' . $synchronizer->getId() . ') Problem with synchronisation of entity ' . $id, LogLevel::ERROR);
+                }
+            }
+
+            $this->report('(' . $synchronizer->getId() . ') ' . count($created) . ' entities created.', LogLevel::INFO);
+            $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $created);
         }
 
         if (!empty($entities['update'])) {
