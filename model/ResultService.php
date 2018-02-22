@@ -36,7 +36,7 @@ use Psr\Log\LogLevel;
  * Class SyncService
  * @package oat\taoSync\model
  */
-class ResultService extends ConfigurableService
+class ResultService extends ConfigurableService implements SyncResultServiceInterface
 {
     use OntologyAwareTrait;
 
@@ -134,7 +134,7 @@ class ResultService extends ConfigurableService
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    protected function sendResults($results)
+    public function sendResults($results)
     {
         $importAcknowledgment = $this->getSyncClient()->sendResults($results);
         if (empty($importAcknowledgment)) {
