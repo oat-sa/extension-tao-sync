@@ -22,7 +22,7 @@ namespace oat\taoSync\model\history;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
-use oat\search\QueryBuilder;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 /**
  * Class ResultSyncHistoryService
@@ -62,7 +62,7 @@ class ResultSyncHistoryService extends ConfigurableService
         $qb = $qbBuilder
             ->select(self::SYNC_RESULT_ID)
             ->from(self::SYNC_RESULT_TABLE)
-            ->where(self::SYNC_RESULT_ID . ' <> :id ')
+            ->where(self::SYNC_RESULT_ID . ' = :id ')
             ->andWhere(self::SYNC_RESULT_STATUS . ' = :status')
             ->setParameter('id', $id)
             ->setParameter('status', self::STATUS_SYNCHRONIZED)

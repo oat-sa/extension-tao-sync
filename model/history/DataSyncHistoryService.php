@@ -22,7 +22,7 @@ namespace oat\taoSync\model\history;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
-use oat\search\QueryBuilder;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 /**
  * Class SyncHistoryService

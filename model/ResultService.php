@@ -26,6 +26,7 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -445,16 +446,16 @@ class ResultService extends ConfigurableService
     {
         switch ($level) {
             case LogLevel::INFO:
-//                $this->logInfo($message);
+                $this->logInfo($message);
                 $reportLevel = \common_report_Report::TYPE_SUCCESS;
                 break;
             case LogLevel::ERROR:
-//                $this->logError($message);
+                $this->logError($message);
                 $reportLevel = \common_report_Report::TYPE_ERROR;
                 break;
             case LogLevel::DEBUG:
             default:
-//                $this->logDebug($message);
+                $this->logDebug($message);
                 $reportLevel = \common_report_Report::TYPE_INFO;
                 break;
         }
@@ -465,7 +466,7 @@ class ResultService extends ConfigurableService
      * Fetch the delivery result server from delivery
      *
      * @param $deliveryId
-     * @return mixed
+     * @return ResultManagement | \taoResultServer_models_classes_WritableResultStorage
      */
     protected function getResultStorage($deliveryId)
     {
