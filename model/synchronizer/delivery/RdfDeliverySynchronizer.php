@@ -69,6 +69,7 @@ class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements De
                 $this->getDeliverySyncService()->synchronizeDelivery($entity['id']);
                 $created[] = $entity['id'];
             } catch (\common_Exception $e) {
+                $this->logError($e->getMessage());
                 $errors[] = $entity['id'];
             }
         }

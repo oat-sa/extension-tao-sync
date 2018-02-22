@@ -23,14 +23,17 @@ namespace oat\taoSync\model\synchronizer\delivery;
 use oat\generis\model\fileReference\UrlFileSerializer;
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdf;
+use oat\generis\model\OntologyRdfs;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\File;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\import\ImportersService;
+use oat\tao\model\TaoOntology;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoDeliveryRdf\model\DeliveryFactory;
 use oat\taoQtiTest\models\import\QtiTestImporter;
+use oat\taoResultServer\models\classes\implementation\OntologyService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\SyncService;
 
@@ -66,7 +69,20 @@ class DeliverySynchronizerService extends ConfigurableService
 
         /** @var DeliveryFactory $deliveryFactory */
         $deliveryFactory = $this->getServiceLocator()->get(DeliveryFactory::SERVICE_ID);
-        return $deliveryFactory->create($deliveryClass, $test, $delivery->getLabel(), $delivery);
+        $report = $deliveryFactory->create($deliveryClass, $test, $delivery->getLabel(), $delivery);
+
+        $properties = [
+            OntologyRdf::RDF_TYPE,
+            OntologyRdfs::RDFS_LABEL,
+            OntologyService::PROPERTY_RESULT_SERVER
+        ];
+        foreach ($properties as $uri) {
+            $value = $delivery->getOnePropertyValue($this->getProperty($uri));
+            $delivery->removePropertyValues($this->getProperty($uri));
+            $delivery->setPropertyValue($this->getProperty($uri), $value);
+        }
+
+        return $report;
     }
 
     /**
@@ -143,7 +159,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 ->getDirectory('synchronisation')
                 ->getFile(\tao_helpers_Uri::getUniqueId($delivery->getUri()) . DIRECTORY_SEPARATOR . 'export.zip');
 
-            $file->write($source);
+            $file->put($source);
             fclose($source);
             @unlink($exportFile);
             @rmdir($exportDir);
