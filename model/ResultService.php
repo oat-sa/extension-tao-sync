@@ -26,6 +26,7 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -35,7 +36,7 @@ use Psr\Log\LogLevel;
  * Class SyncService
  * @package oat\taoSync\model
  */
-class ResultService extends ConfigurableService
+class ResultService extends ConfigurableService implements SyncResultServiceInterface
 {
     use OntologyAwareTrait;
 
@@ -133,7 +134,7 @@ class ResultService extends ConfigurableService
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    protected function sendResults($results)
+    public function sendResults($results)
     {
         $importAcknowledgment = $this->getSyncClient()->sendResults($results);
         if (empty($importAcknowledgment)) {
@@ -465,7 +466,7 @@ class ResultService extends ConfigurableService
      * Fetch the delivery result server from delivery
      *
      * @param $deliveryId
-     * @return mixed
+     * @return ResultManagement | \taoResultServer_models_classes_WritableResultStorage
      */
     protected function getResultStorage($deliveryId)
     {
