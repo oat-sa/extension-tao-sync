@@ -20,8 +20,15 @@
 
 namespace oat\taoSync\scripts\install;
 
+use oat\generis\model\OntologyRdf;
+use oat\generis\model\OntologyRdfs;
 use oat\oatbox\extension\InstallAction;
 use oat\tao\model\TaoOntology;
+use oat\taoDelivery\model\fields\DeliveryFieldsService;
+use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoDeliveryRdf\model\DeliveryContainerService;
+use oat\taoProctoring\model\ProctorService;
+use oat\taoResultServer\models\classes\implementation\OntologyService;
 use oat\taoSync\model\Entity;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\delivery\RdfDeliverySynchronizer;
@@ -84,16 +91,16 @@ class RegisterSyncService extends InstallAction
                 )),
                 DeliverySynchronizer::SYNC_DELIVERY => new RdfDeliverySynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_FIELDS => array(
-                        'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
-                        'http://www.w3.org/2000/01/rdf-schema#label',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#DeliveryResultServer',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#Maxexec ',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#DisplayOrder',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#AccessSettings',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#PeriodEnd',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#CustomLabel',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#ProctorAccessible',
-                        'http://www.tao.lu/Ontologies/TAODelivery.rdf#PeriodStart',
+                        OntologyRdf::RDF_TYPE,
+                        OntologyRdfs::RDFS_LABEL,
+                        OntologyService::PROPERTY_RESULT_SERVER,
+                        DeliveryContainerService::PROPERTY_MAX_EXEC,
+                        DeliveryAssemblyService::PROPERTY_DELIVERY_DISPLAY_ORDER_PROP,
+                        DeliveryContainerService::PROPERTY_ACCESS_SETTINGS,
+                        DeliveryAssemblyService::PROPERTY_END,
+                        DeliveryFieldsService::PROPERTY_CUSTOM_LABEL,
+                        ProctorService::ACCESSIBLE_PROCTOR,
+                        DeliveryAssemblyService::PROPERTY_START,
                     )
                 ))
             )

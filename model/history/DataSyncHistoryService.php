@@ -22,6 +22,7 @@ namespace oat\taoSync\model\history;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 /**
  * Class SyncHistoryService
@@ -131,19 +132,21 @@ class DataSyncHistoryService extends ConfigurableService
      */
     public function getNotUpdatedEntityIds($type)
     {
-        $query = 'SELECT ' . self::SYNC_ENTITY_ID .
-            ' FROM ' . self::SYNC_TABLE .
-            ' WHERE ' . self::SYNC_NUMBER . ' <> ? ' .
-            ' AND ' . self::SYNC_ENTITY_TYPE . ' = ?' .
-            ' AND ' . self::SYNC_ACTION . ' <> ?';
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $qb = $qbBuilder
+            ->select(self::SYNC_ENTITY_ID)
+            ->from(self::SYNC_TABLE)
+            ->where(self::SYNC_NUMBER . ' <> :sync_number ')
+            ->andWhere(self::SYNC_ENTITY_TYPE . ' = :type')
+            ->andWhere(self::SYNC_ACTION . ' <> :action')
+            ->setParameter('sync_number',  $this->getCurrentSynchroId())
+            ->setParameter('type', $type)
+            ->setParameter('action', self::ACTION_DELETED)
+        ;
 
         /** @var \PDOStatement $statement */
-        $statement = $this->getPersistence()->query($query, array(
-            $this->getCurrentSynchroId(),
-            $type,
-            self::ACTION_DELETED,
-        ));
-        $results = $statement->fetchAll(\PDO::FETCH_ASSOC);
+        $results = $qb->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
         $returnValue = [];
         foreach ($results as $result) {
@@ -215,7 +218,7 @@ class DataSyncHistoryService extends ConfigurableService
         try {
             return $this->getPersistence()->insertMultiple(self::SYNC_TABLE, $dataToSave);
         } catch (\Exception $e) {
-            \common_Logger::w($e->getMessage());
+            $this->logWarning($e->getMessage());
             return false;
         }
     }
@@ -252,7 +255,7 @@ class DataSyncHistoryService extends ConfigurableService
         try {
             return $this->getPersistence()->updateMultiple(self::SYNC_TABLE, $dataToSave);
         } catch (\Exception $e) {
-            \common_Logger::w($e->getMessage());
+            $this->logWarning($e->getMessage());
             return false;
         }
     }

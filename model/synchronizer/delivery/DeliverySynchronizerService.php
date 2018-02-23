@@ -23,14 +23,17 @@ namespace oat\taoSync\model\synchronizer\delivery;
 use oat\generis\model\fileReference\UrlFileSerializer;
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdf;
+use oat\generis\model\OntologyRdfs;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\File;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\import\ImportersService;
+use oat\tao\model\TaoOntology;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoDeliveryRdf\model\DeliveryFactory;
 use oat\taoQtiTest\models\import\QtiTestImporter;
+use oat\taoResultServer\models\classes\implementation\OntologyService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\SyncService;
 
@@ -55,21 +58,31 @@ class DeliverySynchronizerService extends ConfigurableService
      *
      * @param $id
      * @return \common_report_Report
+     * @throws \common_Exception
+     * @throws \core_kernel_persistence_Exception
      */
     public function synchronizeDelivery($id)
     {
-        try {
-            $delivery = $this->getResource($id);
-            $test = $this->importRemoteDeliveryTest($delivery);
-            $deliveryClass = $this->getClass($delivery->getOnePropertyValue($this->getProperty(OntologyRdf::RDF_TYPE)));
-        } catch (\common_Exception $e) {
-            $this->logError($e->getMessage());
-            return null;
-        }
+        $delivery = $this->getResource($id);
+        $test = $this->importRemoteDeliveryTest($delivery);
+        $deliveryClass = $this->getClass($delivery->getOnePropertyValue($this->getProperty(OntologyRdf::RDF_TYPE)));
 
         /** @var DeliveryFactory $deliveryFactory */
         $deliveryFactory = $this->getServiceLocator()->get(DeliveryFactory::SERVICE_ID);
-        return $deliveryFactory->create($deliveryClass, $test, $delivery->getLabel(), $delivery);
+        $report = $deliveryFactory->create($deliveryClass, $test, $delivery->getLabel(), $delivery);
+
+        $properties = [
+            OntologyRdf::RDF_TYPE,
+            OntologyRdfs::RDFS_LABEL,
+            OntologyService::PROPERTY_RESULT_SERVER
+        ];
+        foreach ($properties as $uri) {
+            $value = $delivery->getOnePropertyValue($this->getProperty($uri));
+            $delivery->removePropertyValues($this->getProperty($uri));
+            $delivery->setPropertyValue($this->getProperty($uri), $value);
+        }
+
+        return $report;
     }
 
     /**
@@ -137,7 +150,8 @@ class DeliverySynchronizerService extends ConfigurableService
                 ),
                 $exportDir
             );
-            $this->logDebug('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
+            $this->logInfo('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
+
             $source = fopen($report->getData(), 'r');
 
             /** @var File $file */
@@ -146,7 +160,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 ->getDirectory('synchronisation')
                 ->getFile(\tao_helpers_Uri::getUniqueId($delivery->getUri()) . DIRECTORY_SEPARATOR . 'export.zip');
 
-            $file->write($source);
+            $file->put($source);
             fclose($source);
             @unlink($exportFile);
             @rmdir($exportDir);
@@ -174,18 +188,22 @@ class DeliverySynchronizerService extends ConfigurableService
 
         try {
             $testPackageSerial = $delivery->getOnePropertyValue($this->getProperty(self::DELIVERY_TEST_PACKAGE_URI));
+            if (is_null($testPackageSerial)) {
+                throw new \common_Exception();
+            }
             $file = $this->getFileSerializer()->unserializeFile($testPackageSerial);
             if ($file->exists()) {
                 $file->delete();
             }
         } catch (\common_Exception $e) {
-            $this->logDebug('Problem to fetch test backup. Replace it by import.');
+            $this->logInfo('Problem to fetch test backup. Replace it by import.');
             $file = $this->getServiceLocator()
                 ->get(FileSystemService::SERVICE_ID)
                 ->getDirectory('synchronisation')
                 ->getFile(\tao_helpers_Uri::getUniqueId($delivery->getUri()) . DIRECTORY_SEPARATOR . 'export.zip');
         }
 
+        /** @var SynchronisationClient $client */
         $client = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
         $testPackage = $client->getRemoteDeliveryTest($delivery->getUri());
 

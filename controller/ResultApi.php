@@ -68,7 +68,7 @@ class ResultApi extends \tao_actions_RestController
      */
     protected function getSyncResultService()
     {
-        return $this->propagate(new ResultService());
+        return $this->getServiceLocator()->get(ResultService::SERVICE_ID);
     }
 
 }

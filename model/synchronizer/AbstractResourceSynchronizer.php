@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\model\synchronizer;
 
+use oat\generis\model\GenerisRdf;
 use oat\generis\model\kernel\persistence\smoothsql\search\ComplexSearchService;
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdf;
@@ -194,9 +195,11 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      * Insert multiple entities to Rdf storage
      *
      * @param array $entities
+     * @return array
      */
     public function insertMultiple(array $entities)
     {
+        $created = [];
         foreach ($entities as $entity) {
             $properties = isset($entity['properties']) ? $entity['properties'] : [];
             if (isset($properties[OntologyRdf::RDF_TYPE])) {
@@ -205,16 +208,14 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
                 $class = $this->getRootClass();
             }
 
-            $label = isset($properties[OntologyRdfs::RDFS_LABEL]) ? $properties[OntologyRdfs::RDFS_LABEL] : null;
-            $comment = isset($properties[OntologyRdfs::RDFS_COMMENT]) ? $properties[OntologyRdfs::RDFS_COMMENT] : null;
-
-            $resource = $class->createInstance($label, $comment, $entity['id']);
-            $triples = $resource->getRdfTriples();
-            foreach ($triples as $triple) {
-                $resource->removePropertyValues($this->getProperty($triple->predicate));
-            }
+            $resource = $this->getResource($entity['id']);
+            $resource->setType($class);
             $resource->setPropertiesValues($properties);
+
+            $created[] = $entity['id'];
         }
+
+        return $created;
     }
 
     /**
@@ -378,8 +379,8 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     protected function getExcludedClasses()
     {
         return [
-            'http://www.tao.lu/Ontologies/generis.rdf#generis_Ressource',
-            'http://www.w3.org/2000/01/rdf-schema#Resource',
+            GenerisRdf::CLASS_GENERIS_RESOURCE,
+            OntologyRdfs::RDFS_RESOURCE,
             $this->getRootClass()->getUri(),
         ];
     }

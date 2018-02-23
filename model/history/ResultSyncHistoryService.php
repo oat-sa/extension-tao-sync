@@ -22,6 +22,7 @@ namespace oat\taoSync\model\history;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+use Doctrine\DBAL\Query\QueryBuilder;
 
 /**
  * Class ResultSyncHistoryService
@@ -39,7 +40,7 @@ class ResultSyncHistoryService extends ConfigurableService
 
     const OPTION_PERSISTENCE = 'persistence';
 
-    const SYNC_RESULT_TABLE = 'synchronisationResult';
+    const SYNC_RESULT_TABLE = 'synchronisation_result';
 
     const SYNC_RESULT_ID = 'id';
     const SYNC_RESULT_STATUS = 'status';
@@ -56,21 +57,24 @@ class ResultSyncHistoryService extends ConfigurableService
      */
     public function isAlreadyExported($id)
     {
-        $query = 'SELECT ' . self::SYNC_RESULT_ID .
-            ' FROM ' . self::SYNC_RESULT_TABLE .
-            ' WHERE ' . self::SYNC_RESULT_ID . ' = ?' .
-            ' AND ' . self::SYNC_RESULT_STATUS . ' = ?';
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $qb = $qbBuilder
+            ->select(self::SYNC_RESULT_ID)
+            ->from(self::SYNC_RESULT_TABLE)
+            ->where(self::SYNC_RESULT_ID . ' = :id ')
+            ->andWhere(self::SYNC_RESULT_STATUS . ' = :status')
+            ->setParameter('id', $id)
+            ->setParameter('status', self::STATUS_SYNCHRONIZED)
+        ;
 
         /** @var \PDOStatement $statement */
-        $statement = $this->getPersistence()->query($query, array(
-            $id,
-            self::STATUS_SYNCHRONIZED,
-        ));
+        $statement = $qb->execute();
 
         try {
             return $statement->rowCount() > 0;
         } catch (\Exception $e) {
-            \common_Logger::w($e->getMessage());
+            $this->logWarning($e->getMessage());
             return false;
         }
     }
@@ -102,7 +106,7 @@ class ResultSyncHistoryService extends ConfigurableService
         try {
             return $this->getPersistence()->insertMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
         } catch (\Exception $e) {
-            \common_Logger::w($e->getMessage());
+            $this->logWarning($e->getMessage());
             return false;
         }
     }

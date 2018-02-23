@@ -93,8 +93,8 @@ abstract class UserSynchronizer extends AbstractResourceSynchronizer
     protected function getExcludedClasses()
     {
         $excludedClasses = [
-            'http://www.tao.lu/Ontologies/TAO.rdf#User',
-            'http://www.tao.lu/Ontologies/generis.rdf#User',
+            TaoOntology::CLASS_URI_TAO_USER,
+            GenerisRdf::CLASS_GENERIS_USER
         ];
         return array_merge(parent::getExcludedClasses(), $excludedClasses);
     }

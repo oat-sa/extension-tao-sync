@@ -88,8 +88,8 @@ class InstallSynchronisationHistory extends InstallAction
             }
 
         } catch(SchemaException $e) {
-            \common_Logger::i($e->getMessage());
-            \common_Logger::i('Database Schema already up to date.');
+            $this->logDebug($e->getMessage());
+            $this->logDebug('Database Schema already up to date.');
         }
 
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronisation storage successfully created');
