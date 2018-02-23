@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\controller;
 
+use oat\taoOauth\model\OauthController;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
@@ -30,7 +31,7 @@ use oat\taoSync\model\SyncService;
  *
  * @package oat\taoSync\controller
  */
-class SynchronisationApi extends \tao_actions_RestController
+class SynchronisationApi extends OauthController
 {
     const PARAM_TYPE = 'type';
     const PARAM_PARAMETERS = 'params';

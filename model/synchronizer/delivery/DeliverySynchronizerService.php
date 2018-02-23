@@ -63,6 +63,7 @@ class DeliverySynchronizerService extends ConfigurableService
             $test = $this->importRemoteDeliveryTest($delivery);
             $deliveryClass = $this->getClass($delivery->getOnePropertyValue($this->getProperty(OntologyRdf::RDF_TYPE)));
         } catch (\common_Exception $e) {
+            $this->logError($e->getMessage());
             return null;
         }
 
@@ -136,7 +137,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 ),
                 $exportDir
             );
-            \common_Logger::d('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
+            $this->logDebug('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
             $source = fopen($report->getData(), 'r');
 
             /** @var File $file */
@@ -178,7 +179,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 $file->delete();
             }
         } catch (\common_Exception $e) {
-            \common_Logger::d('Problem to fetch test backup. Replace it by import.');
+            $this->logDebug('Problem to fetch test backup. Replace it by import.');
             $file = $this->getServiceLocator()
                 ->get(FileSystemService::SERVICE_ID)
                 ->getDirectory('synchronisation')
