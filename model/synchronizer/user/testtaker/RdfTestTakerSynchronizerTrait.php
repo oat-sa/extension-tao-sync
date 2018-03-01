@@ -18,11 +18,40 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\user\proctor;
+namespace oat\taoSync\model\synchronizer\user\testtaker;
 
-use oat\taoSync\model\synchronizer\user\UserSynchronizer;
+use oat\tao\model\TaoOntology;
+use oat\tao\model\user\TaoRoles;
 
-class RdfProctorSynchronizer extends UserSynchronizer implements ProctorSynchronizer
+trait RdfTestTakerSynchronizerTrait
 {
-    use RdfProctorSynchronizerTrait;
+    /**
+     * Get the synchronizer identifier
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return TestTakerSynchronizer::SYNC_ID;
+    }
+
+    /**
+     * Get the root class of entity to synchronize
+     *
+     * @return \core_kernel_classes_Class
+     */
+    protected function getRootClass()
+    {
+        return $this->getClass(TaoOntology::CLASS_URI_SUBJECT);
+    }
+
+    /**
+     * Get the role defining what a test taker is
+     *
+     * @return string
+     */
+    protected function getUserRole()
+    {
+        return TaoRoles::DELIVERY;
+    }
 }

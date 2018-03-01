@@ -20,9 +20,27 @@
 
 namespace oat\taoSync\model\synchronizer\user\proctor;
 
-use oat\taoSync\model\synchronizer\user\UserSynchronizer;
+use oat\taoProctoring\model\ProctorService;
 
-class RdfProctorSynchronizer extends UserSynchronizer implements ProctorSynchronizer
+trait RdfProctorSynchronizerTrait
 {
-    use RdfProctorSynchronizerTrait;
+    /**
+     * Get the synchronizer identifier
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return ProctorSynchronizer::SYNC_PROCTOR;
+    }
+
+    /**
+     * Get the role defining what a proctor is
+     *
+     * @return string
+     */
+    public function getUserRole()
+    {
+        return ProctorService::ROLE_PROCTOR;
+    }
 }
