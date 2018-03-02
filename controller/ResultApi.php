@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\controller;
 
+use oat\taoOauth\model\OauthController;
 use oat\taoSync\model\ResultService;
 
 /**
@@ -27,7 +28,7 @@ use oat\taoSync\model\ResultService;
  *
  * @package oat\taoSync\controller
  */
-class ResultApi extends \tao_actions_RestController
+class ResultApi extends \tao_actions_RestController implements OauthController
 {
     const PARAM_RESULTS = 'results';
 
