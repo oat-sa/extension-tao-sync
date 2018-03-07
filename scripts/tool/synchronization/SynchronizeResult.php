@@ -18,33 +18,42 @@
  *
  */
 
-namespace oat\taoSync\scripts\tool;
+namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\extension\AbstractAction;
-use oat\taoSync\model\SyncService;
+use oat\taoSync\model\ResultService;
 
-class SynchronizeData extends AbstractAction
+/**
+ * Class SynchronizeResult
+ *
+ * Action to launch results synchronisation
+ *
+ * @package oat\taoSync\scripts\tool
+ */
+class SynchronizeResult extends AbstractAction
 {
+    /**
+     * Launch the synchronisation result
+     *
+     * @param $params
+     * @return \common_report_Report
+     * @throws \common_Exception
+     * @throws \common_exception_Error
+     * @throws \common_exception_NoImplementation
+     * @throws \common_exception_NotFound
+     * @throws \common_exception_NotImplemented
+     */
     public function __invoke($params)
     {
-        $type = null;
-        foreach ($params as $param) {
-            list($option, $value) = explode('=', $param);
-            switch ($option) {
-                case '--type':
-                    $type = $value;
-                    break;
-            }
-        }
-
-        return $this->getSyncService()->synchronize($type);
+        return $this->getSyncResultService()->synchronizeResults();
     }
 
     /**
-     * @return SyncService
+     * @return ResultService
      */
-    protected function getSyncService()
+    protected function getSyncResultService()
     {
-        return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
+        return $this->getServiceLocator()->get(ResultService::SERVICE_ID);
     }
+
 }

@@ -18,42 +18,22 @@
  *
  */
 
-namespace oat\taoSync\scripts\tool;
+namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\extension\AbstractAction;
-use oat\taoSync\model\ResultService;
 
-/**
- * Class SynchronizeResult
- *
- * Action to launch results synchronisation
- *
- * @package oat\taoSync\scripts\tool
- */
-class SynchronizeResult extends AbstractAction
+class SynchronizeAll extends AbstractAction
 {
-    /**
-     * Launch the synchronisation result
-     *
-     * @param $params
-     * @return \common_report_Report
-     * @throws \common_Exception
-     * @throws \common_exception_Error
-     * @throws \common_exception_NoImplementation
-     * @throws \common_exception_NotFound
-     * @throws \common_exception_NotImplemented
-     */
     public function __invoke($params)
     {
-        return $this->getSyncResultService()->synchronizeResults();
-    }
-
-    /**
-     * @return ResultService
-     */
-    protected function getSyncResultService()
-    {
-        return $this->getServiceLocator()->get(ResultService::SERVICE_ID);
+        $report = \common_report_Report::createInfo('Synchronizing data');
+        try {
+            $report->add(call_user_func($this->propagate(new SynchronizeData()), []));
+            $report->add(call_user_func($this->propagate(new SynchronizeResult()), []));
+        } catch (\Exception $e) {
+            $report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
+        }
+        return $report;
     }
 
 }
