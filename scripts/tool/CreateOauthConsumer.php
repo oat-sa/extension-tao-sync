@@ -59,15 +59,6 @@ class CreateOauthConsumer extends ImportConsumer
         ));
     }
 
-    protected function provideUsage()
-    {
-        return [
-            'prefix' => 'h',
-            'longPrefix' => 'help',
-            'description' => 'description',
-        ];
-    }
-
     protected function provideOptions()
     {
         $options = array_merge(parent::provideOptions(),
