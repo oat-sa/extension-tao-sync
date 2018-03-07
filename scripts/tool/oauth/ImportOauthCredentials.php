@@ -78,7 +78,7 @@ class ImportOauthCredentials extends ImportConsumer
         return PlatformService::singleton()->getRootClass()->createInstanceWithProperties(array(
             OntologyRdfs::RDFS_LABEL => 'Synchronization client',
             PlatformService::PROPERTY_AUTH_TYPE => (new OAuth2Type())->getAuthClass()->getUri(),
-            PublishingService::PUBLISH_ACTIONS => 'oat\\\\taoSync\\\\scripts\\\\tool\\\\SynchronizeData',
+            PublishingService::PUBLISH_ACTIONS => 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData',
             PlatformService::PROPERTY_ROOT_URL => $rootUrl,
             ConsumerStorage::CONSUMER_CLIENT_KEY => $key,
             ConsumerStorage::CONSUMER_CLIENT_SECRET => $secret,
@@ -86,6 +86,25 @@ class ImportOauthCredentials extends ImportConsumer
             ConsumerStorage::CONSUMER_TOKEN_TYPE => OAuthClient::DEFAULT_TOKEN_TYPE,
             ConsumerStorage::CONSUMER_TOKEN_GRANT_TYPE => OAuthClient::DEFAULT_GRANT_TYPE,
         ));
+    }
+
+    /**
+     * Add required args to set the endpoint root url
+     *
+     * @return array
+     */
+    protected function provideOptions()
+    {
+        return array_merge(parent::provideOptions(),
+            array(
+                'rootUrl' => [
+                    'prefix' => 'u',
+                    'longPrefix' => 'root-url',
+                    'required' => true,
+                    'description' => 'The endpoint of the synchronisation data with oauth consumer',
+                ],
+            )
+        );
     }
 
 }

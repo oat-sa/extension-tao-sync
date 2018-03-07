@@ -19,7 +19,7 @@
 
 namespace oat\taoSync\controller;
 
-use oat\taoSync\scripts\tool\SynchronizeAll;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
 use oat\taoTaskQueue\model\TaskLogActionTrait;
