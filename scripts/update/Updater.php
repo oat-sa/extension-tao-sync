@@ -34,7 +34,7 @@ use oat\taoSync\model\ResultService;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\synchronizer\delivery\RdfDeliverySynchronizer;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
-use oat\taoSync\scripts\tool\SynchronizeData;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\tao\model\TaoOntology;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;

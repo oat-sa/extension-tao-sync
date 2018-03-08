@@ -30,9 +30,9 @@ return array(
         'taoPublishing' => '>=0.5.1',
         'taoTestCenter' => '>=3.7.0',
     ),
-    'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
+    'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole',
     'acl' => array(
-        array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', array('ext'=>'taoSync')),
+        array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole', array('ext'=>'taoSync')),
     ),
     'install' => array(
         'rdf' => [

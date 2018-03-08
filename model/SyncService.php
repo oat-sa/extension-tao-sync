@@ -74,12 +74,16 @@ class SyncService extends ConfigurableService
         $syncId = $this->getSyncHistoryService()->createSynchronisation();
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
-        if (is_null($type)) {
-            foreach($this->getAllTypes() as $type) {
+        try {
+            if (is_null($type)) {
+                foreach ($this->getAllTypes() as $type) {
+                    $this->synchronizeType($type, $params);
+                }
+            } else {
                 $this->synchronizeType($type, $params);
             }
-        } else {
-            $this->synchronizeType($type, $params);
+        } catch (\Exception $e) {
+            $this->report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
 
         return $this->report;
