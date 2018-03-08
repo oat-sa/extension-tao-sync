@@ -42,7 +42,7 @@ class ResultApi extends \tao_actions_RestController implements OauthController
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_POST) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
 
             $parameters = file_get_contents('php://input');

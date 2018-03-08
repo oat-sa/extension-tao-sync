@@ -53,7 +53,7 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
             }
 
             if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
@@ -81,7 +81,7 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
             }
 
             if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
@@ -114,7 +114,7 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
             }
 
             if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
@@ -150,7 +150,7 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
         try {
             // Check if it's post method
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted for ' . __METHOD__ . '.');
+                throw new \BadMethodCallException('Only GET method is accepted for ' . __METHOD__ . '.');
             }
 
             if (!$this->hasRequestParameter(self::PARAM_DELIVERY_URI)) {

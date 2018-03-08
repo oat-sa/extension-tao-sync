@@ -22,6 +22,7 @@ namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdfs;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
@@ -103,6 +104,12 @@ class SyncService extends ConfigurableService
      */
     public function fetch($type, $params)
     {
+        $this->getServiceLocator()
+            ->get(EventManager::SERVICE_ID)
+            ->trigger(
+                new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
+            );
+
         $response = [
             'type' => $type
         ];
