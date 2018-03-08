@@ -19,6 +19,7 @@
  */
 
 namespace oat\taoSync\scripts\update;
+
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoOauth\model\user\UserService;
 use oat\taoPublishing\model\publishing\PublishingService;
