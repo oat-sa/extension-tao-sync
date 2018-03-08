@@ -27,7 +27,6 @@ use oat\taoOauth\model\storage\ConsumerStorage;
 use oat\taoOauth\scripts\tools\ImportConsumer;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\SyncService;
 
 class ImportOauthCredentials extends ImportConsumer
 {
@@ -40,27 +39,16 @@ class ImportOauthCredentials extends ImportConsumer
      *
      * @return \common_report_Report
      * @throws \common_exception_Error
-     * @throws \core_kernel_users_Exception
      */
     protected function run()
     {
         $report = \common_report_Report::createInfo('Registering synchronisation consumer...');
+
         $report->add(parent::run());
-        $this->addUserRoles($this->createdConsumer);
         $this->createOauthEndpoint();
         $report->add(\common_report_Report::createSuccess('Endpoint successfully added.'));
-        return $report;
-    }
 
-    /**
-     * Attach taoSync role to consumer
-     *
-     * @param \core_kernel_classes_Resource $consumer
-     * @throws \core_kernel_users_Exception
-     */
-    protected function addUserRoles(\core_kernel_classes_Resource $consumer)
-    {
-        \core_kernel_users_Service::singleton()->attachRole($consumer, $this->getResource(SyncService::TAO_SYNC_ROLE));
+        return $report;
     }
 
     /**
@@ -106,5 +94,6 @@ class ImportOauthCredentials extends ImportConsumer
             )
         );
     }
+
 
 }

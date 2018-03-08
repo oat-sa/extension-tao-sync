@@ -20,8 +20,8 @@
 
 namespace oat\taoSync\scripts\tool\oauth;
 
+use oat\taoOauth\model\user\UserService;
 use oat\taoOauth\scripts\tools\GenerateCredentials;
-use oat\taoSync\model\SyncService;
 
 class GenerateOauthCredentials extends GenerateCredentials
 {
@@ -29,23 +29,19 @@ class GenerateOauthCredentials extends GenerateCredentials
      * Generate an oauth consumer and add to it taoSync role
      *
      * @return \common_report_Report
-     * @throws \core_kernel_users_Exception
      */
     protected function run()
     {
         $report = parent::__invoke([]);
-        $this->addUserRoles($this->createdConsumer);
+        $this->getUserService()->createOauthUser($this->createdConsumer);
         return $report;
     }
 
     /**
-     * Attach taoSync role to consumer
-     *
-     * @param \core_kernel_classes_Resource $consumer
-     * @throws \core_kernel_users_Exception
+     * @return UserService
      */
-    protected function addUserRoles(\core_kernel_classes_Resource $consumer)
+    protected function getUserService()
     {
-        \core_kernel_users_Service::singleton()->attachRole($consumer, $this->getResource(SyncService::TAO_SYNC_ROLE));
+        return $this->getServiceLocator()->get(UserService::SERVICE_ID);
     }
 }
