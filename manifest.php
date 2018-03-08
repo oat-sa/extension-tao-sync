@@ -26,12 +26,12 @@ return array(
     'version' => '0.1.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'tao' => '>=14.16.0'
+        'tao' => '>=14.16.0',
+        'taoTaskQueue' => '>=0.14.3',
     ),
-    'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole',
+    'managementRole' => 'http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManagerRole',
     'acl' => [
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole', ['ext'=>'taoSync']],
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole', ['ext'=>'taoTaskQueue']]
+        ['grant', 'http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManagerRole', ['ext'=>'taoSync']],
     ],
     'install' => [
         'rdf' => [
