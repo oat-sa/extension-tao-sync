@@ -22,6 +22,7 @@ namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdfs;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
@@ -74,12 +75,16 @@ class SyncService extends ConfigurableService
         $syncId = $this->getSyncHistoryService()->createSynchronisation();
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
-        if (is_null($type)) {
-            foreach($this->getAllTypes() as $type) {
+        try {
+            if (is_null($type)) {
+                foreach ($this->getAllTypes() as $type) {
+                    $this->synchronizeType($type, $params);
+                }
+            } else {
                 $this->synchronizeType($type, $params);
             }
-        } else {
-            $this->synchronizeType($type, $params);
+        } catch (\Exception $e) {
+            $this->report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
 
         return $this->report;
@@ -99,6 +104,10 @@ class SyncService extends ConfigurableService
      */
     public function fetch($type, $params)
     {
+        $this->getEventManager()->trigger(
+            new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
+        );
+
         $response = [
             'type' => $type
         ];
@@ -423,6 +432,14 @@ class SyncService extends ConfigurableService
     protected function getSyncHistoryService()
     {
         return $this->getServiceLocator()->get(DataSyncHistoryService::SERVICE_ID);
+    }
+
+    /**
+     * @return EventManager
+     */
+    protected function getEventManager()
+    {
+        return $this->getServiceLocator()->get(EventManager::SERVICE_ID);
     }
 
     /**
