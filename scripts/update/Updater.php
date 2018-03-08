@@ -19,35 +19,10 @@
  */
 
 namespace oat\taoSync\scripts\update;
-
-use oat\generis\model\data\event\ResourceCreated;
-use oat\oatbox\event\EventManager;
-use oat\oatbox\filesystem\FileSystemService;
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
-use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
+use oat\taoOauth\model\user\UserService;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\client\SynchronisationClient;
-use oat\taoSync\model\Entity;
-use oat\taoSync\model\listener\ListenerService;
-use oat\taoSync\model\ResultService;
-use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
-use oat\taoSync\model\synchronizer\delivery\RdfDeliverySynchronizer;
-use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
+use oat\taoSync\model\oauth\OauthUserService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
-use oat\tao\model\TaoOntology;
-use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
-use oat\taoSync\model\synchronizer\eligibility\EligibilitySynchronizer;
-use oat\taoSync\model\synchronizer\eligibility\RdfEligibilitySynchronizer;
-use oat\taoSync\model\synchronizer\testcenter\RdfTestCenterSynchronizer;
-use oat\taoSync\model\synchronizer\user\administrator\RdfAdministratorSynchronizer;
-use oat\taoSync\model\synchronizer\user\proctor\RdfProctorSynchronizer;
-use oat\taoSync\model\synchronizer\user\testtaker\RdfTestTakerSynchronizer;
-use oat\taoSync\model\synchronizer\user\testtaker\TestTakerSynchronizer;
-use oat\taoSync\model\synchronizer\user\administrator\AdministratorSynchronizer;
-use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
-use oat\taoSync\model\synchronizer\testcenter\TestCenterSynchronizer;
-use oat\taoSync\model\SyncService;
 
 /**
  * Class Updater
@@ -64,5 +39,17 @@ class Updater extends \common_ext_ExtensionUpdater
     public function update($initialVersion)
     {
         $this->setVersion('0.1.0');
+
+        if ($this->isVersion('0.1.0')) {
+            $this->getServiceManager()->register(UserService::SERVICE_ID, new OauthUserService());
+            $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);
+            $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
+            if (!in_array(SynchronizeData::class, $actions)) {
+                $actions[] = SynchronizeData::class;
+                $service->setOption(PublishingService::OPTIONS_ACTIONS, $actions);
+                $this->getServiceManager()->register(PublishingService::SERVICE_ID, $service);
+            }
+            $this->setVersion('0.2.0');
+        }
     }
 }
