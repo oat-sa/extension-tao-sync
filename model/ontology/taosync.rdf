@@ -9,8 +9,7 @@
           	<rdf:type rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#ManagementRole"/>
           	<rdfs:label xml:lang="en-US"><![CDATA[Sync Manager Role]]></rdfs:label>
             <rdfs:comment xml:lang="en-US"><![CDATA[The Sync Manager Role]]></rdfs:comment>
-          	<generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#BackOfficeRole"/>
-          	<generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/generis.rdf#taoTaskQueueManager"/>
+          	<generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/generis.rdf#GenerisRole"/>
         </rdf:Description>
 
         <rdf:Description rdf:about="http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManager">
@@ -18,6 +17,8 @@
             <rdfs:label xml:lang="en-US"><![CDATA[Sync Manager]]></rdfs:label>
             <rdfs:comment xml:lang="en-US"><![CDATA[The Sync Manager Role]]></rdfs:comment>
             <generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManagerRole"/>
+            <generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#BackOfficeRole"/>
+            <generis:includesRole rdf:resource="http://www.tao.lu/Ontologies/generis.rdf#taoTaskQueueManager"/>
         </rdf:Description>
 
 </rdf:RDF>
