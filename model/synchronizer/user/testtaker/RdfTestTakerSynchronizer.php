@@ -22,7 +22,7 @@ namespace oat\taoSync\model\synchronizer\user\testtaker;
 
 use oat\taoSync\model\synchronizer\user\UserSynchronizer;
 
-class RdfTestTakerSynchronizer extends UserSynchronizer
+class RdfTestTakerSynchronizer extends UserSynchronizer implements TestTakerSynchronizer
 {
     use RdfTestTakerSynchronizerTrait;
 }
