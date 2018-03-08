@@ -1,13 +1,25 @@
-extension-tao-sync
-========================
+# Tao Sync extension
 
 The purpose of this extension is to synchronize a local server against a remote.
-All data in test centers can be syncrhonized.
+All data and results can be synchronized.
 
-This is a two step process.
+To take care about data security all http request required by synchronisation are signed following oauth2 standart.
+All data are encrypted.
 
-1°) Data synchronisation
--
+
+## Installation
+
+You can add the Tao Sync as a standard TAO extension to your current TAO instance.
+
+```bash
+ $ composer require oat-sa/extension-tao-sync
+```
+
+## Synchronization
+
+#### 1. Data synchronisation
+
+
 To prepare delivery execution, synchronization require to fetch several object $TYPE from data server:
 * test-center
 * administrator
@@ -18,12 +30,14 @@ To prepare delivery execution, synchronization require to fetch several object $
 
 To configure the amount of data by request, use `chunkSize` parameter in `taoSync/syncService` config
 
-`php index.php '\oat\taoSync\scripts\tool\SynchronizeData' [--type=$TYPE]`
+```bash
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeData' [--type=$TYPE]
+```
 
-NB: The delivery has an exported package sent to server to be synchronized to be compiled
+_Note_: 
+> The delivery has an exported package sent to server to be synchronized to be compiled
 
-2°) Data synchronisation
--
+### 2. Result synchronisation
 
 Once client server has delivery execution result, a script synchronize (send) result to central server.
 Only finished delivery execution are sent.
@@ -34,5 +48,44 @@ When a delivery execution is send, sync history will be updated to log the actio
 To configure the amount of data by request, use `chunkSize` parameter in `taoSync/resultService` config
 
 
-`php index.php '\oat\taoSync\scripts\tool\SynchronizeResult'`
+```bash
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeResult'
+```
+
+### 3. Synchronize All
+
+To synchronize data and results in the same time:
+
+```bash
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeAll'
+```
+
+## Oauth credentials
+
+### 1. Generate credentials to allow user to connect to platform
+
+This command create a consumer with oauth credential and associate an user to authenticate connection
+
+```bash
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\oauth\GenerateOauthCredentials'
+```
+
+The output will contain:
+- key
+- secret
+- tokenUrl
+
+_Note_: 
+> Add `-cmd` flag to this command to have the command to run on client server
+
+### 2. Import Oauth credentials to client server
+
+To import the previously created consumer, connect to client server and enter the following command:
+
+```bash
+ $ sudo -u www-data php index.php 'oat\taoSync\scripts\tool\oauth\ImportOauthCredentials' -k $key -s $secret -tu $tokenUrl -u $rootUrl
+```
+
+Arguments come from created consumer. The $rootUrl is the domain name of host server
+
 

@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\install;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\scripts\tool\SynchronizeData;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 
 /**
  * Class RegisterSyncPublishingAction
