@@ -30,10 +30,20 @@ class GenerateOauthCredentials extends GenerateCredentials
      *
      * @return \common_report_Report
      */
-    protected function run()
+    public function __invoke($params)
     {
         $report = parent::__invoke([]);
-        $this->getUserService()->createConsumerUser($this->createdConsumer);
+
+        if (in_array('-cmd', $params)) {
+            return \common_report_Report::createInfo(
+                'php index.php \'' . ImportOauthCredentials::class . '\'' .
+                ' -k ' . $this->key .
+                ' -s ' . $this->secret .
+                ' -tu ' . $this->tokenUrl .
+                ' -u ' . ROOT_URL
+            );
+        }
+
         return $report;
     }
 
