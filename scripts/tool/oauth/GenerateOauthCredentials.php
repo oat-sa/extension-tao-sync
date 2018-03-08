@@ -33,7 +33,7 @@ class GenerateOauthCredentials extends GenerateCredentials
     protected function run()
     {
         $report = parent::__invoke([]);
-        $this->getUserService()->createOauthUser($this->createdConsumer);
+        $this->getUserService()->createConsumerUser($this->createdConsumer);
         return $report;
     }
 
