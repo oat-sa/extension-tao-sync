@@ -18,34 +18,31 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer\user\proctor;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoProctoring\model\ProctorService;
+use oat\taoSync\model\synchronizer\user\UserSynchronizer;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+class RdfProctorSynchronizer extends UserSynchronizer implements ProctorSynchronizer
 {
     /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
+     * Get the synchronizer identifier
+     *
+     * @return string
      */
-    public function update($initialVersion)
+    public function getId()
     {
-        $this->skip('0.0.1','0.1.0');
-
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
+        return self::SYNC_PROCTOR;
     }
+
+    /**
+     * Get the role defining what a proctor is
+     *
+     * @return string
+     */
+    public function getUserRole()
+    {
+        return ProctorService::ROLE_PROCTOR;
+    }
+
 }

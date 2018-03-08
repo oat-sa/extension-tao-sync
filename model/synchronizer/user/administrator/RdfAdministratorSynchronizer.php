@@ -18,34 +18,30 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer\user\administrator;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoSync\model\synchronizer\user\UserSynchronizer;
+use oat\taoTestCenter\model\TestCenterService;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+class RdfAdministratorSynchronizer extends UserSynchronizer implements AdministratorSynchronizer
 {
     /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
+     * Get the synchronizer identifier
+     *
+     * @return string
      */
-    public function update($initialVersion)
+    public function getId()
     {
-        $this->skip('0.0.1','0.1.0');
+        return self::SYNC_ADMINISTRATOR;
+    }
 
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
+    /**
+     * Get the role defining what an administrator is
+     *
+     * @return string
+     */
+    public function getUserRole()
+    {
+        return TestCenterService::ROLE_TESTCENTER_ADMINISTRATOR;
     }
 }

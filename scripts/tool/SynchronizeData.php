@@ -18,34 +18,33 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\scripts\tool;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\oatbox\extension\AbstractAction;
+use oat\taoSync\model\SyncService;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+class SynchronizeData extends AbstractAction
 {
-    /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
-     */
-    public function update($initialVersion)
+    public function __invoke($params)
     {
-        $this->skip('0.0.1','0.1.0');
-
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
+        $type = null;
+        foreach ($params as $param) {
+            list($option, $value) = explode('=', $param);
+            switch ($option) {
+                case '--type':
+                    $type = $value;
+                    break;
+            }
         }
+
+        return $this->getSyncService()->synchronize($type);
+    }
+
+    /**
+     * @return SyncService
+     */
+    protected function getSyncService()
+    {
+        return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
     }
 }

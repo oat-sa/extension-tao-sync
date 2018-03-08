@@ -18,34 +18,30 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer\testcenter;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoTestCenter\model\TestCenterService;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+class RdfTestCenterSynchronizer extends AbstractResourceSynchronizer implements TestCenterSynchronizer
 {
     /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
+     * Get the synchronizer identifier
+     *
+     * @return string
      */
-    public function update($initialVersion)
+    public function getId()
     {
-        $this->skip('0.0.1','0.1.0');
+        return self::SYNC_ID;
+    }
 
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
+    /**
+     * Get the root class of entity to synchronize
+     *
+     * @return \core_kernel_classes_Class
+     */
+    protected function getRootClass()
+    {
+        return $this->getClass(TestCenterService::CLASS_URI);
     }
 }

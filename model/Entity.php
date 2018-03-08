@@ -18,34 +18,17 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
-
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+namespace oat\taoSync\model;
 
 /**
- * Class Updater
+ * Class Entity
  *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
+ * Representation of an entity
+ *
+ * @todo
+ * @package oat\taoSync\model
  */
-class Updater extends \common_ext_ExtensionUpdater
+class Entity
 {
-    /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
-     */
-    public function update($initialVersion)
-    {
-        $this->skip('0.0.1','0.1.0');
-
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
-    }
+    const CREATED_AT = 'http://www.taotesting.com/Ontologies/TAO.rdf#CreatedAt';
 }

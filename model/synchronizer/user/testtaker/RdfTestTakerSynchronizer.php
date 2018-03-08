@@ -18,34 +18,41 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer\user\testtaker;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\tao\model\TaoOntology;
+use oat\tao\model\user\TaoRoles;
+use oat\taoSync\model\synchronizer\user\UserSynchronizer;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+class RdfTestTakerSynchronizer extends UserSynchronizer implements TestTakerSynchronizer
 {
     /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
+     * Get the synchronizer identifier
+     *
+     * @return string
      */
-    public function update($initialVersion)
+    public function getId()
     {
-        $this->skip('0.0.1','0.1.0');
+        return self::SYNC_ID;
+    }
 
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
+    /**
+     * Get the root class of entity to synchronize
+     *
+     * @return \core_kernel_classes_Class
+     */
+    protected function getRootClass()
+    {
+        return $this->getClass(TaoOntology::CLASS_URI_SUBJECT);
+    }
 
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
+    /**
+     * Get the role defining what a test taker is
+     *
+     * @return string
+     */
+    protected function getUserRole()
+    {
+        return TaoRoles::DELIVERY;
     }
 }

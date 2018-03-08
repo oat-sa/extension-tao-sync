@@ -14,7 +14,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2017 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
 
@@ -23,10 +23,12 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.1.0',
+    'version' => '0.2.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=14.16.0',
+        'taoPublishing' => '>=0.5.1',
+        'taoTestCenter' => '>=3.7.0',
         'taoTaskQueue' => '>=0.14.3',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManagerRole',
@@ -35,9 +37,15 @@ return array(
     ],
     'install' => [
         'rdf' => [
-            dirname(__FILE__). '/model/ontology/taosync.rdf'
+            dirname(__FILE__) . '/model/ontology/synchronisation.rdf',
+            dirname(__FILE__). '/model/ontology/taosync.rdf',
         ],
         'php' => [
+            \oat\taoSync\scripts\install\RegisterSyncService::class,
+            \oat\taoSync\scripts\install\RegisterSyncPublishingAction::class,
+            \oat\taoSync\scripts\install\AttachEvents::class,
+            \oat\taoSync\scripts\install\RegisterSyncFilesystem::class,
+            \oat\taoSync\scripts\install\InstallSynchronisationHistory::class,
         ]
     ],
     'uninstall' => array(

@@ -18,34 +18,11 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer\testcenter;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoSync\model\synchronizer\Synchronizer;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+interface TestCenterSynchronizer extends Synchronizer
 {
-    /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
-     */
-    public function update($initialVersion)
-    {
-        $this->skip('0.0.1','0.1.0');
-
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
-    }
+    const SYNC_ID = 'test-center';
 }

@@ -18,34 +18,18 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\model\synchronizer;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
 
-/**
- * Class Updater
- *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
- */
-class Updater extends \common_ext_ExtensionUpdater
+interface RdfClassSynchronizer
 {
     /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
+     * Get the requested class triples with associated tree
+     *
+     * Fetch the class itself and all parents to the root class
+     *
+     * @param $requestedClasses
+     * @return array
      */
-    public function update($initialVersion)
-    {
-        $this->skip('0.0.1','0.1.0');
-
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
-    }
+    public function fetchMissingClasses($requestedClasses);
 }

@@ -18,34 +18,27 @@
  *
  */
 
-namespace oat\taoSync\scripts\update;
+namespace oat\taoSync\scripts\install;
 
-use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoSync\model\ui\FormFieldsService;
+use oat\oatbox\extension\InstallAction;
+use oat\oatbox\filesystem\FileSystemService;
 
 /**
- * Class Updater
+ * Class RegisterSynchronisationFilesystem
  *
- * @author Moyon Camille <camille@taotesting.com>
- * @author Dieter Raber <dieter@taotesting.com>
+ * Register the filesystem used to store test package created at delivery creation
+ *
+ * @package oat\taoSync\scripts\install
  */
-class Updater extends \common_ext_ExtensionUpdater
+class RegisterSyncFilesystem extends InstallAction
 {
-    /**
-     * @param $initialVersion
-     * @return string|void
-     * @throws \Exception
-     */
-    public function update($initialVersion)
+    public function __invoke($params)
     {
-        $this->skip('0.0.1','0.1.0');
-
-        if ($this->isVersion('0.1.0')) {
-            $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
-
-            // include the Sync master role
-            OntologyUpdater::syncModels();
-            $this->setVersion('0.2.0');
-        }
+        /** @var FileSystemService $fileSystemService */
+        $fileSystemService = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
+        $fileSystemService->createFileSystem('synchronisation');
+        $this->registerService(FileSystemService::SERVICE_ID, $fileSystemService);
+        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronization filesystem was registered.');
     }
+
 }
