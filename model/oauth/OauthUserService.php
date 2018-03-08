@@ -35,7 +35,7 @@ class OauthUserService extends UserService
      */
     public function createConsumerUser(\core_kernel_classes_Resource $consumer)
     {
-        $consumer = parent::createOauthUser($consumer);
+        $consumer = parent::createConsumerUser($consumer);
         $consumer->setPropertyValue($this->getProperty(GenerisRdf::PROPERTY_USER_ROLES), self::TAO_SYNC_ROLE);
         return $consumer;
     }
