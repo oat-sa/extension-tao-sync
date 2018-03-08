@@ -18,15 +18,17 @@
  *
  */
 
-namespace oat\taoSync\model;
+namespace oat\taoSync\model\event;
 
 use oat\oatbox\event\Event;
 
 class SynchronisationStart implements Event
 {
+    protected $synchronisation;
+
     public function __construct(\core_kernel_classes_Resource $synchronisation)
     {
-
+        $this->synchronisation = $synchronisation;
     }
 
     public function getName()

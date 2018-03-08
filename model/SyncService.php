@@ -26,6 +26,7 @@ use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SynchronisationStart;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
@@ -75,6 +76,10 @@ class SyncService extends ConfigurableService
         $syncId = $this->getSyncHistoryService()->createSynchronisation();
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
+        $this->getEventManager()->trigger(
+            new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
+        );
+
         try {
             if (is_null($type)) {
                 foreach ($this->getAllTypes() as $type) {
@@ -104,10 +109,6 @@ class SyncService extends ConfigurableService
      */
     public function fetch($type, $params)
     {
-        $this->getEventManager()->trigger(
-            new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
-        );
-
         $response = [
             'type' => $type
         ];
