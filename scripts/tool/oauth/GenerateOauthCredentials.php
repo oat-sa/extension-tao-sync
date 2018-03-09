@@ -22,6 +22,7 @@ namespace oat\taoSync\scripts\tool\oauth;
 
 use oat\taoOauth\model\user\UserService;
 use oat\taoOauth\scripts\tools\GenerateCredentials;
+use oat\taoSync\model\SyncService;
 
 class GenerateOauthCredentials extends GenerateCredentials
 {
@@ -34,6 +35,8 @@ class GenerateOauthCredentials extends GenerateCredentials
     {
         $report = parent::__invoke([]);
 
+        $this->addSyncRole($this->createdConsumer);
+
         if (in_array('-cmd', $params)) {
             return \common_report_Report::createInfo(
                 'php index.php \'' . ImportOauthCredentials::class . '\'' .
@@ -45,6 +48,26 @@ class GenerateOauthCredentials extends GenerateCredentials
         }
 
         return $report;
+    }
+
+    /**
+     * Add sync role to consumer user
+     *
+     * @param \core_kernel_classes_Resource $consumer
+     * @return boolean
+     */
+    protected function addSyncRole(\core_kernel_classes_Resource $consumer)
+    {
+        $consumerUser =$this->getUserService()->getConsumerUser($consumer);
+        try {
+            \tao_models_classes_UserService::singleton()->attachRole(
+                $consumerUser,
+                $this->getResource(SyncService::TAO_SYNC_ROLE)
+            );
+            return true;
+        } catch (\core_kernel_users_Exception $e) {
+            return false;
+        }
     }
 
     /**

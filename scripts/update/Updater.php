@@ -20,9 +20,7 @@
 
 namespace oat\taoSync\scripts\update;
 use oat\tao\scripts\update\OntologyUpdater;
-use oat\taoOauth\model\user\UserService;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\oauth\OauthUserService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 
 /**
@@ -43,7 +41,6 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('0.1.0')) {
             OntologyUpdater::syncModels();
-            $this->getServiceManager()->register(UserService::SERVICE_ID, new OauthUserService());
             $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);
             $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
             if (!in_array(SynchronizeData::class, $actions)) {
