@@ -130,14 +130,14 @@ define([
             }).on('pollSingleFinished', function (taskId, taskData) {
                 if (taskData.status === 'completed') {
                     setState('success');
+                    updateTime(taskData);
                     setHistoryTime(taskData.updatedAt, '$completed');
                 }
                 else if (taskData.status === 'failed') {
                     setState('error');
                 }
             }).on('pollSingle', function (taskId, taskData) {
-                setTime(taskData.createdAt, '$enqueued');
-                setTime(taskData.createdAt + taskData.createdAtElapsed, '$updated');
+                updateTime(taskData);
             }).on('error', function () {
                 setState('error');
             });
@@ -187,6 +187,15 @@ define([
                 $spinner[state === 'progress' ? 'addClass' : 'removeClass']('spinner-icon');
                 $container.addClass('state-' + state);
                 msg.$all.hide();
+            }
+
+            /**
+             * Update the displayed times
+             * @param {Object} taskData
+             */
+            function updateTime(taskData) {
+                setTime(taskData.createdAt, '$enqueued');
+                setTime(taskData.createdAt + taskData.createdAtElapsed, '$updated');
             }
 
             /**
@@ -241,11 +250,13 @@ define([
                                 setState('error');
                                 break;
                             case 'completed':
-                                setHistoryTime(currentTask.updatedAt, '$completed');
                                 setState('form');
+                                updateTime(currentTask);
+                                setHistoryTime(currentTask.updatedAt, '$completed');
                                 break;
                             default:
                                 setState('progress');
+                                updateTime(currentTask);
                                 taskQueue.pollSingle(currentTask.id);
                         }
                     }
