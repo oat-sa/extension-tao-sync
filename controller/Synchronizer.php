@@ -19,7 +19,9 @@
 
 namespace oat\taoSync\controller;
 
+use oat\generis\model\OntologyAwareTrait;
 use oat\tao\scripts\tools\maintenance\Status;
+use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
 use oat\taoTaskQueue\model\Task\TaskInterface;
@@ -28,6 +30,7 @@ use oat\taoTaskQueue\model\TaskLogActionTrait;
 class Synchronizer extends \tao_actions_CommonModule
 {
     use TaskLogActionTrait;
+    use OntologyAwareTrait;
 
     /**
      * Extension ID
@@ -49,22 +52,71 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     public function createTask()
     {
-        try{
-            $data  = $this->getRequestParameters();
+        try {
+            $data = $this->getRequestParameters();
 
             $label = $data['label'];
             unset($data['label']);
 
             $callable = $this->propagate(new Status());
             $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
-            return $this->returnTaskJson($queueService->createTask($callable, $data, $label));
-        } catch(\Exception $e){
+            $task = $queueService->createTask($callable, $data, $label);
+            $this->setLastSyncTask($task);
+            return $this->returnTaskJson($task);
+        } catch (\Exception $e) {
             return $this->returnJson([
-                'success'   => false,
-                'errorMsg'  => $e->getMessage(),
+                'success' => false,
+                'errorMsg' => $e->getMessage(),
                 'errorCode' => $e->getCode()
             ]);
         }
+    }
+
+    /**
+     * Get the last task data
+     * @return mixed
+     * @throws \core_kernel_persistence_Exception
+     */
+    public function lastTask()
+    {
+        $taskId = $this->getLastSyncTask();
+        $taskData = null;
+
+        if ($taskId) {
+            try {
+                $task = $this->getTaskLogEntity($taskId);
+                $taskData = $task->toArray();
+            } catch (\common_exception_NotFound $e) {
+            }
+        }
+
+        return $this->returnJson([
+            'success' => true,
+            'data' => $taskData
+        ]);
+    }
+
+    /**
+     * @param TaskInterface $task
+     */
+    protected function setLastSyncTask($task)
+    {
+        $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->setPropertyValue($this->getProperty(DataSyncHistoryService::SYNCHRO_TASK), $task->getId());
+    }
+
+    /**
+     * @return string|null
+     * @throws \core_kernel_persistence_Exception
+     */
+    protected function getLastSyncTask()
+    {
+        $taskId = $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->getOnePropertyValue($this->getProperty(DataSyncHistoryService::SYNCHRO_TASK));
+
+        if ($taskId) {
+            return $taskId->uriResource;
+        }
+
+        return null;
     }
 
     /**

@@ -20,10 +20,11 @@ define([
     'jquery',
     'lodash',
     'moment',
+    'core/dataProvider/request',
     'util/url',
     'taoTaskQueue/model/taskQueueModel',
     'layout/loading-bar'
-], function($, _, moment, urlHelper, taskQueueModelFactory, loadingBar) {
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar) {
     'use strict';
 
     /**
@@ -36,8 +37,20 @@ define([
     };
 
     /**
+     * Urls of webservices
+     * @type {Object}
+     */
+    var webservices = {
+        get: urlHelper.route('get', tq.api, tq.ext),
+        archive: urlHelper.route('archive', tq.api, tq.ext),
+        all: urlHelper.route('getAll', tq.api, tq.ext),
+        download: urlHelper.route('download', tq.api, tq.ext),
+        lastTask: urlHelper.route('lastTask', 'Synchronizer', 'taoSync')
+    };
+
+    /**
      * Task Label
-     * @type {string}
+     * @type {String}
      */
     var taskLabel = 'Data Synchronization';
 
@@ -66,7 +79,7 @@ define([
             /**
              * Launch button
              */
-            var $launchButton = $form.find('button');
+            var $launchButton = $form.find('button[data-control="launch"]');
 
             /**
              * Spinners
@@ -77,19 +90,20 @@ define([
              * Start and update time
              */
             var timeFields = {
-                $enqueued: $form.find('#enqueue-time'),
-                $updated:  $form.find('#update-time')
+                $enqueued: $form.find('.enqueue-time'),
+                $updated: $form.find('.update-time'),
+                $completed: $form.find('.complete-time')
             };
 
             /**
              * Dynamic messages in the feedback boxes. These are based on the `data-type` elements
              * and stored in the format msg.$foo to indicate that $foo is a jquery element.
              */
-            var msg = (function() {
+            var msg = (function () {
                 var _msg = {
                     $all: $form.find('.msg')
                 };
-                _msg.$all.each(function() {
+                _msg.$all.each(function () {
                     var $currentMsg = $(this);
                     _msg['$' + $currentMsg.data('type')] = $currentMsg;
                 });
@@ -100,49 +114,44 @@ define([
              * Task Queue object
              */
             var taskQueue = taskQueueModelFactory({
-                url : {
-                    get: urlHelper.route('get', tq.api, tq.ext),
-                    archive: urlHelper.route('archive', tq.api, tq.ext),
-                    all : urlHelper.route('getAll', tq.api, tq.ext),
-                    download : urlHelper.route('download', tq.api, tq.ext)
+                url: {
+                    get: webservices.get,
+                    archive: webservices.archive,
+                    all: webservices.all,
+                    download: webservices.download
                 },
-                pollSingleIntervals : [
+                pollSingleIntervals: [
                     {iteration: Number.MAX_SAFE_INTEGER, interval: 2000}
                 ],
-                pollAllIntervals : [
+                pollAllIntervals: [
                     {iteration: 1, interval: 8000},
                     {iteration: 0, interval: 5000}
                 ]
-            }).on('pollSingleFinished', function(taskId, taskData) {
-                if(taskData.status === 'completed') {
-                    taskQueue.archive(encodeURIComponent(taskData.id)).then(function () {
-                        taskQueue.pollAll();
-                        setState('success');
-                    });
+            }).on('pollSingleFinished', function (taskId, taskData) {
+                if (taskData.status === 'completed') {
                     setState('success');
+                    setHistoryTime(taskData.updatedAt, '$completed');
                 }
-                else if(taskData.status === 'failed'){
+                else if (taskData.status === 'failed') {
                     setState('error');
                 }
-            }).on('pollSingle', function(taskId, taskData){
+            }).on('pollSingle', function (taskId, taskData) {
                 setTime(taskData.createdAt, '$enqueued');
-                msg.$enqueued.show();
                 setTime(taskData.createdAt + taskData.createdAtElapsed, '$updated');
-                msg.$updated.show();
-            }).on('error', function(){
+            }).on('error', function () {
                 setState('error');
             });
 
             /**
              * Get task parameters
              *
-             * @returns {{}}
+             * @returns {Object}
              */
             function getData() {
                 var data = {
                     label: taskLabel
                 };
-                $formFields.each(function() {
+                $formFields.each(function () {
                     data[this.name] = this.value;
                 });
                 return data;
@@ -154,108 +163,100 @@ define([
              */
             function toggleLaunchButtonState() {
                 var isValid = true;
-                $formFields.each(function() {
-                    if(!this.validity.valid) {
-                        $launchButton.attr('disabled','disabled');
-                        isValid = false;
-                        return false;
-                    }
+                $formFields.each(function () {
+                    isValid = this.validity.valid;
+                    return isValid;
                 });
-                if(isValid) {
+                if (isValid) {
                     $launchButton.removeAttr('disabled');
+                } else {
+                    $launchButton.attr('disabled', 'disabled');
                 }
             }
 
             /**
              * Set the state to progress|success|error
              *
-             * @param state
+             * @param {String} state
              */
             function setState(state) {
-                $container.removeClass (function (index, className) {
-                    return (className.match (/(^|\s)state-\S+/g) || []).join(' ');
+                $container.removeClass(function (index, className) {
+                    return (className.match(/(^|\s)state-\S+/g) || []).join(' ');
                 });
                 // make sure spinner doesn't use unnecessary resources
                 $spinner[state === 'progress' ? 'addClass' : 'removeClass']('spinner-icon');
                 $container.addClass('state-' + state);
+                msg.$all.hide();
             }
 
             /**
              * Display time in a localized format
              *
-             * @param timestamp
-             * @param type
+             * @param {Number} timestamp
+             * @param {String} type
              */
             function setTime(timestamp, type) {
-                timeFields[type].text(moment.unix(timestamp).format('LTS'));
+                timeFields[type] && timeFields[type].text(moment.unix(timestamp).format('LTS'));
+                msg[type] && msg[type].show();
+            }
+
+            /**
+             * Display history time in a localized format
+             *
+             * @param {Number} timestamp
+             * @param {String} type
+             */
+            function setHistoryTime(timestamp, type) {
+                setTime(timestamp, type);
+                $container.addClass('history');
             }
 
             // avoids unwanted flicker caused by the late loading of the CSS
             $container.find('.fb-container').removeClass('viewport-hidden');
             loadingBar.start();
 
-            taskQueue.getAll().then(function(taskList) {
-                var currentTask;
-                var i = taskList.length;
-                var validStates = ['created','in_progress','completed','failed'];
-                while(i--){
-                    if(taskList[i].taskLabel === taskLabel && validStates.indexOf(taskList[i].status) > -1) {
-                        currentTask = taskList[i];
-                        break;
-                    }
-                }
+            // check if all form fields are valid, if applicable
+            $formFields.on('keyup paste blur', toggleLaunchButtonState);
 
-                if(currentTask) {
-                    msg.$all.hide();
-                    switch(currentTask.status) {
-                        case 'failed':
-                            setState('error');
-                            break;
-                        case 'completed':
-                            setState('success');
-                            break;
-                        default:
-                            msg.$progress.show();
-                            setState('progress');
-                            setTime(currentTask.createdAt, '$enqueued');
-                            taskQueue.pollSingle(currentTask.id);
-                    }
-                    loadingBar.stop();
-                }
-                else {
-                    setState('form');
-                    loadingBar.stop();
+            // there might be no form fields at all
+            // or they might have received valid entries by other means
+            toggleLaunchButtonState();
 
-                    // check if all form fields are valid, if applicable
-                    $formFields.on('keyup paste blur', toggleLaunchButtonState);
-
-                    // there might be no form fields at all
-                    // or they might have received valid entries by other means
-                    toggleLaunchButtonState();
-
-                    $form.on('submit', function(e) {
-                        e.preventDefault();
-                        taskQueue.pollAllStop();
-                        msg.$all.hide();
-                        msg.$progress.show();
-                        setState('progress');
-                        taskQueue.create(this.action, getData()).then(function (result) {
-                            if (result.finished) {
-                                taskQueue.archive(result.task.id).then(function () {
-                                    taskQueue.pollAll();
-                                    setState('success');
-                                });
-                                setState('success');
-                            }
-                            else {
-                                setTime(result.task.createdAt, '$enqueued');
-                                msg.$enqueued.show();
-                                setState('progress');
-                            }
-                        });
-                    });
-                }
+            // set form actions
+            $form.on('submit', function (e) {
+                e.preventDefault();
+                setState('progress');
+                taskQueue.create(this.action, getData());
             });
+            $form.find('button[data-control="close"]').on('click', function (e) {
+                e.preventDefault();
+                setState('form');
+            });
+
+            request(webservices.lastTask)
+                .then(function (currentTask) {
+                    if (currentTask && currentTask.status) {
+                        switch (currentTask.status) {
+                            case 'failed':
+                                setState('error');
+                                break;
+                            case 'completed':
+                                setHistoryTime(currentTask.updatedAt, '$completed');
+                                setState('form');
+                                break;
+                            default:
+                                setState('progress');
+                                taskQueue.pollSingle(currentTask.id);
+                        }
+                    }
+                    else {
+                        setState('form');
+                    }
+                    loadingBar.stop();
+                })
+                .catch(function () {
+                    setState('error');
+                });
         }
     };
 });

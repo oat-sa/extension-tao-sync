@@ -60,7 +60,7 @@
         margin: auto !important;
         display: none;
         position: relative;
-        .icon-loop {
+        [class^="icon-"] {
             @include font-size(20);
             color: currentColor;
             padding: 0;
@@ -86,15 +86,20 @@
     }
     &.state {
         &-form {
-            .custom-fields, button {
+            .custom-fields, button[data-control="launch"] {
                 display: block;
+            }
+            &.history {
+                .status-history {
+                    display: block;
+                }
             }
             .intro {
                 visibility: visible;
             }
         }
         &-progress {
-            .feedback-info {
+            .status-progress {
                 display: block;
             }
             .intro {
@@ -102,12 +107,18 @@
             }
         }
         &-success {
-            .feedback-success {
+            button[data-control="close"] {
+                display: block;
+            }
+            .status-success {
                 display: block;
             }
         }
         &-error {
-            .feedback-error {
+            button[data-control="close"] {
+                display: block;
+            }
+            .status-error {
                 display: block;
             }
         }
