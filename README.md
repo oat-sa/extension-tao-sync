@@ -31,7 +31,7 @@ To prepare delivery execution, synchronization require to fetch several object $
 To configure the amount of data by request, use `chunkSize` parameter in `taoSync/syncService` config
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeData' [--type=$TYPE]
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeData' [--type=$TYPE]
 ```
 
 _Note_: 
@@ -49,7 +49,7 @@ To configure the amount of data by request, use `chunkSize` parameter in `taoSyn
 
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeResult'
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeResult'
 ```
 
 ### 3. Synchronize All
@@ -57,7 +57,7 @@ To configure the amount of data by request, use `chunkSize` parameter in `taoSyn
 To synchronize data and results in the same time:
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeAll'
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeAll'
 ```
 
 ## Oauth credentials
