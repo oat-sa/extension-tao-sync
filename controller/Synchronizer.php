@@ -53,6 +53,11 @@ class Synchronizer extends \tao_actions_CommonModule
     public function createTask()
     {
         try {
+            $lastTask = $this->getLastSyncTask();
+            if ($lastTask && !in_array($lastTask->getStatus(), ['completed', 'failed'])) {
+                throw new \common_exception_RestApi(__('The synchronisation is already running!'), 423);
+            }
+            
             $data = $this->getRequestParameters();
 
             $label = $data['label'];
@@ -79,15 +84,11 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     public function lastTask()
     {
-        $taskId = $this->getLastSyncTask();
+        $task = $this->getLastSyncTask();
         $taskData = null;
 
-        if ($taskId) {
-            try {
-                $task = $this->getTaskLogEntity($taskId);
-                $taskData = $task->toArray();
-            } catch (\common_exception_NotFound $e) {
-            }
+        if ($task) {
+            $taskData = $task->toArray();
         }
 
         return $this->returnJson([
@@ -105,15 +106,17 @@ class Synchronizer extends \tao_actions_CommonModule
     }
 
     /**
-     * @return string|null
+     * @return TaskInterface
      * @throws \core_kernel_persistence_Exception
      */
     protected function getLastSyncTask()
     {
         $taskId = $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->getOnePropertyValue($this->getProperty(DataSyncHistoryService::SYNCHRO_TASK));
-
         if ($taskId) {
-            return $taskId->uriResource;
+            try {
+                return $this->getTaskLogEntity($taskId->uriResource);
+            } catch (\common_exception_NotFound $e) {
+            }
         }
 
         return null;
