@@ -252,9 +252,18 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         $properties = $this->filterProperties($resource->getRdfTriples()->toArray());
         return [
             'id' => $resource->getUri(),
-            'checksum' => md5(serialize($properties)),
+            'checksum' => $this->serializeProperties($properties),
             'properties' => ($withProperty === true) ? $properties : [],
         ];
+    }
+
+    /**
+     * @param array $properties
+     * @return string
+     */
+    protected function serializeProperties($properties)
+    {
+        return md5(serialize($properties));
     }
 
     /**
