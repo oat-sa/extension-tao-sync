@@ -49,7 +49,7 @@ class Updater extends \common_ext_ExtensionUpdater
                 $actions[] = SynchronizeData::class;
                 $updatePublishingService = true;
             }
-            if (!in_array('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)) {
+            if (in_array('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)) {
                 unset($actions[array_search('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)]);
                 $updatePublishingService = true;
             }
