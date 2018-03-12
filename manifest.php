@@ -46,7 +46,6 @@ return array(
             \oat\taoSync\scripts\install\AttachEvents::class,
             \oat\taoSync\scripts\install\RegisterSyncFilesystem::class,
             \oat\taoSync\scripts\install\InstallSynchronisationHistory::class,
-            \oat\taoSync\scripts\install\RegisterOauthUserService::class,
         ]
     ),
     'uninstall' => array(
