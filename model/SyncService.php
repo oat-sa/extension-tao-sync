@@ -44,7 +44,7 @@ class SyncService extends ConfigurableService
     use OntologyAwareTrait;
 
     const SERVICE_ID = 'taoSync/syncService';
-    const TAO_SYNC_ROLE = 'http://www.tao.lu/Ontologies/generis.rdf#SyncManagerRole';
+    const TAO_SYNC_ROLE = 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager';
 
     const OPTION_SYNCHRONIZERS = 'synchronizers';
     const OPTION_CHUNK_SIZE = 'chunkSize';
