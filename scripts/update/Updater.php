@@ -43,11 +43,18 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('0.1.0')) {
             OntologyUpdater::syncModels();
-            $this->getServiceManager()->register(UserService::SERVICE_ID, new OauthUserService());
             $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);
             $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
+            $updatePublishingService = false;
             if (!in_array(SynchronizeData::class, $actions)) {
                 $actions[] = SynchronizeData::class;
+                $updatePublishingService = true;
+            }
+            if (in_array('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)) {
+                unset($actions[array_search('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)]);
+                $updatePublishingService = true;
+            }
+            if ($updatePublishingService) {
                 $service->setOption(PublishingService::OPTIONS_ACTIONS, $actions);
                 $this->getServiceManager()->register(PublishingService::SERVICE_ID, $service);
             }
