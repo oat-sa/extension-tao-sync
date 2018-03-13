@@ -30,16 +30,16 @@ class DetectTestAndItemIdentifiers
 
     /**
      * @param $deliveryId
-     * @param $variable
+     * @param $test
+     * @param $item
      * @return array
      * @throws \core_kernel_persistence_Exception
      */
-    public function detect($deliveryId, $variable)
+    public function detect($deliveryId, $test, $item = null)
     {
         $remoteNamespace = explode('#', $deliveryId);
-        $variable = (array) $variable;
         $testIdentifier = null;
-        if (isset($variable['test'])) {
+        if (isset($test)) {
             $delivery = $this->getResource($deliveryId);
             $test = $this->getResource($delivery->getOnePropertyValue($this->getProperty(DeliveryAssemblyService::PROPERTY_ORIGIN)));
             $qtiTestIdentifier = (string) $test->getOnePropertyValue($this->getProperty(QtiTestService::PROPERTY_QTI_TEST_IDENTIFIER));
@@ -47,8 +47,8 @@ class DetectTestAndItemIdentifiers
         }
 
         $itemIdentifier = null;
-        if (isset($variable['item'])) {
-            $item = $this->getResource($variable['item']);
+        if (isset($item)) {
+            $item = $this->getResource($item);
             $qtiItemIdentifier = (string) $item->getOnePropertyValue($this->getProperty(ImportService::PROPERTY_QTI_ITEM_IDENTIFIER));
             $itemIdentifier = $qtiItemIdentifier ? implode('#', [$remoteNamespace[0], $qtiItemIdentifier]) : null;
         }

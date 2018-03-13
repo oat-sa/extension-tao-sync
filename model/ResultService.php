@@ -304,7 +304,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         $deliveryExecutionVariables = [];
         foreach ($variables as $variable) {
             $variable = (array) $variable[0];
-            list($testIdentifier,$itemIdentifier) = $this->detectTestAndItemIdentifiers($deliveryId,$variable);
+            list($testIdentifier,$itemIdentifier) = $this->detectTestAndItemIdentifiers($deliveryId, $variable);
             $deliveryExecutionVariables[] = [
                 'type' => $variable['class'],
                 'callIdTest' => isset($variable['callIdTest'])? $variable['callIdTest'] : null,
@@ -326,7 +326,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      */
     protected function detectTestAndItemIdentifiers($deliveryId, $variable)
     {
-        return (new DetectTestAndItemIdentifiers())->detect($deliveryId, $variable);
+        return (new DetectTestAndItemIdentifiers())->detect($deliveryId, $variable['test'], $variable['item']);
     }
 
     /**
