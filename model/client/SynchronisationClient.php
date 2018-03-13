@@ -28,7 +28,7 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\ResultApi;
 use oat\taoSync\controller\SynchronisationApi;
-use oat\taoSync\scripts\tool\SynchronizeData;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use \Psr\Http\Message\StreamInterface;
 
 /**
