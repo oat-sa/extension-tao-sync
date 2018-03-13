@@ -303,6 +303,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         $variables = $this->getResultStorage($deliveryId)->getDeliveryVariables($deliveryExecutionId);
         $deliveryExecutionVariables = [];
         foreach ($variables as $variable) {
+            $variable = (array) $variable[0];
             list($testIdentifier,$itemIdentifier) = $this->detectTestAndItemIdentifiers($deliveryId,$variable);
             $deliveryExecutionVariables[] = [
                 'type' => $variable['class'],

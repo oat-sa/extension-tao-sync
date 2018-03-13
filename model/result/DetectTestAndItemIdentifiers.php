@@ -37,8 +37,7 @@ class DetectTestAndItemIdentifiers
     public function detect($deliveryId, $variable)
     {
         $remoteNamespace = explode('#', $deliveryId);
-
-        $variable = (array) $variable[0];
+        $variable = (array) $variable;
         $testIdentifier = null;
         if (isset($variable['test'])) {
             $delivery = $this->getResource($deliveryId);
