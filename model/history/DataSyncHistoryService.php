@@ -50,6 +50,7 @@ class DataSyncHistoryService extends ConfigurableService
 
     const SYNCHRO_URI = 'http://www.taotesting.com/ontologies/synchro.rdf#synchro';
     const SYNCHRO_ID = 'http://www.taotesting.com/ontologies/synchro.rdf#identifier';
+    const SYNCHRO_TASK = 'http://www.taotesting.com/ontologies/synchro.rdf#task';
 
     const ACTION_TOUCHED = 'touched';
     const ACTION_CREATED = 'created';

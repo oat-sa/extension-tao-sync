@@ -1,0 +1,154 @@
+@import "inc/bootstrap";
+
+#tao-sync-container {
+    max-width: 900px;
+    width: 100%;
+    margin: auto;
+
+    .intro {
+        margin-bottom: 30px;
+        // toggle visibility rather than state to avoid differences
+        // in positioning of the button and the feedback boxes
+        visibility: hidden;
+    }
+    .custom-fields {
+        max-width: 300px;
+        margin: 0 auto 25px auto;
+        display:none;
+        div {
+            margin-bottom: 5px;
+        }
+        label {
+            display:block;
+            white-space: nowrap;
+        }
+        input {
+            width: 100%;
+            @include font-size(20);
+            max-width: none;
+        }
+    }
+    .msg {
+        display:none;
+        margin-bottom: 5px;
+    }
+
+    [class^="feedback-"], [class*=" feedback-"] {
+        display:none;
+        padding-left: 60px;
+        max-width: 600px;
+        margin: 10px auto;
+        [class^="icon-"], [class*=" icon-"]  {
+            @include font-size(25);
+            &.icon-loop {
+                color: $info;
+            }
+            &.icon-result-ok {
+                color: $success;
+            }
+            &.icon-error {
+                color: $error;
+            }
+        }
+    }
+
+    button{
+        height: auto;
+        line-height: 1.2;
+        padding: 15px 20px 15px 55px;
+        @include font-size(20, true);
+        margin: auto !important;
+        display: none;
+        position: relative;
+        [class^="icon-"] {
+            @include font-size(20);
+            color: currentColor;
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            left: 17px;
+            top: 17px;
+        }
+    }
+
+    strong {
+        color: $info;
+        font-weight: normal;
+
+    }
+    &[class^="state-"], &[class*=" state-"] {
+        button {
+            display:none;
+        }
+        .custom-fields {
+            display:none;
+        }
+    }
+    &.state {
+        &-form {
+            .custom-fields, button[data-control="launch"] {
+                display: block;
+            }
+            &.history {
+                .status-history {
+                    display: block;
+                }
+            }
+            .intro {
+                visibility: visible;
+            }
+        }
+        &-progress {
+            .status-progress {
+                display: block;
+            }
+            .intro {
+                visibility: visible;
+            }
+        }
+        &-success {
+            button[data-control="close"] {
+                display: block;
+            }
+            .status-success {
+                display: block;
+            }
+        }
+        &-error {
+            button[data-control="close"] {
+                display: block;
+            }
+            .status-error {
+                display: block;
+            }
+        }
+    }
+
+    .spinner-icon {
+        display: block;
+        @include vendor-prefix(transform, translateZ(0));
+        @include vendor-prefix(transform-origin, 50% 50%);
+        @include keyframes(icon-rotation) {
+            0% {
+                @include vendor-prefix(transform, rotate(0deg));
+            }
+            100% {
+                @include vendor-prefix(transform, rotate(360deg));
+            }
+        }
+        @include animation(icon-rotation 1.4s infinite linear);
+    }
+
+    .action-area {
+        margin: 20px auto;
+        padding:20px;
+        position: relative;
+        min-height: 330px;
+        @include font-size(16)
+    }
+
+    h2 {
+        @include font-size(23);
+        font-family: $headingFont;
+    }
+}

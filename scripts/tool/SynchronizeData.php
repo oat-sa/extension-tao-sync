@@ -28,8 +28,15 @@ class SynchronizeData extends AbstractAction
     public function __invoke($params)
     {
         $type = null;
-        foreach ($params as $param) {
-            list($option, $value) = explode('=', $param);
+
+        foreach ($params as $key => $param) {
+            if (strpos($param, '=') !== false) {
+                list($option, $value) = explode('=', $param);
+            } else {
+                $option = $key;
+                $value = $param;
+            }
+
             switch ($option) {
                 case '--type':
                     $type = $value;
