@@ -26,10 +26,12 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoQtiItem\model\qti\ImportService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
+use taoQtiTest_models_classes_QtiTestService as QtiTestService;
 use Psr\Log\LogLevel;
 
 /**
@@ -300,14 +302,30 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     {
         $variables = $this->getResultStorage($deliveryId)->getDeliveryVariables($deliveryExecutionId);
         $deliveryExecutionVariables = [];
+        $remoteNamespace = explode('#', $deliveryId);
         foreach ($variables as $variable) {
             $variable = (array) $variable[0];
+            $testIdentifier = null;
+            if (isset($variable['test'])) {
+                $delivery = $this->getResource($deliveryId);
+                $test = $this->getResource($delivery->getOnePropertyValue($this->getProperty(DeliveryAssemblyService::PROPERTY_ORIGIN)));
+                $qtiTestIdentifier = (string) $test->getOnePropertyValue($this->getProperty(QtiTestService::PROPERTY_QTI_TEST_IDENTIFIER));
+                $testIdentifier = $qtiTestIdentifier ? implode('#', [$remoteNamespace[0], $qtiTestIdentifier]) : null;
+            }
+
+            $itemIdentifier = null;
+            if (isset($variable['item'])) {
+                $item = $this->getResource($variable['item']);
+                $qtiItemIdentifier = (string) $item->getOnePropertyValue($this->getProperty(ImportService::PROPERTY_QTI_ITEM_IDENTIFIER));
+                $itemIdentifier = $qtiItemIdentifier ? implode('#', [$remoteNamespace[0], $qtiItemIdentifier]) : null;
+            }
+
             $deliveryExecutionVariables[] = [
                 'type' => $variable['class'],
                 'callIdTest' => isset($variable['callIdTest'])? $variable['callIdTest'] : null,
                 'callIdItem' => isset($variable['callIdItem']) ? $variable['callIdItem'] : null,
-                'test' => isset($variable['test']) ? $variable['test'] : null,
-                'item' => isset($variable['item']) ? $variable['item'] : null,
+                'test' => $testIdentifier,
+                'item' => $itemIdentifier,
                 'data' => $variable['variable'],
             ];
         }
