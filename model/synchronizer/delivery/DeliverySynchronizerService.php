@@ -195,7 +195,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 $file->delete();
             }
         } catch (\common_Exception $e) {
-            $this->logNotice('Problem to fetch test backup. Replace it by import.');
+            $this->logInfo('Problem to fetch test backup. Replace it by import.');
             $file = $this->getServiceLocator()
                 ->get(FileSystemService::SERVICE_ID)
                 ->getDirectory('synchronisation')

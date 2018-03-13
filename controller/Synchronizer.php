@@ -22,7 +22,7 @@ namespace oat\taoSync\controller;
 use oat\generis\model\OntologyAwareTrait;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\ui\FormFieldsService;
-use oat\taoSync\scripts\tool\SynchronizeData;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
 use oat\taoTaskQueue\model\Task\TaskInterface;
 use oat\taoTaskQueue\model\TaskLogActionTrait;
@@ -63,7 +63,7 @@ class Synchronizer extends \tao_actions_CommonModule
             $label = $data['label'];
             unset($data['label']);
 
-            $callable = $this->propagate(new SynchronizeData());
+            $callable = $this->propagate(new SynchronizeAll());
             $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
             $task = $queueService->createTask($callable, $data, $label);
             $this->setLastSyncTask($task);

@@ -167,7 +167,7 @@ class DataSyncHistoryService extends ConfigurableService
     {
         $lastId = $this->getCurrentSynchroId();
         $this->synchroId = $lastId + 1;
-        $this->getResource(self::SYNCHRO_ID)->setPropertyValue($this->getProperty(self::SYNCHRO_ID), $this->synchroId);
+        $this->getResource(self::SYNCHRO_URI)->setPropertyValue($this->getProperty(self::SYNCHRO_ID), $this->synchroId);
         return $this->synchroId;
     }
 
@@ -180,7 +180,7 @@ class DataSyncHistoryService extends ConfigurableService
     protected function getCurrentSynchroId()
     {
         if (!$this->synchroId) {
-            $synchro = $this->getResource(self::SYNCHRO_ID);
+            $synchro = $this->getResource(self::SYNCHRO_URI);
             $synchroIdProperty = $synchro->getOnePropertyValue($this->getProperty(self::SYNCHRO_ID));
             if (is_null($synchroIdProperty)) {
                 $this->synchroId = 0;

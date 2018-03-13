@@ -21,6 +21,8 @@
 namespace oat\taoSync\scripts\update;
 
 use oat\tao\scripts\update\OntologyUpdater;
+use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 
 /**
@@ -47,5 +49,27 @@ class Updater extends \common_ext_ExtensionUpdater
             OntologyUpdater::syncModels();
             $this->setVersion('0.2.0');
         }
+
+        if ($this->isVersion('0.2.0')) {
+            OntologyUpdater::syncModels();
+            $service = $this->getServiceManager()->get(PublishingService::SERVICE_ID);
+            $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
+            $updatePublishingService = false;
+            if (!in_array(SynchronizeData::class, $actions)) {
+                $actions[] = SynchronizeData::class;
+                $updatePublishingService = true;
+            }
+            if (in_array('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)) {
+                unset($actions[array_search('oat\\taoSync\\scripts\\tool\\SynchronizeData', $actions)]);
+                $updatePublishingService = true;
+            }
+            if ($updatePublishingService) {
+                $service->setOption(PublishingService::OPTIONS_ACTIONS, $actions);
+                $this->getServiceManager()->register(PublishingService::SERVICE_ID, $service);
+            }
+
+            $this->setVersion('0.3.0');
+        }
+
     }
 }

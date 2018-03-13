@@ -42,6 +42,7 @@ class SyncService extends ConfigurableService
     use OntologyAwareTrait;
 
     const SERVICE_ID = 'taoSync/syncService';
+    const TAO_SYNC_ROLE = 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager';
 
     const OPTION_SYNCHRONIZERS = 'synchronizers';
     const OPTION_CHUNK_SIZE = 'chunkSize';
@@ -74,12 +75,16 @@ class SyncService extends ConfigurableService
         $syncId = $this->getSyncHistoryService()->createSynchronisation();
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
-        if (is_null($type)) {
-            foreach($this->getAllTypes() as $type) {
+        try {
+            if (is_null($type)) {
+                foreach ($this->getAllTypes() as $type) {
+                    $this->synchronizeType($type, $params);
+                }
+            } else {
                 $this->synchronizeType($type, $params);
             }
-        } else {
-            $this->synchronizeType($type, $params);
+        } catch (\Exception $e) {
+            $this->report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
 
         return $this->report;
