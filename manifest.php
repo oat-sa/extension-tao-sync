@@ -31,9 +31,9 @@ return array(
         'taoTestCenter' => '>=3.7.0',
         'taoTaskQueue' => '>=0.14.3',
     ),
-    'managementRole' => 'http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManagerRole',
+    'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
-        ['grant', 'http://www.tao.lu/Ontologies/TAOSync.rdf#SyncManagerRole', ['ext'=>'taoSync']],
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
     ],
     'install' => [
         'rdf' => [
