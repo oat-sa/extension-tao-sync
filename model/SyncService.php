@@ -22,9 +22,11 @@ namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdfs;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SynchronisationStart;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
@@ -74,6 +76,10 @@ class SyncService extends ConfigurableService
     {
         $syncId = $this->getSyncHistoryService()->createSynchronisation();
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
+
+        $this->getEventManager()->trigger(
+            new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
+        );
 
         try {
             if (is_null($type)) {
@@ -428,6 +434,14 @@ class SyncService extends ConfigurableService
     protected function getSyncHistoryService()
     {
         return $this->getServiceLocator()->get(DataSyncHistoryService::SERVICE_ID);
+    }
+
+    /**
+     * @return EventManager
+     */
+    protected function getEventManager()
+    {
+        return $this->getServiceLocator()->get(EventManager::SERVICE_ID);
     }
 
     /**
