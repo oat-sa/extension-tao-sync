@@ -347,7 +347,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      * Return formatter from current synchronizer options
      * Otherwise return the default FormatterService
      *
-     * @return array|object
+     * @return FormatterService
      */
     protected function getFormatter()
     {
