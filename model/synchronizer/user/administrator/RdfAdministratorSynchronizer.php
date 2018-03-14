@@ -21,8 +21,27 @@
 namespace oat\taoSync\model\synchronizer\user\administrator;
 
 use oat\taoSync\model\synchronizer\user\UserSynchronizer;
+use oat\taoTestCenter\model\TestCenterService;
 
 class RdfAdministratorSynchronizer extends UserSynchronizer implements AdministratorSynchronizer
 {
-    use RdfAdministratorSynchronizerTrait;
+    /**
+     * Get the synchronizer identifier
+     *
+     * @return string
+     */
+    public function getId()
+    {
+        return self::SYNC_ADMINISTRATOR;
+    }
+
+    /**
+     * Get the role defining what an administrator is
+     *
+     * @return string
+     */
+    public function getUserRole()
+    {
+        return TestCenterService::ROLE_TESTCENTER_ADMINISTRATOR;
+    }
 }

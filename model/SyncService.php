@@ -463,8 +463,6 @@ class SyncService extends ConfigurableService
                     } elseif (is_string($synchronizer)) {
                         if (is_a($synchronizer, Synchronizer::class, true)) {
                             $this->synchronizers[$type] = $this->propagate(new $synchronizer());
-                        } else {
-                            $this->synchronizers[$type] = $this->getServiceLocator()->get($synchronizer);
                         }
                     } elseif (is_array($synchronizer)) {
                         if (isset($synchronizer['class']) && is_a($synchronizer['class'], Synchronizer::class, true)) {

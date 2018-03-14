@@ -347,7 +347,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      * Return formatter from current synchronizer options
      * Otherwise return the default FormatterService
      *
-     * @return SynchronizerFormatter
+     * @return array|object
      */
     protected function getFormatter()
     {
@@ -355,6 +355,8 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             $formatterClass = $this->getOption(self::OPTIONS_FORMATTER_CLASS);
             if (is_a($formatterClass, SynchronizerFormatter::class, true)) {
                 return new $formatterClass();
+            } else {
+                return $this->getServiceLocator()->get($this->getOption(self::OPTIONS_FORMATTER_CLASS));
             }
         }
         return new FormatterService();
