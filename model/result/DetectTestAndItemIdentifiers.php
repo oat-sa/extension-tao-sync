@@ -35,7 +35,7 @@ class DetectTestAndItemIdentifiers
      * @return array
      * @throws \core_kernel_persistence_Exception
      */
-    public function detect($deliveryId, $test, $item = null)
+    public function detect($deliveryId, $test = null, $item = null)
     {
         $remoteNamespace = explode('#', $deliveryId);
         $testIdentifier = null;

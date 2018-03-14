@@ -326,7 +326,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      */
     protected function detectTestAndItemIdentifiers($deliveryId, $variable)
     {
-        return (new DetectTestAndItemIdentifiers())->detect($deliveryId, $variable['test'], $variable['item']);
+        $test = isset($variable['test']) ? $variable['test'] : null;
+        $item = isset($variable['item']) ? $variable['item'] : null;
+        return (new DetectTestAndItemIdentifiers())->detect($deliveryId, $test, $item);
     }
 
     /**
