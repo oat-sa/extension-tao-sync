@@ -16,8 +16,6 @@ $formFields = get_data('form-fields');
         <section class="intro">
             <p>
                 <?= __('Depending on the workload this process may take a while.') ?>
-                <br/>
-                <?= __('Please do not close or reload the browser window before you receive a notification that the process has been completed!') ?>
             </p>
         </section>
 
