@@ -31,6 +31,8 @@ use oat\search\base\QueryBuilderInterface;
 use oat\search\helper\SupportedOperatorHelper;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\formatter\FormatterService;
+use oat\taoSync\model\formatter\SynchronizerFormatter;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -52,6 +54,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
 
     const OPTIONS_EXCLUDED_FIELDS = 'excludedProperties';
     const OPTIONS_FIELDS = 'fields';
+    const OPTIONS_FORMATTER_CLASS = 'formatter';
 
     /**
      * Get the root class of entity to synchronize
@@ -249,21 +252,17 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      */
     public function format(\core_kernel_classes_Resource $resource, $withProperty = false)
     {
-        $properties = $this->filterProperties($resource->getRdfTriples()->toArray());
-        return [
-            'id' => $resource->getUri(),
-            'checksum' => $this->serializeProperties($properties),
-            'properties' => ($withProperty === true) ? $properties : [],
+        $options = [
+            FormatterService::OPTION_ONLY_FIELDS => is_array($this->getOption(self::OPTIONS_FIELDS))
+                ? $this->getOption(self::OPTIONS_FIELDS)
+                : [],
+            FormatterService::OPTION_EXCLUDED_FIELDS => is_array($this->getOption(self::OPTIONS_EXCLUDED_FIELDS))
+                ? $this->getOption(self::OPTIONS_EXCLUDED_FIELDS)
+                : [],
+            FormatterService::OPTION_INCLUDED_PROPERTIES => $withProperty
         ];
-    }
 
-    /**
-     * @param array $properties
-     * @return string
-     */
-    protected function serializeProperties($properties)
-    {
-        return md5(serialize($properties));
+        return $this->getFormatter()->format($resource, $options);
     }
 
     /**
@@ -331,56 +330,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     }
 
     /**
-     * Filter resource triples against the SyncService configuration
-     *
-     * self::OPTIONS_FIELDS, if it is set only these fields will be taken under account
-     * self::OPTIONS_EXCLUDED_FIELDS, excluded fields
-     *
-     * return an array of $predicate => $object
-     *
-     * @param array $triples
-     * @return array
-     */
-    protected function filterProperties(array $triples)
-    {
-        $fields = is_array($this->getOption(self::OPTIONS_FIELDS)) ? $this->getOption(self::OPTIONS_FIELDS) : [];
-        $excludedFields = is_array($this->getOption(self::OPTIONS_EXCLUDED_FIELDS)) ? $this->getOption(self::OPTIONS_EXCLUDED_FIELDS) : [];
-
-        $properties = [];
-
-        /** @var \core_kernel_classes_Triple $triple */
-        foreach ($triples as $triple) {
-            $predicate = $object = null;
-            if (!empty($fields)) {
-                if (in_array($triple->predicate, $fields)) {
-                    $predicate = $triple->predicate;
-                    $object = $triple->object;
-                }
-            } else {
-                if (!in_array($triple->predicate, $excludedFields)) {
-                    $predicate = $triple->predicate;
-                    $object = $triple->object;
-                }
-            }
-
-            if (!is_null($predicate) && !is_null($object)) {
-                if (array_key_exists($predicate, $properties)) {
-                    if ($properties[$predicate] == $object) {
-                        continue;
-                    }
-                    $value = is_array($properties[$predicate]) ? $properties[$predicate] : [$properties[$predicate]];
-                    $value[] = $object;
-                } else {
-                    $value = $object;
-                }
-                $properties[$predicate] = $value;
-            }
-        }
-
-        return $properties;
-    }
-
-    /**
      * List of class to not synchronize
      *
      * @return array
@@ -392,5 +341,22 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             OntologyRdfs::RDFS_RESOURCE,
             $this->getRootClass()->getUri(),
         ];
+    }
+
+    /**
+     * Return formatter from current synchronizer options
+     * Otherwise return the default FormatterService
+     *
+     * @return SynchronizerFormatter
+     */
+    protected function getFormatter()
+    {
+        if ($this->hasOption(self::OPTIONS_FORMATTER_CLASS)) {
+            $formatterClass = $this->getOption(self::OPTIONS_FORMATTER_CLASS);
+            if (is_a($formatterClass, SynchronizerFormatter::class, true)) {
+                return new $formatterClass();
+            }
+        }
+        return new FormatterService();
     }
 }
