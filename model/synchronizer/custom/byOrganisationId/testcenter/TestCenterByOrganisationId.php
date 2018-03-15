@@ -45,6 +45,7 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
 
     public function fetch(array $options = [])
     {
+        $this->logWarning(print_r($options, true));
         $id = $this->getOrganisationIdFromOption($options);
         /**
          * @todo apply options
@@ -53,13 +54,15 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
         $queryBuilder = $search->query();
         $query = $search->searchType($queryBuilder, TestCenterService::CLASS_URI , true);
-        $query->add('http://www.taotesting.com/ontologies/synchro.rdf#organisationId')->equals($id);
+        $query->add(self::ORGANISATION_ID_PROPERTY)->equals($id);
         $queryBuilder->setCriteria($query);
         $results = $search->getGateway()->search($queryBuilder);
         $values = [];
         if ($results->total() > 0) {
             /** @var \core_kernel_classes_Resource $resource */
             foreach ($results as $resource) {
+                $this->logError(print_r($resource, true));
+
                 $instance = $this->format($resource);
                 $values[$instance['id']] = $instance;
             }

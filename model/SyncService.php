@@ -150,15 +150,17 @@ class SyncService extends ConfigurableService
      *
      * @param $type
      * @param array $entityIds
+     * @param array $options
      * @return array
      * @throws \common_exception_BadRequest
      */
-    public function fetchEntityDetails($type, array $entityIds)
+    public function fetchEntityDetails($type, array $entityIds, array $options = [])
     {
+        $options = array_merge(['withProperties' => true], $options);
         $entities = [];
         foreach ($entityIds as $id) {
             try {
-                $entities[$id] = $this->getSynchronizer($type)->fetchOne($id, ['withProperties' => true]);
+                $entities[$id] = $this->getSynchronizer($type)->fetchOne($id, $options);
             } catch (\common_exception_NotFound $e) {}
         }
         return $entities;
