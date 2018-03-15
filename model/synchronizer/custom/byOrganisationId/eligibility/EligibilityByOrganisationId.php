@@ -22,7 +22,10 @@ namespace oat\taoSync\model\synchronizer\custom\byOrganisationId\eligibility;
 
 use oat\generis\model\kernel\persistence\smoothsql\search\ComplexSearchService;
 use oat\generis\model\kernel\persistence\smoothsql\search\QueryJoiner;
+use oat\search\helper\SupportedOperatorHelper;
+use oat\taoSync\model\Entity;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\eligibility\RdfEligibilitySynchronizer;
 use oat\taoTestCenter\model\EligibilityService;
 use oat\taoTestCenter\model\TestCenterService;
@@ -31,20 +34,64 @@ class EligibilityByOrganisationId extends RdfEligibilitySynchronizer
 {
     use OrganisationIdTrait;
 
-    public function fetch(array $options = [])
+    /**
+     * Fetch an entity associated to the given id in Rdf storage
+     *
+     * Scope it to test center organisation id
+     *
+     * @param $id
+     * @param array $params
+     * @return array
+     * @throws \common_exception_NotFound
+     * @throws \core_kernel_persistence_Exception
+     */
+    public function fetchOne($id, array $params = [])
     {
-        $id = $this->getOrganisationIdFromOption($options);
+        $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
+
+        $resource = $this->getResource($id);
+        if (!$resource->exists()) {
+            throw new \common_exception_NotFound('No resource found for id : ' . $id);
+        }
+
+        $orgId = $this->getOrganisationIdFromOption($params);
+        $testCenter = $this->getResource($resource->getOnePropertyValue($this->getProperty(EligibilityService::PROPERTY_TESTCENTER_URI)));
+        $orgIdPropertyValue = $testCenter->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
+
+        if ($orgIdPropertyValue != $orgId) {
+            throw new \common_exception_NotFound('No organisation resource found for id : ' . $id);
+        }
+
+        return $this->format($resource, $withProperties);
+    }
+
+    /**
+     * Get a list of entities
+     *
+     * Scope it to test center organisation id
+     *
+     * @param array $params
+     * @return array
+     * @throws \common_exception_NotFound
+     */
+    public function fetch(array $params = [])
+    {
+        $orgId = $this->getOrganisationIdFromOption($params);
 
         /** @var ComplexSearchService $search */
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
 
         $queryBuilder = $search->query();
         $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        if (isset($params['startCreatedAt'])) {
+            $query->addCriterion(Entity::CREATED_AT, SupportedOperatorHelper::GREATER_THAN_EQUAL, $params['startCreatedAt']);
+        }
         $queryBuilder->setCriteria($query);
+        $this->applyQueryOptions($queryBuilder, $params);
 
         $queryBuilder2 = $search->query();
         $query2 = $search->searchType($queryBuilder2, TestCenterService::CLASS_URI, true);
-        $query2->add('http://www.taotesting.com/ontologies/synchro.rdf#organisationId')->equals($id);
+        $query2->add(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY)->equals($orgId);
         $queryBuilder2->setCriteria($query2);
 
         /** @var QueryJoiner $joiner */

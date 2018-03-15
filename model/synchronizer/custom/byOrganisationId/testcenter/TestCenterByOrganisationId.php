@@ -34,6 +34,17 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
     const ORGANISATION_ID_PROPERTY = 'http://www.taotesting.com/ontologies/synchro.rdf#organisationId';
     const OPTION_ORGANISATION_ID = 'organisationId';
 
+    /**
+     * Fetch an entity associated to the given id in Rdf storage
+     *
+     * Scope it to test center organisation id
+     *
+     * @param $id
+     * @param array $params
+     * @return array
+     * @throws \common_exception_NotFound
+     * @throws \core_kernel_persistence_Exception
+     */
     public function fetchOne($id, array $params = [])
     {
         $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
@@ -52,6 +63,15 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
         return $this->format($resource, $withProperties);
     }
 
+    /**
+     * Get a list of entities
+     *
+     * Scope it to test center organisation id
+     *
+     * @param array $params
+     * @return array
+     * @throws \common_exception_NotFound
+     */
     public function fetch(array $params = [])
     {
         $id = $this->getOrganisationIdFromOption($params);
