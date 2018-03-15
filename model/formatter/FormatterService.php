@@ -40,7 +40,7 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
      */
     public function format(\core_kernel_classes_Resource $resource, array $options = [])
     {
-        if (array_key_exists(self::OPTION_INCLUDED_PROPERTIES, $options) && $options[self::OPTION_EXCLUDED_FIELDS] === true) {
+        if (array_key_exists(self::OPTION_INCLUDED_PROPERTIES, $options) && $options[self::OPTION_INCLUDED_PROPERTIES] === true) {
             $withProperties = true;
         } else {
             $withProperties = false;
