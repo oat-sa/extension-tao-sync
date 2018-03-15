@@ -21,6 +21,7 @@
 namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\extension\AbstractAction;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\SyncService;
 
 class SynchronizeData extends AbstractAction
@@ -29,22 +30,26 @@ class SynchronizeData extends AbstractAction
     {
         $type = null;
 
+        $options = [];
+
         foreach ($params as $key => $param) {
             if (strpos($param, '=') !== false) {
                 list($option, $value) = explode('=', $param);
             } else {
-                $option = $key;
-                $value = $param;
+                $option = $param;
+                $value = null;
             }
 
-            switch ($option) {
-                case '--type':
-                    $type = $value;
-                    break;
+            if ($option == '--type' && !is_null($value)) {
+                $type = $value;
+            }
+
+            if ($option == '--orgId' && !is_null($value)) {
+                $options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID] = $value;
             }
         }
 
-        return $this->getSyncService()->synchronize($type);
+        return $this->getSyncService()->synchronize($type, $options);
     }
 
     /**

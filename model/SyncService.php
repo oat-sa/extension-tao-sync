@@ -100,7 +100,7 @@ class SyncService extends ConfigurableService
      * Fetch the data related to the given synchronizer $type
      *
      * Add query option to chunk the data set
-     * Add an additional 'nextCallUrl' parameter as callBack for next chunk (see $this->>synchronizeType())
+     * Add an additional 'nextCallUrl' parameter as callBack for next chunk (see $this->synchronizeType())
      * nextCallUrl is added only if there are chunk+1 records. The '+1' will be the start of next call
      *
      * @param $type
@@ -111,7 +111,7 @@ class SyncService extends ConfigurableService
     public function fetch($type, $params)
     {
         $response = [
-            'type' => $type
+            SynchronisationApi::PARAM_TYPE => $type
         ];
 
         $options = $params;
@@ -136,8 +136,8 @@ class SyncService extends ConfigurableService
             $nextEntity = array_pop($entities);
             $params['nextResource'] = $nextEntity['id'];
             $response['nextCallUrl'] = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([
-                'type' => $type,
-                SynchronisationApi::PARAM_PARAMETERS => $params
+                SynchronisationApi::PARAM_TYPE => $type,
+                SynchronisationApi::PARAM_PARAMETERS => $params,
             ]);
         }
 

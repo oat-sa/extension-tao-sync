@@ -18,25 +18,26 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\custom\byOrganisationId;
+namespace oat\taoSync\model\formatter;
 
-use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
-
-trait OrganisationIdTrait
+/**
+ * Interface SynchronizerFormatter
+ *
+ * To define formatter for resource synchronization
+ *
+ * @package oat\taoSync\model\formatter
+ */
+interface SynchronizerFormatter
 {
     /**
-     * Extract the organisation id parameter from $parameters
+     * Format a resource to an array
      *
+     * Add a checksum to identify the resource content
+     * Add resource triples as properties if $withProperties param is true
+     *
+     * @param \core_kernel_classes_Resource $resource
      * @param array $options
-     * @return string The organisation id
-     * @throws \common_exception_NotFound If does not exist
+     * @return array
      */
-    protected function getOrganisationIdFromOption(array $options = [])
-    {
-        if (!isset($options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID])) {
-            $this->logError('Organisation id cannot be retrieved from parameters. Current synchronisation aborted.');
-            throw new \common_exception_NotFound();
-        }
-        return (string) $options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID];
-    }
+    public function format(\core_kernel_classes_Resource $resource, array $options = []);
 }
