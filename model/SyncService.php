@@ -256,7 +256,7 @@ class SyncService extends ConfigurableService
         foreach ($remoteEntities as $remoteEntity) {
             $id = $remoteEntity['id'];
             try {
-                $localEntity = $synchronizer->fetchOne($id);
+                $localEntity = $synchronizer->fetchOne($id, $params);
                 if ($localEntity['checksum'] == $remoteEntity['checksum']) {
                     // up to date
                     $this->report('(' . $synchronizer->getId() . ') Entity "' . $id . '" is already up to date.');
@@ -273,7 +273,7 @@ class SyncService extends ConfigurableService
             }
         }
 
-        return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities, $params = []));
+        return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities, $params));
     }
 
     /**
