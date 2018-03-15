@@ -18,30 +18,15 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\testcenter;
+namespace oat\taoSync\model\synchronizer\custom\byOrganisationId;
 
-use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
-use oat\taoTestCenter\model\TestCenterService;
-
-class RdfTestCenterSynchronizer extends AbstractResourceSynchronizer implements TestCenterSynchronizer
+trait OrganisationIdTrait
 {
-    /**
-     * Get the synchronizer identifier
-     *
-     * @return string
-     */
-    public function getId()
+    protected function getOrganisationIdFromOption(array $options = [])
     {
-        return self::SYNC_TEST_CENTER;
-    }
-
-    /**
-     * Get the root class of entity to synchronize
-     *
-     * @return \core_kernel_classes_Class
-     */
-    protected function getRootClass()
-    {
-        return $this->getClass(TestCenterService::CLASS_URI);
+        if (!isset($options['orgId'])) {
+            throw new \common_exception_NotFound('Organisation id cannot be retrieved from parameters');
+        }
+        return $options['orgId'];
     }
 }

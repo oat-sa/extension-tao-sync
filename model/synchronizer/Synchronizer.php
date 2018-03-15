@@ -91,4 +91,11 @@ interface Synchronizer
      * @param array $entities
      */
     public function updateMultiple(array $entities);
+
+    /**
+     * Allow to fetch tje syunchronizer configuration
+     *
+     * @return mixed
+     */
+    public function getOptions();
 }
