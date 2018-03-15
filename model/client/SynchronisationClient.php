@@ -73,16 +73,16 @@ class SynchronisationClient extends ConfigurableService
      *
      * @param $type
      * @param $entityIds
-     * @param array $options
+     * @param array $params
      * @return mixed
      * @throws \common_Exception
      */
-    public function fetchEntityDetails($type, $entityIds, array $options = [])
+    public function fetchEntityDetails($type, $entityIds, array $params = [])
     {
         $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([
             SynchronisationApi::PARAM_TYPE => $type,
             SynchronisationApi::PARAM_ENTITY_IDS => $entityIds,
-            SynchronisationApi::PARAM_PARAMETERS => $options,
+            SynchronisationApi::PARAM_PARAMETERS => $params,
         ]);
         $method = 'GET';
 
