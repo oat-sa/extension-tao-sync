@@ -206,7 +206,7 @@ class SyncService extends ConfigurableService
         $nextCallUrl = isset($response['nextCallUrl']) ? $response['nextCallUrl'] : null;
         $previousCall = null;
         while (true) {
-            $this->synchronizeEntities($this->getSynchronizer($type), $remoteEntities);
+            $this->synchronizeEntities($this->getSynchronizer($type), $remoteEntities, $params);
             if (is_null($nextCallUrl) || $previousCall == $nextCallUrl) {
                 break;
             }
@@ -232,6 +232,7 @@ class SyncService extends ConfigurableService
      * 4 - Persist the diff array (['create' => [...], 'update' => [...]])
      *
      * @param Synchronizer $synchronizer
+     * @param array $params
      * @param array $remoteEntities
      * @return bool
      * @throws \common_Exception
@@ -239,7 +240,7 @@ class SyncService extends ConfigurableService
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
-    protected function synchronizeEntities(Synchronizer $synchronizer, array $remoteEntities)
+    protected function synchronizeEntities(Synchronizer $synchronizer, array $remoteEntities, $params = [])
     {
         $entities = array(
             'create' => [],
@@ -272,7 +273,7 @@ class SyncService extends ConfigurableService
             }
         }
 
-        return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities));
+        return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities, $params = []));
     }
 
     /**
@@ -301,17 +302,18 @@ class SyncService extends ConfigurableService
      *
      * @param $type
      * @param array $entities
+     * @param array $params
      * @return array
      * @throws \common_Exception
      */
-    protected function getEntityDetails($type, array $entities = [])
+    protected function getEntityDetails($type, array $entities = [], $params = [])
     {
         if (!empty($entities['create'])) {
             $entityIds = [];
             foreach ($entities['create'] as $entity) {
                 $entityIds[] = $entity['id'];
             }
-            $toCreate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds);
+            $toCreate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds, $params);
             $entities['create'] = $toCreate;
         }
 
@@ -320,7 +322,7 @@ class SyncService extends ConfigurableService
             foreach ($entities['update'] as $entity) {
                 $entityIds[] = $entity['id'];
             }
-            $toUpdate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds);
+            $toUpdate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds, $params);
             $entities['update'] = $toUpdate;
         }
 

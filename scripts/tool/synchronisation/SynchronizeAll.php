@@ -28,8 +28,8 @@ class SynchronizeAll extends AbstractAction
     {
         $report = \common_report_Report::createInfo('Synchronizing data');
         try {
-            $report->add(call_user_func($this->propagate(new SynchronizeData()), []));
-            $report->add(call_user_func($this->propagate(new SynchronizeResult()), []));
+            $report->add(call_user_func($this->propagate(new SynchronizeData()), $params));
+            $report->add(call_user_func($this->propagate(new SynchronizeResult()), $params));
         } catch (\Exception $e) {
             $report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
