@@ -21,6 +21,7 @@
 namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\extension\AbstractAction;
+use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\SyncService;
 
@@ -36,16 +37,20 @@ class SynchronizeData extends AbstractAction
             if (strpos($param, '=') !== false) {
                 list($option, $value) = explode('=', $param);
             } else {
-                $option = $param;
-                $value = null;
+                $option = $key;
+                $value = $param;
             }
 
-            if ($option == '--type' && !is_null($value)) {
+            $option = preg_replace('#^\-*#', '', $option);
+
+            if (is_null($value) || is_null($option) || is_int($option)) {
+                continue;
+            }
+
+            if ($option == SynchronisationApi::PARAM_TYPE) {
                 $type = $value;
-            }
-
-            if ($option == '--orgId' && !is_null($value)) {
-                $options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID] = $value;
+            } else {
+                $options[$option] = $value;
             }
         }
 

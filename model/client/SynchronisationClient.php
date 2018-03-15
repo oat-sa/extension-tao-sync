@@ -56,7 +56,10 @@ class SynchronisationClient extends ConfigurableService
      */
     public function fetchEntityChecksums($type, $params)
     {
-        $url = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_PARAMETERS => $params]);
+        $url = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([
+            SynchronisationApi::PARAM_TYPE => $type,
+            SynchronisationApi::PARAM_PARAMETERS => $params,
+        ]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -70,12 +73,17 @@ class SynchronisationClient extends ConfigurableService
      *
      * @param $type
      * @param $entityIds
+     * @param array $options
      * @return mixed
      * @throws \common_Exception
      */
-    public function fetchEntityDetails($type, $entityIds)
+    public function fetchEntityDetails($type, $entityIds, array $options = [])
     {
-        $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_ENTITY_IDS => $entityIds]);
+        $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([
+            SynchronisationApi::PARAM_TYPE => $type,
+            SynchronisationApi::PARAM_ENTITY_IDS => $entityIds,
+            SynchronisationApi::PARAM_PARAMETERS => $options,
+        ]);
         $method = 'GET';
 
         /** @var Response $response */
@@ -162,6 +170,8 @@ class SynchronisationClient extends ConfigurableService
     /**
      * json_decode the body content of given response
      *
+     * Parse error to have a readable message if http code is not 2**
+     *
      * @param ResponseInterface $response
      * @return mixed
      * @throws \common_Exception
@@ -171,7 +181,7 @@ class SynchronisationClient extends ConfigurableService
         if (!preg_match('/2\d\d/', (string) $response->getStatusCode())) {
             $message = 'An error has occurred during calling synchronisation server. Http code : ' . $response->getStatusCode() . '. ';
             $body = json_decode($response->getBody()->getContents(), true);
-            if (JSON_ERROR_NONE === json_last_error() && isset($body['errorMsg'])) {
+            if (JSON_ERROR_NONE === json_last_error() && isset($body['errorMsg']) && !empty($body['errorMsg'])) {
                 $message .= 'Message : ' . $body['errorMsg'];
             }
             throw new \common_Exception($message);
