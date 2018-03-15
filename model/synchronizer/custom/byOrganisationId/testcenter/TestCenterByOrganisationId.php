@@ -64,7 +64,7 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
     }
 
     /**
-     * Get a list of entities
+     * Get a list of testcenters
      *
      * Scope it to test center organisation id
      *

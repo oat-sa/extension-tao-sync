@@ -20,53 +20,79 @@
 
 namespace oat\taoSync\model\synchronizer\custom\byOrganisationId\user;
 
+use oat\generis\model\GenerisRdf;
 use oat\generis\model\kernel\persistence\smoothsql\search\ComplexSearchService;
-use oat\generis\model\kernel\persistence\smoothsql\search\QueryJoiner;
+use oat\search\helper\SupportedOperatorHelper;
+use oat\taoSync\model\Entity;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
 use oat\taoSync\model\synchronizer\user\proctor\RdfProctorSynchronizer;
 use oat\taoTestCenter\model\ProctorManagementService;
-use oat\taoTestCenter\model\TestCenterService;
+use oat\search\base\exception\SearchGateWayExeption;
 
 class ProctorByOrganisationId extends RdfProctorSynchronizer
 {
     use OrganisationIdTrait;
 
-    public function fetch(array $options = [])
+    /**
+     * Get a list of proctors
+     *
+     * Scope it to test center organisation id
+     *
+     * @param array $params
+     * @return array
+     * @throws \common_Exception
+     * @throws \common_exception_NotFound
+     */
+    public function fetch(array $params = [])
     {
-        $id = $this->getOrganisationIdFromOption($options);
+        $orgId = $this->getOrganisationIdFromOption($params);
+        $testcenters = $this->getTestCentersByOrganisationId($orgId);
 
-        /** @var ComplexSearchService $search */
-        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
-        $queryBuilder = $search->query();
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
-        $queryBuilder->setCriteria($query);
-        $queryBuilder2 = $search->query();
-        $query2 = $search->searchType($queryBuilder2, TestCenterService::CLASS_URI, true);
-        $query2->add('http://www.taotesting.com/ontologies/synchro.rdf#organisationId')->equals($id);
-        $queryBuilder2->setCriteria($query2);
-        /** @var QueryJoiner $joiner */
-        $joiner = $search->getGateway()->getJoiner();
-        $joiner->setQuery($queryBuilder)
-            ->join($queryBuilder2)
-            ->on(ProctorManagementService::PROPERTY_ASSIGNED_PROCTOR_URI);
-//        $joiner->sort($sorting);
-//
-//        if (!is_null($offset)) {
-//            $joiner->setOffset($offset);
-//        }
-//
-//        if (!is_null($limit)) {
-//            $joiner->setLimit($limit);
-//        }
-//
-        $results = $search->getGateway()->join($joiner);
-        $values = [];
-        if ($results->total() > 0) {
-            foreach ($results as $resource) {
-                $instance = $this->format($resource);
-                $values[$instance['id']] = $instance;
+        $proctorResources = [];
+        /** @var \core_kernel_classes_Resource $eligibility */
+        foreach ($testcenters as $testcenter) {
+            $proctors = $this->getProctorsByTestCenter($testcenter, $params);
+            foreach ($proctors as $proctor) {
+                $proctorResources[$proctor->getUri()] = $proctor;
             }
         }
-        return $values;
+
+        return $this->postApplyQueryOptions($proctorResources, $params);
+    }
+
+    /**
+     * Get administrator associated to given $testcenter
+     *
+     * Fetch only proctor role
+     * 
+     * @param \core_kernel_classes_Resource $testcenter
+     * @param $params
+     * @return array
+     */
+    protected function getProctorsByTestCenter(\core_kernel_classes_Resource $testcenter, $params)
+    {
+        /** @var ComplexSearchService $search */
+        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
+
+        $queryBuilder = $search->query();
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $query->add(GenerisRdf::PROPERTY_USER_ROLES)->equals($this->getUserRole());
+        $query->add(ProctorManagementService::PROPERTY_ASSIGNED_PROCTOR_URI)->equals($testcenter->getUri());
+        if (isset($params['startCreatedAt'])) {
+            $query->addCriterion(Entity::CREATED_AT, SupportedOperatorHelper::GREATER_THAN_EQUAL, $params['startCreatedAt']);
+        }
+        $queryBuilder->setCriteria($query);
+
+        try {
+            $values = [];
+            $results = $search->getGateway()->search($queryBuilder);
+            foreach ($results as $result) {
+                $values[] = $this->getResource($result);
+            }
+            return $values;
+        } catch (SearchGateWayExeption $e) {
+            $this->logError('SQL error during processiong of ' . __METHOD__ . ' : ' . $e->getMessage());
+            return [];
+        }
     }
 }

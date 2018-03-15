@@ -32,45 +32,32 @@ class DeliveryByOrganisationId extends RdfDeliverySynchronizer
 {
     use OrganisationIdTrait;
 
-    public function fetch(array $options = [])
+    /**
+     * Get a list of delivery
+     *
+     * Scope it to eligibilities associated to test center organisation id
+     *
+     * @param array $params
+     * @return array
+     * @throws \common_Exception
+     * @throws \common_exception_NotFound
+     */
+    public function fetch(array $params = [])
     {
-        $id = $this->getOrganisationIdFromOption($options);
+        $orgId = $this->getOrganisationIdFromOption($params);
+        $eligibilities = $this->getEligibilitiesByOrganisationId($orgId);
 
-        /** @var ComplexSearchService $search */
-        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
-
-        $queryBuilder = $search->query();
-        $query = $search->searchType($queryBuilder, EligibilityService::CLASS_URI, true);
-        $queryBuilder->setCriteria($query);
-
-        $queryBuilder2 = $search->query();
-        $query2 = $search->searchType($queryBuilder2, TestCenterService::CLASS_URI, true)
-            ->add(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY)->equals($id);
-        $queryBuilder2->setCriteria($query2);
-
-        /** @var QueryJoiner $joiner */
-        $joiner = $search->getGateway()->getJoiner();
-        $joiner->setQuery($queryBuilder)
-            ->join($queryBuilder2)
-            ->on(EligibilityService::PROPERTY_TESTCENTER_URI);
-
-        $results = $search->getGateway()->join($joiner);
-        $values = [];
-        if ($results->total() > 0) {
-            /** @var \core_kernel_classes_Resource $resource */
-            foreach ($results as $resource) {
-                $deliveryUris = $resource->getPropertyValues($this->getProperty(EligibilityService::PROPERTY_DELIVERY_URI));
-                foreach ($deliveryUris as $deliveryUri) {
-                    $delivery = $this->getResource($deliveryUri);
-                    if ($delivery->exists()) {
-                        $instance = $this->format($delivery);
-                        $values[$instance['id']] = $instance;
-                    }
-                }
+        $deliveryResources = [];
+        /** @var \core_kernel_classes_Resource $eligibility */
+        foreach ($eligibilities as $eligibility) {
+            $deliveries = $eligibility->getPropertyValues($this->getProperty(EligibilityService::PROPERTY_DELIVERY_URI));
+            foreach ($deliveries as $delivery) {
+                $deliveryResource = $this->getResource($delivery);
+                $deliveryResources[$deliveryResource->getUri()] = $deliveryResource;
             }
         }
 
-        return $values;
+        return $this->postApplyQueryOptions($deliveryResources, $params);
     }
 
 }

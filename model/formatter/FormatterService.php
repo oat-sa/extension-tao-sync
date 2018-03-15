@@ -46,7 +46,7 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
             $withProperties = false;
         }
 
-        $properties = $this->filterProperties($resource->getRdfTriples()->toArray());
+        $properties = $this->filterProperties($resource->getRdfTriples()->toArray(), $options);
         return [
             'id' => $resource->getUri(),
             'checksum' => $this->hashProperties($properties),

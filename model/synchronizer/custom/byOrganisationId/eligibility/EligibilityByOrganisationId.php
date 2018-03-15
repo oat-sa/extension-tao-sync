@@ -35,38 +35,7 @@ class EligibilityByOrganisationId extends RdfEligibilitySynchronizer
     use OrganisationIdTrait;
 
     /**
-     * Fetch an entity associated to the given id in Rdf storage
-     *
-     * Scope it to test center organisation id
-     *
-     * @param $id
-     * @param array $params
-     * @return array
-     * @throws \common_exception_NotFound
-     * @throws \core_kernel_persistence_Exception
-     */
-    public function fetchOne($id, array $params = [])
-    {
-        $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
-
-        $resource = $this->getResource($id);
-        if (!$resource->exists()) {
-            throw new \common_exception_NotFound('No resource found for id : ' . $id);
-        }
-
-        $orgId = $this->getOrganisationIdFromOption($params);
-        $testCenter = $this->getResource($resource->getOnePropertyValue($this->getProperty(EligibilityService::PROPERTY_TESTCENTER_URI)));
-        $orgIdPropertyValue = $testCenter->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
-
-        if ($orgIdPropertyValue != $orgId) {
-            throw new \common_exception_NotFound('No organisation resource found for id : ' . $id);
-        }
-
-        return $this->format($resource, $withProperties);
-    }
-
-    /**
-     * Get a list of entities
+     * Get a list of eligibilities
      *
      * Scope it to test center organisation id
      *
