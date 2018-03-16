@@ -88,4 +88,16 @@ To import the previously created consumer, connect to client server and enter th
 
 Arguments come from created consumer. The $rootUrl is the domain name of host server
 
+### 3. Scope synchronisation to a test center identifier
+
+To scope synchronisation to test center orgId property the platform needs to register a testcenter property. 
+SyncService has also to register new synchronizers to process by organisation id.
+```bash
+ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\RegisterSyncServiceByOrgId'
+```
+
+_Note_: 
+> The test center organisation id is: http://www.taotesting.com/ontologies/synchro.rdf#organisationId
+
+
 
