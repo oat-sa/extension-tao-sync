@@ -21,6 +21,8 @@
 namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\extension\AbstractAction;
+use oat\taoSync\controller\SynchronisationApi;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\SyncService;
 
 class SynchronizeData extends AbstractAction
@@ -28,6 +30,8 @@ class SynchronizeData extends AbstractAction
     public function __invoke($params)
     {
         $type = null;
+
+        $options = [];
 
         foreach ($params as $key => $param) {
             if (strpos($param, '=') !== false) {
@@ -37,14 +41,20 @@ class SynchronizeData extends AbstractAction
                 $value = $param;
             }
 
-            switch ($option) {
-                case '--type':
-                    $type = $value;
-                    break;
+            $option = preg_replace('#^\-*#', '', $option);
+
+            if (is_null($value) || is_null($option) || is_int($option)) {
+                continue;
+            }
+
+            if ($option == SynchronisationApi::PARAM_TYPE) {
+                $type = $value;
+            } else {
+                $options[$option] = $value;
             }
         }
 
-        return $this->getSyncService()->synchronize($type);
+        return $this->getSyncService()->synchronize($type, $options);
     }
 
     /**

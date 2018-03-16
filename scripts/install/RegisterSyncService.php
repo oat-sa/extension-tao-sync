@@ -59,7 +59,7 @@ class RegisterSyncService extends InstallAction
         $options = array(
             SyncService::OPTION_CHUNK_SIZE => SyncService::DEFAULT_CHUNK_SIZE,
             SyncService::OPTION_SYNCHRONIZERS => array(
-                TestCenterSynchronizer::SYNC_ID => new RdfTestCenterSynchronizer(array(
+                TestCenterSynchronizer::SYNC_TEST_CENTER => new RdfTestCenterSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
@@ -77,7 +77,7 @@ class RegisterSyncService extends InstallAction
                         Entity::CREATED_AT,
                     )
                 )),
-                TestTakerSynchronizer::SYNC_ID => new RdfTestTakerSynchronizer(array(
+                TestTakerSynchronizer::SYNC_TEST_TAKER => new RdfTestTakerSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
