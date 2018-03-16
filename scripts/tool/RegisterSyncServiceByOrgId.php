@@ -56,6 +56,13 @@ class RegisterSyncServiceByOrgId extends InstallAction
 {
     use OntologyAwareTrait;
 
+    /**
+     * Setup the synchronisation to scope it to a test center organisation id property
+     *
+     * @param $params
+     * @return \common_report_Report
+     * @throws \common_Exception
+     */
     public function __invoke($params)
     {
         $this->createOrganisationIdProperty();
@@ -64,6 +71,9 @@ class RegisterSyncServiceByOrgId extends InstallAction
         return \common_report_Report::createSuccess('SyncService successfully registered.');
     }
 
+    /**
+     * Create test center organisation id property
+     */
     protected function createOrganisationIdProperty()
     {
         $property = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
@@ -85,6 +95,14 @@ class RegisterSyncServiceByOrgId extends InstallAction
         ));
     }
 
+    /**
+     * Migrate the SyncService config synchronizers
+     *
+     * If old synchronizer exists migrate it
+     * In all cases register syncrhonizers by orig id
+     *
+     * @throws \common_Exception
+     */
     protected function migrateSyncServiceSynchronizers()
     {
         /** @var SyncService $service */
