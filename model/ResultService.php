@@ -25,12 +25,12 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
+use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
-use oat\taoSync\model\result\DetectTestAndItemIdentifiers;
 use Psr\Log\LogLevel;
 
 /**
@@ -328,7 +328,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     {
         $test = isset($variable['test']) ? $variable['test'] : null;
         $item = isset($variable['item']) ? $variable['item'] : null;
-        return (new DetectTestAndItemIdentifiers())->detect($deliveryId, $test, $item);
+        return (new DetectTestAndItemIdentifiersHelper())->detect($deliveryId, $test, $item);
     }
 
     /**
