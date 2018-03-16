@@ -93,7 +93,7 @@ interface Synchronizer
     public function updateMultiple(array $entities);
 
     /**
-     * Allow to fetch tje syunchronizer configuration
+     * Allow to fetch the synchronizer configuration
      *
      * @return mixed
      */
