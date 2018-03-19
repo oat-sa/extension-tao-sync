@@ -62,7 +62,6 @@ class HandShakeServerResponse
         return [
             'syncUser' => $formatter->format($this->user, [FormatterService::OPTION_INCLUDED_PROPERTIES => true]),
             'oauthInfo' => [
-                'organizationId' => 789,
                 'key' => $this->consumerOauth->getUniquePropertyValue($this->getProperty(DataStore::PROPERTY_OAUTH_KEY))->literal,
                 'secret' => $this->consumerOauth->getUniquePropertyValue($this->getProperty(DataStore::PROPERTY_OAUTH_SECRET))->literal,
                 'tokenUrl' => $this->consumerOauth->getUniquePropertyValue($this->getProperty(ConsumerStorage::CONSUMER_TOKEN_URL))->literal,

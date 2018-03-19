@@ -92,7 +92,6 @@ class HandShakeService extends ConfigurableService
         $key = $oauthData['key'];
         $secret = $oauthData['secret'];
         $tokenUrl = $oauthData['tokenUrl'];
-        $organizationId = $oauthData['organizationId'];
         $action = 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData';
 
         /** @var PublishingService $publishingAuthService */
@@ -126,16 +125,15 @@ class HandShakeService extends ConfigurableService
         $resource->setType($class);
         $resource->setPropertiesValues($properties);
 
-        if ($inserted){
+        if ($inserted && isset($syncUser['properties'][TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY])){
+            $organizationId = $syncUser['properties'][TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY];
             $callable = $this->propagate(new SynchronizeAll());
             $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
             $task = $queueService->createTask($callable, [TestCenterByOrganisationId::OPTION_ORGANISATION_ID => $organizationId], 'Synchronize Data');
             $this->setLastSyncTask($task);
-
-            return true;
         }
 
-        return false;
+        return true;
     }
 
     /**
