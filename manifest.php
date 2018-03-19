@@ -23,7 +23,7 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.7.0',
+    'version' => '0.8.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=17.10.0',
@@ -31,6 +31,7 @@ return array(
         'taoPublishing' => '>=0.7.2',
         'taoTestCenter' => '>=3.7.0',
         'taoTaskQueue' => '>=0.14.3',
+        'taoDeliveryRdf' => '>=4.8.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
