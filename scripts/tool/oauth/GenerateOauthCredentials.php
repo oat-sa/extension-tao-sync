@@ -31,13 +31,13 @@ class GenerateOauthCredentials extends GenerateCredentials
      *
      * @return \common_report_Report
      */
-    public function __invoke($params)
+    public function run()
     {
-        $report = parent::__invoke([]);
+        $report = parent::run();
 
         $this->addSyncRole($this->createdConsumer);
 
-        if (in_array('-cmd', $params)) {
+        if ($this->hasOption('command-output')) {
             return \common_report_Report::createInfo(
                 'php index.php \'' . ImportOauthCredentials::class . '\'' .
                 ' -k ' . $this->key .
@@ -49,6 +49,20 @@ class GenerateOauthCredentials extends GenerateCredentials
 
         return $report;
     }
+
+    protected function provideOptions()
+    {
+        return [
+            'command-output' => [
+                'prefix' => 'cmd',
+                'longPrefix' => 'command-output',
+                'flag' => true,
+                'defaultValue' => 0,
+                'description' => 'Print the command to import generated credentials.',
+            ],
+        ];
+    }
+
 
     /**
      * Add sync role to consumer user

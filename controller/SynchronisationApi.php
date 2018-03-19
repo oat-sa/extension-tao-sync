@@ -21,6 +21,7 @@
 namespace oat\taoSync\controller;
 
 use oat\taoOauth\model\OauthController;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 

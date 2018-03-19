@@ -36,14 +36,20 @@ trait OrganisationIdTrait
      * Extract the organisation id parameter from $parameters
      *
      * @param array $options
-     * @return string The organisation id
-     * @throws \common_exception_NotFound If it is not found
+     * @return string
+     * @throws \common_exception_Error
+     * @throws \common_exception_NotFound
      */
     protected function getOrganisationIdFromOption(array $options = [])
     {
         if (!isset($options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID])) {
-            $this->logError('Organisation id cannot be retrieved from parameters. Current synchronisation aborted.');
-            throw new \common_exception_NotFound();
+            $ids = \common_session_SessionManager::getSession()->getUserPropertyValues($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
+            $id = reset($ids);
+            if (empty($id)) {
+                $this->logError('Organisation id cannot be retrieved from parameters. Current synchronisation aborted.');
+                throw new \common_exception_NotFound();
+            }
+            $options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID] = $id;
         }
         return (string) $options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID];
     }
