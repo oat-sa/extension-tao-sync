@@ -95,8 +95,9 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
             $type = $this->getRequestParameter(self::PARAM_TYPE);
             $entityIds = $this->getRequestParameter(self::PARAM_ENTITY_IDS);
             $entityIds = is_array($entityIds) ? $entityIds : [$entityIds];
+            $params = $this->hasRequestParameter(self::PARAM_PARAMETERS) ? $this->getRequestParameter(self::PARAM_PARAMETERS) : [];
 
-            $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds));
+            $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds, $params));
 
         } catch (\Exception $e) {
             $this->returnFailure($e);

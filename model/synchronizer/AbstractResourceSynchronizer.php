@@ -247,10 +247,10 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      * Add resource triples as properties if $withProperties param is true
      *
      * @param \core_kernel_classes_Resource $resource
-     * @param $withProperty
+     * @param boolean $withProperties
      * @return array
      */
-    public function format(\core_kernel_classes_Resource $resource, $withProperty = false)
+    public function format(\core_kernel_classes_Resource $resource, $withProperties = false)
     {
         $options = [
             FormatterService::OPTION_ONLY_FIELDS => is_array($this->getOption(self::OPTIONS_FIELDS))
@@ -259,7 +259,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             FormatterService::OPTION_EXCLUDED_FIELDS => is_array($this->getOption(self::OPTIONS_EXCLUDED_FIELDS))
                 ? $this->getOption(self::OPTIONS_EXCLUDED_FIELDS)
                 : [],
-            FormatterService::OPTION_INCLUDED_PROPERTIES => $withProperty
+            FormatterService::OPTION_INCLUDED_PROPERTIES => $withProperties
         ];
 
         return $this->getFormatter()->format($resource, $options);

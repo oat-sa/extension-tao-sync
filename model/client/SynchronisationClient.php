@@ -25,6 +25,7 @@ use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+use Psr\Http\Message\ResponseInterface;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\ResultApi;
 use oat\taoSync\controller\SynchronisationApi;
@@ -55,15 +56,15 @@ class SynchronisationClient extends ConfigurableService
      */
     public function fetchEntityChecksums($type, $params)
     {
-        $url = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_PARAMETERS => $params]);
+        $url = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([
+            SynchronisationApi::PARAM_TYPE => $type,
+            SynchronisationApi::PARAM_PARAMETERS => $params,
+        ]);
         $method = 'GET';
 
         /** @var Response $response */
         $response = $this->call($url, $method);
-        if ($response->getStatusCode() != 200) {
-            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
-        }
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->decodeResponseBody($response);
     }
 
     /**
@@ -72,20 +73,22 @@ class SynchronisationClient extends ConfigurableService
      *
      * @param $type
      * @param $entityIds
+     * @param array $params
      * @return mixed
      * @throws \common_Exception
      */
-    public function fetchEntityDetails($type, $entityIds)
+    public function fetchEntityDetails($type, $entityIds, array $params = [])
     {
-        $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_ENTITY_IDS => $entityIds]);
+        $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([
+            SynchronisationApi::PARAM_TYPE => $type,
+            SynchronisationApi::PARAM_ENTITY_IDS => $entityIds,
+            SynchronisationApi::PARAM_PARAMETERS => $params,
+        ]);
         $method = 'GET';
 
         /** @var Response $response */
         $response = $this->call($url, $method);
-        if ($response->getStatusCode() != 200) {
-            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
-        }
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->decodeResponseBody($response);
     }
 
     /**
@@ -106,10 +109,7 @@ class SynchronisationClient extends ConfigurableService
 
         /** @var Response $response */
         $response = $this->call($url, $method);
-        if ($response->getStatusCode() != 200) {
-            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
-        }
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->decodeResponseBody($response);
     }
 
     /**
@@ -126,7 +126,7 @@ class SynchronisationClient extends ConfigurableService
         $method = 'GET';
 
         $response = $this->call($url, $method);
-        if ($response->getStatusCode() != 200) {
+        if (!preg_match('/2\d\d/', (string) $response->getStatusCode())) {
             throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
         }
         return $response->getBody();
@@ -148,10 +148,7 @@ class SynchronisationClient extends ConfigurableService
     {
         /** @var Response $response */
         $response = $this->call($url, $method, $body);
-        if ($response->getStatusCode() != 200) {
-            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
-        }
-        return json_decode($response->getBody()->getContents(), true);
+        return $this->decodeResponseBody($response);
     }
 
     /**
@@ -167,8 +164,27 @@ class SynchronisationClient extends ConfigurableService
         $method = 'POST';
 
         $response = $this->call($url, $method, json_encode([ResultApi::PARAM_RESULTS => $results]));
-        if ($response->getStatusCode() != 200) {
-            throw new \common_Exception('An error has occurred during calling remote server with message : ' . $response->getBody()->getContents());
+        return $this->decodeResponseBody($response);
+    }
+
+    /**
+     * json_decode the body content of given response
+     *
+     * Parse error to have a readable message if http code is not 2**
+     *
+     * @param ResponseInterface $response
+     * @return mixed
+     * @throws \common_Exception
+     */
+    protected function decodeResponseBody(ResponseInterface $response)
+    {
+        if (!preg_match('/2\d\d/', (string) $response->getStatusCode())) {
+            $message = 'An error has occurred during calling synchronisation server. Http code : ' . $response->getStatusCode() . '. ';
+            $body = json_decode($response->getBody()->getContents(), true);
+            if (JSON_ERROR_NONE === json_last_error() && isset($body['errorMsg']) && !empty($body['errorMsg'])) {
+                $message .= 'Message : ' . $body['errorMsg'];
+            }
+            throw new \common_Exception($message);
         }
         return json_decode($response->getBody()->getContents(), true);
     }

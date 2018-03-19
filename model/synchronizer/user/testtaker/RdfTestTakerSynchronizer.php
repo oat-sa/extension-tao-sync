@@ -33,7 +33,7 @@ class RdfTestTakerSynchronizer extends UserSynchronizer implements TestTakerSync
      */
     public function getId()
     {
-        return self::SYNC_ID;
+        return self::SYNC_TEST_TAKER;
     }
 
     /**
