@@ -36,7 +36,8 @@ class RegisterHandShakeService extends InstallAction
     public function __invoke($params)
     {
         $handShake = new HandShakeService([
-            HandShakeService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/handShake'
+            HandShakeService::OPTION_ROOT_URL => 'http://tao.dev/',
+            HandShakeService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
         ]);
 
         $this->registerService(HandShakeService::SERVICE_ID, $handShake);
