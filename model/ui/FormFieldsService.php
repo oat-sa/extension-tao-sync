@@ -66,6 +66,7 @@ class FormFieldsService extends ConfigurableService
             'attributes' => []
         ];
         $values = \common_session_SessionManager::getSession()->getUser()->getPropertyValues(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
+        $organizationId = null;
         if (count($values) > 0){
             $organizationId = $values[0];
         }
