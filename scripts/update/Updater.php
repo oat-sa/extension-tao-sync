@@ -73,8 +73,8 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.3.0');
         }
 
-        $this->skip('0.3.0', '0.8.0');
-        if ($this->isVersion('0.8.0')){
+        $this->skip('0.3.0', '0.9.0');
+        if ($this->isVersion('0.9.0')){
             $handShakeService = new HandShakeService([
                 HandShakeService::OPTION_ROOT_URL => 'http://tao.dev/',
                 HandShakeService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
@@ -86,7 +86,7 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->registerService(HandShakeServerService::SERVICE_ID, $handShakeServerService);
 
-            $this->setVersion('0.9.0');
+            $this->setVersion('0.10.0');
         }
     }
 }
