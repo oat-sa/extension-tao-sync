@@ -120,6 +120,6 @@ class HandShakeClientService extends ConfigurableService
         $resource->setType($class);
         $resource->setPropertiesValues($properties);
 
-        return true;
+        return $inserted;
     }
 }
