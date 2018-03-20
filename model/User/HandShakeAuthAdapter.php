@@ -34,9 +34,14 @@ class HandShakeAuthAdapter extends AuthAdapter
        try {
            return parent::authenticate();
        } catch (\core_kernel_users_InvalidLoginException $exception){
-           if ($this->handShakeWithServer()){
-               return parent::authenticate();
+           try {
+               if ($this->handShakeWithServer()){
+                   return parent::authenticate();
+               }
+           }catch (\Exception $exception){
+               new \core_kernel_users_InvalidLoginException();
            }
+
        }
     }
 
