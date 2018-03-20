@@ -80,11 +80,11 @@ class Updater extends \common_ext_ExtensionUpdater
                 HandShakeService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
             ]);
 
-            $this->registerService(HandShakeService::SERVICE_ID, $handShakeService);
+            $this->getServiceManager()->register(HandShakeService::SERVICE_ID, $handShakeService);
 
             $handShakeServerService = new HandShakeServerService([]);
 
-            $this->registerService(HandShakeServerService::SERVICE_ID, $handShakeServerService);
+            $this->getServiceManager()->register(HandShakeServerService::SERVICE_ID, $handShakeServerService);
 
             $this->setVersion('0.10.0');
         }
