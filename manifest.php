@@ -23,7 +23,7 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.10.0',
+    'version' => '0.10.1',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=17.10.0',
