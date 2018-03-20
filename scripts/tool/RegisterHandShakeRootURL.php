@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\tool;
 
 
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\User\HandShakeService;
+use oat\taoSync\model\User\HandShakeClientService;
 
 /**
  * Class RegisterHandShakeRootURL
@@ -48,12 +48,12 @@ class RegisterHandShakeRootURL extends InstallAction
             throw new \Exception('Please specify the --rootUrl=...');
         }
 
-        /** @var HandShakeService $service */
-        $service = $this->getServiceManager()->get(HandShakeService::SERVICE_ID);
-        $service->setOption(HandShakeService::OPTION_ROOT_URL, $rootUrl);
-        $service->setOption(HandShakeService::OPTION_REMOTE_AUTH_URL, $rootUrl . 'taoSync/HandShake');
+        /** @var HandShakeClientService $service */
+        $service = $this->getServiceManager()->get(HandShakeClientService::SERVICE_ID);
+        $service->setOption(HandShakeClientService::OPTION_ROOT_URL, $rootUrl);
+        $service->setOption(HandShakeClientService::OPTION_REMOTE_AUTH_URL, $rootUrl . 'taoSync/HandShake');
 
-        $this->registerService(HandShakeService::SERVICE_ID, $service);
+        $this->registerService(HandShakeClientService::SERVICE_ID, $service);
 
         return \common_report_Report::createSuccess('HandShakeService root url successfully registered.');
     }

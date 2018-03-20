@@ -23,7 +23,7 @@ namespace oat\taoSync\scripts\update;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\model\server\HandShakeServerService;
-use oat\taoSync\model\User\HandShakeService;
+use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 
@@ -75,12 +75,12 @@ class Updater extends \common_ext_ExtensionUpdater
 
         $this->skip('0.3.0', '0.9.0');
         if ($this->isVersion('0.9.0')){
-            $handShakeService = new HandShakeService([
-                HandShakeService::OPTION_ROOT_URL => 'http://tao.dev/',
-                HandShakeService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
+            $handShakeService = new HandShakeClientService([
+                HandShakeClientService::OPTION_ROOT_URL => 'http://tao.dev/',
+                HandShakeClientService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
             ]);
 
-            $this->getServiceManager()->register(HandShakeService::SERVICE_ID, $handShakeService);
+            $this->getServiceManager()->register(HandShakeClientService::SERVICE_ID, $handShakeService);
 
             $handShakeServerService = new HandShakeServerService([]);
 

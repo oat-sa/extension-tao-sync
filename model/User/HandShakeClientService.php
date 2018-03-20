@@ -39,7 +39,7 @@ use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
 use oat\taoTaskQueue\model\Task\TaskInterface;
 
-class HandShakeService extends ConfigurableService
+class HandShakeClientService extends ConfigurableService
 {
     use LoggerAwareTrait;
     use OntologyAwareTrait;
@@ -50,11 +50,11 @@ class HandShakeService extends ConfigurableService
     const OPTION_REMOTE_AUTH_URL = 'remoteAuthURL';
 
     /**
-     * @param HandShakeRequest $handShakeRequest
+     * @param HandShakeClientRequest $handShakeRequest
      * @return bool|\core_kernel_classes_Resource
      * @throws \Exception
      */
-    public function execute(HandShakeRequest $handShakeRequest)
+    public function execute(HandShakeClientRequest $handShakeRequest)
     {
         $client = new Client();
         $request = new Request('POST',

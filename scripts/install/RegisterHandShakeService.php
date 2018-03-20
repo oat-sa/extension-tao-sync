@@ -21,7 +21,7 @@
 namespace oat\taoSync\scripts\install;
 
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\User\HandShakeService;
+use oat\taoSync\model\User\HandShakeClientService;
 
 /**
  * sudo -u www-data php index.php 'oat\taoSync\scripts\install\RegisterHandShakeService'
@@ -35,12 +35,12 @@ class RegisterHandShakeService extends InstallAction
      */
     public function __invoke($params)
     {
-        $handShake = new HandShakeService([
-            HandShakeService::OPTION_ROOT_URL => 'http://tao.dev/',
-            HandShakeService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
+        $handShake = new HandShakeClientService([
+            HandShakeClientService::OPTION_ROOT_URL => 'http://tao.dev/',
+            HandShakeClientService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
         ]);
 
-        $this->registerService(HandShakeService::SERVICE_ID, $handShake);
+        $this->registerService(HandShakeClientService::SERVICE_ID, $handShake);
 
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'HandShakeService was registered.');
     }

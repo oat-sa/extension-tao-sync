@@ -21,7 +21,7 @@
 namespace oat\taoSync\model\User;
 
 
-class HandShakeRequest
+class HandShakeClientRequest
 {
     /** @var string */
     protected $login;
