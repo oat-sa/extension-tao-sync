@@ -33,11 +33,6 @@ use oat\taoOauth\model\OAuthClient;
 use oat\taoOauth\model\storage\ConsumerStorage;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\history\DataSyncHistoryService;
-use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
-use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
-use oat\taoTaskQueue\model\QueueDispatcherInterface;
-use oat\taoTaskQueue\model\Task\TaskInterface;
 
 class HandShakeClientService extends ConfigurableService
 {
@@ -125,22 +120,6 @@ class HandShakeClientService extends ConfigurableService
         $resource->setType($class);
         $resource->setPropertiesValues($properties);
 
-        if ($inserted && isset($syncUser['properties'][TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY])){
-            $organizationId = $syncUser['properties'][TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY];
-            $callable = $this->propagate(new SynchronizeAll());
-            $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
-            $task = $queueService->createTask($callable, [TestCenterByOrganisationId::OPTION_ORGANISATION_ID => $organizationId], 'Synchronize Data');
-            $this->setLastSyncTask($task);
-        }
-
         return true;
-    }
-
-    /**
-     * @param TaskInterface $task
-     */
-    protected function setLastSyncTask($task)
-    {
-        $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->setPropertyValue($this->getProperty(DataSyncHistoryService::SYNCHRO_TASK), $task->getId());
     }
 }
