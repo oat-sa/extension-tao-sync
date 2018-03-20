@@ -23,12 +23,12 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.9.0',
+    'version' => '0.10.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=17.10.0',
         'taoOauth' => '>=0.1.0',
-        'taoPublishing' => '>=0.7.2',
+        'taoPublishing' => '>=0.8.0',
         'taoTestCenter' => '>=3.7.0',
         'taoTaskQueue' => '>=0.14.3',
         'taoDeliveryRdf' => '>=4.8.0',
@@ -48,6 +48,8 @@ return array(
             \oat\taoSync\scripts\install\AttachEvents::class,
             \oat\taoSync\scripts\install\RegisterSyncFilesystem::class,
             \oat\taoSync\scripts\install\InstallSynchronisationHistory::class,
+            \oat\taoSync\scripts\install\RegisterHandShakeService::class,
+            \oat\taoSync\scripts\install\RegisterHandShakeServerService::class,
         ]
     ],
     'uninstall' => array(

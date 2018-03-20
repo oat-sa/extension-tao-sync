@@ -85,6 +85,38 @@ class GenerateOauthCredentials extends GenerateCredentials
     }
 
     /**
+     * @return mixed
+     */
+    public function getCreatedConsumer()
+    {
+        return $this->createdConsumer;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getKey()
+    {
+        return $this->key;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSecret()
+    {
+        return $this->secret;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTokenUrl()
+    {
+        return $this->tokenUrl;
+    }
+
+    /**
      * @return UserService
      */
     protected function getUserService()

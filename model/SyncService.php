@@ -45,6 +45,7 @@ class SyncService extends ConfigurableService
 
     const SERVICE_ID = 'taoSync/syncService';
     const TAO_SYNC_ROLE = 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager';
+    const PROPERTY_CONSUMER_USER = 'http://www.tao.lu/Ontologies/taoSync.rdf#ConsumerUser';
 
     const OPTION_SYNCHRONIZERS = 'synchronizers';
     const OPTION_CHUNK_SIZE = 'chunkSize';

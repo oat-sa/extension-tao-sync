@@ -20,6 +20,8 @@
 
 namespace oat\taoSync\model\synchronizer;
 
+use oat\taoSync\model\formatter\SynchronizerFormatter;
+
 interface Synchronizer
 {
     /**
@@ -98,4 +100,9 @@ interface Synchronizer
      * @return mixed
      */
     public function getOptions();
+
+    /**
+     * @return SynchronizerFormatter
+     */
+    public function getFormatter();
 }
