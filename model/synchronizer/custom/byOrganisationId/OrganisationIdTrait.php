@@ -137,6 +137,9 @@ trait OrganisationIdTrait
         $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
         /** @var \core_kernel_classes_Resource $resource */
         foreach ($resources as $resource) {
+            if (!$resource->exists()) {
+                continue;
+            }
             $createdAt = $resource->getUniquePropertyValue($this->getProperty(Entity::CREATED_AT))->literal;
             $sortedInstances[$createdAt] = $this->format($resource, $withProperties);
         }
