@@ -28,6 +28,7 @@ use oat\generis\model\OntologyRdfs;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use function GuzzleHttp\Psr7\stream_for;
+use oat\tao\model\TaoOntology;
 use oat\taoOauth\model\bootstrap\OAuth2Type;
 use oat\taoOauth\model\OAuthClient;
 use oat\taoOauth\model\storage\ConsumerStorage;
@@ -113,7 +114,7 @@ class HandShakeClientService extends ConfigurableService
         if (isset($properties[OntologyRdf::RDF_TYPE])) {
             $class = $this->getClass($properties[OntologyRdf::RDF_TYPE]);
         } else {
-            $class = $this->getRootClass();
+            $class = $this->getClass(TaoOntology::CLASS_URI_TAO_USER);
         }
 
         $resource = $this->getResource($syncUser['id']);

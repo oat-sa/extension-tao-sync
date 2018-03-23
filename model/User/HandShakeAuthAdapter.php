@@ -21,28 +21,31 @@
 namespace oat\taoSync\model\User;
 
 use oat\generis\model\user\AuthAdapter;
+use oat\oatbox\log\LoggerAwareTrait;
 use oat\oatbox\service\ServiceManager;
 
 class HandShakeAuthAdapter extends AuthAdapter
 {
+    use LoggerAwareTrait;
+
     /**
      * @return \common_user_User|void
      * @throws \Exception
      */
     public function authenticate()
     {
-       try {
-           return parent::authenticate();
-       } catch (\core_kernel_users_InvalidLoginException $exception){
-           try {
-               if ($this->handShakeWithServer()){
-                   return parent::authenticate();
-               }
-           }catch (\Exception $exception){
-               new \core_kernel_users_InvalidLoginException();
-           }
-
-       }
+        try {
+            return parent::authenticate();
+        } catch (\core_kernel_users_InvalidLoginException $exception) {
+            try {
+                if ($this->handShakeWithServer()) {
+                    return parent::authenticate();
+                }
+            } catch (\Exception $exception) {
+                $this->logError($exception->getMessage());
+                new \core_kernel_users_InvalidLoginException();
+            }
+        }
     }
 
     /**
