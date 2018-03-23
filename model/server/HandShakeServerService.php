@@ -36,18 +36,18 @@ class HandShakeServerService extends ConfigurableService
 
     /**
      * @param $userIdentifier
-     * @throws \core_kernel_persistence_Exception
-     * @throws \Exception
+     * @return HandShakeServerResponse
+     * @throws InvalidRoleForSync
+     * @throws \common_exception_BadRequest
      */
     public function execute($userIdentifier)
     {
-        $user = core_kernel_users_Service::singleton()->getOneUser($userIdentifier);
+        $user = $this->getUsersService()->getOneUser($userIdentifier);
         if (!in_array(SyncService::TAO_SYNC_ROLE, $user->getPropertyValues($this->getProperty(GenerisRdf::PROPERTY_USER_ROLES)))) {
-            throw new \Exception('User does not have the '. SyncService::TAO_SYNC_ROLE . ' role.');
+            throw new InvalidRoleForSync('User does not have the '. SyncService::TAO_SYNC_ROLE . ' role.');
         }
 
-        $generator = new GenerateOauthCredentials();
-        $this->propagate($generator);
+        $generator = $this->getGeneratorOauth();
         $generator->__invoke([]);
 
         $user->editPropertyValues(
@@ -55,10 +55,50 @@ class HandShakeServerService extends ConfigurableService
             $generator->getCreatedConsumer()
         );
 
+        $this->triggerEvent($user);
+
+        return new HandShakeServerResponse($generator->getCreatedConsumer(), $user, $this->getFormatter()) ;
+    }
+
+    /**
+     * @return core_kernel_users_Service
+     */
+    protected function getUsersService()
+    {
+        return core_kernel_users_Service::singleton();
+    }
+
+    /**
+     * @return GenerateOauthCredentials
+     */
+    protected function getGeneratorOauth()
+    {
+        $generator = new GenerateOauthCredentials();
+        $this->propagate($generator);
+
+        return $generator;
+    }
+
+    /**
+     * @param $user
+     */
+    protected function triggerEvent($user)
+    {
         /** @var EventManager $eventManager */
         $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
         $eventManager->trigger(new HandShakeServerEvent($user));
+    }
 
-        return new HandShakeServerResponse($generator->getCreatedConsumer(), $user) ;
+    /**
+     * @return \oat\taoSync\model\formatter\SynchronizerFormatter
+     * @throws \common_exception_BadRequest
+     */
+    protected function getFormatter()
+    {
+        /** @var SyncService $syncService */
+        $syncService = $this->getServiceLocator()->get(SyncService::SERVICE_ID);
+        $synchronizer = $syncService->getSynchronizer('administrator');
+
+        return $synchronizer->getFormatter();
     }
 }

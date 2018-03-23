@@ -35,17 +35,28 @@ class HandShakeAuthAdapter extends AuthAdapter
     public function authenticate()
     {
         try {
-            return parent::authenticate();
+            return $this->callParentAuthenticate();
         } catch (\core_kernel_users_InvalidLoginException $exception) {
             try {
                 if ($this->handShakeWithServer()) {
-                    return parent::authenticate();
+                    return $this->callParentAuthenticate();
                 }
+                throw new \core_kernel_users_InvalidLoginException();
+
             } catch (\Exception $exception) {
                 $this->logError($exception->getMessage());
-                new \core_kernel_users_InvalidLoginException();
+                throw new \core_kernel_users_InvalidLoginException();
             }
         }
+    }
+
+    /**
+     * @return \common_user_User
+     * @throws \Exception
+     */
+    protected function callParentAuthenticate()
+    {
+        return parent::authenticate();
     }
 
     /**

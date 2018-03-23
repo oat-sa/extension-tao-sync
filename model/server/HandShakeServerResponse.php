@@ -21,11 +21,10 @@
 namespace oat\taoSync\model\server;
 
 use oat\generis\model\OntologyAwareTrait;
-use oat\oatbox\service\ServiceManager;
 use oat\tao\model\oauth\DataStore;
 use oat\taoOauth\model\storage\ConsumerStorage;
 use oat\taoSync\model\formatter\FormatterService;
-use oat\taoSync\model\SyncService;
+use oat\taoSync\model\formatter\SynchronizerFormatter;
 
 class HandShakeServerResponse
 {
@@ -37,14 +36,23 @@ class HandShakeServerResponse
     /** @var \core_kernel_classes_Resource */
     protected $user;
 
+    /** @var SynchronizerFormatter */
+    protected $formatter;
+
     /**
      * HandShakeServerResponse constructor.
      * @param \core_kernel_classes_Resource $consumerOauth
+     * @param \core_kernel_classes_Resource $user
+     * @param SynchronizerFormatter $formatter
      */
-    public function __construct(\core_kernel_classes_Resource $consumerOauth, \core_kernel_classes_Resource $user)
-    {
+    public function __construct(
+        \core_kernel_classes_Resource $consumerOauth,
+        \core_kernel_classes_Resource $user,
+        SynchronizerFormatter $formatter
+    ){
         $this->consumerOauth = $consumerOauth;
-        $this->user  = $user;
+        $this->user = $user;
+        $this->formatter = $formatter;
     }
 
     /**
@@ -54,13 +62,8 @@ class HandShakeServerResponse
      */
     public function asArray()
     {
-        /** @var SyncService $syncService */
-        $syncService = ServiceManager::getServiceManager()->get(SyncService::SERVICE_ID);
-        $synchronizer = $syncService->getSynchronizer('administrator');
-        $formatter = $synchronizer->getFormatter();
-
         return [
-            'syncUser' => $formatter->format($this->user, [FormatterService::OPTION_INCLUDED_PROPERTIES => true]),
+            'syncUser' => $this->formatter->format($this->user, [FormatterService::OPTION_INCLUDED_PROPERTIES => true]),
             'oauthInfo' => [
                 'key' => $this->consumerOauth->getUniquePropertyValue($this->getProperty(DataStore::PROPERTY_OAUTH_KEY))->literal,
                 'secret' => $this->consumerOauth->getUniquePropertyValue($this->getProperty(DataStore::PROPERTY_OAUTH_SECRET))->literal,
