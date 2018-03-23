@@ -20,6 +20,8 @@
 
 namespace oat\taoSync\model\synchronizer;
 
+use oat\taoSync\model\formatter\SynchronizerFormatter;
+
 interface Synchronizer
 {
     /**
@@ -91,4 +93,16 @@ interface Synchronizer
      * @param array $entities
      */
     public function updateMultiple(array $entities);
+
+    /**
+     * Allow to fetch the synchronizer configuration
+     *
+     * @return mixed
+     */
+    public function getOptions();
+
+    /**
+     * @return SynchronizerFormatter
+     */
+    public function getFormatter();
 }

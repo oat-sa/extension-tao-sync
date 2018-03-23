@@ -18,7 +18,7 @@
  *
  */
 
-namespace oat\taoSync\scripts\tool;
+namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\extension\AbstractAction;
 use oat\taoSync\model\ResultService;

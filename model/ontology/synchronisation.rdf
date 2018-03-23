@@ -2,7 +2,7 @@
 <rdf:RDF
         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
-        xml:base="http://www.taotesting.com/ontologies/blueprint.rdf#"
+        xml:base="http://www.taotesting.com/ontologies/synchro.rdf#"
         xmlns:generis="http://www.tao.lu/Ontologies/generis.rdf#"
 >
 
@@ -34,4 +34,13 @@
         <generis:is_language_dependent rdf:resource="http://www.tao.lu/Ontologies/generis.rdf#False"/>
     </rdf:Description>
 
+    <rdf:Description rdf:about="http://www.taotesting.com/ontologies/synchro.rdf#task">
+        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+        <rdfs:label xml:lang="en-US"><![CDATA[Synchronisation task]]></rdfs:label>
+        <rdfs:comment xml:lang="en-US"><![CDATA[Synchronisation task]]></rdfs:comment>
+        <rdfs:domain rdf:resource="http://www.taotesting.com/ontologies/synchro.rdf#synchro"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <generis:is_language_dependent rdf:resource="http://www.tao.lu/Ontologies/generis.rdf#False"/>
+    </rdf:Description>
+    
 </rdf:RDF>

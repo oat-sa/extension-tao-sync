@@ -25,6 +25,7 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
+use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
@@ -295,6 +296,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * @param $deliveryId
      * @param $deliveryExecutionId
      * @return array
+     * @throws \core_kernel_persistence_Exception
      */
     protected function getDeliveryExecutionVariables($deliveryId, $deliveryExecutionId)
     {
@@ -302,17 +304,31 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         $deliveryExecutionVariables = [];
         foreach ($variables as $variable) {
             $variable = (array) $variable[0];
+            list($testIdentifier,$itemIdentifier) = $this->detectTestAndItemIdentifiers($deliveryId, $variable);
             $deliveryExecutionVariables[] = [
                 'type' => $variable['class'],
                 'callIdTest' => isset($variable['callIdTest'])? $variable['callIdTest'] : null,
                 'callIdItem' => isset($variable['callIdItem']) ? $variable['callIdItem'] : null,
-                'test' => isset($variable['test']) ? $variable['test'] : null,
-                'item' => isset($variable['item']) ? $variable['item'] : null,
+                'test' => $testIdentifier,
+                'item' => $itemIdentifier,
                 'data' => $variable['variable'],
             ];
         }
 
         return $deliveryExecutionVariables;
+    }
+
+    /**
+     * @param $deliveryId
+     * @param $variable
+     * @return array
+     * @throws \core_kernel_persistence_Exception
+     */
+    protected function detectTestAndItemIdentifiers($deliveryId, $variable)
+    {
+        $test = isset($variable['test']) ? $variable['test'] : null;
+        $item = isset($variable['item']) ? $variable['item'] : null;
+        return (new DetectTestAndItemIdentifiersHelper())->detect($deliveryId, $test, $item);
     }
 
     /**

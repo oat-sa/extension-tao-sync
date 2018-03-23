@@ -24,5 +24,5 @@ use oat\taoSync\model\synchronizer\Synchronizer;
 
 interface TestCenterSynchronizer extends Synchronizer
 {
-    const SYNC_ID = 'test-center';
+    const SYNC_TEST_CENTER = 'test-center';
 }

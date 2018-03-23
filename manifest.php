@@ -23,20 +23,24 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.1.0',
+    'version' => '0.10.1',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'tao' => '>=14.16.0',
-        'taoPublishing' => '>=0.5.1',
+        'tao' => '>=17.10.0',
+        'taoOauth' => '>=0.1.0',
+        'taoPublishing' => '>=0.8.0',
         'taoTestCenter' => '>=3.7.0',
+        'taoTaskQueue' => '>=0.14.3',
+        'taoDeliveryRdf' => '>=4.8.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
-    'acl' => array(
-        array('grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', array('ext'=>'taoSync')),
-    ),
-    'install' => array(
+    'acl' => [
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
+    ],
+    'install' => [
         'rdf' => [
             dirname(__FILE__) . '/model/ontology/synchronisation.rdf',
+            dirname(__FILE__). '/model/ontology/taosync.rdf',
         ],
         'php' => [
             \oat\taoSync\scripts\install\RegisterSyncService::class,
@@ -44,8 +48,10 @@ return array(
             \oat\taoSync\scripts\install\AttachEvents::class,
             \oat\taoSync\scripts\install\RegisterSyncFilesystem::class,
             \oat\taoSync\scripts\install\InstallSynchronisationHistory::class,
+            \oat\taoSync\scripts\install\RegisterHandShakeService::class,
+            \oat\taoSync\scripts\install\RegisterHandShakeServerService::class,
         ]
-    ),
+    ],
     'uninstall' => array(
     ),
     'update' => oat\taoSync\scripts\update\Updater::class,

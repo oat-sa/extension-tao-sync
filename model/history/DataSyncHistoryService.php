@@ -50,6 +50,7 @@ class DataSyncHistoryService extends ConfigurableService
 
     const SYNCHRO_URI = 'http://www.taotesting.com/ontologies/synchro.rdf#synchro';
     const SYNCHRO_ID = 'http://www.taotesting.com/ontologies/synchro.rdf#identifier';
+    const SYNCHRO_TASK = 'http://www.taotesting.com/ontologies/synchro.rdf#task';
 
     const ACTION_TOUCHED = 'touched';
     const ACTION_CREATED = 'created';
@@ -166,7 +167,7 @@ class DataSyncHistoryService extends ConfigurableService
     {
         $lastId = $this->getCurrentSynchroId();
         $this->synchroId = $lastId + 1;
-        $this->getResource(self::SYNCHRO_ID)->setPropertyValue($this->getProperty(self::SYNCHRO_ID), $this->synchroId);
+        $this->getResource(self::SYNCHRO_URI)->setPropertyValue($this->getProperty(self::SYNCHRO_ID), $this->synchroId);
         return $this->synchroId;
     }
 
@@ -179,7 +180,7 @@ class DataSyncHistoryService extends ConfigurableService
     protected function getCurrentSynchroId()
     {
         if (!$this->synchroId) {
-            $synchro = $this->getResource(self::SYNCHRO_ID);
+            $synchro = $this->getResource(self::SYNCHRO_URI);
             $synchroIdProperty = $synchro->getOnePropertyValue($this->getProperty(self::SYNCHRO_ID));
             if (is_null($synchroIdProperty)) {
                 $this->synchroId = 0;

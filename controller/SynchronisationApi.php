@@ -20,6 +20,8 @@
 
 namespace oat\taoSync\controller;
 
+use oat\taoOauth\model\OauthController;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
@@ -30,7 +32,7 @@ use oat\taoSync\model\SyncService;
  *
  * @package oat\taoSync\controller
  */
-class SynchronisationApi extends \tao_actions_RestController
+class SynchronisationApi extends \tao_actions_RestController implements OauthController
 {
     const PARAM_TYPE = 'type';
     const PARAM_PARAMETERS = 'params';
@@ -52,7 +54,7 @@ class SynchronisationApi extends \tao_actions_RestController
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
             }
 
             if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
@@ -80,7 +82,7 @@ class SynchronisationApi extends \tao_actions_RestController
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
             }
 
             if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
@@ -94,8 +96,9 @@ class SynchronisationApi extends \tao_actions_RestController
             $type = $this->getRequestParameter(self::PARAM_TYPE);
             $entityIds = $this->getRequestParameter(self::PARAM_ENTITY_IDS);
             $entityIds = is_array($entityIds) ? $entityIds : [$entityIds];
+            $params = $this->hasRequestParameter(self::PARAM_PARAMETERS) ? $this->getRequestParameter(self::PARAM_PARAMETERS) : [];
 
-            $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds));
+            $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds, $params));
 
         } catch (\Exception $e) {
             $this->returnFailure($e);
@@ -113,7 +116,7 @@ class SynchronisationApi extends \tao_actions_RestController
     {
         try {
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted to access ' . __FUNCTION__);
+                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
             }
 
             if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
@@ -149,7 +152,7 @@ class SynchronisationApi extends \tao_actions_RestController
         try {
             // Check if it's post method
             if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only get method is accepted for ' . __METHOD__ . '.');
+                throw new \BadMethodCallException('Only GET method is accepted for ' . __METHOD__ . '.');
             }
 
             if (!$this->hasRequestParameter(self::PARAM_DELIVERY_URI)) {

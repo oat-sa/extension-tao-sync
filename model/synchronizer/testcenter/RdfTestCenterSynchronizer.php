@@ -32,7 +32,7 @@ class RdfTestCenterSynchronizer extends AbstractResourceSynchronizer implements 
      */
     public function getId()
     {
-        return self::SYNC_ID;
+        return self::SYNC_TEST_CENTER;
     }
 
     /**

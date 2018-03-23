@@ -22,9 +22,11 @@ namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdfs;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SynchronisationStart;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
@@ -42,6 +44,8 @@ class SyncService extends ConfigurableService
     use OntologyAwareTrait;
 
     const SERVICE_ID = 'taoSync/syncService';
+    const TAO_SYNC_ROLE = 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager';
+    const PROPERTY_CONSUMER_USER = 'http://www.tao.lu/Ontologies/taoSync.rdf#ConsumerUser';
 
     const OPTION_SYNCHRONIZERS = 'synchronizers';
     const OPTION_CHUNK_SIZE = 'chunkSize';
@@ -74,12 +78,20 @@ class SyncService extends ConfigurableService
         $syncId = $this->getSyncHistoryService()->createSynchronisation();
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
-        if (is_null($type)) {
-            foreach($this->getAllTypes() as $type) {
+        $this->getEventManager()->trigger(
+            new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
+        );
+
+        try {
+            if (is_null($type)) {
+                foreach ($this->getAllTypes() as $type) {
+                    $this->synchronizeType($type, $params);
+                }
+            } else {
                 $this->synchronizeType($type, $params);
             }
-        } else {
-            $this->synchronizeType($type, $params);
+        } catch (\Exception $e) {
+            $this->report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
 
         return $this->report;
@@ -89,7 +101,7 @@ class SyncService extends ConfigurableService
      * Fetch the data related to the given synchronizer $type
      *
      * Add query option to chunk the data set
-     * Add an additional 'nextCallUrl' parameter as callBack for next chunk (see $this->>synchronizeType())
+     * Add an additional 'nextCallUrl' parameter as callBack for next chunk (see $this->synchronizeType())
      * nextCallUrl is added only if there are chunk+1 records. The '+1' will be the start of next call
      *
      * @param $type
@@ -100,7 +112,7 @@ class SyncService extends ConfigurableService
     public function fetch($type, $params)
     {
         $response = [
-            'type' => $type
+            SynchronisationApi::PARAM_TYPE => $type
         ];
 
         $options = $params;
@@ -125,8 +137,8 @@ class SyncService extends ConfigurableService
             $nextEntity = array_pop($entities);
             $params['nextResource'] = $nextEntity['id'];
             $response['nextCallUrl'] = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([
-                'type' => $type,
-                SynchronisationApi::PARAM_PARAMETERS => $params
+                SynchronisationApi::PARAM_TYPE => $type,
+                SynchronisationApi::PARAM_PARAMETERS => $params,
             ]);
         }
 
@@ -139,15 +151,17 @@ class SyncService extends ConfigurableService
      *
      * @param $type
      * @param array $entityIds
+     * @param array $options
      * @return array
      * @throws \common_exception_BadRequest
      */
-    public function fetchEntityDetails($type, array $entityIds)
+    public function fetchEntityDetails($type, array $entityIds, array $options = [])
     {
+        $options = array_merge(['withProperties' => true], $options);
         $entities = [];
         foreach ($entityIds as $id) {
             try {
-                $entities[$id] = $this->getSynchronizer($type)->fetchOne($id, ['withProperties' => true]);
+                $entities[$id] = $this->getSynchronizer($type)->fetchOne($id, $options);
             } catch (\common_exception_NotFound $e) {}
         }
         return $entities;
@@ -195,7 +209,7 @@ class SyncService extends ConfigurableService
         $nextCallUrl = isset($response['nextCallUrl']) ? $response['nextCallUrl'] : null;
         $previousCall = null;
         while (true) {
-            $this->synchronizeEntities($this->getSynchronizer($type), $remoteEntities);
+            $this->synchronizeEntities($this->getSynchronizer($type), $remoteEntities, $params);
             if (is_null($nextCallUrl) || $previousCall == $nextCallUrl) {
                 break;
             }
@@ -221,6 +235,7 @@ class SyncService extends ConfigurableService
      * 4 - Persist the diff array (['create' => [...], 'update' => [...]])
      *
      * @param Synchronizer $synchronizer
+     * @param array $params
      * @param array $remoteEntities
      * @return bool
      * @throws \common_Exception
@@ -228,7 +243,7 @@ class SyncService extends ConfigurableService
      * @throws \common_exception_NotFound
      * @throws \common_exception_NotImplemented
      */
-    protected function synchronizeEntities(Synchronizer $synchronizer, array $remoteEntities)
+    protected function synchronizeEntities(Synchronizer $synchronizer, array $remoteEntities, $params = [])
     {
         $entities = array(
             'create' => [],
@@ -244,7 +259,7 @@ class SyncService extends ConfigurableService
         foreach ($remoteEntities as $remoteEntity) {
             $id = $remoteEntity['id'];
             try {
-                $localEntity = $synchronizer->fetchOne($id);
+                $localEntity = $synchronizer->fetchOne($id, $params);
                 if ($localEntity['checksum'] == $remoteEntity['checksum']) {
                     // up to date
                     $this->report('(' . $synchronizer->getId() . ') Entity "' . $id . '" is already up to date.');
@@ -261,7 +276,7 @@ class SyncService extends ConfigurableService
             }
         }
 
-        return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities));
+        return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities, $params));
     }
 
     /**
@@ -290,17 +305,18 @@ class SyncService extends ConfigurableService
      *
      * @param $type
      * @param array $entities
+     * @param array $params
      * @return array
      * @throws \common_Exception
      */
-    protected function getEntityDetails($type, array $entities = [])
+    protected function getEntityDetails($type, array $entities = [], $params = [])
     {
         if (!empty($entities['create'])) {
             $entityIds = [];
             foreach ($entities['create'] as $entity) {
                 $entityIds[] = $entity['id'];
             }
-            $toCreate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds);
+            $toCreate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds, $params);
             $entities['create'] = $toCreate;
         }
 
@@ -309,7 +325,7 @@ class SyncService extends ConfigurableService
             foreach ($entities['update'] as $entity) {
                 $entityIds[] = $entity['id'];
             }
-            $toUpdate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds);
+            $toUpdate = $this->getSynchronisationClient()->fetchEntityDetails($type, $entityIds, $params);
             $entities['update'] = $toUpdate;
         }
 
@@ -423,6 +439,14 @@ class SyncService extends ConfigurableService
     protected function getSyncHistoryService()
     {
         return $this->getServiceLocator()->get(DataSyncHistoryService::SERVICE_ID);
+    }
+
+    /**
+     * @return EventManager
+     */
+    protected function getEventManager()
+    {
+        return $this->getServiceLocator()->get(EventManager::SERVICE_ID);
     }
 
     /**
