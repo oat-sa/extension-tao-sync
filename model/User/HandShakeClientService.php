@@ -28,6 +28,7 @@ use oat\generis\model\OntologyRdfs;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use function GuzzleHttp\Psr7\stream_for;
+use oat\tao\model\TaoOntology;
 use oat\taoOauth\model\bootstrap\OAuth2Type;
 use oat\taoOauth\model\OAuthClient;
 use oat\taoOauth\model\storage\ConsumerStorage;
@@ -46,18 +47,17 @@ class HandShakeClientService extends ConfigurableService
 
     /**
      * @param HandShakeClientRequest $handShakeRequest
-     * @return bool|\core_kernel_classes_Resource
+     * @return bool
      * @throws \Exception
      */
     public function execute(HandShakeClientRequest $handShakeRequest)
     {
-        $client = new Client();
+        $client = $this->getClient();
         $request = new Request('POST',
             $this->getOption(static::OPTION_REMOTE_AUTH_URL)
         );
 
         $body = stream_for(json_encode(['login' => $handShakeRequest->getLogin()]));
-
         $request = $request->withHeader('Accept', 'application/json');
         $request = $request->withHeader('Content-type', 'application/json');
         $request = $request->withBody($body);
@@ -78,17 +78,24 @@ class HandShakeClientService extends ConfigurableService
         ) {
 
             $this->logError('Oauth information not received');
+
             return false;
         }
-
         $oauthData = $responseParsed['oauthInfo'];
         $syncUser = $responseParsed['syncUser'];
 
-        $key = $oauthData['key'];
-        $secret = $oauthData['secret'];
-        $tokenUrl = $oauthData['tokenUrl'];
-        $action = 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData';
+        $this->removeRemoteConnections();
+        $this->createRemoteConnection($oauthData);
 
+        return $this->insertRemoteUser($syncUser);
+    }
+
+    /**
+     * @throws \common_exception_NotFound
+     */
+    protected function removeRemoteConnections()
+    {
+        $action = 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData';
         /** @var PublishingService $publishingAuthService */
         $publishingAuthService = $this->getServiceLocator()->get(PublishingService::SERVICE_ID);
         if ($founds = $publishingAuthService->findByAction($action)){
@@ -96,8 +103,18 @@ class HandShakeClientService extends ConfigurableService
                 $found->delete();
             }
         }
+    }
 
-        $inserted = PlatformService::singleton()->getRootClass()->createInstanceWithProperties(array(
+    /**
+     * @param $oauthData
+     */
+    protected function createRemoteConnection($oauthData)
+    {
+        $key = $oauthData['key'];
+        $secret = $oauthData['secret'];
+        $tokenUrl = $oauthData['tokenUrl'];
+
+        $this->getPlatformService()->getRootClass()->createInstanceWithProperties(array(
             OntologyRdfs::RDFS_LABEL => 'Synchronization client',
             PlatformService::PROPERTY_AUTH_TYPE => (new OAuth2Type())->getAuthClass()->getUri(),
             PublishingService::PUBLISH_ACTIONS => 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData',
@@ -108,18 +125,44 @@ class HandShakeClientService extends ConfigurableService
             ConsumerStorage::CONSUMER_TOKEN_TYPE => OAuthClient::DEFAULT_TOKEN_TYPE,
             ConsumerStorage::CONSUMER_TOKEN_GRANT_TYPE => OAuthClient::DEFAULT_GRANT_TYPE,
         ));
+    }
 
+    /**
+     * @param $syncUser
+     * @return boolean
+     */
+    protected function insertRemoteUser($syncUser)
+    {
         $properties = isset($syncUser['properties']) ? $syncUser['properties'] : [];
         if (isset($properties[OntologyRdf::RDF_TYPE])) {
             $class = $this->getClass($properties[OntologyRdf::RDF_TYPE]);
         } else {
-            $class = $this->getRootClass();
+            $class = $this->getClass(TaoOntology::CLASS_URI_TAO_USER);
         }
 
-        $resource = $this->getResource($syncUser['id']);
-        $resource->setType($class);
-        $resource->setPropertiesValues($properties);
+        if (isset($syncUser['id'])){
+            $resource = $this->getResource($syncUser['id']);
+            $resource->setType($class);
+            $resource->setPropertiesValues($properties);
+            return true;
+        }
 
-        return $inserted;
+        return false;
+    }
+
+    /**
+     * @return Client
+     */
+    protected function getClient()
+    {
+        return new Client();
+    }
+
+    /**
+     * @return PlatformService
+     */
+    protected function getPlatformService()
+    {
+        return PlatformService::singleton();
     }
 }
