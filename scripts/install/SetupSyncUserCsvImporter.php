@@ -34,7 +34,7 @@ class SetupSyncUserCsvImporter extends InstallAction
         );
         $importerFactory->setOption(UserCsvImporterFactory::OPTION_MAPPERS, $typeOptions);
         $this->registerService(UserCsvImporterFactory::SERVICE_ID, $importerFactory);
-        return \common_report_Report::createSuccess('TestCenterAdmin csv importer successfully registered.');
+        return \common_report_Report::createSuccess('SyncUser csv importer successfully registered.');
     }
 
 }
