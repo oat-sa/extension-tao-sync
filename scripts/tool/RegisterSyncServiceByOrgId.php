@@ -67,6 +67,7 @@ class RegisterSyncServiceByOrgId extends InstallAction
     {
         $this->createOrganisationIdProperty();
         $this->migrateSyncServiceSynchronizers();
+        $this->addOrganisationIdPropertyToCsvImporter();
 
         return \common_report_Report::createSuccess('SyncService successfully registered.');
     }
@@ -218,5 +219,10 @@ class RegisterSyncServiceByOrgId extends InstallAction
 
         $service->setOption(SyncService::OPTION_SYNCHRONIZERS, $synchronizers);
         $this->registerService(SyncService::SERVICE_ID, $service);
+    }
+
+    protected function addOrganisationIdPropertyToCsvImporter()
+    {
+        return call_user_func($this->propagate(new SetupSyncUserCsvImporterByOrgId()), []);
     }
 }
