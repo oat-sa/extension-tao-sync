@@ -20,8 +20,10 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\tao\model\user\import\UserCsvImporterFactory;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
@@ -90,6 +92,19 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.10.0','0.10.3');
+
+        if ($this->isVersion('0.10.3')) {
+            /** @var UserCsvImporterFactory $importerFactory */
+            $importerFactory = $this->getServiceManager()->get(UserCsvImporterFactory::SERVICE_ID);
+            $typeOptions = $importerFactory->getOption(UserCsvImporterFactory::OPTION_MAPPERS);
+            $typeOptions[SyncUserCsvImporter::USER_IMPORTER_TYPE] = array(
+                UserCsvImporterFactory::OPTION_MAPPERS_IMPORTER => new SyncUserCsvImporter()
+            );
+            $importerFactory->setOption(UserCsvImporterFactory::OPTION_MAPPERS, $typeOptions);
+            $this->getServiceManager()->register(UserCsvImporterFactory::SERVICE_ID, $importerFactory);
+
+            $this->setVersion('0.11.0');
+        }
 
     }
 }
