@@ -41,7 +41,9 @@ class HandShakeAuthAdapter extends AuthAdapter
                 if ($this->handShakeWithServer()) {
                     return $this->callParentAuthenticate();
                 }
-                throw new \core_kernel_users_InvalidLoginException();
+                throw new \core_kernel_users_InvalidLoginException(
+                    'User not existed or hand shake already been done.'
+                );
 
             } catch (\Exception $exception) {
                 $this->logError($exception->getMessage());
