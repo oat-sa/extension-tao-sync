@@ -23,6 +23,9 @@ namespace oat\taoSync\test\User;
 use core_kernel_classes_Class;
 use core_kernel_classes_Resource;
 use GuzzleHttp\Client;
+use oat\oatbox\filesystem\Directory;
+use oat\oatbox\filesystem\File;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\model\User\HandShakeClientRequest;
@@ -63,11 +66,41 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * @dataProvider dataSuccessProvider
+     */
+    public function testIsHandShakeAlreadyDone($data)
+    {
+        $service = $this->getService($data);
+
+        $this->assertFalse($service->isHandShakeAlreadyDone());
+    }
+
+    /**
+     * @dataProvider dataFailedProvider
+     */
+    public function testIsHandShakeAlreadyDoneTrue($data)
+    {
+        $service = $this->getService($data);
+
+        $this->assertTrue($service->isHandShakeAlreadyDone());
+    }
+
+    /**
+     * @dataProvider dataSuccessProvider
+     */
+    public function testMarkHandShakeAlreadyDone($data)
+    {
+        $service = $this->getService($data);
+
+        $this->assertTrue($service->markHandShakeAlreadyDone());
+    }
+
+    /**
      * @param $dataProvider
      *
      * @return HandShakeClientService
      */
-    protected function getService($dataProvider)
+    protected function getService($dataProvider = [])
     {
         $body = $this->getMockForAbstractClass(StreamInterface::class);
         $body
@@ -89,13 +122,37 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($response);
 
         $service = $this->getMockBuilder(HandShakeClientService::class)
-            ->setMethods(['logError', 'getPlatformService', 'getClient', 'getClass', 'getResource'])
+            ->setMethods(['logError', 'getPlatformService', 'getClient', 'getClass', 'getResource', 'getFileSystem'])
             ->getMockForAbstractClass();
+
+        $fileSystem = $this->getMockBuilder(FileSystemService::class)->disableOriginalConstructor()->getMock();
+        $fileMock = $this->getMockBuilder(File::class)->disableOriginalConstructor()->getMock();
+        $fileMock
+            ->method('read')
+            ->willReturn($dataProvider['handshakedone']);
+        $fileMock
+            ->method('put')
+            ->willReturn(true);
+
+        $directoryMock = $this->getMockBuilder(Directory::class)->disableOriginalConstructor()->getMock();
+        $directoryMock
+            ->method('getDirectory')
+            ->willReturn($directoryMock);
+        $directoryMock
+            ->method('getFile')
+            ->willReturn($fileMock);
+        $fileSystem
+            ->method('getDirectory')
+            ->willReturn($directoryMock);
+        $fileSystem
+            ->method('getFileSystem')
+            ->willReturn($fileMock);
 
         $service->method('getClient')->willReturn($client);
         $service->method('getResource')->willReturn($this->mockResource());
         $service->method('getClass')->willReturn($this->mockClass());
         $service->method('getPlatformService')->willReturn($this->mockPlatformService());
+        $service->method('getFileSystem')->willReturn($fileSystem);
 
         $service->setOption(HandShakeClientService::OPTION_REMOTE_AUTH_URL, 'http://removeurl.dev/handshake');
         $serviceLocator = $this->getMockForAbstractClass(ServiceLocatorInterface::class);
@@ -179,6 +236,7 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'code' => 200,
+                    'handshakedone' => 0,
                     'content' => json_encode([
                         'oauthInfo' => [
                             'key' => 'key',
@@ -204,6 +262,7 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'code' => 500,
+                    'handshakedone' => 1,
                     'content' => ''
                 ],
             ]
@@ -219,6 +278,7 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
             [
                 [
                     'code' => 200,
+                    'handshakedone' => 0,
                     'content' => json_encode([
                         'oauthInfo' => [
                         ],

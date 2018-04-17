@@ -41,7 +41,9 @@ class HandShakeAuthAdapter extends AuthAdapter
                 if ($this->handShakeWithServer()) {
                     return $this->callParentAuthenticate();
                 }
-                throw new \core_kernel_users_InvalidLoginException();
+                throw new \core_kernel_users_InvalidLoginException(
+                    'Fail to login or hand shake has already been done.'
+                );
 
             } catch (\Exception $exception) {
                 $this->logError($exception->getMessage());
@@ -66,9 +68,21 @@ class HandShakeAuthAdapter extends AuthAdapter
     {
         /** @var HandShakeClientService $handShakeService */
         $handShakeService = ServiceManager::getServiceManager()->get(HandShakeClientService::SERVICE_ID);
-        return $handShakeService->execute(new HandShakeClientRequest(
-            $this->username, $this->password
-        ));
+
+        if (!$handShakeService->isHandShakeAlreadyDone()) {
+
+            $flag = $handShakeService->execute(new HandShakeClientRequest(
+                $this->username, $this->password
+            ));
+
+            if ($flag){
+                $handShakeService->markHandShakeAlreadyDone();
+            }
+
+            return $flag;
+        }
+
+        return false;
     }
 
 }
