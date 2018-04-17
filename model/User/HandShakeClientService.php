@@ -25,6 +25,7 @@ use GuzzleHttp\Psr7\Request;
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdf;
 use oat\generis\model\OntologyRdfs;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use function GuzzleHttp\Psr7\stream_for;
@@ -88,6 +89,32 @@ class HandShakeClientService extends ConfigurableService
         $this->createRemoteConnection($oauthData);
 
         return $this->insertRemoteUser($syncUser);
+    }
+
+    /**
+     * @return bool
+     */
+    public function isHandShakeAlreadyDone()
+    {
+        $fileSystem = $this->getFileSystem();
+        $file = $fileSystem
+            ->getDirectory('synchronisation')
+            ->getDirectory('config')
+            ->getFile('handshakedone');
+
+        return (bool)$file->read();
+    }
+
+    /**
+     * @throws \common_exception_Error
+     * @throws \common_exception_NotFound
+     */
+    public function markHandShakeAlreadyDone()
+    {
+        $fileSystem = $this->getFileSystem();
+        $file = $fileSystem->getFileSystem('synchronisation');
+
+        return $file->put('config/handshakedone', 1);
     }
 
     /**
@@ -164,5 +191,14 @@ class HandShakeClientService extends ConfigurableService
     protected function getPlatformService()
     {
         return PlatformService::singleton();
+    }
+
+
+    protected function getFileSystem()
+    {
+        /** @var FileSystemService $fileSystem */
+        $fileSystem = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
+
+        return $fileSystem;
     }
 }
