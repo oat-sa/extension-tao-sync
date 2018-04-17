@@ -18,12 +18,14 @@
  *
  */
 
+use oat\taoSync\controller\HandShake;
+
 return array(
     'name' => 'taoSync',
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '0.11.2',
+    'version' => '0.12.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=17.10.0',
@@ -35,6 +37,7 @@ return array(
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class],
     ],
     'install' => [
         'rdf' => [
