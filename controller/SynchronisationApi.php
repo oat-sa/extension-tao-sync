@@ -32,7 +32,7 @@ use oat\taoSync\model\SyncService;
  *
  * @package oat\taoSync\controller
  */
-class SynchronisationApi extends \tao_actions_RestController implements OauthController
+class SynchronisationApi extends \tao_actions_RestController
 {
     const PARAM_TYPE = 'type';
     const PARAM_PARAMETERS = 'params';
