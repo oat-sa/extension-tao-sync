@@ -66,9 +66,21 @@ class HandShakeAuthAdapter extends AuthAdapter
     {
         /** @var HandShakeClientService $handShakeService */
         $handShakeService = ServiceManager::getServiceManager()->get(HandShakeClientService::SERVICE_ID);
-        return $handShakeService->execute(new HandShakeClientRequest(
-            $this->username, $this->password
-        ));
+
+        if (!$handShakeService->isHandShakeAlreadyDone()) {
+
+            $flag = $handShakeService->execute(new HandShakeClientRequest(
+                $this->username, $this->password
+            ));
+
+            if ($flag){
+                $handShakeService->markHandShakeAlreadyDone();
+            }
+
+            return $flag;
+        }
+
+        return false;
     }
 
 }
