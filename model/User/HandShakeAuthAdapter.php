@@ -42,7 +42,7 @@ class HandShakeAuthAdapter extends AuthAdapter
                     return $this->callParentAuthenticate();
                 }
                 throw new \core_kernel_users_InvalidLoginException(
-                    'User not existed or hand shake already been done.'
+                    'Fail to login or hand shake has already been done.'
                 );
 
             } catch (\Exception $exception) {
