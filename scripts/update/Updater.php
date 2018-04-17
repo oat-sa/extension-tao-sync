@@ -20,6 +20,8 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\oatbox\filesystem\FileSystem;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\tao\model\user\import\UserCsvImporterFactory;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoPublishing\model\publishing\PublishingService;
@@ -107,5 +109,16 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.11.0','0.11.1');
+
+        if ($this->isVersion('0.11.1')) {
+            /** @var FileSystemService $fileSystemService */
+            $fileSystemService = $this->getServiceManager()->get(FileSystemService::SERVICE_ID);
+            /** @var FileSystem $fileSystem */
+            $fileSystem = $fileSystemService->getFileSystem('synchronisation');
+
+            $fileSystem->put('config/handshakedone', 0);
+
+            $this->setVersion('0.11.2');
+        }
     }
 }
