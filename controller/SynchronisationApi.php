@@ -81,22 +81,27 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
     public function fetchEntityDetails()
     {
         try {
-            if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
+            if ($this->getRequestMethod() != \Request::HTTP_POST) {
+                throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
 
-            if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
+            $parameters = file_get_contents('php://input');
+            if (!is_array($parameters = json_decode($parameters, true)) || json_last_error() !== JSON_ERROR_NONE) {
+                throw new \InvalidArgumentException('Missing parameters to access ' . __FUNCTION__);
+            }
+
+            if (!isset($parameters[self::PARAM_TYPE])) {
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_TYPE . '" parameter is required to access ' . __FUNCTION__);
             }
 
-            if (!$this->hasRequestParameter(self::PARAM_ENTITY_IDS)) {
+            if (!isset($parameters[self::PARAM_ENTITY_IDS])) {
                 throw new \InvalidArgumentException('Missing "' . self::PARAM_ENTITY_IDS . '" parameter to process ' . __FUNCTION__);
             }
 
-            $type = $this->getRequestParameter(self::PARAM_TYPE);
-            $entityIds = $this->getRequestParameter(self::PARAM_ENTITY_IDS);
+            $type = $parameters[self::PARAM_TYPE];
+            $entityIds = $parameters[self::PARAM_ENTITY_IDS];
             $entityIds = is_array($entityIds) ? $entityIds : [$entityIds];
-            $params = $this->hasRequestParameter(self::PARAM_PARAMETERS) ? $this->getRequestParameter(self::PARAM_PARAMETERS) : [];
+            $params = isset($parameters[self::PARAM_PARAMETERS]) ? $parameters[self::PARAM_PARAMETERS] : [];
 
             $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds, $params));
 
@@ -115,20 +120,25 @@ class SynchronisationApi extends \tao_actions_RestController implements OauthCon
     public function fetchClassDetails()
     {
         try {
-            if ($this->getRequestMethod() != \Request::HTTP_GET) {
-                throw new \BadMethodCallException('Only GET method is accepted to access ' . __FUNCTION__);
+            if ($this->getRequestMethod() != \Request::HTTP_POST) {
+                throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
 
-            if (!$this->hasRequestParameter(self::PARAM_TYPE)) {
+            $parameters = file_get_contents('php://input');
+            if (!is_array($parameters = json_decode($parameters, true)) || json_last_error() !== JSON_ERROR_NONE) {
+                throw new \InvalidArgumentException('Missing parameters to access ' . __FUNCTION__);
+            }
+
+            if (!isset($parameters[self::PARAM_TYPE])) {
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_TYPE . '" parameter is required to access ' . __FUNCTION__);
             }
-            $type = $this->getRequestParameter(self::PARAM_TYPE);
+            $type = $parameters[self::PARAM_TYPE];
 
-            if (!$this->hasRequestParameter(self::PARAM_REQUESTED_CLASSES)) {
+            if (!$parameters[self::PARAM_REQUESTED_CLASSES]) {
                 return $this->returnFailure(new \common_Exception('No requested class provided.'));
             }
 
-            $requestedClasses = $this->getRequestParameter(self::PARAM_REQUESTED_CLASSES);
+            $requestedClasses = $parameters[self::PARAM_REQUESTED_CLASSES];
             if (!is_array($requestedClasses)) {
                 return $this->returnFailure(new \common_Exception('Requested classes is malformed.'));
             }
