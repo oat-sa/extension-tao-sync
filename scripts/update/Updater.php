@@ -20,11 +20,14 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\tao\model\accessControl\func\AccessRule;
+use oat\tao\model\accessControl\func\AclProxy;
 use oat\oatbox\filesystem\FileSystem;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\tao\model\user\import\UserCsvImporterFactory;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\controller\HandShake;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\User\HandShakeClientService;
@@ -120,5 +123,13 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('0.11.2');
         }
+
+        if ($this->isVersion('0.11.2')) {
+            AclProxy::applyRule(new AccessRule(
+                'grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class
+            ));
+            $this->setVersion('0.12.0');
+        }
     }
+
 }

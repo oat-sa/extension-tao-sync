@@ -28,7 +28,7 @@ use oat\taoSync\model\ResultService;
  *
  * @package oat\taoSync\controller
  */
-class ResultApi extends \tao_actions_RestController implements OauthController
+class ResultApi extends \tao_actions_RestController
 {
     const PARAM_RESULTS = 'results';
 
