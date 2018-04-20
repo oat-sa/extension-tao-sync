@@ -20,14 +20,47 @@
 
 namespace oat\taoSync\controller;
 
+use oat\oatbox\user\LoginFailedException;
 use oat\taoSync\model\server\HandShakeServerService;
 
-class HandShake extends \tao_actions_RestController
+class HandShake extends \tao_actions_CommonModule
 {
+    use \tao_actions_RestTrait;
+
     const USER_IDENTIFIER = 'login';
+
+    /**
+     * Check response encoding requested
+     *
+     * tao_actions_RestModule constructor.
+     */
+    public function __construct()
+    {
+        if ($this->hasHeader("Accept")) {
+            try {
+                $this->responseEncoding = (\tao_helpers_Http::acceptHeader($this->getAcceptableMimeTypes(), $this->getHeader("Accept")));
+            } catch (\common_exception_ClientException $e) {
+                $this->returnFailure($e);
+            }
+        }
+
+        header('Content-Type: '.$this->responseEncoding);
+    }
 
     public function index()
     {
+        if (!$this->isAllowedUser()) {
+            $data['success']	= false;
+            $data['errorCode']	= '401';
+            $data['errorMsg']	= 'You are not authorized to access this functionality.';
+            $data['version']	= TAO_VERSION;
+
+            header('HTTP/1.0 401 Unauthorized');
+            header('WWW-Authenticate: Basic realm="' . GENERIS_INSTANCE_NAME . '"');
+            echo json_encode($data);
+            return;
+        }
+
         try {
             if ($this->getRequestMethod() != \Request::HTTP_POST) {
                 throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
@@ -51,6 +84,18 @@ class HandShake extends \tao_actions_RestController
             $this->returnJson($response->asArray());
         } catch (\Exception $e) {
             $this->returnFailure($e);
+        }
+    }
+
+    protected function isAllowedUser()
+    {
+        try {
+            $request = \common_http_Request::currentRequest();
+            $authAdapter = new \tao_models_classes_HttpBasicAuthAdapter($request);
+            $authAdapter->authenticate();
+            return true;
+        } catch (LoginFailedException $e) {
+            return false;
         }
     }
 }

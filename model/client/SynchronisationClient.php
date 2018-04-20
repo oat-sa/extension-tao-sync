@@ -79,15 +79,15 @@ class SynchronisationClient extends ConfigurableService
      */
     public function fetchEntityDetails($type, $entityIds, array $params = [])
     {
-        $url = '/taoSync/SynchronisationApi/fetchEntityDetails?' . http_build_query([
+        $url = '/taoSync/SynchronisationApi/fetchEntityDetails';
+        $method = 'POST';
+
+        $response = $this->call($url, $method, json_encode([
             SynchronisationApi::PARAM_TYPE => $type,
             SynchronisationApi::PARAM_ENTITY_IDS => $entityIds,
             SynchronisationApi::PARAM_PARAMETERS => $params,
-        ]);
-        $method = 'GET';
+        ]));
 
-        /** @var Response $response */
-        $response = $this->call($url, $method);
         return $this->decodeResponseBody($response);
     }
 
@@ -104,11 +104,14 @@ class SynchronisationClient extends ConfigurableService
      */
     public function getMissingClasses($type, array $classes)
     {
-        $url = '/taoSync/SynchronisationApi/fetchClassDetails?' . http_build_query([SynchronisationApi::PARAM_TYPE => $type, SynchronisationApi::PARAM_REQUESTED_CLASSES => $classes]);
-        $method = 'GET';
+        $url = '/taoSync/SynchronisationApi/fetchClassDetails';
+        $method = 'POST';
 
-        /** @var Response $response */
-        $response = $this->call($url, $method);
+        $response = $this->call($url, $method, json_encode([
+            SynchronisationApi::PARAM_TYPE => $type,
+            SynchronisationApi::PARAM_REQUESTED_CLASSES => $classes
+        ]));
+
         return $this->decodeResponseBody($response);
     }
 
@@ -122,7 +125,9 @@ class SynchronisationClient extends ConfigurableService
 
     public function getRemoteDeliveryTest($deliveryUri)
     {
-        $url = '/taoSync/SynchronisationApi/getDeliveryTest?' . http_build_query([SynchronisationApi::PARAM_DELIVERY_URI => $deliveryUri]);
+        $url = '/taoSync/SynchronisationApi/getDeliveryTest?' . http_build_query([
+            SynchronisationApi::PARAM_DELIVERY_URI => $deliveryUri
+        ]);
         $method = 'GET';
 
         $response = $this->call($url, $method);

@@ -21,6 +21,8 @@
 namespace oat\taoSync\scripts\install;
 
 use oat\oatbox\extension\InstallAction;
+use oat\oatbox\filesystem\FileSystem;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\taoSync\model\User\HandShakeClientService;
 
 /**
@@ -39,6 +41,12 @@ class RegisterHandShakeService extends InstallAction
             HandShakeClientService::OPTION_ROOT_URL => 'http://tao.dev/',
             HandShakeClientService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
         ]);
+
+        /** @var FileSystemService $fileSystem */
+        $fileSystemService = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
+        /** @var FileSystem $fileSystem */
+        $fileSystem = $fileSystemService->getFileSystem('synchronisation');
+        $fileSystem->put('config/handshakedone', 0);
 
         $this->registerService(HandShakeClientService::SERVICE_ID, $handShake);
 
