@@ -128,8 +128,10 @@ class Updater extends \common_ext_ExtensionUpdater
             AclProxy::applyRule(new AccessRule(
                 'grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class
             ));
-            $this->setVersion('0.12.1');
+            $this->setVersion('0.12.0');
         }
+
+        $this->skip('0.12.0','0.12.1');
     }
 
 }
