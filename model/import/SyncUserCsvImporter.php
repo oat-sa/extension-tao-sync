@@ -19,7 +19,9 @@
 
 namespace oat\taoSync\model\import;
 
+use oat\generis\model\GenerisRdf;
 use oat\generis\model\user\UserRdf;
+use oat\tao\model\TaoOntology;
 use oat\tao\model\user\import\RdsUserImportService;
 use oat\taoSync\model\SyncService;
 
@@ -56,7 +58,20 @@ class SyncUserCsvImporter extends RdsUserImportService
      */
     public function import($filePath, $extraProperties = [], $options = [])
     {
+        $urlAfterLogin =  _url(
+            'index',
+            'Main',
+            'tao',
+            array(
+                'structure' => 'synchronization',
+                'ext'       => 'taoSync'
+            )
+        );
+
         $extraProperties[UserRdf::PROPERTY_ROLES] = SyncService::TAO_SYNC_ROLE;
+        $extraProperties[TaoOntology::PROPERTY_USER_FIRST_TIME] = GenerisRdf::GENERIS_FALSE;
+        $extraProperties[TaoOntology::PROPERTY_USER_LAST_EXTENSION] = str_replace(ROOT_URL, '', $urlAfterLogin);
+
         return parent::import($filePath, $extraProperties, $options);
     }
 }
