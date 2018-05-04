@@ -71,6 +71,7 @@ class SyncUserCsvImporter extends RdsUserImportService
         $extraProperties[UserRdf::PROPERTY_ROLES] = SyncService::TAO_SYNC_ROLE;
         $extraProperties[TaoOntology::PROPERTY_USER_FIRST_TIME] = GenerisRdf::GENERIS_FALSE;
         $extraProperties[TaoOntology::PROPERTY_USER_LAST_EXTENSION] = str_replace(ROOT_URL, '', $urlAfterLogin);
+        $extraProperties['roles'] = SyncService::TAO_SYNC_ROLE;
 
         return parent::import($filePath, $extraProperties, $options);
     }
