@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\tool;
 use oat\oatbox\extension\InstallAction;
 use oat\tao\model\user\import\OntologyUserMapper;
 use oat\tao\model\user\import\UserCsvImporterFactory;
-use oat\tao\model\user\import\UserMapper;
+use oat\tao\model\user\import\UserMapperInterface;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 
@@ -41,16 +41,16 @@ class SetupSyncUserCsvImporterByOrgId extends InstallAction
         $mappers = $factory->getOption(UserCsvImporterFactory::OPTION_MAPPERS);
         $syncUserOptions = $mappers[SyncUserCsvImporter::USER_IMPORTER_TYPE];
 
-        $mapper = $factory->getImporter(SyncUserCsvImporter::USER_IMPORTER_TYPE)->getMapper();
+        $mapper = $factory->create(SyncUserCsvImporter::USER_IMPORTER_TYPE)->getMapper();
         if (!$mapper) {
             $mapper = new OntologyUserMapper();
             $schema = $factory->getOption(UserCsvImporterFactory::OPTION_DEFAULT_SCHEMA);
         } else {
-            $schema = $mapper->getOption(UserMapper::OPTION_SCHEMA);
+            $schema = $mapper->getOption(UserMapperInterface::OPTION_SCHEMA);
         }
 
         $schema[OntologyUserMapper::OPTION_SCHEMA_MANDATORY]['organisation id'] = TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY;
-        $mapper->setOption(UserMapper::OPTION_SCHEMA, $schema);
+        $mapper->setOption(UserMapperInterface::OPTION_SCHEMA, $schema);
 
         $syncUserOptions[UserCsvImporterFactory::OPTION_MAPPERS_MAPPER] = $mapper;
         $mappers[SyncUserCsvImporter::USER_IMPORTER_TYPE] = $syncUserOptions;
