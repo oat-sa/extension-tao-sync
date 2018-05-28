@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\controller;
 
+use oat\oatbox\user\LoginService;
 use oat\oatbox\user\LoginFailedException;
 use oat\taoSync\model\server\HandShakeServerService;
 
@@ -28,6 +29,7 @@ class HandShake extends \tao_actions_CommonModule
     use \tao_actions_RestTrait;
 
     const USER_IDENTIFIER = 'login';
+    const USER_PASSWORD   = 'password';
 
     /**
      * Check response encoding requested
@@ -47,22 +49,26 @@ class HandShake extends \tao_actions_CommonModule
         header('Content-Type: '.$this->responseEncoding);
     }
 
+    /**
+     * Authenticate the syncManager user and get his data along with the Sync HandShake
+     * The request must be a POST, and it's body is application/json
+     * that contains the credentials as :  { login : login, password : password }.
+     * -> 200 whith the handshake 
+     * -> 401 for wrong authentication
+     * -> 412 for malformed requests (missing parameter)
+     * -> 500 otherwise
+     *
+     */
     public function index()
     {
-        if (!$this->isAllowedUser()) {
-            $data['success']	= false;
-            $data['errorCode']	= '401';
-            $data['errorMsg']	= 'You are not authorized to access this functionality.';
-            $data['version']	= TAO_VERSION;
-
-            header('HTTP/1.0 401 Unauthorized');
-            header('WWW-Authenticate: Basic realm="' . GENERIS_INSTANCE_NAME . '"');
-            echo json_encode($data);
+        //allow preflight requests
+        if($this->getRequest()->isOptions()){
+            header('HTTP/1.0 200 OK');
             return;
         }
 
         try {
-            if ($this->getRequestMethod() != \Request::HTTP_POST) {
+            if (!$this->getRequest()->isPost()) {
                 throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
 
@@ -71,11 +77,29 @@ class HandShake extends \tao_actions_CommonModule
             if (is_array($parameters = json_decode($parameters, true))
                 && json_last_error() === JSON_ERROR_NONE
                 && isset($parameters[self::USER_IDENTIFIER])
+                && isset($parameters[self::USER_PASSWORD])
             ) {
                 $userIdentifier = $parameters[self::USER_IDENTIFIER];
+                $userPassword   = $parameters[self::USER_PASSWORD];
             } else {
-                throw new \InvalidArgumentException('A valid "' . self::USER_IDENTIFIER . '" parameter is required to access ' . __FUNCTION__);
+                return $this->returnJson([
+                    'success'	=> false,
+                    'errorCode'	=> '412',
+                    'errorMsg'	=> 'Valid "' . self::USER_IDENTIFIER . '" and "'. self::USER_PASSWORD .'" parameters are required to access ' . __FUNCTION__,
+                    'version'	=> TAO_VERSION
+                ], 412);
             }
+
+            //check identity
+            if(!$this->isAllowedUser($userIdentifier, $userPassword)){
+                return $this->returnJson([
+                    'success'	=> false,
+                    'errorCode'	=> '401',
+                    'errorMsg'	=> 'You are not authorized to access this functionality.',
+                    'version'	=> TAO_VERSION
+                ], 401);
+            }
+
 
             /** @var HandShakeServerService $handShakeServer */
             $handShakeServer = $this->getServiceLocator()->get(HandShakeServerService::SERVICE_ID);
@@ -87,15 +111,19 @@ class HandShake extends \tao_actions_CommonModule
         }
     }
 
-    protected function isAllowedUser()
+    /**
+     * Check whether the given credentials match an authorized user
+     * @param string $userIdentifier the login of the user
+     * @param string $userPassword   the password of the user
+     * @return boolean true if allowed
+     */
+    protected function isAllowedUser($userIdentifier, $userPassword)
     {
         try {
-            $request = \common_http_Request::currentRequest();
-            $authAdapter = new \tao_models_classes_HttpBasicAuthAdapter($request);
-            $authAdapter->authenticate();
-            return true;
+            return LoginService::authenticate($userIdentifier, $userPassword);
         } catch (LoginFailedException $e) {
             return false;
         }
     }
+
 }
