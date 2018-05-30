@@ -20,16 +20,28 @@
 
 namespace oat\taoSync\scripts\tool\synchronisation;
 
+use oat\oatbox\action\Action;
 use oat\oatbox\extension\AbstractAction;
 
 class SynchronizeAll extends AbstractAction
 {
+    /**
+     * @param $params
+     * @return \common_report_Report
+     * @throws \common_exception_Error
+     */
     public function __invoke($params)
     {
+        $actionsToRun = $params['actionsToRun'];
+        unset($params['actionsToRun']);
+
         $report = \common_report_Report::createInfo('Synchronizing data');
         try {
-            $report->add(call_user_func($this->propagate(new SynchronizeData()), $params));
-            $report->add(call_user_func($this->propagate(new SynchronizeResult()), $params));
+            foreach ($actionsToRun as $action){
+                if (is_subclass_of($action, Action::class)){
+                    $report->add(call_user_func($this->propagate(new $action), $params));
+                }
+            }
         } catch (\Exception $e) {
             $report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
