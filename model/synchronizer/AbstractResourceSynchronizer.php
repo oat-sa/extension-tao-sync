@@ -153,7 +153,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             if ($results->total() > 0) {
                 $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
                 foreach ($results as $resource) {
-                    $instance = $this->format($resource, $withProperties);
+                    $instance = $this->format($resource, $withProperties, $params);
                     $values[$instance['id']] = $instance;
                 }
             }
@@ -179,7 +179,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             throw new \common_exception_NotFound('No resource found for id : ' . $id);
         }
 
-        return $this->format($resource, $withProperties);
+        return $this->format($resource, $withProperties, $params);
     }
 
     /**
@@ -248,9 +248,10 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      *
      * @param \core_kernel_classes_Resource $resource
      * @param boolean $withProperties
+     * @param array $params
      * @return array
      */
-    public function format(\core_kernel_classes_Resource $resource, $withProperties = false)
+    public function format(\core_kernel_classes_Resource $resource, $withProperties = false, array $params = [])
     {
         $options = [
             FormatterService::OPTION_ONLY_FIELDS => is_array($this->getOption(self::OPTIONS_FIELDS))
@@ -262,7 +263,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             FormatterService::OPTION_INCLUDED_PROPERTIES => $withProperties
         ];
 
-        return $this->getFormatter()->format($resource, $options);
+        return $this->getFormatter()->format($resource, $options, $params);
     }
 
     /**

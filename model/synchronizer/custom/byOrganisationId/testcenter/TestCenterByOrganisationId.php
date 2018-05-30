@@ -60,7 +60,7 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
             throw new \common_exception_NotFound('No resource with organisation id found for id : ' . $id);
         }
 
-        return $this->format($resource, $withProperties);
+        return $this->format($resource, $withProperties, $params);
     }
 
     /**
@@ -97,7 +97,7 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
             if ($results->total() > 0) {
                 $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
                 foreach ($results as $resource) {
-                    $instance = $this->format($resource, $withProperties);
+                    $instance = $this->format($resource, $withProperties, $params);
                     $values[$instance['id']] = $instance;
                 }
             }
