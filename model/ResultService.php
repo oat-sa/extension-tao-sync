@@ -45,6 +45,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
     const OPTION_CHUNK_SIZE = 'chunkSize';
     const OPTION_DELETE_AFTER_SEND = 'deleteAfterSend';
+    const OPTION_STATUS_EXECUTIONS_TO_SYNC = 'statusExecutionsToSync';
 
     const DEFAULT_CHUNK_SIZE = 100;
 
@@ -77,9 +78,10 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
             /** @var DeliveryExecution $deliveryExecution */
             foreach ($this->getDeliveryExecutionByDelivery($delivery) as $deliveryExecution) {
                 $deliveryExecutionId = $deliveryExecution->getIdentifier();
-
-                // Skip non finished delivery executions
-                if ($deliveryExecution->getState()->getUri() != DeliveryExecution::STATE_FINISHIED) {
+                $statesToSync        = $this->getExecutionsStatesAvailableForSync();
+                $currentState        = $deliveryExecution->getState()->getUri();
+                // Skip non white listed states of delivery executions.
+                if (!in_array($currentState, $statesToSync)){
                     continue;
                 }
 
@@ -521,4 +523,16 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         return DeliveryAssemblyService::singleton();
     }
 
+    /**
+     * @return array
+     */
+    protected function getExecutionsStatesAvailableForSync()
+    {
+        $statuses = $this->getOption(static::OPTION_STATUS_EXECUTIONS_TO_SYNC);
+        if ($statuses == null){
+            return [DeliveryExecution::STATE_FINISHIED];
+        }
+
+        return $statuses;
+    }
 }
