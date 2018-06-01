@@ -157,6 +157,8 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(ResultService::SERVICE_ID, $syncResultService);
             $this->setVersion('0.12.2');
         }
+
+        $this->skip('0.12.2','0.12.3');
     }
 
 }
