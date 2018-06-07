@@ -32,8 +32,7 @@ return array(
         'taoOauth' => '>=1.0.3',
         'taoTestCenter' => '>=3.7.0',
         'taoTaskQueue' => '>=0.14.3',
-        'taoDeliveryRdf' => '>=4.8.0',
-        'taoEncryption'  => '>=0.8.3'
+        'taoDeliveryRdf' => '>=4.8.0'
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
