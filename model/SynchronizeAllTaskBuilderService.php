@@ -21,6 +21,7 @@
 namespace oat\taoSync\model;
 
 use oat\oatbox\service\ConfigurableService;
+use oat\taoEncryption\Service\Session\EncryptedUser;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 use oat\taoTaskQueue\model\QueueDispatcherInterface;
 
@@ -34,10 +35,12 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
      * @param $data
      * @param $label
      * @return mixed
+     * @throws \common_exception_Error
      */
     public function run($data, $label)
     {
-        $data['actionsToRun'] = $this->getOption(static::OPTION_TASKS_TO_RUN_ON_SYNC);
+        $data['applicationKey'] = $this->getApplicationKey();
+        $data['actionsToRun']   = $this->getOption(static::OPTION_TASKS_TO_RUN_ON_SYNC);
 
         $syncAll = new SynchronizeAll();
         $callable = $this->propagate($syncAll);
@@ -47,5 +50,20 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
         $task = $queueService->createTask($callable, $data, $label);
 
         return $task;
+    }
+
+    /**
+     * @return string
+     * @throws \common_exception_Error
+     */
+    protected function getApplicationKey()
+    {
+        $user = \common_session_SessionManager::getSession()->getUser();
+
+        if ($user instanceof EncryptedUser){
+            return $user->getApplicationKey();
+        }
+
+        return '';
     }
 }
