@@ -74,7 +74,7 @@ class EligibilityByOrganisationId extends RdfEligibilitySynchronizer
         $values = [];
         if ($results->total() > 0) {
             foreach ($results as $resource) {
-                $instance = $this->format($resource);
+                $instance = $this->format($resource, false, $params);
                 $values[$instance['id']] = $instance;
             }
         }
