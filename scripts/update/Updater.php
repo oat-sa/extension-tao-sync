@@ -181,7 +181,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.14.2');
         }
 
-        $this->skip('0.14.2','0.15.0');
+        $this->skip('0.14.2','0.16.0');
     }
 
 }
