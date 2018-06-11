@@ -26,13 +26,17 @@ use oat\oatbox\filesystem\FileSystem;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\tao\model\user\import\UserCsvImporterFactory;
 use oat\tao\scripts\update\OntologyUpdater;
+use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
 use oat\taoSync\model\import\SyncUserCsvImporter;
+use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 
 /**
  * Class Updater
@@ -131,7 +135,53 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.12.0');
         }
 
-        $this->skip('0.12.0','1.0.0');
+        $this->skip('0.12.0','0.12.1');
+
+        if ($this->isVersion('0.12.1')){
+
+            $service = new SynchronizeAllTaskBuilderService([
+                SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC => [
+                    SynchronizeData::class,
+                    SynchronizeResult::class,
+                ]
+            ]);
+
+            $this->getServiceManager()->register(SynchronizeAllTaskBuilderService::SERVICE_ID, $service);
+
+            /** @var ResultService $syncResultService */
+            $syncResultService = $this->getServiceManager()->get(ResultService::SERVICE_ID);
+            $syncResultService->setOption(ResultService::OPTION_STATUS_EXECUTIONS_TO_SYNC, [
+                DeliveryExecution::STATE_FINISHIED
+            ]);
+
+            $this->getServiceManager()->register(ResultService::SERVICE_ID, $syncResultService);
+            $this->setVersion('0.12.2');
+        }
+
+        $this->skip('0.12.2','0.14.1');
+
+        if ($this->isVersion('0.14.1')){
+
+            $service = new SynchronizeAllTaskBuilderService([
+                SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC => [
+                    SynchronizeData::class,
+                    SynchronizeResult::class,
+                ]
+            ]);
+
+            $this->getServiceManager()->register(SynchronizeAllTaskBuilderService::SERVICE_ID, $service);
+
+            /** @var ResultService $syncResultService */
+            $syncResultService = $this->getServiceManager()->get(ResultService::SERVICE_ID);
+            $syncResultService->setOption(ResultService::OPTION_STATUS_EXECUTIONS_TO_SYNC, [
+                DeliveryExecution::STATE_FINISHIED
+            ]);
+
+            $this->getServiceManager()->register(ResultService::SERVICE_ID, $syncResultService);
+            $this->setVersion('0.14.2');
+        }
+
+        $this->skip('0.14.2','1.0.0');
     }
 
 }

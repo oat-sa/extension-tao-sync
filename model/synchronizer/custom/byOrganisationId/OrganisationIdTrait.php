@@ -141,7 +141,7 @@ trait OrganisationIdTrait
                 continue;
             }
             $createdAt = $resource->getUniquePropertyValue($this->getProperty(Entity::CREATED_AT))->literal;
-            $sortedInstances[$createdAt] = $this->format($resource, $withProperties);
+            $sortedInstances[$createdAt] = $this->format($resource, $withProperties, $params);
         }
 
         ksort($sortedInstances);
