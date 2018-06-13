@@ -21,9 +21,10 @@
 namespace oat\taoSync\model;
 
 use oat\oatbox\service\ConfigurableService;
+use oat\tao\model\taskQueue\QueueDispatcherInterface;
+use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\taoEncryption\Service\Session\EncryptedUser;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
-use oat\taoTaskQueue\model\QueueDispatcherInterface;
 
 class SynchronizeAllTaskBuilderService extends ConfigurableService
 {
@@ -34,7 +35,7 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
     /**
      * @param $data
      * @param $label
-     * @return mixed
+     * @return TaskInterface
      * @throws \common_exception_Error
      */
     public function run($data, $label)
