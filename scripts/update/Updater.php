@@ -20,6 +20,8 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\generis\model\OntologyRdfs;
+use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
 use oat\oatbox\filesystem\FileSystem;
@@ -33,6 +35,9 @@ use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
+use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
+use oat\taoSync\model\SyncService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -182,6 +187,31 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.14.2','0.15.0');
+
+        if ($this->isVersion('0.15.0')) {
+            $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
+            $options = $service->getOptions();
+            if (
+                isset($options[SyncService::OPTION_SYNCHRONIZERS])
+                && isset($options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY])
+            ) {
+                /** @var ConfigurableService $deliverySynchronizer */
+                $deliverySynchronizer = $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY];
+                if ($deliverySynchronizer->hasOption(AbstractResourceSynchronizer::OPTIONS_FIELDS)) {
+                    $deliveryFields = $deliverySynchronizer->getOption(AbstractResourceSynchronizer::OPTIONS_FIELDS);
+                    if (!in_array(OntologyRdfs::RDFS_SUBCLASSOF, $deliveryFields)) {
+                        $deliveryFields[] = OntologyRdfs::RDFS_SUBCLASSOF;
+                        $deliverySynchronizer->setOption(AbstractResourceSynchronizer::OPTIONS_FIELDS, $deliveryFields);
+                        $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY] = $deliverySynchronizer;
+                        $service->setOptions($options);
+                        $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
+                    }
+                }
+
+
+            }
+            $this->setVersion('0.15.1');
+        }
     }
 
 }

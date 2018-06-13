@@ -101,6 +101,7 @@ class RegisterSyncService extends InstallAction
                         DeliveryFieldsService::PROPERTY_CUSTOM_LABEL,
                         ProctorService::ACCESSIBLE_PROCTOR,
                         DeliveryAssemblyService::PROPERTY_START,
+                        OntologyRdfs::RDFS_SUBCLASSOF,
                     )
                 ))
             )
