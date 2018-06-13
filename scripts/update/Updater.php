@@ -20,17 +20,20 @@
 
 namespace oat\taoSync\scripts\update;
 
-use oat\generis\model\OntologyRdfs;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
 use oat\oatbox\filesystem\FileSystem;
 use oat\oatbox\filesystem\FileSystemService;
+use oat\tao\model\TaoOntology;
 use oat\tao\model\user\import\UserCsvImporterFactory;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoDeliveryRdf\model\ContainerRuntime;
+use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\Entity;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
@@ -197,18 +200,29 @@ class Updater extends \common_ext_ExtensionUpdater
             ) {
                 /** @var ConfigurableService $deliverySynchronizer */
                 $deliverySynchronizer = $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY];
-                if ($deliverySynchronizer->hasOption(AbstractResourceSynchronizer::OPTIONS_FIELDS)) {
-                    $deliveryFields = $deliverySynchronizer->getOption(AbstractResourceSynchronizer::OPTIONS_FIELDS);
-                    if (!in_array(OntologyRdfs::RDFS_SUBCLASSOF, $deliveryFields)) {
-                        $deliveryFields[] = OntologyRdfs::RDFS_SUBCLASSOF;
-                        $deliverySynchronizer->setOption(AbstractResourceSynchronizer::OPTIONS_FIELDS, $deliveryFields);
-                        $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY] = $deliverySynchronizer;
-                        $service->setOptions($options);
-                        $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
-                    }
+                $deliverySynchronizerOptions = $deliverySynchronizer->getOptions();
+                if (isset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_FIELDS])) {
+                    unset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_FIELDS]);
                 }
-
-
+                $excludedFields = [];
+                if (isset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS])) {
+                    $excludedFields =
+                        $deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS]
+                        + array(
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
+                            DeliveryAssemblyService::PROPERTY_ORIGIN,
+                            DeliveryAssemblyService::PROPERTY_DELIVERY_DIRECTORY,
+                            DeliveryAssemblyService::PROPERTY_DELIVERY_TIME,
+                            DeliveryAssemblyService::PROPERTY_DELIVERY_RUNTIME,
+                            ContainerRuntime::PROPERTY_CONTAINER,
+                        );
+                }
+                $deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS] = $excludedFields;
+                $deliverySynchronizer->setOptions($deliverySynchronizerOptions);
+                $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY] = $deliverySynchronizer;
+                $service->setOptions($options);
+                $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
             }
             $this->setVersion('0.15.1');
         }
