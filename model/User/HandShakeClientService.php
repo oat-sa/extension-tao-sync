@@ -35,6 +35,7 @@ use oat\taoOauth\model\OAuthClient;
 use oat\taoOauth\model\storage\ConsumerStorage;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\controller\HandShake;
 
 class HandShakeClientService extends ConfigurableService
 {
@@ -57,15 +58,12 @@ class HandShakeClientService extends ConfigurableService
         $request = new Request('POST',
             $this->getOption(static::OPTION_REMOTE_AUTH_URL)
         );
-
-        $body = stream_for(json_encode(['login' => $handShakeRequest->getLogin()]));
+        $body = stream_for(json_encode($handShakeRequest->toArray()));
         $request = $request->withHeader('Accept', 'application/json');
         $request = $request->withHeader('Content-type', 'application/json');
         $request = $request->withBody($body);
 
-        $response = $client->send($request, [
-            'auth' => array_values($handShakeRequest->toArray()), 'verify' => false,
-        ]);
+        $response = $client->send($request);
 
         if ($response->getStatusCode() == 500) {
             throw new \Exception('A internal error has occurred during server request.');
