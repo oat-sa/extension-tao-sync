@@ -28,10 +28,10 @@ return array(
     'version' => '1.0.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'tao' => '>=19.0.0',
+        'tao' => '>=19.8.0',
         'taoOauth' => '>=1.0.3',
         'taoTestCenter' => '>=3.7.0',
-        'taoTaskQueue' => '>=0.14.3',
+        'taoTaskQueue' => '>=0.17.0',
         'taoDeliveryRdf' => '>=4.8.0'
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
