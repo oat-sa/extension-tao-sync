@@ -20,19 +20,27 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
 use oat\oatbox\filesystem\FileSystem;
 use oat\oatbox\filesystem\FileSystemService;
+use oat\tao\model\TaoOntology;
 use oat\tao\model\user\import\UserCsvImporterFactory;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoDeliveryRdf\model\ContainerRuntime;
+use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\Entity;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
+use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
+use oat\taoSync\model\SyncService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -182,6 +190,43 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.14.2','1.0.0');
+      
+        if ($this->isVersion('1.0.0')) {
+            $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
+            $options = $service->getOptions();
+            if (
+                isset($options[SyncService::OPTION_SYNCHRONIZERS])
+                && isset($options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY])
+            ) {
+                /** @var ConfigurableService $deliverySynchronizer */
+                $deliverySynchronizer = $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY];
+                $deliverySynchronizerOptions = $deliverySynchronizer->getOptions();
+                if (isset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_FIELDS])) {
+                    unset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_FIELDS]);
+                }
+                $excludedFields = [];
+                if (isset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS])) {
+                    $excludedFields =
+                        $deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS]
+                        + array(
+                            TaoOntology::PROPERTY_UPDATED_AT,
+                            Entity::CREATED_AT,
+                            DeliveryAssemblyService::PROPERTY_ORIGIN,
+                            DeliveryAssemblyService::PROPERTY_DELIVERY_DIRECTORY,
+                            DeliveryAssemblyService::PROPERTY_DELIVERY_TIME,
+                            DeliveryAssemblyService::PROPERTY_DELIVERY_RUNTIME,
+                            ContainerRuntime::PROPERTY_CONTAINER,
+                        );
+                }
+                $deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS] = $excludedFields;
+                $deliverySynchronizer->setOptions($deliverySynchronizerOptions);
+                $options[SyncService::OPTION_SYNCHRONIZERS][DeliverySynchronizer::SYNC_DELIVERY] = $deliverySynchronizer;
+                $service->setOptions($options);
+                $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
+            }
+            $this->setVersion('1.0.1');
+        }
+
     }
 
 }
