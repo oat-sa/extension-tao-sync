@@ -20,11 +20,12 @@
 namespace oat\taoSync\controller;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\tao\model\taskQueue\Task\TaskInterface;
+use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
+use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\ui\FormFieldsService;
-use oat\taoTaskQueue\model\Task\TaskInterface;
-use oat\taoTaskQueue\model\TaskLogActionTrait;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
@@ -106,7 +107,7 @@ class Synchronizer extends \tao_actions_CommonModule
     }
 
     /**
-     * @return TaskInterface
+     * @return EntityInterface|null
      * @throws \core_kernel_persistence_Exception
      */
     protected function getLastSyncTask()

@@ -76,7 +76,7 @@ abstract class UserSynchronizer extends AbstractResourceSynchronizer
             if ($results->total() > 0) {
                 $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
                 foreach ($results as $resource) {
-                    $instance = $this->format($resource, $withProperties);
+                    $instance = $this->format($resource, $withProperties, $params);
                     $values[$instance['id']] = $instance;
                 }
             }

@@ -36,9 +36,10 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
      *
      * @param \core_kernel_classes_Resource $resource
      * @param array $options
+     * @param array $params
      * @return array
      */
-    public function format(\core_kernel_classes_Resource $resource, array $options = [])
+    public function format(\core_kernel_classes_Resource $resource, array $options = [], array $params = [])
     {
         if (array_key_exists(self::OPTION_INCLUDED_PROPERTIES, $options) && $options[self::OPTION_INCLUDED_PROPERTIES] === true) {
             $withProperties = true;
@@ -46,7 +47,7 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
             $withProperties = false;
         }
 
-        $properties = $this->filterProperties($resource->getRdfTriples()->toArray(), $options);
+        $properties = $this->filterProperties($resource->getRdfTriples()->toArray(), $options, $params);
         return [
             'id' => $resource->getUri(),
             'checksum' => $this->hashProperties($properties),
@@ -65,9 +66,10 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
      *
      * @param \core_kernel_classes_Triple[] $triples
      * @param array $options
+     * @param array $params
      * @return array
      */
-    protected function filterProperties(array $triples, array $options = [])
+    protected function filterProperties(array $triples, array $options = [], array $params = [])
     {
         if (array_key_exists(self::OPTION_ONLY_FIELDS, $options) && is_array($options[self::OPTION_ONLY_FIELDS])) {
             $fields = $options[self::OPTION_ONLY_FIELDS];
