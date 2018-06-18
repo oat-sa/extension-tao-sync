@@ -190,7 +190,7 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.14.2','1.0.0');
-      
+
         if ($this->isVersion('1.0.0')) {
             $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
             $options = $service->getOptions();
@@ -226,6 +226,8 @@ class Updater extends \common_ext_ExtensionUpdater
             }
             $this->setVersion('1.0.1');
         }
+
+        $this->skip('1.0.1', '1.0.2');
 
     }
 
