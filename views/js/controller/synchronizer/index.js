@@ -22,7 +22,7 @@ define([
     'moment',
     'core/dataProvider/request',
     'util/url',
-    'taoTaskQueue/model/taskQueueModel',
+    'core/taskQueue/taskQueueModel',
     'layout/loading-bar'
 ], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar) {
     'use strict';
