@@ -33,7 +33,9 @@ use oat\taoDeliveryRdf\model\ContainerRuntime;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
@@ -44,6 +46,7 @@ use oat\taoSync\model\SyncService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 
 /**
@@ -228,6 +231,37 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('1.0.1', '1.0.2');
+
+        if ($this->isVersion('1.0.2')) {
+
+            /** @var \common_persistence_SqlPersistence $persistence */
+            $persistence = \common_persistence_Manager::getPersistence('default');
+            $schemaManager = $persistence->getSchemaManager();
+            $fromSchema = $schemaManager->createSchema();
+            $toSchema = clone $fromSchema;
+
+            $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
+            if (!$table->hasColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED)) {
+                $table->addColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
+                $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+                foreach ($queries as $query) {
+                    $persistence->exec($query);
+                }
+            }
+
+            $syncDeliveryLog = new SyncDeliveryLogService();
+            $this->getServiceManager()->register(SyncDeliveryLogService::SERVICE_ID, $syncDeliveryLog);
+
+            /** @var SynchronizeAllTaskBuilderService  $syncAll */
+            $syncAll = $this->getServiceManager()->get(SynchronizeAllTaskBuilderService::SERVICE_ID);
+            $options = $syncAll->getOption(SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC);
+            $options[] = SynchronizeDeliveryLog::class;
+
+            $syncAll->setOption(SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC, $options);
+            $this->getServiceManager()->register(SynchronizeAllTaskBuilderService::SERVICE_ID, $syncAll);
+
+            $this->setVersion('1.1.0');
+        }
 
     }
 

@@ -173,6 +173,20 @@ class SynchronisationClient extends ConfigurableService
     }
 
     /**
+     * @param array $logs
+     * @return mixed
+     * @throws \common_Exception
+     */
+    public function sendDeliveryLogs(array $logs)
+    {
+        $url = '/taoSync/ResultApi/syncDeliveryLogs';
+        $method = 'POST';
+
+        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_DELIVERY_LOGS => $logs]));
+        return $this->decodeResponseBody($response);
+    }
+
+    /**
      * json_decode the body content of given response
      *
      * Parse error to have a readable message if http code is not 2**
