@@ -63,4 +63,11 @@ interface SyncResultServiceInterface
      * @return array
      */
     public function importDeliveryResults(array $results);
+
+    /**
+     * @param string $offlineResultId
+     * @param string $onlineResultId
+     * @return boolean
+     */
+    public function mapOfflineResultIdToOnlineResultId($offlineResultId, $onlineResultId);
 }

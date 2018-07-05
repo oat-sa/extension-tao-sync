@@ -25,6 +25,7 @@ use \common_report_Report as Report;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
+use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use Psr\Log\LogLevel;
 
 class SyncDeliveryLogService extends ConfigurableService implements SyncDeliveryLogServiceInterface
@@ -135,12 +136,25 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
     public function importDeliveryLogs(array $logs)
     {
         $importAcknowledgment = [];
-        $logsToBeInserted = [];
-        foreach ($logs as $resultId => $resultLog) {
-            try {
-                $this->checkResultLogFormat($resultLog);
-                $logsToBeInserted[] = $resultLog;
+        foreach ($logs as $resultId => $resultLogs) {
+            $logsToBeInserted = [];
+            foreach ($resultLogs  as $resultLog) {
+                try {
+                    $this->checkResultLogFormat($resultLog);
+                    $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultLog['delivery_execution_id']);
+                    if ($onlineResultId) {
+                        $resultLog['delivery_execution_id'] = $onlineResultId;
+                        $resultLog['data'] = json_encode($resultLog['data']);
 
+                        $logsToBeInserted[] = $resultLog;
+                    }
+                } catch (\Exception $exception) {
+                    $this->logError($exception->getMessage());
+                }
+            }
+
+            try {
+                $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'noOfLogsSynced' => count($logsToBeInserted),
@@ -148,16 +162,26 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
             } catch (\Exception $exception) {
                 $importAcknowledgment[$resultId] = [
-                    'success' => 0,
-                    'noOfLogsSynced' => 0,
+                    'success' => 0
                 ];
             }
-
         }
 
-        $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
-
         return $importAcknowledgment;
+    }
+
+
+    /**
+     * @param string $offlineResultId
+     * @return boolean
+     * @throws \Exception
+     */
+    public function getOnlineIdOfOfflineResultId($offlineResultId)
+    {
+        /** @var OfflineResultToOnlineResultMapper $mapper */
+        $mapper = $this->getServiceLocator()->get(OfflineResultToOnlineResultMapper::SERVICE_ID);
+
+        return $mapper->getOnlineResultId($offlineResultId);
     }
 
     /**
