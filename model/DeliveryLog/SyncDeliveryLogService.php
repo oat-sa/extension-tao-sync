@@ -53,7 +53,6 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
         $counter = 0;
         $logs = [];
-        $stats = [];
         $statsOfLogs = [];
 
         foreach ($logsToSync as $resultId) {
@@ -75,12 +74,12 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         }
 
         if (!empty($logs)) {
-            $stats[] = $this->sendDeliveryLogs($logs);
+           $this->sendDeliveryLogs($logs);
         }
 
         $logAsCompleted = [];
         foreach ($statsOfLogs as $resultId => $count) {
-            if ($this->syncStats[$resultId] == $count) {
+            if (isset($this->syncStats[$resultId]) && $this->syncStats[$resultId] == $count) {
                 $logAsCompleted[] = $resultId;
             }
         }
@@ -108,19 +107,22 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
         foreach ($syncAcknowledgment as $id => $data) {
             if ((bool)$data['success']) {
-                $syncSuccess[$id] = $data['noOfLogsSynced'];
+                $syncSuccess[$id]      = $data['noOfLogsSynced'];
+                if (!isset($this->syncStats[$id])) {
+                    $this->syncStats[$id] = 0;
+                }
                 $this->syncStats[$id] += $data['noOfLogsSynced'];
             } else {
                 $syncFailed[] = $id;
             }
-        }
 
-        if (!empty($syncSuccess)) {
-            $this->report(count($syncSuccess) . ' result logs exports have been acknowledged.', LogLevel::INFO);
-        }
+            if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
+                $this->report($syncSuccess[$id] . ' result logs exports have been acknowledged.', LogLevel::INFO);
+            }
 
-        if (!empty($syncFailed)) {
-            $this->report(count($syncFailed) . ' result logs exports have not been acknowledged.', LogLevel::ERROR);
+            if (!empty($syncFailed)) {
+                $this->report(count($syncFailed) . ' result logs exports have not been acknowledged.', LogLevel::ERROR);
+            }
         }
 
         return $syncSuccess;

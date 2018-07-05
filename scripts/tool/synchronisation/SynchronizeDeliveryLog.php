@@ -30,8 +30,6 @@ class SynchronizeDeliveryLog extends AbstractAction
      *
      * @param $params
      * @return \common_report_Report
-     * @throws \common_Exception
-     * @throws \common_exception_Error
      */
     public function __invoke($params)
     {

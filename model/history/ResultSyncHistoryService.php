@@ -156,14 +156,18 @@ class ResultSyncHistoryService extends ConfigurableService
         $dataToSave = [];
         foreach ($entityIds as $entityId) {
             $dataToSave[] = [
-                self::SYNC_RESULT_ID  =>  $entityId,
-                self::SYNC_LOG_SYNCED  => 1,
-                self::SYNC_RESULT_TIME  => $now,
+                'conditions' => [
+                    self::SYNC_RESULT_ID => $entityId,
+                ],
+                'updateValues' => [
+                    self::SYNC_LOG_SYNCED  => 1,
+                    self::SYNC_RESULT_TIME  => $now,
+                ],
             ];
         }
 
         try {
-            return $this->getPersistence()->insertMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
+            return $this->getPersistence()->updateMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
         } catch (\Exception $e) {
             $this->logWarning($e->getMessage());
             return false;
