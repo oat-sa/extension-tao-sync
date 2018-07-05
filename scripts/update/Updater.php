@@ -37,6 +37,7 @@ use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
+use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
@@ -259,6 +260,23 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $syncAll->setOption(SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC, $options);
             $this->getServiceManager()->register(SynchronizeAllTaskBuilderService::SERVICE_ID, $syncAll);
+
+            $persistenceId = 'mapOfflineToOnlineResultIds';
+
+            try {
+                \common_persistence_Manager::getPersistence($persistenceId);
+            } catch (\common_Exception $e) {
+                \common_persistence_Manager::addPersistence($persistenceId,  array(
+                    'driver' => 'SqlKvWrapper',
+                    'sqlPersistence' => 'default',
+                ));
+            }
+
+            $mapper = new OfflineResultToOnlineResultMapper([
+                OfflineResultToOnlineResultMapper::OPTION_PERSISTENCE => 'mapOfflineToOnlineResultIds'
+            ]);
+
+            $this->getServiceManager()->register(OfflineResultToOnlineResultMapper::SERVICE_ID, $mapper);
 
             $this->setVersion('1.1.0');
         }

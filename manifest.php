@@ -19,6 +19,7 @@
  */
 
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
 
 return array(
     'name' => 'taoSync',
@@ -53,6 +54,7 @@ return array(
             \oat\taoSync\scripts\install\RegisterHandShakeService::class,
             \oat\taoSync\scripts\install\RegisterHandShakeServerService::class,
             \oat\taoSync\scripts\install\SetupSyncUserCsvImporter::class,
+            RegisterOfflineToOnlineResultMapper::class,
         ]
     ],
     'uninstall' => array(
