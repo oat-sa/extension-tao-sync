@@ -20,7 +20,7 @@
 
 namespace oat\taoSync\controller;
 
-use oat\taoOauth\model\OauthController;
+use oat\taoSync\model\DeliveryLog\SyncDeliveryLogServiceInterface;
 use oat\taoSync\model\ResultService;
 
 /**
@@ -31,6 +31,8 @@ use oat\taoSync\model\ResultService;
 class ResultApi extends \tao_actions_RestController
 {
     const PARAM_RESULTS = 'results';
+
+    const PARAM_DELIVERY_LOGS = 'delivery_logs';
 
     /**
      * Api endpoint to receive results
@@ -65,11 +67,49 @@ class ResultApi extends \tao_actions_RestController
     }
 
     /**
-     * @return ResultService
+     * @throws \common_exception_NotImplemented
+     */
+    public function syncDeliveryLogs()
+    {
+        try {
+            if ($this->getRequestMethod() != \Request::HTTP_POST) {
+                throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
+            }
+
+            $parameters = file_get_contents('php://input');
+            if (
+                is_array($parameters = json_decode($parameters, true))
+                && json_last_error() === JSON_ERROR_NONE
+                && isset($parameters[self::PARAM_DELIVERY_LOGS])
+                && is_array($parameters[self::PARAM_DELIVERY_LOGS])
+            ) {
+                $logs = $parameters[self::PARAM_DELIVERY_LOGS];
+            } else {
+                throw new \InvalidArgumentException('A valid "' . self::PARAM_DELIVERY_LOGS . '" parameter is required to access ' . __FUNCTION__);
+            }
+
+            $response = $this->getSyncResultLogService()->importDeliveryLogs($logs);
+
+            $this->returnJson($response);
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+    /**
+     * @return array|ResultService|object
      */
     protected function getSyncResultService()
     {
         return $this->getServiceLocator()->get(ResultService::SERVICE_ID);
+    }
+
+    /**
+     * @return array|SyncDeliveryLogServiceInterface|object
+     */
+    protected function getSyncResultLogService()
+    {
+        return $this->getServiceLocator()->get(SyncDeliveryLogServiceInterface::SERVICE_ID);
     }
 
 }
