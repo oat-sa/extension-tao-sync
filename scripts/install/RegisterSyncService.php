@@ -39,6 +39,7 @@ use oat\taoSync\model\synchronizer\user\administrator\AdministratorSynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\synchronizer\testcenter\TestCenterSynchronizer;
 use oat\taoSync\model\SyncService;
+use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
  * Class RegisterSyncService
@@ -70,6 +71,7 @@ class RegisterSyncService extends InstallAction
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
+                        ProctorManagementService::PROPERTY_AUTHORIZED_PROCTOR_URI,
                     )
                 )),
                 TestTakerSynchronizer::SYNC_TEST_TAKER => new RdfTestTakerSynchronizer(array(

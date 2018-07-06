@@ -43,12 +43,14 @@ use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
+use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
+use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
  * Class Updater
@@ -235,6 +237,39 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('1.0.2')) {
 
+            /** @var SyncService $service */
+            $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
+            $options = $service->getOptions();
+
+            if (
+                isset($options[SyncService::OPTION_SYNCHRONIZERS])
+                && isset($options[SyncService::OPTION_SYNCHRONIZERS][ProctorSynchronizer::SYNC_PROCTOR])
+            ) {
+                /** @var ConfigurableService $proctorSynchronizer */
+                $proctorSynchronizer = $options[SyncService::OPTION_SYNCHRONIZERS][ProctorSynchronizer::SYNC_PROCTOR];
+                $proctorSynchronizerOptions = $proctorSynchronizer->getOptions();
+
+                if (isset($proctorSynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS])) {
+                    $excludedFields = $proctorSynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS];
+
+                    if (array_search(ProctorManagementService::PROPERTY_AUTHORIZED_PROCTOR_URI, $excludedFields) === false) {
+                        $excludedFields[] = ProctorManagementService::PROPERTY_AUTHORIZED_PROCTOR_URI;
+                        $proctorSynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS] = $excludedFields;
+
+                        $proctorSynchronizer->setOptions($proctorSynchronizerOptions);
+                        $options[SyncService::OPTION_SYNCHRONIZERS][ProctorSynchronizer::SYNC_PROCTOR] = $proctorSynchronizer;
+                        $service->setOptions($options);
+                        $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
+                    }
+                }
+
+            }
+
+            $this->setVersion('1.1.0');
+        }
+
+        if ($this->isVersion('1.1.0')) {
+
             /** @var \common_persistence_SqlPersistence $persistence */
             $persistence = \common_persistence_Manager::getPersistence('default');
             $schemaManager = $persistence->getSchemaManager();
@@ -278,9 +313,8 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->getServiceManager()->register(OfflineResultToOnlineResultMapper::SERVICE_ID, $mapper);
 
-            $this->setVersion('1.1.0');
+            $this->setVersion('1.2.0');
         }
-
     }
 
 }
