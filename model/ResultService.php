@@ -270,6 +270,16 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     }
 
     /**
+     * @param $deliveryExecution
+     */
+    public function triggerResultEvent($deliveryExecution)
+    {
+        /** @var EventManager $eventManager */
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $eventManager->trigger(new ResultCreated($deliveryExecution));
+    }
+
+    /**
      * Get details of a delivery execution
      *
      * @param $deliveryExecutionId
@@ -574,13 +584,4 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         return $deliveryExecution;
     }
 
-    /**
-     * @param $deliveryExecution
-     */
-    protected function triggerResultEvent($deliveryExecution)
-    {
-        /** @var EventManager $eventManager */
-        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
-        $eventManager->trigger(new ResultCreated($deliveryExecution));
-    }
 }
