@@ -194,6 +194,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                 $testtaker = $this->getResource($details['test-taker']);
 
                 $deliveryExecution = $this->spawnDeliveryExecution($delivery, $testtaker);
+                $deliveryExecution = $this->updateDeliveryExecution($details, $deliveryExecution);
 
                 $this->getResultStorage($deliveryId)->storeRelatedTestTaker($deliveryExecution->getIdentifier(), $testtaker->getUri());
                 $this->getResultStorage($deliveryId)->storeRelatedDelivery($deliveryExecution->getIdentifier(), $delivery->getUri());
@@ -552,5 +553,19 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         return $statuses;
+    }
+
+    /**
+     * @param array $details
+     * @param DeliveryExecution $deliveryExecution
+     * @return DeliveryExecution
+     */
+    protected function updateDeliveryExecution($details, $deliveryExecution)
+    {
+        if (isset($details['state'])) {
+            $deliveryExecution->setState($details['state']);
+        }
+
+        return $deliveryExecution;
     }
 }
