@@ -21,6 +21,7 @@
 namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
@@ -29,6 +30,7 @@ use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
+use oat\taoResultServer\models\Events\ResultCreated;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -235,6 +237,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
             }
 
             if (isset($deliveryId)) {
+                if ($success == true) {
+                    $this->triggerResultEvent($deliveryExecution);
+                }
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
                     'deliveryId' => $deliveryId,
@@ -567,5 +572,15 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         return $deliveryExecution;
+    }
+
+    /**
+     * @param $deliveryExecution
+     */
+    protected function triggerResultEvent($deliveryExecution)
+    {
+        /** @var EventManager $eventManager */
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $eventManager->trigger(new ResultCreated($deliveryExecution));
     }
 }
