@@ -21,16 +21,17 @@
 namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
-use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoQtiTest\models\ExtendedStateService;
+use oat\taoQtiTest\models\runner\QtiRunnerService;
+use oat\taoQtiTest\models\TestSessionService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
-use oat\taoResultServer\models\Events\ResultCreated;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -238,7 +239,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
             if (isset($deliveryId)) {
                 if ($success == true) {
-                    $this->triggerResultEvent($deliveryExecution);
+                    $this->touchTestSession($deliveryExecution);
                 }
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
@@ -270,13 +271,43 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     }
 
     /**
-     * @param $deliveryExecution
+     * @param DeliveryExecution $deliveryExecution
+     * @throws \common_Exception
+     * @throws \common_exception_Error
+     * @throws \common_exception_MissingParameter
+     * @throws \common_exception_NotFound
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     * @throws \qtism\runtime\storage\common\StorageException
+     * @throws \qtism\runtime\tests\AssessmentTestSessionException
      */
-    public function triggerResultEvent($deliveryExecution)
+    public function touchTestSession(DeliveryExecution $deliveryExecution)
     {
-        /** @var EventManager $eventManager */
-        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
-        $eventManager->trigger(new ResultCreated($deliveryExecution));
+        /** @var TestSessionService $testSession */
+        $testSession = $this->getServiceLocator()->get(TestSessionService::SERVICE_ID);
+
+        if ($testSession->getTestSession($deliveryExecution) === null) {
+            /** @var QtiRunnerService $runnerService */
+            $runnerService =  $this->getServiceLocator()->get(QtiRunnerService::SERVICE_ID);
+
+            $compiledDelivery = $deliveryExecution->getDelivery();
+            $runtime = DeliveryAssemblyService::singleton()->getRuntime($compiledDelivery);
+            $inputParameters = \tao_models_classes_service_ServiceCallHelper::getInputValues($runtime, []);
+
+            $serviceContext = $runnerService->getServiceContext(
+                $inputParameters['QtiTestDefinition'],
+                $inputParameters['QtiTestCompilation'],
+                $deliveryExecution->getIdentifier(),
+                $deliveryExecution->getUserIdentifier()
+            );
+            $runnerService->init($serviceContext);
+            $runnerService->persist($serviceContext);
+
+            $session = $testSession->getTestSession($deliveryExecution);
+
+            $session->endTestSession();
+            $testSession->persist($session);
+            $this->getServiceManager()->get(ExtendedStateService::SERVICE_ID)->persist($session->getSessionId());
+        }
     }
 
     /**
