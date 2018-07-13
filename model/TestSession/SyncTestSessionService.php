@@ -60,7 +60,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
         $counter = 0;
 
         foreach ($sessionsToSync as $resultId) {
-            $this->report->add(Report::createInfo(' The Test session ('.$resultId.') to send to remote server. Sending...'));
+            $this->report->add(Report::createInfo('The Test session ('.$resultId.') to send to remote server. Sending...'));
             $sessions[] = $resultId;
             $counter++;
         }
@@ -102,11 +102,11 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
             }
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
-                $this->report->add(Report::createInfo($syncSuccess[$id] . ' result logs exports have been acknowledged.'));
+                $this->report->add(Report::createInfo($syncSuccess[$id] . ' sync sessions acknowledged.'));
             }
 
             if (!empty($syncFailed)) {
-                $this->report->add(Report::createInfo(count($syncFailed) . ' result logs exports have not been acknowledged.'));
+                $this->report->add(Report::createInfo(count($syncFailed) . ' sync sessions have not been acknowledged.'));
             }
         }
 
