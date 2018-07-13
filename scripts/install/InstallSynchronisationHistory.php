@@ -76,6 +76,7 @@ class InstallSynchronisationHistory extends InstallAction
             $tableResults->addColumn(ResultSyncHistoryService::SYNC_RESULT_ID, 'string');
             $tableResults->addColumn(ResultSyncHistoryService::SYNC_RESULT_STATUS, 'string', ['notnull' => true, 'length' => 32]);
             $tableResults->addColumn(ResultSyncHistoryService::SYNC_RESULT_TIME, 'datetime', ['notnull' => true,]);
+            $tableResults->addColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
 
             $tableResults->setPrimaryKey(array(ResultSyncHistoryService::SYNC_RESULT_ID));
 

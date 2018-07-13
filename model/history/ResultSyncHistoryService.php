@@ -23,6 +23,7 @@ namespace oat\taoSync\model\history;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use Doctrine\DBAL\Query\QueryBuilder;
+use PDO;
 
 /**
  * Class ResultSyncHistoryService
@@ -45,6 +46,7 @@ class ResultSyncHistoryService extends ConfigurableService
     const SYNC_RESULT_ID = 'id';
     const SYNC_RESULT_STATUS = 'status';
     const SYNC_RESULT_TIME = 'time';
+    const SYNC_LOG_SYNCED = 'log_synced';
 
     const STATUS_SYNCHRONIZED = 'synchronized';
     const STATUS_FAILED = 'failed';
@@ -80,6 +82,32 @@ class ResultSyncHistoryService extends ConfigurableService
     }
 
     /**
+     * @return array
+     */
+    public function getResultsWithDeliveryLogNotSynced()
+    {
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+
+        $qb = $qbBuilder
+            ->select(self::SYNC_RESULT_ID)
+            ->from(self::SYNC_RESULT_TABLE)
+            ->where(self::SYNC_LOG_SYNCED . ' = :log_synced ')
+            ->setParameter('log_synced', 0)
+        ;
+
+        /** @var \PDOStatement $statement */
+        $statement = $qb->execute();
+
+        try {
+            return $statement->fetchAll(PDO::FETCH_COLUMN);
+        } catch (\Exception $e) {
+            $this->logWarning($e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Flags exported results id
      *
      * @param array $entityIds
@@ -105,6 +133,41 @@ class ResultSyncHistoryService extends ConfigurableService
 
         try {
             return $this->getPersistence()->insertMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
+        } catch (\Exception $e) {
+            $this->logWarning($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Flags exported results id
+     *
+     * @param array $entityIds
+     * @return bool
+     */
+    public function logResultsLogsAsExported(array $entityIds)
+    {
+        if (empty($entityIds)) {
+            return true;
+        }
+
+        $now = $this->getPersistence()->getPlatForm()->getNowExpression();
+
+        $dataToSave = [];
+        foreach ($entityIds as $entityId) {
+            $dataToSave[] = [
+                'conditions' => [
+                    self::SYNC_RESULT_ID => $entityId,
+                ],
+                'updateValues' => [
+                    self::SYNC_LOG_SYNCED  => 1,
+                    self::SYNC_RESULT_TIME  => $now,
+                ],
+            ];
+        }
+
+        try {
+            return $this->getPersistence()->updateMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
         } catch (\Exception $e) {
             $this->logWarning($e->getMessage());
             return false;

@@ -31,6 +31,7 @@ use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
+use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use Psr\Log\LogLevel;
 
 /**
@@ -193,6 +194,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                 $testtaker = $this->getResource($details['test-taker']);
 
                 $deliveryExecution = $this->spawnDeliveryExecution($delivery, $testtaker);
+                $deliveryExecution = $this->updateDeliveryExecution($details, $deliveryExecution);
 
                 $this->getResultStorage($deliveryId)->storeRelatedTestTaker($deliveryExecution->getIdentifier(), $testtaker->getUri());
                 $this->getResultStorage($deliveryId)->storeRelatedDelivery($deliveryExecution->getIdentifier(), $delivery->getUri());
@@ -226,6 +228,8 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                     }
 
                 }
+
+                $this->mapOfflineResultIdToOnlineResultId($resultId, $deliveryExecution->getIdentifier());
             } catch (\Exception $e) {
                 $success = false;
             }
@@ -243,6 +247,21 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         return $importAcknowledgment;
+    }
+
+    /**
+     * @param string $offlineResultId
+     * @param string $onlineResultId
+     * @return boolean
+     * @throws \common_Exception
+     * @throws \Exception
+     */
+    public function mapOfflineResultIdToOnlineResultId($offlineResultId, $onlineResultId)
+    {
+        /** @var OfflineResultToOnlineResultMapper $mapper */
+        $mapper = $this->getServiceLocator()->get(OfflineResultToOnlineResultMapper::SERVICE_ID);
+
+        return $mapper->set($offlineResultId, $onlineResultId);
     }
 
     /**
@@ -534,5 +553,19 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         return $statuses;
+    }
+
+    /**
+     * @param array $details
+     * @param DeliveryExecution $deliveryExecution
+     * @return DeliveryExecution
+     */
+    protected function updateDeliveryExecution($details, $deliveryExecution)
+    {
+        if (isset($details['state'])) {
+            $deliveryExecution->setState($details['state']);
+        }
+
+        return $deliveryExecution;
     }
 }
