@@ -239,7 +239,11 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
             if (isset($deliveryId)) {
                 if ($success == true) {
-                    $this->touchTestSession($deliveryExecution);
+                    try {
+                        $this->touchTestSession($deliveryExecution);
+                    } catch (\Exception $e) {
+                        \common_Logger::e($e->getMessage());
+                    }
                 }
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
