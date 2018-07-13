@@ -27,9 +27,6 @@ use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
-use oat\taoQtiTest\models\ExtendedStateService;
-use oat\taoQtiTest\models\runner\QtiRunnerService;
-use oat\taoQtiTest\models\TestSessionService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
@@ -238,13 +235,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
             }
 
             if (isset($deliveryId)) {
-                if ($success == true) {
-                    try {
-                        $this->touchTestSession($deliveryExecution);
-                    } catch (\Exception $e) {
-                        \common_Logger::e($e->getMessage());
-                    }
-                }
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
                     'deliveryId' => $deliveryId,
@@ -272,46 +262,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         $mapper = $this->getServiceLocator()->get(OfflineResultToOnlineResultMapper::SERVICE_ID);
 
         return $mapper->set($offlineResultId, $onlineResultId);
-    }
-
-    /**
-     * @param DeliveryExecution $deliveryExecution
-     * @throws \common_Exception
-     * @throws \common_exception_Error
-     * @throws \common_exception_MissingParameter
-     * @throws \common_exception_NotFound
-     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
-     * @throws \qtism\runtime\storage\common\StorageException
-     * @throws \qtism\runtime\tests\AssessmentTestSessionException
-     */
-    public function touchTestSession(DeliveryExecution $deliveryExecution)
-    {
-        /** @var TestSessionService $testSession */
-        $testSession = $this->getServiceLocator()->get(TestSessionService::SERVICE_ID);
-
-        if ($testSession->getTestSession($deliveryExecution) === null) {
-            /** @var QtiRunnerService $runnerService */
-            $runnerService =  $this->getServiceLocator()->get(QtiRunnerService::SERVICE_ID);
-
-            $compiledDelivery = $deliveryExecution->getDelivery();
-            $runtime = DeliveryAssemblyService::singleton()->getRuntime($compiledDelivery);
-            $inputParameters = \tao_models_classes_service_ServiceCallHelper::getInputValues($runtime, []);
-
-            $serviceContext = $runnerService->getServiceContext(
-                $inputParameters['QtiTestDefinition'],
-                $inputParameters['QtiTestCompilation'],
-                $deliveryExecution->getIdentifier(),
-                $deliveryExecution->getUserIdentifier()
-            );
-            $runnerService->init($serviceContext);
-            $runnerService->persist($serviceContext);
-
-            $session = $testSession->getTestSession($deliveryExecution);
-
-            $session->endTestSession();
-            $testSession->persist($session);
-            $this->getServiceManager()->get(ExtendedStateService::SERVICE_ID)->persist($session->getSessionId());
-        }
     }
 
     /**
