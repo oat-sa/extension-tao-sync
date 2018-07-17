@@ -21,7 +21,7 @@ namespace oat\taoSync\model\TestSession;
 
 interface SyncTestSessionServiceInterface
 {
-    const SERVICE_ID = 'taoSync/testSessionService';
+    const SERVICE_ID = 'taoSync/SyncTestSessionService';
     /**
      * @param array $params
      */
