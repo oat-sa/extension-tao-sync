@@ -563,7 +563,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     protected function updateDeliveryExecution($details, $deliveryExecution)
     {
         if (isset($details['state'])) {
-            $deliveryExecution->setState($details['state']);
+            $deliveryExecution->getImplementation()->setState($details['state']);
         }
 
         return $deliveryExecution;
