@@ -19,6 +19,8 @@
  */
 namespace oat\taoSync\model\TestSession;
 
+use oat\taoDelivery\model\execution\DeliveryExecution;
+
 interface SyncTestSessionServiceInterface
 {
     const SERVICE_ID = 'taoSync/SyncTestSessionService';
@@ -37,4 +39,10 @@ interface SyncTestSessionServiceInterface
      * @return array
      */
     public function importTestSessions(array $session);
+
+    /**
+     * @param DeliveryExecution $deliveryExecution
+     * @return mixed
+     */
+    public function touchTestSession(DeliveryExecution $deliveryExecution);
 }

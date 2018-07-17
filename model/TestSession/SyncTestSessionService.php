@@ -96,7 +96,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
         foreach ($syncAcknowledgment as $id => $data) {
             if ((bool)$data['success']) {
-                $syncSuccess[$id]      = 1;
+                $syncSuccess[$id] = 1;
             } else {
                 $syncFailed[] = $id;
             }
@@ -124,7 +124,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
             try {
                 $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultId);
                 $deliveryExecution = $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID)->getDeliveryExecution($onlineResultId);
-                $this->touchTestSession($deliveryExecution);
+                $this->afterImportSession($deliveryExecution);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1
                 ];
@@ -207,5 +207,23 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
         $mapper = $this->getServiceLocator()->get(OfflineResultToOnlineResultMapper::SERVICE_ID);
 
         return $mapper->getOnlineResultId($offlineResultId);
+    }
+
+    /**
+     * @param DeliveryExecution $deliveryExecution
+     * @return bool
+     * @throws \common_Exception
+     * @throws \common_exception_Error
+     * @throws \common_exception_MissingParameter
+     * @throws \common_exception_NotFound
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     * @throws \qtism\runtime\storage\common\StorageException
+     * @throws \qtism\runtime\tests\AssessmentTestSessionException
+     */
+    protected function afterImportSession($deliveryExecution)
+    {
+        $this->touchTestSession($deliveryExecution);
+
+        return true;
     }
 }
