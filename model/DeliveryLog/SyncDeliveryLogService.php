@@ -143,6 +143,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                     $this->checkResultLogFormat($resultLog);
                     $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultLog['delivery_execution_id']);
                     if ($onlineResultId) {
+                        unset($resultLog['id']);
                         $resultLog['delivery_execution_id'] = $onlineResultId;
                         $resultLog['data'] = json_encode($resultLog['data']);
 

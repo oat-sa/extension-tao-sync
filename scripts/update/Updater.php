@@ -45,11 +45,13 @@ use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncService;
+use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
 use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
@@ -316,7 +318,36 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('1.2.0');
         }
 
-        $this->skip('1.2.0', '1.2.1');
+        if ($this->isVersion('1.2.0')) {
+
+            /** @var \common_persistence_SqlPersistence $persistence */
+            $persistence = \common_persistence_Manager::getPersistence('default');
+            $schemaManager = $persistence->getSchemaManager();
+            $fromSchema = $schemaManager->createSchema();
+            $toSchema = clone $fromSchema;
+
+            $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
+            if (!$table->hasColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED)) {
+                $table->addColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
+                $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+                foreach ($queries as $query) {
+                    $persistence->exec($query);
+                }
+            }
+
+            $syncTestSession = new SyncTestSessionService();
+            $this->getServiceManager()->register(SyncTestSessionService::SERVICE_ID, $syncTestSession);
+
+            /** @var SynchronizeAllTaskBuilderService  $syncAll */
+            $syncAll = $this->getServiceManager()->get(SynchronizeAllTaskBuilderService::SERVICE_ID);
+            $options = $syncAll->getOption(SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC);
+            $options[] = SynchronizeTestSession::class;
+
+            $syncAll->setOption(SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC, $options);
+            $this->getServiceManager()->register(SynchronizeAllTaskBuilderService::SERVICE_ID, $syncAll);
+
+            $this->setVersion('1.3.0');
+        }
     }
 
 }
