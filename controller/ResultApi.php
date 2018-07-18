@@ -22,6 +22,7 @@ namespace oat\taoSync\controller;
 
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogServiceInterface;
 use oat\taoSync\model\ResultService;
+use oat\taoSync\model\TestSession\SyncTestSessionServiceInterface;
 
 /**
  * Class ResultApi
@@ -33,6 +34,8 @@ class ResultApi extends \tao_actions_RestController
     const PARAM_RESULTS = 'results';
 
     const PARAM_DELIVERY_LOGS = 'delivery_logs';
+
+    const PARAM_TEST_SESSIONS = 'test_sessions';
 
     /**
      * Api endpoint to receive results
@@ -97,6 +100,36 @@ class ResultApi extends \tao_actions_RestController
     }
 
     /**
+     * @throws \common_exception_NotImplemented
+     */
+    public function syncTestSessions()
+    {
+        try {
+            if ($this->getRequestMethod() != \Request::HTTP_POST) {
+                throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
+            }
+
+            $parameters = file_get_contents('php://input');
+            if (
+                is_array($parameters = json_decode($parameters, true))
+                && json_last_error() === JSON_ERROR_NONE
+                && isset($parameters[self::PARAM_TEST_SESSIONS])
+                && is_array($parameters[self::PARAM_TEST_SESSIONS])
+            ) {
+                $sessions = $parameters[self::PARAM_TEST_SESSIONS];
+            } else {
+                throw new \InvalidArgumentException('A valid "' . self::PARAM_TEST_SESSIONS . '" parameter is required to access ' . __FUNCTION__);
+            }
+
+            $response = $this->getSyncTestSessionsService()->importTestSessions($sessions);
+
+            $this->returnJson($response);
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+    /**
      * @return array|ResultService|object
      */
     protected function getSyncResultService()
@@ -110,6 +143,14 @@ class ResultApi extends \tao_actions_RestController
     protected function getSyncResultLogService()
     {
         return $this->getServiceLocator()->get(SyncDeliveryLogServiceInterface::SERVICE_ID);
+    }
+
+    /**
+     * @return array|SyncTestSessionServiceInterface|object
+     */
+    protected function getSyncTestSessionsService()
+    {
+        return $this->getServiceLocator()->get(SyncTestSessionServiceInterface::SERVICE_ID);
     }
 
 }

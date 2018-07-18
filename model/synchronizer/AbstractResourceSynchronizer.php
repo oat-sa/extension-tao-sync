@@ -203,6 +203,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     public function insertMultiple(array $entities)
     {
         $created = [];
+        $excludedFields = $this->getOption(self::OPTIONS_EXCLUDED_FIELDS) ?: [];
         foreach ($entities as $entity) {
             $properties = isset($entity['properties']) ? $entity['properties'] : [];
             if (isset($properties[OntologyRdf::RDF_TYPE])) {
@@ -213,6 +214,13 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
 
             $resource = $this->getResource($entity['id']);
             $resource->setType($class);
+
+            foreach ($properties as $property => $value) {
+                if (in_array($property, $excludedFields)) {
+                    unset($properties[$property]);
+                }
+            }
+
             $resource->setPropertiesValues($properties);
 
             $created[] = $entity['id'];
