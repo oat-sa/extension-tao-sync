@@ -318,7 +318,9 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('1.2.0');
         }
 
-        if ($this->isVersion('1.2.0')) {
+        $this->skip('1.2.0', '1.2.1');
+
+        if ($this->isVersion('1.2.1')) {
 
             /** @var \common_persistence_SqlPersistence $persistence */
             $persistence = \common_persistence_Manager::getPersistence('default');
