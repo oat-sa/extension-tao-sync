@@ -370,8 +370,8 @@ class Updater extends \common_ext_ExtensionUpdater
             }
 
             $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
-            if ($table->hasColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED)) {
-                $table->dropColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED);
+            if ($table->hasColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED)) {
+                $table->dropColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED);
                 $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
                 foreach ($queries as $query) {
                     $persistence->exec($query);
