@@ -19,6 +19,7 @@
  */
 
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\scripts\install\InstallEnhancedDeliveryLog;
 use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
 
 return array(
@@ -26,7 +27,7 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '1.3.0',
+    'version' => '1.4.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'tao' => '>=19.10.0',
@@ -56,6 +57,7 @@ return array(
             \oat\taoSync\scripts\install\RegisterHandShakeServerService::class,
             \oat\taoSync\scripts\install\SetupSyncUserCsvImporter::class,
             RegisterOfflineToOnlineResultMapper::class,
+            InstallEnhancedDeliveryLog::class,
         ]
     ],
     'uninstall' => array(

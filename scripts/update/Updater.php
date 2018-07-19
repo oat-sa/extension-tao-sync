@@ -31,8 +31,10 @@ use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDeliveryRdf\model\ContainerRuntime;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoProctoring\model\deliveryLog\implementation\RdsDeliveryLogService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -349,6 +351,42 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(SynchronizeAllTaskBuilderService::SERVICE_ID, $syncAll);
 
             $this->setVersion('1.3.0');
+        }
+
+        if ($this->isVersion('1.3.0')) {
+            /** @var \common_persistence_SqlPersistence $persistence */
+            $persistence = \common_persistence_Manager::getPersistence('default');
+            $schemaManager = $persistence->getSchemaManager();
+            $fromSchema = $schemaManager->createSchema();
+            $toSchema = clone $fromSchema;
+
+            $table = $toSchema->getTable(RdsDeliveryLogService::TABLE_NAME);
+            if (!$table->hasColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED)) {
+                $table->addColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
+                $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+                foreach ($queries as $query) {
+                    $persistence->exec($query);
+                }
+            }
+
+            $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
+            if ($table->hasColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED)) {
+                $table->dropColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED);
+                $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+                foreach ($queries as $query) {
+                    $persistence->exec($query);
+                }
+            }
+
+            $deliveryLog = new EnhancedDeliveryLogService(['persistence' => 'default']);
+
+            $this->getServiceManager()->register(EnhancedDeliveryLogService::SERVICE_ID, $deliveryLog);
+
+            /** @var EnhancedDeliveryLogService $deliveryLog */
+            $deliveryLog = $this->getServiceManager()->get(EnhancedDeliveryLogService::SERVICE_ID);
+            $deliveryLog->markAllLogsSynced();
+
+            $this->setVersion('1.4.0');
         }
     }
 

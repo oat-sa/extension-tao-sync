@@ -1,0 +1,90 @@
+<?php
+
+namespace oat\taoSync\model\DeliveryLog;
+
+use Doctrine\DBAL\Query\QueryBuilder;
+use oat\oatbox\service\ConfigurableService;
+use oat\taoProctoring\model\deliveryLog\DeliveryLog;
+use oat\taoProctoring\model\deliveryLog\implementation\RdsDeliveryLogService;
+
+class EnhancedDeliveryLogService extends ConfigurableService
+{
+    const SERVICE_ID = 'taoSync/EnhancedDeliveryLog';
+
+    const OPTION_PERSISTENCE = 'persistence';
+
+    const COLUMN_IS_SYNCED = 'is_synced';
+
+    /**
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function markAllLogsSynced()
+    {
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+
+        $qbBuilder
+            ->update(RdsDeliveryLogService::TABLE_NAME, 'dl')
+            ->set('dl.'.static::COLUMN_IS_SYNCED, ':value')
+            ->setParameter('value', 1)
+        ;
+
+        return $qbBuilder->execute();
+    }
+
+    /**
+     * @param array $ids
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function markLogsAsSynced(array $ids)
+    {
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+
+        $qbBuilder
+            ->update(RdsDeliveryLogService::TABLE_NAME, 'dl')
+            ->set('dl.'.static::COLUMN_IS_SYNCED, ':value')
+            ->where(RdsDeliveryLogService::ID. ' IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->setParameter('value', 1)
+        ;
+
+        return $qbBuilder->execute();
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogsToSynced()
+    {
+        return $this->getDeliveryLog()->search([
+            static::COLUMN_IS_SYNCED => '0'
+        ]);
+    }
+
+    /**
+     * @param array $logsToBeInserted
+     * @return mixed
+     */
+    public function insertMultiple(array $logsToBeInserted)
+    {
+        return $this->getDeliveryLog()->insertMultiple($logsToBeInserted);
+    }
+
+    /**
+     * @return array|DeliveryLog
+     */
+    protected function getDeliveryLog()
+    {
+        return $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+    }
+
+    /**
+     * @return \common_persistence_SqlPersistence
+     */
+    protected function getPersistence()
+    {
+        $persistenceId = $this->getOption(self::OPTION_PERSISTENCE);
+        return $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
+    }
+}
