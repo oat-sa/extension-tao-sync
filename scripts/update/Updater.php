@@ -386,6 +386,18 @@ class Updater extends \common_ext_ExtensionUpdater
             $deliveryLog = $this->getServiceManager()->get(EnhancedDeliveryLogService::SERVICE_ID);
             $deliveryLog->markAllLogsSynced();
 
+            /** @var RdsDeliveryLogService $deliveryLog */
+            $deliveryLog = $this->getServiceManager()->get(RdsDeliveryLogService::SERVICE_ID);
+
+            $deliveryLog->setOption(RdsDeliveryLogService::OPTION_FIELDS, [
+                RdsDeliveryLogService::EVENT_ID,
+                RdsDeliveryLogService::CREATED_BY,
+                RdsDeliveryLogService::DELIVERY_EXECUTION_ID,
+                EnhancedDeliveryLogService::COLUMN_IS_SYNCED
+            ]);
+
+            $this->getServiceManager()->register(RdsDeliveryLogService::SERVICE_ID, $deliveryLog);
+
             $this->setVersion('1.4.0');
         }
     }
