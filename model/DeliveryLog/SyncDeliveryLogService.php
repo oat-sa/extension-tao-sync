@@ -105,7 +105,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             }
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
-                $this->report($syncSuccess[$id] . ' result logs exports have been acknowledged.', LogLevel::INFO);
+                $this->report(count($syncSuccess[$id]). ' result logs exports have been acknowledged.', LogLevel::INFO);
             }
 
             if (!empty($syncFailed)) {
