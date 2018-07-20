@@ -97,7 +97,12 @@ class EnhancedDeliveryLogService extends ConfigurableService
      */
     public function insertMultiple(array $logsToBeInserted)
     {
-        return $this->getDeliveryLog()->insertMultiple($logsToBeInserted);
+        $cleanedLogs = [];
+        foreach ($logsToBeInserted as $log) {
+            unset($log[static::LOG_IS_AFTER_SESSION_SYNCED]);
+            $cleanedLogs[] = $log;
+        }
+        return $this->getDeliveryLog()->insertMultiple($cleanedLogs);
     }
 
     /**
