@@ -82,13 +82,14 @@ class EnhancedDeliveryLogService extends ConfigurableService
     }
 
     /**
+     * @param bool $shouldDecode
      * @return mixed
      */
-    public function getLogsToSynced()
+    public function getLogsToSynced($shouldDecode = true)
     {
         return $this->getDeliveryLog()->search([
             static::COLUMN_IS_SYNCED => '0'
-        ]);
+        ], [], $shouldDecode);
     }
 
     /**

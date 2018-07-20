@@ -35,6 +35,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 {
     const OPTION_CHUNK_SIZE = 'chunkSize';
     const DEFAULT_CHUNK_SIZE = 200;
+    const OPTION_SHOULD_DECODE_BEFORE_SYNC = 'shouldDecodeBeforeSync';
 
     /** @var Report */
     protected $report;
@@ -50,7 +51,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $this->report = Report::createInfo('Starting delivery log synchronisation...');
 
         $deliveryLogService = $this->getDeliveryLogService();
-        $logsToSync = $deliveryLogService->getLogsToSynced();
+        $logsToSync = $deliveryLogService->getLogsToSynced($this->getOption(static::OPTION_SHOULD_DECODE_BEFORE_SYNC));
 
         $counter     = 0;
         $logs        = [];

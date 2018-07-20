@@ -400,8 +400,12 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(RdsDeliveryLogService::SERVICE_ID, $deliveryLog);
 
             $deliveryLogFormatter = new DeliveryLogFormatterService([]);
-
             $this->getServiceManager()->register(DeliveryLogFormatterService::SERVICE_ID, $deliveryLogFormatter);
+
+            /** @var SyncDeliveryLogService $syncDeliveryLog */
+            $syncDeliveryLog = $this->getServiceManager()->get(SyncDeliveryLogService::SERVICE_ID);
+            $syncDeliveryLog->setOption(SyncDeliveryLogService::OPTION_SHOULD_DECODE_BEFORE_SYNC, true);
+            $this->getServiceManager()->register(SyncDeliveryLogService::SERVICE_ID, $syncDeliveryLog);
 
             $this->setVersion('1.4.0');
         }
