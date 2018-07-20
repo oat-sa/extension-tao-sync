@@ -34,6 +34,7 @@ use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoProctoring\model\deliveryLog\implementation\RdsDeliveryLogService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
@@ -397,6 +398,10 @@ class Updater extends \common_ext_ExtensionUpdater
             ]);
 
             $this->getServiceManager()->register(RdsDeliveryLogService::SERVICE_ID, $deliveryLog);
+
+            $deliveryLogFormatter = new DeliveryLogFormatterService([]);
+
+            $this->getServiceManager()->register(DeliveryLogFormatterService::SERVICE_ID, $deliveryLogFormatter);
 
             $this->setVersion('1.4.0');
         }

@@ -138,7 +138,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                     $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultLog['delivery_execution_id']);
                     if ($onlineResultId) {
                         $resultLog['delivery_execution_id'] = $onlineResultId;
-                        $resultLog['data'] = json_encode($resultLog['data']);
+                        $resultLog = $this->formatLog($resultLog);
 
                         $logsSynced[] = $resultLog['id'];
                         unset($resultLog['id']);
@@ -280,5 +280,17 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
             $eventManager->trigger(new DeliveryExecutionIrregularityReport($deliveryExecution));
         }
+    }
+
+    /**
+     * @param array $deliveryLog
+     * @return array
+     */
+    protected function formatLog(array $deliveryLog)
+    {
+        /** @var DeliveryLogFormatterService $deliveryLogFormatter */
+        $deliveryLogFormatter = $this->getServiceLocator()->get(DeliveryLogFormatterService::SERVICE_ID);
+
+        return $deliveryLogFormatter->format($deliveryLog);
     }
 }
