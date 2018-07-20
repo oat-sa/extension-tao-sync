@@ -23,7 +23,6 @@ namespace oat\taoSync\model;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\taskQueue\QueueDispatcherInterface;
 use oat\tao\model\taskQueue\Task\TaskInterface;
-use oat\taoEncryption\Service\Session\EncryptedUser;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 
 class SynchronizeAllTaskBuilderService extends ConfigurableService
@@ -61,7 +60,7 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
     {
         $user = \common_session_SessionManager::getSession()->getUser();
 
-        if ($user instanceof EncryptedUser){
+        if (get_class($user) == 'oat\\taoEncryption\\Service\\Session\\EncryptedUser') {
             return $user->getApplicationKey();
         }
 
