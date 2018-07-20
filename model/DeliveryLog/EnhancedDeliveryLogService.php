@@ -47,7 +47,7 @@ class EnhancedDeliveryLogService extends ConfigurableService
             ->update(RdsDeliveryLogService::TABLE_NAME, 'dl')
             ->set('dl.'.static::COLUMN_IS_SYNCED, ':value')
             ->where(RdsDeliveryLogService::ID. ' IN (:ids)')
-            ->setParameter('ids', $ids)
+            ->setParameter('ids', $ids, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
             ->setParameter('value', 1)
         ;
 
