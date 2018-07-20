@@ -20,10 +20,12 @@
 
 namespace oat\taoSync\model\DeliveryLog;
 
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use \common_report_Report as Report;
+use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
-use oat\taoProctoring\model\deliveryLog\implementation\RdsDeliveryLogService;
+use oat\taoProctoring\model\event\DeliveryExecutionIrregularityReport;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -53,9 +55,13 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $counter     = 0;
         $logs        = [];
         $syncSuccess = [];
+
         foreach ($logsToSync as $deliveryLog) {
-            $resultId                 = $deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID];
-            $logs[$resultId][]        = $deliveryLog;
+            $resultId = $deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID];
+            $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED]
+                = $this->getResultSyncHistory()->isSessionSynced($resultId);
+
+            $logs[$resultId][] = $deliveryLog;
 
             $counter++;
             if ($counter % $this->getChunkSize() === 0) {
@@ -145,6 +151,9 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
             try {
                 $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
+                foreach ($logsToBeInserted as $deliveryLog) {
+                    $this->postImportDeliverLogProcess($deliveryLog);
+                }
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'logsSynced' => $logsSynced
@@ -251,6 +260,25 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $global = array('delivery_execution_id', 'event_id', 'data', 'created_at', 'created_by');
         if (!empty(array_diff_key(array_flip($global), $data))) {
             throw new \InvalidArgumentException('Result Log is not correctly formatted, should contains : ' . implode(', ', $global));
+        }
+    }
+
+    /**
+     * @param array $deliveryLog
+     */
+    protected function postImportDeliverLogProcess(array $deliveryLog)
+    {
+        if (isset($deliveryLog[DeliveryLog::EVENT_ID])
+            && $deliveryLog[DeliveryLog::EVENT_ID] === 'TEST_IRREGULARITY'
+            && isset($deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED])
+            && $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED] === true
+        ) {
+            $deliveryExecution = $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID)
+                ->getDeliveryExecution($deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID]);
+
+            /** @var EventManager $eventManager */
+            $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+            $eventManager->trigger(new DeliveryExecutionIrregularityReport($deliveryExecution));
         }
     }
 }

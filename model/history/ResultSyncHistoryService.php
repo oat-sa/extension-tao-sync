@@ -82,6 +82,33 @@ class ResultSyncHistoryService extends ConfigurableService
         }
     }
 
+    /**
+     * @param $id
+     * @return bool
+     */
+    public function isSessionSynced($id)
+    {
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $qb = $qbBuilder
+            ->select(self::SYNC_RESULT_ID)
+            ->from(self::SYNC_RESULT_TABLE)
+            ->where(self::SYNC_RESULT_ID . ' = :id ')
+            ->andWhere(self::SYNC_RESULT_STATUS . ' = :session_synced')
+            ->setParameter('id', $id)
+            ->setParameter('session_synced', 1)
+        ;
+
+        /** @var \PDOStatement $statement */
+        $statement = $qb->execute();
+
+        try {
+            return $statement->rowCount() > 0;
+        } catch (\Exception $e) {
+            $this->logWarning($e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * @return array

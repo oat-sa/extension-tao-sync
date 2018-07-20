@@ -15,6 +15,8 @@ class EnhancedDeliveryLogService extends ConfigurableService
 
     const COLUMN_IS_SYNCED = 'is_synced';
 
+    const LOG_IS_AFTER_SESSION_SYNCED = 'log_is_after_session_sync';
+
     /**
      * @return \Doctrine\DBAL\Driver\Statement|int
      */
