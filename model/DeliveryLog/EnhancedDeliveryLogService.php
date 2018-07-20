@@ -35,6 +35,33 @@ class EnhancedDeliveryLogService extends ConfigurableService
     }
 
     /**
+     * @param $resultId
+     * @return bool
+     */
+    public function hasAllDeliveryLogsSynced($resultId)
+    {
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+
+        $qb = $qbBuilder
+            ->select(RdsDeliveryLogService::ID)
+            ->from(RdsDeliveryLogService::TABLE_NAME)
+            ->where(RdsDeliveryLogService::DELIVERY_EXECUTION_ID . ' = :delivery_execution_id ')
+            ->andWhere(static::COLUMN_IS_SYNCED . ' = :is_synced ')
+            ->setParameter('delivery_execution_id', $resultId)
+            ->setParameter('is_synced', 0)
+        ;
+        /** @var \PDOStatement $statement */
+        $statement = $qb->execute();
+
+        try {
+            return $statement->rowCount() === 0;
+        } catch (\Exception $e) {
+            $this->logWarning($e->getMessage());
+            return false;
+        }
+    }
+    /**
      * @param array $ids
      * @return \Doctrine\DBAL\Driver\Statement|int
      */

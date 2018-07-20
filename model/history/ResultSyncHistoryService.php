@@ -94,7 +94,7 @@ class ResultSyncHistoryService extends ConfigurableService
             ->select(self::SYNC_RESULT_ID)
             ->from(self::SYNC_RESULT_TABLE)
             ->where(self::SYNC_RESULT_ID . ' = :id ')
-            ->andWhere(self::SYNC_RESULT_STATUS . ' = :session_synced')
+            ->andWhere(self::SYNC_SESSION_SYNCED . ' = :session_synced')
             ->setParameter('id', $id)
             ->setParameter('session_synced', 1)
         ;

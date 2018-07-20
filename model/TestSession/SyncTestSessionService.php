@@ -30,6 +30,7 @@ use oat\taoQtiTest\models\runner\QtiRunnerService;
 use oat\taoQtiTest\models\TestSessionService;
 use oat\taoResultServer\models\Events\ResultCreated;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use \common_report_Report as Report;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -60,9 +61,11 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
         $counter = 0;
 
         foreach ($sessionsToSync as $resultId) {
-            $this->report->add(Report::createInfo('The Test session ('.$resultId.') to send to remote server. Sending...'));
-            $sessions[] = $resultId;
-            $counter++;
+            if ($this->getDeliveryLogService()->hasAllDeliveryLogsSynced($resultId)) {
+                $this->report->add(Report::createInfo('The Test session ('.$resultId.') to send to remote server. Sending...'));
+                $sessions[] = $resultId;
+                $counter++;
+            }
         }
 
         if ($counter === 0) {
@@ -226,4 +229,13 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
         return true;
     }
+
+    /**
+     * @return array|EnhancedDeliveryLogService
+     */
+    protected function getDeliveryLogService()
+    {
+        return $this->getServiceLocator()->get(EnhancedDeliveryLogService::SERVICE_ID);
+    }
+
 }
