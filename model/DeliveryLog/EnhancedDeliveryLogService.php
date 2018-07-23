@@ -18,23 +18,6 @@ class EnhancedDeliveryLogService extends ConfigurableService
     const LOG_IS_AFTER_SESSION_SYNCED = 'log_is_after_session_sync';
 
     /**
-     * @return \Doctrine\DBAL\Driver\Statement|int
-     */
-    public function markAllLogsSynced()
-    {
-        /** @var QueryBuilder $qbBuilder */
-        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
-
-        $qbBuilder
-            ->update(RdsDeliveryLogService::TABLE_NAME, 'dl')
-            ->set('dl.'.static::COLUMN_IS_SYNCED, ':value')
-            ->setParameter('value', 1)
-        ;
-
-        return $qbBuilder->execute();
-    }
-
-    /**
      * @param $resultId
      * @return bool
      */

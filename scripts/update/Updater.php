@@ -383,10 +383,6 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->getServiceManager()->register(EnhancedDeliveryLogService::SERVICE_ID, $deliveryLog);
 
-            /** @var EnhancedDeliveryLogService $deliveryLog */
-            $deliveryLog = $this->getServiceManager()->get(EnhancedDeliveryLogService::SERVICE_ID);
-            $deliveryLog->markAllLogsSynced();
-
             /** @var RdsDeliveryLogService $deliveryLog */
             $deliveryLog = $this->getServiceManager()->get(RdsDeliveryLogService::SERVICE_ID);
 
