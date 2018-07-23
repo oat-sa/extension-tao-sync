@@ -37,6 +37,6 @@ class AttachReactivateDeliveryExecutionEvent extends InstallAction
     {
         $this->registerEvent(DeliveryExecutionReactivated::class, [ResultSyncHistoryService::SERVICE_ID, 'catchDeliveryExecutionReactivated']);
 
-        return \common_report_Report::createSuccess('SyncService successfully registered.');
+        return \common_report_Report::createSuccess('AttachReactivateDeliveryExecutionEvent successfully registered.');
     }
 }
