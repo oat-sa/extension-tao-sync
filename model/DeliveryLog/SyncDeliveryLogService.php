@@ -55,20 +55,21 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
         $counter     = 0;
         $logs        = [];
-        $syncSuccess = [];
 
         foreach ($logsToSync as $deliveryLog) {
             $resultId = $deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID];
             $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED]
                 = $this->getResultSyncHistory()->isSessionSynced($resultId);
 
-            $logs[$resultId][] = $deliveryLog;
+            $logs[$resultId][]      = $deliveryLog;
 
             $counter++;
             if ($counter % $this->getChunkSize() === 0) {
                 $this->report($counter . ' results logs to send to remote server. Sending...', LogLevel::INFO);
-                $syncSuccess = array_merge($syncSuccess, $this->sendDeliveryLogs($logs));
+                $syncSuccess = $this->sendDeliveryLogs($logs);
                 $logs = [];
+
+                $this->markLogsAsSynced($syncSuccess);
             }
         }
 
@@ -77,13 +78,10 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         }
 
         if (!empty($logs)) {
-            $syncSuccess = array_merge($syncSuccess, $this->sendDeliveryLogs($logs));
+            $syncSuccess = $this->sendDeliveryLogs($logs);
+            $this->markLogsAsSynced($syncSuccess);
         }
 
-        foreach ($syncSuccess as $resultId => $logsSynced) {
-            $deliveryLogService->markLogsAsSynced($logsSynced);
-            $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
-        }
 
         return $this->report;
     }
@@ -294,4 +292,19 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
         return $deliveryLogFormatter->format($deliveryLog);
     }
+
+    /**
+     * @param $syncSuccess
+     * @throws \common_exception_Error
+     */
+    protected function markLogsAsSynced($syncSuccess)
+    {
+        $deliveryLogService = $this->getDeliveryLogService();
+
+        foreach ($syncSuccess as $resultId => $logsSynced) {
+            $deliveryLogService->markLogsAsSynced($logsSynced);
+            $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
+        }
+    }
+
 }
