@@ -23,6 +23,7 @@ namespace oat\taoSync\model\history;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use Doctrine\DBAL\Query\QueryBuilder;
+use oat\taoProctoring\model\event\DeliveryExecutionReactivated;
 use PDO;
 
 /**
@@ -51,6 +52,30 @@ class ResultSyncHistoryService extends ConfigurableService
 
     const STATUS_SYNCHRONIZED = 'synchronized';
     const STATUS_FAILED = 'failed';
+    const STATUS_TO_BE_RE_SYNCED = 'to_be_re_synced';
+
+    /**
+     * @param DeliveryExecutionReactivated $event
+     * @return \Doctrine\DBAL\Driver\Statement|int
+     */
+    public function catchDeliveryExecutionReactivated(DeliveryExecutionReactivated $event)
+    {
+        $resultId = $event->getDeliveryExecution()->getIdentifier();
+
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $qb = $qbBuilder
+            ->update(static::SYNC_RESULT_TABLE, 'sr')
+            ->set('sr.'.static::SYNC_RESULT_STATUS, ':status')
+            ->set('sr.'.static::SYNC_SESSION_SYNCED, ':session_synced')
+            ->where('sr.'.static::SYNC_RESULT_ID .'=:id')
+            ->setParameter('id', $resultId)
+            ->setParameter('session_synced', 0)
+            ->setParameter('status', static::STATUS_TO_BE_RE_SYNCED)
+        ;
+
+        return $qb->execute();
+    }
 
     /**
      * Check if the given result $id is already exported
@@ -69,6 +94,34 @@ class ResultSyncHistoryService extends ConfigurableService
             ->andWhere(self::SYNC_RESULT_STATUS . ' = :status')
             ->setParameter('id', $id)
             ->setParameter('status', self::STATUS_SYNCHRONIZED)
+        ;
+
+        /** @var \PDOStatement $statement */
+        $statement = $qb->execute();
+
+        try {
+            return $statement->rowCount() > 0;
+        } catch (\Exception $e) {
+            $this->logWarning($e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if the given result $id is already exported
+     *
+     * @param $id
+     * @return bool
+     */
+    public function exists($id)
+    {
+        /** @var QueryBuilder $qbBuilder */
+        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $qb = $qbBuilder
+            ->select(self::SYNC_RESULT_ID)
+            ->from(self::SYNC_RESULT_TABLE)
+            ->where(self::SYNC_RESULT_ID . ' = :id ')
+            ->setParameter('id', $id)
         ;
 
         /** @var \PDOStatement $statement */
@@ -188,16 +241,37 @@ class ResultSyncHistoryService extends ConfigurableService
         $now = $this->getPersistence()->getPlatForm()->getNowExpression();
 
         $dataToSave = [];
+        $dataToUpdate = [];
         foreach ($entityIds as $entityId) {
-            $dataToSave[] = [
-                self::SYNC_RESULT_ID  =>  $entityId,
-                self::SYNC_RESULT_STATUS  => $status,
-                self::SYNC_RESULT_TIME  => $now,
-            ];
+            if ($this->exists($entityId)) {
+                $dataToUpdate[] = [
+                    'conditions' => [
+                        self::SYNC_RESULT_ID => $entityId,
+                    ],
+                    'updateValues' => [
+                        self::SYNC_RESULT_STATUS  => static::STATUS_SYNCHRONIZED,
+                        self::SYNC_RESULT_TIME  => $now,
+                    ],
+                ];
+            } else {
+                $dataToSave[] = [
+                    self::SYNC_RESULT_ID  =>  $entityId,
+                    self::SYNC_RESULT_STATUS  => $status,
+                    self::SYNC_RESULT_TIME  => $now,
+                ];
+            }
         }
 
         try {
-            return $this->getPersistence()->insertMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
+            if (!empty($dataToSave)) {
+                $this->getPersistence()->insertMultiple(self::SYNC_RESULT_TABLE, $dataToSave);
+            }
+
+            if (!empty($dataToUpdate)) {
+                $this->getPersistence()->updateMultiple(self::SYNC_RESULT_TABLE, $dataToUpdate);
+            }
+
+            return true;
         } catch (\Exception $e) {
             $this->logWarning($e->getMessage());
             return false;
