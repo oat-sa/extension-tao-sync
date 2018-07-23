@@ -193,7 +193,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                 $delivery = $this->getResource($deliveryId);
                 $testtaker = $this->getResource($details['test-taker']);
 
-                $deliveryExecution = $this->spawnDeliveryExecution($delivery, $testtaker);
+                $deliveryExecution = $this->spawnDeliveryExecution($resultId, $delivery, $testtaker);
                 $deliveryExecution = $this->updateDeliveryExecution($details, $deliveryExecution);
 
                 $this->getResultStorage($deliveryId)->storeRelatedTestTaker($deliveryExecution->getIdentifier(), $testtaker->getUri());
@@ -446,10 +446,30 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * @param $testtaker
      * @return DeliveryExecution
      * @throws \common_exception_Error
+     * @throws \Exception
      */
-    protected function spawnDeliveryExecution($delivery, $testtaker)
+    protected function spawnDeliveryExecution($resultId, $delivery, $testtaker)
     {
-        return $this->getDeliveryExecutionService()->initDeliveryExecution($delivery, $testtaker);
+        $onlineId = $this->getOnlineIdOfOfflineResultId($resultId);
+
+        if ($onlineId) {
+            return $this->getDeliveryExecutionService()->getDeliveryExecution($onlineId);
+        } else {
+            return $this->getDeliveryExecutionService()->initDeliveryExecution($delivery, $testtaker);
+        }
+    }
+
+    /**
+     * @param string $offlineResultId
+     * @return boolean
+     * @throws \Exception
+     */
+    public function getOnlineIdOfOfflineResultId($offlineResultId)
+    {
+        /** @var OfflineResultToOnlineResultMapper $mapper */
+        $mapper = $this->getServiceLocator()->get(OfflineResultToOnlineResultMapper::SERVICE_ID);
+
+        return $mapper->getOnlineResultId($offlineResultId);
     }
 
     /**
