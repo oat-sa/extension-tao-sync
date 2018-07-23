@@ -18,114 +18,34 @@
  *
  */
 
-namespace oat\taoSync\model\history;
+namespace oat\taoSync\model\history\byOrganisationId;
 
-use oat\generis\model\OntologyAwareTrait;
-use oat\oatbox\service\ConfigurableService;
 use Doctrine\DBAL\Query\QueryBuilder;
+use oat\taoSync\model\history\DataSyncHistoryService;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 
 /**
- * Class SyncHistoryService
+ * Class DataSyncHistoryByOrgIdService
  *
  * Storage to store action applied on entity at synchronisation
  * Mostly used to find not updated entities to delete
  *
- * @package oat\taoSync\model\history
+ * @package oat\taoSync\model\history\byOrganisationId
  */
-class DataSyncHistoryService extends ConfigurableService
+class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
 {
-    use OntologyAwareTrait;
+    use OrganisationIdTrait;
 
-    const SERVICE_ID = 'taoSync/syncHistoryService';
+    const SYNC_ORG_ID = 'organisationId';
 
-    const OPTION_PERSISTENCE = 'persistence';
-
-    const SYNC_TABLE = 'synchronisation';
-    const SYNC_ID = 'id';
-    const SYNC_NUMBER = 'sync_id';
-    const SYNC_ENTITY_ID = 'entity_id';
-    const SYNC_ENTITY_TYPE = 'type';
-    const SYNC_ACTION = 'action';
-    const SYNC_TIME = 'time';
-
-    const SYNCHRO_URI = 'http://www.taotesting.com/ontologies/synchro.rdf#synchro';
-    const SYNCHRO_ID = 'http://www.taotesting.com/ontologies/synchro.rdf#identifier';
-    const SYNCHRO_TASK = 'http://www.taotesting.com/ontologies/synchro.rdf#task';
-
-    const ACTION_TOUCHED = 'touched';
-    const ACTION_CREATED = 'created';
-    const ACTION_UPDATED = 'updated';
-    const ACTION_DELETED = 'deleted';
-
-    protected $synchroId;
+    protected $organisationId;
 
     /**
-     * Flag created entities in synchronisation history with current synchro version
-     *
-     * @param $type
-     * @param array $entityIds
-     * @return bool
-     * @throws \core_kernel_persistence_Exception
-     */
-    public function logCreatedEntities($type, array $entityIds)
-    {
-        if (empty($entityIds)) {
-            return true;
-        }
-        return $this->insert($type, self::ACTION_CREATED, $entityIds);
-    }
-
-    /**
-     * Flag not changed entities in synchronisation history with current synchro version
-     *
-     * @param $type
-     * @param array $entityIds
-     * @return bool
-     * @throws \core_kernel_persistence_Exception
-     */
-    public function logNotChangedEntities($type, array $entityIds)
-    {
-        if (empty($entityIds)) {
-            return true;
-        }
-        return $this->update($type, self::ACTION_TOUCHED, $entityIds);
-    }
-
-    /**
-     * Flag updated entities in synchronisation history with current synchro version
-     *
-     * @param $type
-     * @param array $entityIds
-     * @return bool
-     * @throws \core_kernel_persistence_Exception
-     */
-    public function logUpdatedEntities($type, array $entityIds)
-    {
-        if (empty($entityIds)) {
-            return true;
-        }
-        return $this->update($type, self::ACTION_UPDATED, $entityIds);
-    }
-
-    /**
-     * Flag deleted entities in synchronisation history with current synchro version
-     *
-     * @param $type
-     * @param array $entityIds
-     * @return bool
-     * @throws \core_kernel_persistence_Exception
-     */
-    public function logDeletedEntities($type, array $entityIds)
-    {
-        if (empty($entityIds)) {
-            return true;
-        }
-        return $this->update($type, self::ACTION_DELETED, $entityIds);
-    }
-
-    /**
-     * Get the entities not updated by the current synchro.
+     * Get the entities not updated by the current synchro (scoped to organisation id).
      * It means that there are not in remote server anymore
+     *
+     * Check is scoped to organisation id
      *
      * @param $type
      * @return array
@@ -141,9 +61,11 @@ class DataSyncHistoryService extends ConfigurableService
             ->where(self::SYNC_NUMBER . ' <> :sync_number ')
             ->andWhere(self::SYNC_ENTITY_TYPE . ' = :type')
             ->andWhere(self::SYNC_ACTION . ' <> :action')
+            ->andWhere(self::SYNC_ORG_ID . ' = :orgId')
             ->setParameter('sync_number',  $this->getCurrentSynchroId())
             ->setParameter('type', $type)
             ->setParameter('action', self::ACTION_DELETED)
+            ->setParameter('orgId', $this->getCurrentOrganisationId())
         ;
 
         /** @var \PDOStatement $statement */
@@ -160,40 +82,50 @@ class DataSyncHistoryService extends ConfigurableService
     /**
      * Create a new synchronisation process by incrementing the synchronisation version
      *
+     * Save the organisationId extracted from $params as synchronisation property
+     *
      * @param array $params
      * @return int
+     * @throws \common_exception_Error
+     * @throws \common_exception_NotFound
      * @throws \core_kernel_persistence_Exception
      */
     public function createSynchronisation(array $params = [])
     {
         $lastId = $this->getCurrentSynchroId();
         $this->synchroId = $lastId + 1;
-        $this->getResource(self::SYNCHRO_URI)->setPropertyValue($this->getProperty(self::SYNCHRO_ID), $this->synchroId);
+        $this->getResource(self::SYNCHRO_URI)->setPropertiesValues(array(
+            self::SYNCHRO_ID => $this->synchroId,
+            TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY => $this->getOrganisationIdFromOption($params)
+        ));
+
         return $this->synchroId;
     }
 
     /**
-     * Get the current synchro identifier store in ontology
+     * Get the current organisation id from the synchronisation resource
      *
      * @return int
      * @throws \core_kernel_persistence_Exception
      */
-    protected function getCurrentSynchroId()
+    protected function getCurrentOrganisationId()
     {
-        if (!$this->synchroId) {
-            $synchro = $this->getResource(self::SYNCHRO_URI);
-            $synchroIdProperty = $synchro->getOnePropertyValue($this->getProperty(self::SYNCHRO_ID));
-            if (is_null($synchroIdProperty)) {
-                $this->synchroId = 0;
+        if (!$this->organisationId) {
+            $orgId = $this->getResource(self::SYNCHRO_URI)
+                ->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
+            if (is_null($orgId)) {
+                $this->organisationId = 0;
             } else {
-                $this->synchroId = (int) $synchroIdProperty->literal;
+                $this->organisationId = (int) $orgId->literal;
             }
         }
-        return $this->synchroId;
+        return $this->organisationId;
     }
 
     /**
      * Insert multiple entity for the given type. Each record will have the $action
+     *
+     * Add organisation id property
      *
      * @param $type
      * @param $action
@@ -214,6 +146,7 @@ class DataSyncHistoryService extends ConfigurableService
                 self::SYNC_ENTITY_TYPE  => $type,
                 self::SYNC_ACTION  => $action,
                 self::SYNC_TIME => $now,
+                self::SYNC_ORG_ID => $this->getCurrentOrganisationId(),
             ];
         }
 
@@ -228,6 +161,8 @@ class DataSyncHistoryService extends ConfigurableService
     /**
      * Update multiple entity for the given type. Each record will have the $action
      *
+     * Check if the database contains the entity id with a different org id, in this case insert
+     *
      * @param $type
      * @param $action
      * @param array $entityIds
@@ -239,12 +174,37 @@ class DataSyncHistoryService extends ConfigurableService
         $syncId = $this->getCurrentSynchroId();
         $now = $this->getPersistence()->getPlatForm()->getNowExpression();
 
+        $orgId = $this->getCurrentOrganisationId();
+
+        $toInsert = [];
+        foreach ($entityIds as $k => $id) {
+            $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
+            $qb = $qbBuilder
+                ->select(self::SYNC_ENTITY_ID)
+                ->from(self::SYNC_TABLE)
+                ->where(self::SYNC_ENTITY_ID . ' = :id')
+                ->andWhere(self::SYNC_ORG_ID . ' = :orgId')
+                ->setParameter('id',  $id)
+                ->setParameter('orgId', $orgId)
+            ;
+
+            if ($qb->execute()->rowCount() == 0) {
+                $toInsert[] = $id;
+                unset($entityIds[$k]);
+            }
+        }
+
+        if (!empty($toInsert)) {
+            $this->insert($type, $action, $toInsert);
+        }
+
         $dataToSave = [];
         foreach ($entityIds as $entityId) {
             $dataToSave[] = [
                 'conditions' => [
                     self::SYNC_ENTITY_ID => $entityId,
                     self::SYNC_ENTITY_TYPE => $type,
+                    self::SYNC_ORG_ID => $orgId,
                 ],
                 'updateValues' => [
                     self::SYNC_ACTION => $action,
@@ -260,14 +220,5 @@ class DataSyncHistoryService extends ConfigurableService
             $this->logWarning($e->getMessage());
             return false;
         }
-    }
-
-    /**
-     * @return \common_persistence_SqlPersistence
-     */
-    public function getPersistence()
-    {
-        $persistenceId = $this->getOption(self::OPTION_PERSISTENCE);
-        return $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
     }
 }

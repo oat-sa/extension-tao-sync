@@ -85,12 +85,35 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($service->isHandShakeAlreadyDone());
     }
 
+    public function testIsHandShakeAlreadyDoneTrueWithAlwaysRemoteLogin()
+    {
+        $service = $this->getService([
+            'code' => 200,
+            'handshakedone' => 1,
+            'content' => '',
+            'alwaysRemoteLogin' => true
+        ]);
+        $this->assertFalse($service->isHandShakeAlreadyDone());
+    }
+
     /**
      * @dataProvider dataSuccessProvider
      */
     public function testMarkHandShakeAlreadyDone($data)
     {
         $service = $this->getService($data);
+
+        $this->assertTrue($service->markHandShakeAlreadyDone());
+    }
+
+    public function testMarkHandShakeAlreadyDoneWithAlwaysRemoteLogin()
+    {
+        $service = $this->getService([
+            'code' => 200,
+            'handshakedone' => 0,
+            'content' => '',
+            'alwaysRemoteLogin' => true
+        ]);
 
         $this->assertTrue($service->markHandShakeAlreadyDone());
     }
@@ -122,7 +145,7 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
             ->willReturn($response);
 
         $service = $this->getMockBuilder(HandShakeClientService::class)
-            ->setMethods(['logError', 'getPlatformService', 'getClient', 'getClass', 'getResource', 'getFileSystem'])
+            ->setMethods(['logError', 'getPlatformService', 'getClient', 'getClass', 'getResource', 'getFileSystem', 'hasOption', 'getOption'])
             ->getMockForAbstractClass();
 
         $fileSystem = $this->getMockBuilder(FileSystemService::class)->disableOriginalConstructor()->getMock();
@@ -130,9 +153,12 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
         $fileMock
             ->method('read')
             ->willReturn($dataProvider['handshakedone']);
-        $fileMock
-            ->method('put')
-            ->willReturn(true);
+
+        if (array_key_exists('alwaysRemoteLogin', $dataProvider)) {
+            $fileMock->expects($this->never())->method('put');
+        } else {
+            $fileMock->method('put')->willReturn(true);
+        }
 
         $directoryMock = $this->getMockBuilder(Directory::class)->disableOriginalConstructor()->getMock();
         $directoryMock
@@ -153,6 +179,13 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
         $service->method('getClass')->willReturn($this->mockClass());
         $service->method('getPlatformService')->willReturn($this->mockPlatformService());
         $service->method('getFileSystem')->willReturn($fileSystem);
+
+        if (array_key_exists('alwaysRemoteLogin', $dataProvider)) {
+            $service->method('hasOption')->willReturn(true);
+            $service->method('getOption')->with(HandShakeClientService::OPTION_ALWAYS_REMOTE_LOGIN)->willReturn($dataProvider['alwaysRemoteLogin']);
+        } else {
+            $service->method('hasOption')->willReturn(false);
+        }
 
         $service->setOption(HandShakeClientService::OPTION_REMOTE_AUTH_URL, 'http://removeurl.dev/handshake');
         $serviceLocator = $this->getMockForAbstractClass(ServiceLocatorInterface::class);
