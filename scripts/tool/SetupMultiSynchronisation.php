@@ -54,7 +54,7 @@ class SetupMultiSynchronisation extends InstallAction
         } catch(SchemaException $e) {
             \common_Logger::i('Database Schema already up to date.');
         }
-        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Diagnostic successfully created');
+        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronisation table successfully updated');
     }
 
 }
