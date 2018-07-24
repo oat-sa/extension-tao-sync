@@ -72,7 +72,7 @@ class EnhancedDeliveryLogService extends ConfigurableService
     {
         return $this->getDeliveryLog()->search([
             static::COLUMN_IS_SYNCED => '0'
-        ], [], $shouldDecode);
+        ], ['shouldDecodeData' => $shouldDecode]);
     }
 
     /**
