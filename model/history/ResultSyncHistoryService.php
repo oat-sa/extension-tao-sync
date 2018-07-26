@@ -74,7 +74,12 @@ class ResultSyncHistoryService extends ConfigurableService
             ->setParameter('status', static::STATUS_TO_BE_RE_SYNCED)
         ;
 
-        return $qb->execute();
+        try {
+            return $qbBuilder->execute();
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+            return false;
+        }
     }
 
     /**
