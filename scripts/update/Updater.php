@@ -31,8 +31,11 @@ use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDeliveryRdf\model\ContainerRuntime;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoProctoring\model\deliveryLog\implementation\RdsDeliveryLogService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
+use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -353,6 +356,76 @@ class Updater extends \common_ext_ExtensionUpdater
 
         $this->skip('1.3.0', '1.3.1');
 
+        if ($this->isVersion('1.3.1')) {
+            $this->addColumnToDeliveryLog();
+            $this->dropColumnIsSynced();
+
+            $deliveryLog = new EnhancedDeliveryLogService(['persistence' => 'default']);
+            $this->getServiceManager()->register(EnhancedDeliveryLogService::SERVICE_ID, $deliveryLog);
+
+            /** @var RdsDeliveryLogService $deliveryLog */
+            $deliveryLog = $this->getServiceManager()->get(RdsDeliveryLogService::SERVICE_ID);
+
+            $deliveryLog->setOption(RdsDeliveryLogService::OPTION_FIELDS, [
+                RdsDeliveryLogService::EVENT_ID,
+                RdsDeliveryLogService::CREATED_BY,
+                RdsDeliveryLogService::DELIVERY_EXECUTION_ID,
+                EnhancedDeliveryLogService::COLUMN_IS_SYNCED
+            ]);
+
+            $this->getServiceManager()->register(RdsDeliveryLogService::SERVICE_ID, $deliveryLog);
+
+            $deliveryLogFormatter = new DeliveryLogFormatterService([]);
+            $this->getServiceManager()->register(DeliveryLogFormatterService::SERVICE_ID, $deliveryLogFormatter);
+
+            /** @var SyncDeliveryLogService $syncDeliveryLog */
+            $syncDeliveryLog = $this->getServiceManager()->get(SyncDeliveryLogService::SERVICE_ID);
+            $syncDeliveryLog->setOption(SyncDeliveryLogService::OPTION_SHOULD_DECODE_BEFORE_SYNC, true);
+            $this->getServiceManager()->register(SyncDeliveryLogService::SERVICE_ID, $syncDeliveryLog);
+
+            $this->setVersion('1.4.0');
+        }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
+    protected function addColumnToDeliveryLog()
+    {
+        /** @var \common_persistence_SqlPersistence $persistence */
+        $persistence = \common_persistence_Manager::getPersistence('default');
+        $schemaManager = $persistence->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = clone $fromSchema;
+
+        $table = $toSchema->getTable(RdsDeliveryLogService::TABLE_NAME);
+        if (!$table->hasColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED)) {
+            $table->addColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
+            $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+            foreach ($queries as $query) {
+                $persistence->exec($query);
+            }
+        }
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
+    protected function dropColumnIsSynced()
+    {
+        /** @var \common_persistence_SqlPersistence $persistence */
+        $persistence = \common_persistence_Manager::getPersistence('default');
+        $schemaManager = $persistence->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = clone $fromSchema;
+
+        $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
+        if ($table->hasColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED)) {
+            $table->dropColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED);
+            $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+            foreach ($queries as $query) {
+                $persistence->exec($query);
+            }
+        }
+    }
 }
