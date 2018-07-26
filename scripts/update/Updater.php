@@ -357,32 +357,10 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('1.3.0', '1.3.1');
 
         if ($this->isVersion('1.3.1')) {
-            /** @var \common_persistence_SqlPersistence $persistence */
-            $persistence = \common_persistence_Manager::getPersistence('default');
-            $schemaManager = $persistence->getSchemaManager();
-            $fromSchema = $schemaManager->createSchema();
-            $toSchema = clone $fromSchema;
-
-            $table = $toSchema->getTable(RdsDeliveryLogService::TABLE_NAME);
-            if (!$table->hasColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED)) {
-                $table->addColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
-                $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
-                foreach ($queries as $query) {
-                    $persistence->exec($query);
-                }
-            }
-
-            $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
-            if ($table->hasColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED)) {
-                $table->dropColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED);
-                $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
-                foreach ($queries as $query) {
-                    $persistence->exec($query);
-                }
-            }
+            $this->addColumnToDeliveryLog();
+            $this->dropColumnIsSynced();
 
             $deliveryLog = new EnhancedDeliveryLogService(['persistence' => 'default']);
-
             $this->getServiceManager()->register(EnhancedDeliveryLogService::SERVICE_ID, $deliveryLog);
 
             /** @var RdsDeliveryLogService $deliveryLog */
@@ -409,4 +387,45 @@ class Updater extends \common_ext_ExtensionUpdater
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
+    protected function addColumnToDeliveryLog()
+    {
+        /** @var \common_persistence_SqlPersistence $persistence */
+        $persistence = \common_persistence_Manager::getPersistence('default');
+        $schemaManager = $persistence->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = clone $fromSchema;
+
+        $table = $toSchema->getTable(RdsDeliveryLogService::TABLE_NAME);
+        if (!$table->hasColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED)) {
+            $table->addColumn(EnhancedDeliveryLogService::COLUMN_IS_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
+            $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+            foreach ($queries as $query) {
+                $persistence->exec($query);
+            }
+        }
+    }
+
+    /**
+     * @throws \Doctrine\DBAL\Schema\SchemaException
+     */
+    protected function dropColumnIsSynced()
+    {
+        /** @var \common_persistence_SqlPersistence $persistence */
+        $persistence = \common_persistence_Manager::getPersistence('default');
+        $schemaManager = $persistence->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = clone $fromSchema;
+
+        $table = $toSchema->getTable(ResultSyncHistoryService::SYNC_RESULT_TABLE);
+        if ($table->hasColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED)) {
+            $table->dropColumn(ResultSyncHistoryService::SYNC_LOG_SYNCED);
+            $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $toSchema);
+            foreach ($queries as $query) {
+                $persistence->exec($query);
+            }
+        }
+    }
 }
