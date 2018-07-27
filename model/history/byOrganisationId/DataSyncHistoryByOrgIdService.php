@@ -53,30 +53,47 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
      */
     public function getNotUpdatedEntityIds($type)
     {
-        /** @var QueryBuilder $qbBuilder */
-        $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
-        $qb = $qbBuilder
-            ->select(self::SYNC_ENTITY_ID)
-            ->from(self::SYNC_TABLE)
-            ->where(self::SYNC_NUMBER . ' <> :sync_number ')
-            ->andWhere(self::SYNC_ENTITY_TYPE . ' = :type')
-            ->andWhere(self::SYNC_ACTION . ' <> :action')
-            ->andWhere(self::SYNC_ORG_ID . ' = :orgId')
+        $orgId = $this->getCurrentOrganisationId();
+        $queryBuilder1 = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $exprBuilder = $queryBuilder1->expr();
+        $query1 = $queryBuilder1->select('count(id)')
+            ->from(self::SYNC_TABLE, 'b')
+            ->where($exprBuilder->eq('a.' . self::SYNC_ENTITY_ID, 'b.' . self::SYNC_ENTITY_ID))
+            ->andWhere($exprBuilder->neq('b.' . self::SYNC_ORG_ID, ':orgId'))
+            ->andWhere($exprBuilder->neq('b.' . self::SYNC_ACTION, ':action'))
+            ->setParameter('orgId',  $orgId)
+            ->setParameter('action', self::ACTION_DELETED)
+        ;
+
+        $queryBuilder2 = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $exprBuilder = $queryBuilder2->expr();
+        $query2 = $queryBuilder2
+            ->select('a.' . self::SYNC_ENTITY_ID)
+            ->addSelect('(' . $query1->getSQL() . ') as existsWithOtherOrgId')
+            ->from(self::SYNC_TABLE, 'a')
+            ->where($exprBuilder->neq('a.' . self::SYNC_NUMBER, ':sync_number'))
+            ->andWhere($exprBuilder->eq('a.' . self::SYNC_ENTITY_TYPE, ':type'))
+            ->andWhere($exprBuilder->neq('a.' . self::SYNC_ACTION, ':action'))
+            ->andWhere($exprBuilder->eq('a.' . self::SYNC_ORG_ID, ':orgId'))
             ->setParameter('sync_number',  $this->getCurrentSynchroId())
             ->setParameter('type', $type)
             ->setParameter('action', self::ACTION_DELETED)
-            ->setParameter('orgId', $this->getCurrentOrganisationId())
+            ->setParameter('orgId', $orgId)
         ;
 
-        /** @var \PDOStatement $statement */
-        $results = $qb->execute()->fetchAll(\PDO::FETCH_ASSOC);
-
-        $returnValue = [];
+        $results = $query2->execute()->fetchAll(\PDO::FETCH_ASSOC);
+        $entitiesToDelete = $fakeDeletedEntities = [];
         foreach ($results as $result) {
-            $returnValue[] = $result[self::SYNC_ENTITY_ID];
+            if ($result['existsWithOtherOrgId'] !== 0) {
+                $fakeDeletedEntities[] = $result[self::SYNC_ENTITY_ID];
+            } else {
+                $entitiesToDelete[] = $result[self::SYNC_ENTITY_ID];
+            }
         }
-
-        return $returnValue;
+        if (!empty($fakeDeletedEntities)) {
+            $this->logDeletedEntities($type, $fakeDeletedEntities);
+        }
+        return $entitiesToDelete;
     }
 
     /**
