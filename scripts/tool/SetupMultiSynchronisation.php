@@ -25,7 +25,14 @@ use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\User\HandShakeClientService;
+use oat\taoSync\model\User\ScopedToOrganisationAuthAdapter;
 
+/**
+ * Tool to setup the platform to accept synchronisation from multiple sync manager
+ * Testtaker can connect only if they are part of last synchronisation
+ *
+ * sudo -u www-data php index.php '\oat\taoSync\scripts\tool\SetupMultiSynchronisation'
+ */
 class SetupMultiSynchronisation extends InstallAction
 {
     public function __invoke($params)
@@ -54,7 +61,18 @@ class SetupMultiSynchronisation extends InstallAction
         } catch(SchemaException $e) {
             \common_Logger::i('Database Schema already up to date.');
         }
-        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronisation table successfully updated');
+
+        $this->getServiceLocator()
+            ->get(\common_ext_ExtensionsManager::SERVICE_ID)
+            ->getExtensionById('generis')
+            ->setConfig('auth', [
+                [
+                    'driver' => ScopedToOrganisationAuthAdapter::class,
+                    'user_factory' => 'generis/userFactory'
+                ]
+            ]);
+
+        return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Multi synchronisation has been successfully enabled.');
     }
 
 }

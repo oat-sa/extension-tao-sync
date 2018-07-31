@@ -20,9 +20,12 @@
 
 namespace oat\taoSync\model\DeliveryLog;
 
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use \common_report_Report as Report;
+use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
+use oat\taoProctoring\model\event\DeliveryExecutionIrregularityReport;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -32,12 +35,10 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 {
     const OPTION_CHUNK_SIZE = 'chunkSize';
     const DEFAULT_CHUNK_SIZE = 200;
+    const OPTION_SHOULD_DECODE_BEFORE_SYNC = 'shouldDecodeBeforeSync';
 
     /** @var Report */
     protected $report;
-
-    /** @var array */
-    protected $syncStats;
 
     /**
      * @param array $params
@@ -50,23 +51,25 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $this->report = Report::createInfo('Starting delivery log synchronisation...');
 
         $deliveryLogService = $this->getDeliveryLogService();
-        $logsToSync = $this->getResultSyncHistory()->getResultsWithDeliveryLogNotSynced();
+        $logsToSync = $deliveryLogService->getLogsToSynced($this->getOption(static::OPTION_SHOULD_DECODE_BEFORE_SYNC));
 
-        $counter = 0;
-        $logs = [];
-        $statsOfLogs = [];
+        $counter     = 0;
+        $logs        = [];
 
-        foreach ($logsToSync as $resultId) {
-            $deliveryLogs = $deliveryLogService->get($resultId);
-            $logs[$resultId] = $deliveryLogs;
-            $statsOfLogs[$resultId] = count($deliveryLogs);
+        foreach ($logsToSync as $deliveryLog) {
+            $resultId = $deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID];
+            $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED]
+                = $this->getResultSyncHistory()->isSessionSynced($resultId);
 
-            $this->report(count($deliveryLogs) . ' results logs found for result: ' . $resultId);
+            $logs[$resultId][]      = $deliveryLog;
+
             $counter++;
             if ($counter % $this->getChunkSize() === 0) {
                 $this->report($counter . ' results logs to send to remote server. Sending...', LogLevel::INFO);
-                $this->sendDeliveryLogs($logs);
+                $syncSuccess = $this->sendDeliveryLogs($logs);
                 $logs = [];
+
+                $this->markLogsAsSynced($syncSuccess);
             }
         }
 
@@ -75,17 +78,10 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         }
 
         if (!empty($logs)) {
-           $this->sendDeliveryLogs($logs);
+            $syncSuccess = $this->sendDeliveryLogs($logs);
+            $this->markLogsAsSynced($syncSuccess);
         }
 
-        $logAsCompleted = [];
-        foreach ($statsOfLogs as $resultId => $count) {
-            if (isset($this->syncStats[$resultId]) && $this->syncStats[$resultId] == $count) {
-                $logAsCompleted[] = $resultId;
-            }
-        }
-
-        $this->getResultSyncHistory()->logResultsLogsAsExported($logAsCompleted);
 
         return $this->report;
     }
@@ -108,17 +104,13 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
         foreach ($syncAcknowledgment as $id => $data) {
             if ((bool)$data['success']) {
-                $syncSuccess[$id]      = $data['noOfLogsSynced'];
-                if (!isset($this->syncStats[$id])) {
-                    $this->syncStats[$id] = 0;
-                }
-                $this->syncStats[$id] += $data['noOfLogsSynced'];
+                $syncSuccess[$id] = $data['logsSynced'];
             } else {
                 $syncFailed[] = $id;
             }
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
-                $this->report($syncSuccess[$id] . ' result logs exports have been acknowledged.', LogLevel::INFO);
+                $this->report(count($syncSuccess[$id]). ' result logs exports have been acknowledged.', LogLevel::INFO);
             }
 
             if (!empty($syncFailed)) {
@@ -138,15 +130,17 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $importAcknowledgment = [];
         foreach ($logs as $resultId => $resultLogs) {
             $logsToBeInserted = [];
+            $logsSynced       = [];
             foreach ($resultLogs  as $resultLog) {
                 try {
                     $this->checkResultLogFormat($resultLog);
                     $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultLog['delivery_execution_id']);
                     if ($onlineResultId) {
-                        unset($resultLog['id']);
                         $resultLog['delivery_execution_id'] = $onlineResultId;
-                        $resultLog['data'] = json_encode($resultLog['data']);
+                        $resultLog = $this->formatLog($resultLog);
 
+                        $logsSynced[] = $resultLog['id'];
+                        unset($resultLog['id']);
                         $logsToBeInserted[] = $resultLog;
                     }
                 } catch (\Exception $exception) {
@@ -156,9 +150,12 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
             try {
                 $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
+                foreach ($logsToBeInserted as $deliveryLog) {
+                    $this->postImportDeliverLogProcess($deliveryLog);
+                }
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
-                    'noOfLogsSynced' => count($logsToBeInserted),
+                    'logsSynced' => $logsSynced
                 ];
 
             } catch (\Exception $exception) {
@@ -194,11 +191,11 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
     }
 
     /**
-     * @return array|DeliveryLog
+     * @return array|EnhancedDeliveryLogService
      */
     protected function getDeliveryLogService()
     {
-        return $this->getServiceLocator()->get(DeliveryLog::SERVICE_ID);
+        return $this->getServiceLocator()->get(EnhancedDeliveryLogService::SERVICE_ID);
     }
 
     /**
@@ -264,4 +261,50 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             throw new \InvalidArgumentException('Result Log is not correctly formatted, should contains : ' . implode(', ', $global));
         }
     }
+
+    /**
+     * @param array $deliveryLog
+     */
+    protected function postImportDeliverLogProcess(array $deliveryLog)
+    {
+        if (isset($deliveryLog[DeliveryLog::EVENT_ID])
+            && $deliveryLog[DeliveryLog::EVENT_ID] === 'TEST_IRREGULARITY'
+            && isset($deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED])
+            && $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED] === true
+        ) {
+            $deliveryExecution = $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID)
+                ->getDeliveryExecution($deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID]);
+
+            /** @var EventManager $eventManager */
+            $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+            $eventManager->trigger(new DeliveryExecutionIrregularityReport($deliveryExecution));
+        }
+    }
+
+    /**
+     * @param array $deliveryLog
+     * @return array
+     */
+    protected function formatLog(array $deliveryLog)
+    {
+        /** @var DeliveryLogFormatterService $deliveryLogFormatter */
+        $deliveryLogFormatter = $this->getServiceLocator()->get(DeliveryLogFormatterService::SERVICE_ID);
+
+        return $deliveryLogFormatter->format($deliveryLog);
+    }
+
+    /**
+     * @param $syncSuccess
+     * @throws \common_exception_Error
+     */
+    protected function markLogsAsSynced($syncSuccess)
+    {
+        $deliveryLogService = $this->getDeliveryLogService();
+
+        foreach ($syncSuccess as $resultId => $logsSynced) {
+            $deliveryLogService->markLogsAsSynced($logsSynced);
+            $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
+        }
+    }
+
 }
