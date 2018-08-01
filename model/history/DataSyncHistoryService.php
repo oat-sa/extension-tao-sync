@@ -160,10 +160,11 @@ class DataSyncHistoryService extends ConfigurableService
     /**
      * Create a new synchronisation process by incrementing the synchronisation version
      *
+     * @param array $params
      * @return int
      * @throws \core_kernel_persistence_Exception
      */
-    public function createSynchronisation()
+    public function createSynchronisation(array $params = [])
     {
         $lastId = $this->getCurrentSynchroId();
         $this->synchroId = $lastId + 1;

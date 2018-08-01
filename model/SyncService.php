@@ -75,7 +75,7 @@ class SyncService extends ConfigurableService
      */
     public function synchronize($type = null, array $params = [])
     {
-        $syncId = $this->getSyncHistoryService()->createSynchronisation();
+        $syncId = $this->getSyncHistoryService()->createSynchronisation($params);
         $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
         $this->getEventManager()->trigger(

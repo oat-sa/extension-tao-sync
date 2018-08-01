@@ -35,7 +35,6 @@ use oat\taoOauth\model\OAuthClient;
 use oat\taoOauth\model\storage\ConsumerStorage;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\controller\HandShake;
 
 class HandShakeClientService extends ConfigurableService
 {
@@ -46,6 +45,7 @@ class HandShakeClientService extends ConfigurableService
 
     const OPTION_ROOT_URL = 'rootURL';
     const OPTION_REMOTE_AUTH_URL = 'remoteAuthURL';
+    const OPTION_ALWAYS_REMOTE_LOGIN = 'alwaysRemoteLogin';
 
     /**
      * @param HandShakeClientRequest $handShakeRequest
@@ -94,6 +94,9 @@ class HandShakeClientService extends ConfigurableService
      */
     public function isHandShakeAlreadyDone()
     {
+        if ($this->isAlwaysRemoteLogin()) {
+            return false;
+        }
         $fileSystem = $this->getFileSystem();
         $file = $fileSystem
             ->getDirectory('synchronisation')
@@ -109,10 +112,23 @@ class HandShakeClientService extends ConfigurableService
      */
     public function markHandShakeAlreadyDone()
     {
+        if ($this->isAlwaysRemoteLogin()) {
+            return true;
+        }
         $fileSystem = $this->getFileSystem();
         $file = $fileSystem->getFileSystem('synchronisation');
 
         return $file->put('config/handshakedone', 1);
+    }
+
+    /**
+     * Check if alwaysRemoteLogin is set to true in configuration to always enable remote login
+     *
+     * @return bool
+     */
+    public function isAlwaysRemoteLogin()
+    {
+        return $this->hasOption(self::OPTION_ALWAYS_REMOTE_LOGIN) && $this->getOption(self::OPTION_ALWAYS_REMOTE_LOGIN) === true;
     }
 
     /**
@@ -191,12 +207,11 @@ class HandShakeClientService extends ConfigurableService
         return PlatformService::singleton();
     }
 
-
+    /**
+     * @return FileSystemService
+     */
     protected function getFileSystem()
     {
-        /** @var FileSystemService $fileSystem */
-        $fileSystem = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
-
-        return $fileSystem;
+        return $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
     }
 }
