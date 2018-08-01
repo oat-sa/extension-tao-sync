@@ -69,7 +69,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
         $exprBuilder = $queryBuilder2->expr();
         $query2 = $queryBuilder2
             ->select('a.' . self::SYNC_ENTITY_ID)
-            ->addSelect('(' . $query1->getSQL() . ') as existsWithOtherOrgId')
+            ->addSelect('(' . $query1->getSQL() . ') as exists_with_other_org_id')
             ->from(self::SYNC_TABLE, 'a')
             ->where($exprBuilder->neq('a.' . self::SYNC_NUMBER, ':sync_number'))
             ->andWhere($exprBuilder->eq('a.' . self::SYNC_ENTITY_TYPE, ':type'))
@@ -84,7 +84,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
         $results = $query2->execute()->fetchAll(\PDO::FETCH_ASSOC);
         $entitiesToDelete = $fakeDeletedEntities = [];
         foreach ($results as $result) {
-            if ($result['existsWithOtherOrgId'] !== 0) {
+            if ($result['exists_with_other_org_id'] !== 0) {
                 $fakeDeletedEntities[] = $result[self::SYNC_ENTITY_ID];
             } else {
                 $entitiesToDelete[] = $result[self::SYNC_ENTITY_ID];

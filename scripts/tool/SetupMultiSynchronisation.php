@@ -21,6 +21,7 @@
 namespace oat\taoSync\scripts\tool;
 
 use Doctrine\DBAL\Schema\SchemaException;
+use oat\generis\model\user\UserFactoryServiceInterface;
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
@@ -68,7 +69,7 @@ class SetupMultiSynchronisation extends InstallAction
             ->setConfig('auth', [
                 [
                     'driver' => ScopedToOrganisationAuthAdapter::class,
-                    'user_factory' => 'generis/userFactory'
+                    'user_factory' => UserFactoryServiceInterface::SERVICE_ID,
                 ]
             ]);
 
