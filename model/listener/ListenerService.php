@@ -21,14 +21,22 @@
 namespace oat\taoSync\model\listener;
 
 use oat\generis\model\data\event\ResourceCreated;
+use oat\generis\model\data\event\ResourceDeleted;
+use oat\generis\model\kernel\persistence\smoothsql\search\ComplexSearchService;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\event\Event;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\service\ServiceManager;
+use oat\search\base\exception\SearchGateWayExeption;
+use oat\tao\model\event\MetadataModified;
+use oat\tao\model\TaoOntology;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
+use oat\taoSync\model\SyncService;
+use oat\taoTestCenter\model\TestCenterService;
 
 /**
  * Class ListenerService
@@ -102,6 +110,46 @@ class ListenerService extends ConfigurableService
     }
 
     /**
+     * Check if testcenter organisation id has been updated
+     * if yes then updated related sync user to update the user organisation id property
+     *
+     * @param MetadataModified $event
+     * @return array|void
+     */
+    public function onMetadataModified(MetadataModified $event)
+    {
+        if ($event->getMetadataUri() != TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY) {
+            return;
+        }
+
+        if (!$event->getResource()->isInstanceOf($this->getClass(TestCenterService::CLASS_URI))) {
+            return;
+        }
+
+        /** @var ComplexSearchService $search */
+        $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
+
+        $queryBuilder = $search->query();
+        $query = $search->searchType($queryBuilder, TaoOntology::CLASS_URI_TAO_USER, true);
+        $query->add(SyncService::ASSIGNED_SYNC_USER)->equals($event->getResource()->getUri());
+        $queryBuilder->setCriteria($query);
+
+        try {
+            $results = $search->getGateway()->search($queryBuilder);
+            if ($results->total() > 0) {
+                /** @var \core_kernel_classes_Resource $resource */
+                foreach ($results as $resource) {
+                    $resource->editPropertyValues(
+                        $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY),
+                        $event->getMetadataValue()
+                    );
+                }
+            }
+        } catch (SearchGateWayExeption $e) {}
+        return;
+    }
+
+    /**
      * Get the current time in milliseconds
      *
      * @return float
@@ -120,5 +168,10 @@ class ListenerService extends ConfigurableService
     {
         return $this->getServiceLocator()->get(DeliverySynchronizerService::SERVICE_ID);
     }
+
+    public function onResourceDeleted(ResourceDeleted $event)
+    {
+    }
+
 
 }
