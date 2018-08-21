@@ -30,9 +30,9 @@ return array(
     'version' => '1.6.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
-        'tao' => '>=19.10.0',
+        'tao' => '>=19.21.0',
         'taoOauth' => '>=1.0.3',
-        'taoTestCenter' => '>=3.7.0',
+        'taoTestCenter' => '>=3.15.0',
         'taoResultServer' => '>=6.4.0',
         'taoTaskQueue' => '>=0.17.0',
         'taoDeliveryRdf' => '>=4.8.0',
