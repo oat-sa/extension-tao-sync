@@ -146,7 +146,8 @@ class DeliverySynchronizerService extends ConfigurableService
             $report = $exporter->export(
                 array(
                     'filename' => $exportFile,
-                    'instances' => $test->getUri()
+                    'instances' => $test->getUri(),
+                    'uri' => $test->getUri(),
                 ),
                 $exportDir
             );
