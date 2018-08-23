@@ -20,6 +20,7 @@
 namespace oat\taoSync\scripts\install;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\generis\model\OntologyRdfs;
 use oat\oatbox\extension\InstallAction;
 use oat\tao\model\event\MetadataModified;
 use oat\tao\model\TaoOntology;
@@ -57,7 +58,7 @@ class SetupAssignedTestCenterSyncUser extends InstallAction
      */
     protected function registerTestCenterSyncUserProperty()
     {
-        $property = $this->getProperty(SyncService::ASSIGNED_SYNC_USER);
+        $property = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
 
         if ($property->exists()) {
             return;
@@ -69,8 +70,8 @@ class SetupAssignedTestCenterSyncUser extends InstallAction
         $property->setLabel('Assigned sync user');
         $property->setComment('Assign sync user to the test center');
         $property->setPropertyValue(
-            $this->getProperty('http://www.w3.org/2000/01/rdf-schema#subPropertyOf'),
-            'http://www.w3.org/2000/01/rdf-schema#member'
+            $this->getProperty(OntologyRdfs::RDFS_SUBPROPERTYOF),
+            TestCenterService::PROPERTY_MEMBER
         );
     }
 
@@ -89,14 +90,14 @@ class SetupAssignedTestCenterSyncUser extends InstallAction
 
         $alreadySet = false;
         foreach ($formFactoryOptions as $factory) {
-            if ($factory->hasOption('property') && $factory->getOption('property') == SyncService::ASSIGNED_SYNC_USER) {
+            if ($factory->hasOption('property') && $factory->getOption('property') == SyncService::PROPERTY_ASSIGNED_SYNC_USER) {
                 $alreadySet = true;
             }
         }
 
         if (!$alreadySet) {
             array_splice($formFactoryOptions, 2, 0, [new SyncUserFormFactory([
-                'property' => SyncService::ASSIGNED_SYNC_USER,
+                'property' => SyncService::PROPERTY_ASSIGNED_SYNC_USER,
                 'title' => __('Assign Sync Manager'),
                 'isReversed' => true,
             ])]);

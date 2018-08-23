@@ -131,7 +131,7 @@ class ListenerService extends ConfigurableService
 
         $queryBuilder = $search->query();
         $query = $search->searchType($queryBuilder, TaoOntology::CLASS_URI_TAO_USER, true);
-        $query->add(SyncService::ASSIGNED_SYNC_USER)->equals($event->getResource()->getUri());
+        $query->add(SyncService::PROPERTY_ASSIGNED_SYNC_USER)->equals($event->getResource()->getUri());
         $queryBuilder->setCriteria($query);
 
         try {

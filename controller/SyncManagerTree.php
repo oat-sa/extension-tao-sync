@@ -61,7 +61,7 @@ class SyncManagerTree extends \tao_actions_CommonModule
     protected function saveReversedValues(\core_kernel_classes_Resource $testCenter, array $values)
     {
         $id = $this->getTestCenterOrganisationId($testCenter);
-        $assignedSyncUserProperty = $this->getProperty(SyncService::ASSIGNED_SYNC_USER);
+        $assignedSyncUserProperty = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
         $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
 
         $success = true;
