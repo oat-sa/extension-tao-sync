@@ -36,7 +36,7 @@ return array(
         'taoTestCenter' => '>=3.15.0',
         'taoResultServer' => '>=6.4.0',
         'taoTaskQueue' => '>=0.17.0',
-        'taoDeliveryRdf' => '>=4.8.0',
+        'taoDeliveryRdf' => '>=5.7.0',
         'taoProctoring' => '>=9.2.0'
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
