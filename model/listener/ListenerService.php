@@ -169,9 +169,4 @@ class ListenerService extends ConfigurableService
         return $this->getServiceLocator()->get(DeliverySynchronizerService::SERVICE_ID);
     }
 
-    public function onResourceDeleted(ResourceDeleted $event)
-    {
-    }
-
-
 }
