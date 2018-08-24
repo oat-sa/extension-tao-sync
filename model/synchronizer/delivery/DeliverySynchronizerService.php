@@ -71,6 +71,12 @@ class DeliverySynchronizerService extends ConfigurableService
         $deliveryFactory = $this->getServiceLocator()->get(DeliveryFactory::SERVICE_ID);
         $report = $deliveryFactory->create($deliveryClass, $test, $delivery->getLabel(), $delivery);
 
+        if ($report->getType() === \common_report_Report::TYPE_ERROR ) {
+            $delivery->delete(true);
+
+            return $report;
+        }
+
         $properties = [
             OntologyRdf::RDF_TYPE,
             OntologyRdfs::RDFS_LABEL,
@@ -146,7 +152,8 @@ class DeliverySynchronizerService extends ConfigurableService
             $report = $exporter->export(
                 array(
                     'filename' => $exportFile,
-                    'instances' => $test->getUri()
+                    'instances' => $test->getUri(),
+                    'uri' => $test->getUri(),
                 ),
                 $exportDir
             );
