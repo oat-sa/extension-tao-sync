@@ -80,12 +80,6 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             $this->report('No result logs to synchronize', LogLevel::INFO);
         }
 
-//        if (!empty($logs)) {
-//            $syncSuccess = $this->sendDeliveryLogs($logs);
-//            $this->markLogsAsSynced($syncSuccess);
-//        }
-
-
         return $this->report;
     }
 
