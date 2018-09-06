@@ -55,16 +55,19 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
         $counter     = 0;
         $logs        = [];
+        $sessionsSyncStatus = [];
 
         foreach ($logsToSync as $deliveryLog) {
             $resultId = $deliveryLog[DeliveryLog::DELIVERY_EXECUTION_ID];
-            $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED]
-                = $this->getResultSyncHistory()->isSessionSynced($resultId);
+            if (!isset($sessionsSyncStatus[$resultId])) {
+                $sessionsSyncStatus[$resultId] = $this->getResultSyncHistory()->isSessionSynced($resultId);
+            }
+            $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED] = $sessionsSyncStatus[$resultId];
 
             $logs[$resultId][]      = $deliveryLog;
 
             $counter++;
-            if ($counter % $this->getChunkSize() === 0) {
+            if (($counter % $this->getChunkSize() === 0) || count($logsToSync) === $counter) {
                 $this->report($counter . ' results logs to send to remote server. Sending...', LogLevel::INFO);
                 $syncSuccess = $this->sendDeliveryLogs($logs);
                 $logs = [];
@@ -73,14 +76,14 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             }
         }
 
-        if ($counter === 0) {
+        if (empty($logsToSync)) {
             $this->report('No result logs to synchronize', LogLevel::INFO);
         }
 
-        if (!empty($logs)) {
-            $syncSuccess = $this->sendDeliveryLogs($logs);
-            $this->markLogsAsSynced($syncSuccess);
-        }
+//        if (!empty($logs)) {
+//            $syncSuccess = $this->sendDeliveryLogs($logs);
+//            $this->markLogsAsSynced($syncSuccess);
+//        }
 
 
         return $this->report;
@@ -302,8 +305,10 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $deliveryLogService = $this->getDeliveryLogService();
 
         foreach ($syncSuccess as $resultId => $logsSynced) {
-            $deliveryLogService->markLogsAsSynced($logsSynced);
-            $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
+            if (!empty($logsSynced)) {
+                $deliveryLogService->markLogsAsSynced($logsSynced);
+                $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
+            }
         }
     }
 
