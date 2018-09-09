@@ -38,6 +38,8 @@ use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
+use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -55,6 +57,7 @@ use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
+use oat\taoSync\scripts\tool\UnifyDatabaseSchemaColumnsNaming;
 use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
@@ -387,6 +390,27 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('1.4.0', '1.6.2');
+
+        if ($this->isVersion('1.6.2')) {
+
+            /** @var DataSyncHistoryService $service */
+            $service = $this->getServiceManager()->get(DataSyncHistoryService::SERVICE_ID);
+
+            $persistence = $service->getPersistence();
+
+            /** @var \common_persistence_sql_SchemaManager $schemaManager */
+            $schemaManager = $persistence->getDriver()->getSchemaManager();
+            $schema = $schemaManager->createSchema();
+            $syncTable = $schema->getTable(DataSyncHistoryByOrgIdService::SYNC_TABLE);
+
+            if ($syncTable->hasColumn(UnifyDatabaseSchemaColumnsNaming::COLUMN_OLD)) {
+                $this->addReport(\common_report_Report::createFailure(UnifyDatabaseSchemaColumnsNaming::class . ' must be executed first'));
+            } else {
+                $this->setVersion('1.6.3');
+            }
+        }
+
+
     }
 
     /**
