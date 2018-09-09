@@ -65,7 +65,7 @@ class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
         try {
             $syncTable = $schema->getTable(DataSyncHistoryByOrgIdService::SYNC_TABLE);
             if ($this->migrate) {
-                if (!$syncTable->hasColumn(self::COLUMN_OLD)) {
+                if ($syncTable->hasColumn(self::COLUMN_OLD)) {
                     try {
                         $syncTable->addColumn(self::COLUMN_NEW, 'integer', ['length' => 11]);
                         $this->applySchema($persistence, $fromSchema, $schema);
@@ -75,14 +75,18 @@ class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
                     }
                     $result->add($this->migrateData($persistence));
                     $result->add($this->migrateForms());
-
+                } else {
+                    $result->add(common_report_Report::createInfo('Looks like you\'ve already have column in place'));
                 }
             }
             if ($this->cleanup) {
-                $syncTable->dropColumn('organisationId');
-                $this->applySchema($persistence, $fromSchema, $schema);
-                $result->add(common_report_Report::createSuccess('Column has been dropped'));
-
+                if ($syncTable->hasColumn(self::COLUMN_NEW)) {
+                    $syncTable->dropColumn('organisationId');
+                    $this->applySchema($persistence, $fromSchema, $schema);
+                    $result->add(common_report_Report::createSuccess('Column has been dropped'));
+                } else {
+                    $result->add(common_report_Report::createFailure('New column must exist! Please run --migrate first'));
+                }
             }
 
         } catch (\Exception $e) {
@@ -107,7 +111,7 @@ class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
 
     /**
      * @param \common_persistence_SqlPersistence $persistence
-     * @return \Doctrine\DBAL\Driver\Statement|int
+     * @return common_report_Report
      */
     private function migrateData(\common_persistence_SqlPersistence $persistence)
     {
