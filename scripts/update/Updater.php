@@ -57,7 +57,7 @@ use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
-use oat\taoSync\scripts\tool\UnifyDatabaseSchemaColumnsNaming;
+use oat\taoSync\scripts\tool\RenameColumnOrgId;
 use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
@@ -403,8 +403,8 @@ class Updater extends \common_ext_ExtensionUpdater
             $schema = $schemaManager->createSchema();
             $syncTable = $schema->getTable(DataSyncHistoryByOrgIdService::SYNC_TABLE);
 
-            if ($syncTable->hasColumn(UnifyDatabaseSchemaColumnsNaming::COLUMN_OLD)) {
-                $this->addReport(\common_report_Report::createFailure(UnifyDatabaseSchemaColumnsNaming::class . ' must be executed first'));
+            if ($syncTable->hasColumn(RenameColumnOrgId::COLUMN_OLD)) {
+                $this->addReport(\common_report_Report::createFailure(RenameColumnOrgId::class . ' must be executed first'));
             } else {
                 $this->setVersion('1.6.3');
             }

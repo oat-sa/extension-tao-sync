@@ -29,18 +29,17 @@ use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenter
 use oat\taoSync\model\ui\FormFieldsService;
 
 /**
- * Tool to setup the platform to accept synchronisation from multiple sync manager
- * Testtaker can connect only if they are part of last synchronisation
+ *  Tool that would take about renaming column and migration data do be compatible with postgres
  *
- * sudo -u www-data php index.php '\oat\taoSync\scripts\tool\UnifyDatabaseSchemaColumnsNaming'
+ * sudo -u www-data php index.php '\oat\taoSync\scripts\tool\RenameColumnOrgId'
+ *
  */
-class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
+class RenameColumnOrgId extends ScriptAction
 {
     private $migrate;
     private $cleanup;
 
     const COLUMN_OLD = 'organisationId';
-    const COLUMN_NEW = 'organisation_id';
 
     protected function run()
     {
@@ -67,7 +66,7 @@ class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
             if ($this->migrate) {
                 if ($syncTable->hasColumn(self::COLUMN_OLD)) {
                     try {
-                        $syncTable->addColumn(self::COLUMN_NEW, 'integer', ['length' => 11]);
+                        $syncTable->addColumn(DataSyncHistoryByOrgIdService::SYNC_ORG_ID, 'integer', ['length' => 11]);
                         $this->applySchema($persistence, $fromSchema, $schema);
                         $result->add(common_report_Report::createSuccess('Column has been created'));
                     } catch (SchemaException $e) {
@@ -80,8 +79,8 @@ class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
                 }
             }
             if ($this->cleanup) {
-                if ($syncTable->hasColumn(self::COLUMN_NEW)) {
-                    $syncTable->dropColumn('organisationId');
+                if ($syncTable->hasColumn(DataSyncHistoryByOrgIdService::SYNC_ORG_ID)) {
+                    $syncTable->dropColumn(self::COLUMN_OLD);
                     $this->applySchema($persistence, $fromSchema, $schema);
                     $result->add(common_report_Report::createSuccess('Column has been dropped'));
                 } else {
@@ -118,7 +117,7 @@ class UnifyDatabaseSchemaColumnsNaming extends ScriptAction
         $builder = $persistence->getPlatForm()->getQueryBuilder();
         $q = $builder
             ->update(DataSyncHistoryByOrgIdService::SYNC_TABLE)
-            ->set('organisation_id', 'organisationId');
+            ->set(DataSyncHistoryByOrgIdService::SYNC_ORG_ID, self::COLUMN_OLD);
         $result = $q->execute();
         return common_report_Report::createSuccess(__('%s rows has been migrated', $result));
 
