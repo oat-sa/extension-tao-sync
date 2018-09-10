@@ -73,7 +73,6 @@ class RenameColumnOrgId extends ScriptAction
                         $result->add(common_report_Report::createInfo($e->getMessage()));
                     }
                     $result->add($this->migrateData($persistence));
-                    $result->add($this->migrateForms());
                 } else {
                     $result->add(common_report_Report::createInfo('Looks like you\'ve already have column in place'));
                 }
@@ -177,31 +176,6 @@ class RenameColumnOrgId extends ScriptAction
         if (!$this->migrate && !$this->cleanup) {
             throw new \InvalidArgumentException('Run ' . __CLASS__ . ' --help to learn how to use tool');
         }
-    }
-
-    private function migrateForms()
-    {
-        /** @var FormFieldsService $formFieldsService */
-        $formFieldsService = $this->getServiceLocator()->get(FormFieldsService::SERVICE_ID);
-        $fields = (array)$formFieldsService->getOption(FormFieldsService::OPTION_INPUT);
-
-        $orgIdField = [
-            TestCenterByOrganisationId::OPTION_ORGANISATION_ID => [
-                'element' => 'input',
-                'attributes' => [
-                    'required' => true,
-                    'minlength' => 2
-                ],
-                'label' => __('Organisation identifier')
-            ]
-        ];
-
-        unset($fields[self::COLUMN_OLD]);
-        $formFieldsService->setOption(FormFieldsService::OPTION_INPUT, array_merge($fields, $orgIdField));
-        $this->registerService(FormFieldsService::SERVICE_ID, $formFieldsService);
-
-        $this->logInfo('Configured new form fields for synchronization form.');
-        return \common_report_Report::createSuccess('FormFieldsService successfully updated.');
     }
 
 }

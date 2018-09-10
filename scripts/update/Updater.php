@@ -47,6 +47,7 @@ use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncService;
@@ -406,6 +407,27 @@ class Updater extends \common_ext_ExtensionUpdater
             if ($syncTable->hasColumn(RenameColumnOrgId::COLUMN_OLD)) {
                 $this->addReport(\common_report_Report::createFailure(RenameColumnOrgId::class . ' must be executed first'));
             } else {
+                /** @var FormFieldsService $formFieldsService */
+                $formFieldsService = $this->getServiceManager()->get(FormFieldsService::SERVICE_ID);
+                $fields = (array)$formFieldsService->getOption(FormFieldsService::OPTION_INPUT);
+
+                $orgIdField = [
+                    TestCenterByOrganisationId::OPTION_ORGANISATION_ID => [
+                        'element' => 'input',
+                        'attributes' => [
+                            'required' => true,
+                            'minlength' => 2
+                        ],
+                        'label' => __('Organisation identifier')
+                    ]
+                ];
+
+                unset($fields[RenameColumnOrgId::COLUMN_OLD]);
+                $formFieldsService->setOption(FormFieldsService::OPTION_INPUT, array_merge($fields, $orgIdField));
+                $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, $formFieldsService);
+
+                $this->logInfo('Configured new form fields for synchronization form.');
+
                 $this->setVersion('1.6.3');
             }
         }
