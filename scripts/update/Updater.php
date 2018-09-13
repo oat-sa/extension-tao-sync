@@ -390,9 +390,10 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('1.4.0');
         }
 
-        $this->skip('1.4.0', '1.6.2');
 
-        if ($this->isVersion('1.6.2')) {
+        $this->skip('1.4.0', '1.6.3');
+
+        if ($this->isVersion('1.6.3')) {
 
             /** @var DataSyncHistoryService $service */
             $service = $this->getServiceManager()->get(DataSyncHistoryService::SERVICE_ID);
@@ -428,11 +429,9 @@ class Updater extends \common_ext_ExtensionUpdater
 
                 $this->logInfo('Configured new form fields for synchronization form.');
 
-                $this->setVersion('1.6.3');
+                $this->setVersion('1.6.4');
             }
         }
-
-
     }
 
     /**

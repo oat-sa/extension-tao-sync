@@ -217,7 +217,7 @@ class DeliverySynchronizerService extends ConfigurableService
 
         /** @var QtiTestImporter $importer */
         $importer = $this->getServiceLocator()->get(ImportersService::SERVICE_ID)->getImporter('taoQtiTest');
-        $report = $importer->import($file);
+        $report = $importer->import($file, null, true, true, false, true);
 
         if ($report->getType() == \common_report_Report::TYPE_SUCCESS) {
             foreach ($report as $r) {
