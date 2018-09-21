@@ -96,7 +96,6 @@ class SyncManagerTree extends \tao_actions_CommonModule
     protected function getTestCenterOrganisationId(\core_kernel_classes_Resource $testCenter)
     {
         $property = $testCenter->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
-        $props = $testCenter->getRdfTriples();
         if (is_null($property)) {
             throw new \common_Exception(__('TestCenter must have an organisation id property to associate it to sync manager(s).'));
         }
