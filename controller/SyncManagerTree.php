@@ -64,11 +64,22 @@ class SyncManagerTree extends \tao_actions_CommonModule
         $assignedSyncUserProperty = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
         $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
 
+        $currentValues = $this->getAssignedSyncManagers($id);
+
+        $toAdd = array_diff($values, $currentValues);
+        $toRemove = array_diff($currentValues, $values);
+
         $success = true;
-        foreach ($values as $uri) {
+        foreach ($toAdd as $uri) {
             $syncUser = $this->getResource($uri);
-            $success = $success && $syncUser->editPropertyValues($assignedSyncUserProperty, $testCenter);
-            $success = $success && $syncUser->editPropertyValues($organisationIdProperty, $id);
+            $success = $success && $syncUser->setPropertyValue($assignedSyncUserProperty, $testCenter);
+            $success = $success && $syncUser->setPropertyValue($organisationIdProperty, $id);
+        }
+
+        foreach ($toRemove as $uri) {
+            $syncUser = $this->getResource($uri);
+            $success = $success && $syncUser->removePropertyValue($assignedSyncUserProperty, $testCenter);
+            $success = $success && $syncUser->removePropertyValue($organisationIdProperty, $id);
         }
 
         return $success;
@@ -89,5 +100,25 @@ class SyncManagerTree extends \tao_actions_CommonModule
             throw new \common_Exception(__('TestCenter must have an organisation id property to associate it to sync manager(s).'));
         }
         return $property->literal;
+    }
+
+    /**
+     * Get all assigned to testCenter syncManagers
+     *
+     * @param int $organisationId
+     * @return array
+     */
+    private function getAssignedSyncManagers($organisationId)
+    {
+        /** @var \tao_models_classes_UserService $userService */
+        $userService = $this->getServiceLocator()->get(\tao_models_classes_UserService::SERVICE_ID);
+        $userResources = $userService->getAllUsers([], [TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY => $organisationId]);
+
+        $userUris = [];
+        foreach ($userResources as $userResource) {
+            $userUris[] = $userResource->getUri();
+        }
+
+        return $userUris;
     }
 }
