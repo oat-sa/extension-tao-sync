@@ -38,6 +38,8 @@ use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
+use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -45,6 +47,7 @@ use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncService;
@@ -55,6 +58,7 @@ use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
+use oat\taoSync\scripts\tool\RenameColumnOrgId;
 use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
@@ -387,6 +391,46 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('1.4.0', '1.6.5');
+
+        if ($this->isVersion('1.6.5')) {
+
+            /** @var DataSyncHistoryService $service */
+            $service = $this->getServiceManager()->get(DataSyncHistoryService::SERVICE_ID);
+
+            $persistence = $service->getPersistence();
+
+            /** @var \common_persistence_sql_SchemaManager $schemaManager */
+            $schemaManager = $persistence->getDriver()->getSchemaManager();
+            $schema = $schemaManager->createSchema();
+            $syncTable = $schema->getTable(DataSyncHistoryByOrgIdService::SYNC_TABLE);
+
+            if ($syncTable->hasColumn(RenameColumnOrgId::COLUMN_OLD)) {
+                $this->addReport(\common_report_Report::createFailure(RenameColumnOrgId::class . ' must be executed first'));
+            } else {
+                /** @var FormFieldsService $formFieldsService */
+                $formFieldsService = $this->getServiceManager()->get(FormFieldsService::SERVICE_ID);
+                $fields = (array)$formFieldsService->getOption(FormFieldsService::OPTION_INPUT);
+
+                $orgIdField = [
+                    TestCenterByOrganisationId::OPTION_ORGANISATION_ID => [
+                        'element' => 'input',
+                        'attributes' => [
+                            'required' => true,
+                            'minlength' => 2
+                        ],
+                        'label' => __('Organisation identifier')
+                    ]
+                ];
+
+                unset($fields[RenameColumnOrgId::COLUMN_OLD]);
+                $formFieldsService->setOption(FormFieldsService::OPTION_INPUT, array_merge($fields, $orgIdField));
+                $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, $formFieldsService);
+
+                $this->logInfo('Configured new form fields for synchronization form.');
+
+                $this->setVersion('1.6.6');
+            }
+        }
     }
 
     /**
