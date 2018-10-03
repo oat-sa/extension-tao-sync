@@ -41,9 +41,16 @@ class UserFormatterService extends FormatterService
             $orgId          = $this->getOrganisationIdFromOption($params);
             $eligibilities  = $this->getEligibilitiesByOrganisationId($orgId);
 
+            if (!is_array($properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED])) {
+                $properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED] =
+                [$properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED]];
+            }
+
             $userAssignments = [];
             foreach ($eligibilities as $eligibility) {
-                $userAssignments[] = $eligibility->getUri();
+                if (in_array($eligibility->getUri(), $properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED])) {
+                    $userAssignments[] = $eligibility->getUri();
+                }
             }
             $properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED] = $userAssignments;
         }
