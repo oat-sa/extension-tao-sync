@@ -37,7 +37,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
 {
     use OrganisationIdTrait;
 
-    const SYNC_ORG_ID = 'organisationId';
+    const SYNC_ORG_ID = 'organisation_id';
 
     protected $organisationId;
 

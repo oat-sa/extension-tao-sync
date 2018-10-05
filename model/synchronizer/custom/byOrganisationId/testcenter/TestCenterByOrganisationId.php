@@ -32,7 +32,7 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
     use OrganisationIdTrait;
 
     const ORGANISATION_ID_PROPERTY = 'http://www.taotesting.com/ontologies/synchro.rdf#organisationId';
-    const OPTION_ORGANISATION_ID = 'organisationId';
+    const OPTION_ORGANISATION_ID = 'organisation_id';
 
     /**
      * Fetch an entity associated to the given id in Rdf storage
