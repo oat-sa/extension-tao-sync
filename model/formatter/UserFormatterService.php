@@ -22,12 +22,56 @@ namespace oat\taoSync\model\formatter;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
+use oat\taoSync\scripts\tool\RedisTable;
 use oat\taoTestCenter\model\TestCenterAssignment;
 
 class UserFormatterService extends FormatterService
 {
     use OrganisationIdTrait;
     use OntologyAwareTrait;
+
+    /**
+     * Format a resource to an array
+     *
+     * Add a checksum to identify the resource content
+     * Add resource triples as properties if $withProperties param is true
+     *
+     * @param \core_kernel_classes_Resource $resource
+     * @param array $options
+     * @param array $params
+     * @return array
+     * @throws \Exception
+     */
+    public function format(\core_kernel_classes_Resource $resource, array $options = [], array $params = [])
+    {
+        if (array_key_exists(self::OPTION_INCLUDED_PROPERTIES, $options) && $options[self::OPTION_INCLUDED_PROPERTIES] === true) {
+            $withProperties = true;
+        } else {
+            $withProperties = false;
+        }
+
+        $redisTable = new RedisTable();
+        $this->propagate($redisTable);
+
+        $value = $redisTable->get($resource->getUri());
+
+        if (is_null($value) || $value == false) {
+            $triplesArray = $resource->getRdfTriples()->toArray();
+            $redisTable->set($resource->getUri(), serialize($triplesArray));
+        } else {
+            $triplesArray = unserialize($value);
+        }
+
+        $properties = $this->filterProperties(
+            $triplesArray, $options, $params
+        );
+
+        return [
+            'id' => $resource->getUri(),
+            'checksum' => $this->hashProperties($properties),
+            'properties' => ($withProperties === true) ? $properties : [],
+        ];
+    }
 
     /**
      * @inheritdoc
