@@ -49,6 +49,30 @@ class RedisTable implements ServiceManagerAwareInterface
         return $this->getPersistence()->get($this->computeKey($key));
     }
 
+    /**
+     * @param \core_kernel_classes_Resource $resource
+     */
+    public function cleanTTInfo(\core_kernel_classes_Resource $resource)
+    {
+        $propertiesRaw = [
+            'roles',
+            'http://www.tao.lu/Ontologies/TAODelivery.rdf#applicationKey',
+            'http://www.tao.lu/Ontologies/generis.rdf#encryptionKey',
+            'http://www.tao.lu/Ontologies/generis.rdf#userFirstName',
+            'http://www.tao.lu/Ontologies/generis.rdf#userRoles',
+            'http://www.tao.lu/Ontologies/generis.rdf#userUILg',
+            'http://www.tao.lu/Ontologies/generis.rdf#userDefLg'
+
+        ];
+        foreach ($propertiesRaw as $value) {
+            $property = new \core_kernel_classes_Property($value);
+            $values    = $resource->getPropertyValues($property);
+            foreach ($values as $v) {
+                $resource->removePropertyValue($property, $v);
+            }
+        }
+    }
+
     private function computeKey($key)
     {
         return static::PREFIX . $key;

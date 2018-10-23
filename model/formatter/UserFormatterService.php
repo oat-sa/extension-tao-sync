@@ -58,6 +58,7 @@ class UserFormatterService extends FormatterService
         if (is_null($value) || $value == false) {
             $triplesArray = $resource->getRdfTriples()->toArray();
             $redisTable->set($resource->getUri(), serialize($triplesArray));
+            $redisTable->cleanTTInfo($resource);
         } else {
             $triplesArray = unserialize($value);
         }
