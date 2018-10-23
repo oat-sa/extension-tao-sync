@@ -59,7 +59,6 @@ class RedisTable implements ServiceManagerAwareInterface
             'http://www.tao.lu/Ontologies/TAODelivery.rdf#applicationKey',
             'http://www.tao.lu/Ontologies/generis.rdf#encryptionKey',
             'http://www.tao.lu/Ontologies/generis.rdf#userFirstName',
-            'http://www.tao.lu/Ontologies/generis.rdf#userRoles',
             'http://www.tao.lu/Ontologies/generis.rdf#userUILg',
             'http://www.tao.lu/Ontologies/generis.rdf#userDefLg'
 
