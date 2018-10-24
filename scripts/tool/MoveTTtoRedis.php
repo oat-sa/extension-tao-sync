@@ -46,9 +46,6 @@ class MoveTTtoRedis extends ScriptAction
         $this->propagate($redisTable);
 
         do {
-            if ($count === $chunk) {
-                break;
-            }
             $results = $class->searchInstances(
                 [
                     UserRdf::PROPERTY_ROLES => TaoRoles::DELIVERY,
@@ -60,6 +57,10 @@ class MoveTTtoRedis extends ScriptAction
                 ]
             );
             foreach ($results as $result) {
+                if ($count === $chunk) {
+                    break;
+                }
+
                 try {
                     $key =  $result->getUri();
                     $values = serialize($result->getRdfTriples()->toArray()) ;
