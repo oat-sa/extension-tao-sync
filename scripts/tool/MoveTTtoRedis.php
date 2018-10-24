@@ -58,6 +58,7 @@ class MoveTTtoRedis extends ScriptAction
             );
             foreach ($results as $result) {
                 if ($count === $chunk) {
+                    $results = [];
                     break;
                 }
 
