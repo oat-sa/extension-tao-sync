@@ -35,6 +35,7 @@ class MoveTTtoRedis extends ScriptAction
     public function run()
     {
         $limit = $this->getOption('limit');
+        $chunk = $this->getOption('chunk');
         $offset = $this->getOption('offset');
         $report = Report::createInfo('Mapping TestTakers Redis');
 
@@ -45,8 +46,13 @@ class MoveTTtoRedis extends ScriptAction
         $this->propagate($redisTable);
 
         do {
+            if ($count === $chunk) {
+                break;
+            }
             $results = $class->searchInstances(
-                [ UserRdf::PROPERTY_ROLES => TaoRoles::DELIVERY ],
+                [
+                    UserRdf::PROPERTY_ROLES => TaoRoles::DELIVERY,
+                ],
                 [
                     'like' => false,
                     'limit' => $limit,
@@ -82,6 +88,13 @@ class MoveTTtoRedis extends ScriptAction
                 'cast'        => 'integer',
                 'required'    => true,
                 'description' => 'Limit to get tt.'
+            ],
+            'chunk' => [
+                'prefix'      => 'c',
+                'longPrefix'  => 'chunk',
+                'cast'        => 'integer',
+                'required'    => true,
+                'description' => 'chunk to get tt.'
             ],
             'offset' => [
                 'prefix'      => 'o',
