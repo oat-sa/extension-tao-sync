@@ -39,6 +39,17 @@ class RedisTable implements ServiceManagerAwareInterface
     {
         return $this->getPersistence()->set($this->computeKey($key), $value);
     }
+
+    /**
+     * @param $key
+     * @return bool
+     * @throws \Exception
+     */
+    public function has($key)
+    {
+        return $this->getPersistence()->exists($this->computeKey($key));
+    }
+
     /**
      * @param $key
      * @return string

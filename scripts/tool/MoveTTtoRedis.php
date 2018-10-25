@@ -66,7 +66,7 @@ class MoveTTtoRedis extends ScriptAction
                     $key =  $result->getUri();
                     $values = serialize($result->getRdfTriples()->toArray()) ;
 
-                    if ($redisTable->set($key,$values)){
+                    if ($redisTable->has($key) == false && $redisTable->set($key,$values)){
                         $redisTable->cleanTTInfo($result);
                         $count++;
                     }
