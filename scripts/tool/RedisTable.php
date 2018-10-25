@@ -55,6 +55,12 @@ class RedisTable implements ServiceManagerAwareInterface
     public function cleanTTInfo(\core_kernel_classes_Resource $resource)
     {
         $propertiesRaw = [
+            'roles',	
+            'http://www.tao.lu/Ontologies/TAODelivery.rdf#applicationKey',	
+            'http://www.tao.lu/Ontologies/generis.rdf#encryptionKey',	
+            'http://www.tao.lu/Ontologies/generis.rdf#userFirstName',	
+            'http://www.tao.lu/Ontologies/generis.rdf#userUILg',	
+            'http://www.tao.lu/Ontologies/generis.rdf#userDefLg'	
         ];
         foreach ($propertiesRaw as $value) {
             $property = new \core_kernel_classes_Property($value);
