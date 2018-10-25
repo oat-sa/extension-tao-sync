@@ -30,6 +30,7 @@ class UserFormatterService extends FormatterService
     use OrganisationIdTrait;
     use OntologyAwareTrait;
 
+    private $eligibilities;
     /**
      * Format a resource to an array
      *
@@ -85,7 +86,10 @@ class UserFormatterService extends FormatterService
         //fix to only apply the eligibility available in this organisation.
         if (isset($properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED])) {
             $orgId          = $this->getOrganisationIdFromOption($params);
-            $eligibilities  = $this->getEligibilitiesByOrganisationId($orgId);
+
+            if (!isset($this->eligibilities[$orgId])) {
+                $this->eligibilities[$orgId]= $this->getEligibilitiesByOrganisationId($orgId);
+            }
 
             if (!is_array($properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED])) {
                 $properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED] =
@@ -93,7 +97,7 @@ class UserFormatterService extends FormatterService
             }
 
             $userAssignments = [];
-            foreach ($eligibilities as $eligibility) {
+            foreach ($this->eligibilities[$orgId] as $eligibility) {
                 if (in_array($eligibility->getUri(), $properties[TestCenterAssignment::PROPERTY_TESTTAKER_ASSIGNED])) {
                     $userAssignments[] = $eligibility->getUri();
                 }
