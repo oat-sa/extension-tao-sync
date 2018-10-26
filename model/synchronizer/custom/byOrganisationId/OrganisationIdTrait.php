@@ -141,19 +141,9 @@ trait OrganisationIdTrait
         }
 
         ksort($sortedInstances);
-        $limit = isset($params['limit']) ? $params['limit'] : false;
-        $offset = isset($params['offset']) ? $params['offset'] : 0;
-        $current = 1;
-        foreach ($sortedInstances as $createdAt => $instance) {
-            if ($current < $offset) {
-                continue;
-            }
 
+        foreach ($sortedInstances as $createdAt => $instance) {
             $values[$instance['id']] = $instance;
-            if ($limit !== false && ($current - $offset) == $limit) {
-                break;
-            }
-            $current++;
         }
 
         return $values;
