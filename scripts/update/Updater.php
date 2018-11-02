@@ -432,7 +432,7 @@ class Updater extends \common_ext_ExtensionUpdater
             }
         }
 
-        $this->skip('1.6.6', '1.6.8');
+        $this->skip('1.6.6', '2.0.0');
     }
 
     /**
