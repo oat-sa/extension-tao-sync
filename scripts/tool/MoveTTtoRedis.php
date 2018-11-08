@@ -80,11 +80,6 @@ class MoveTTtoRedis extends ScriptAction
                 );
             }
 
-            if(empty($results)) {
-                $report->add(Report::createSuccess('No TT found.'));
-                break;
-            }
-
             foreach ($results as $result) {
                 if ($chunk !== null & $count === $chunk) {
                     $results = [];
@@ -97,8 +92,35 @@ class MoveTTtoRedis extends ScriptAction
 
                     if ($force === true)  {
                         if ($merge === true) {
-                            $previousRdfTriples = unserialize($redisTable->get($key)) ;
-                            $values = array_merge($previousRdfTriples, $values);
+                            $mergedRdfTriples = [];
+
+                            $previousRdfTriples = unserialize($redisTable->get($key));
+                            $newTriples = unserialize($values);
+
+                            /** @var \core_kernel_classes_Triple $previousRdfTriple */
+                            foreach ($newTriples as $newTriple) {
+                                /** @var \core_kernel_classes_Triple  $newTriple */
+                                foreach ($previousRdfTriples as $previousRdfTriple) {
+                                    //overwrite existing triple
+                                    if ($newTriple->predicate == $previousRdfTriple->predicate) {
+                                        $mergedRdfTriples[] = $newTriple;
+                                        continue 2;
+                                    }
+                                }
+
+                                $mergedRdfTriples[] = $newTriple;
+                            }
+
+                            foreach ($previousRdfTriples as $previousRdfTriple) {
+                                //add previous triple
+                                foreach ($newTriples as $newTriple) {
+                                    if ($newTriple->predicate == $previousRdfTriple->predicate) {
+                                        continue 2;
+                                    }
+                                }
+                                $mergedRdfTriples[] = $previousRdfTriple;
+                            }
+                            $values = serialize($mergedRdfTriples);
                         }
 
                         $redisTable->set($key,$values);
@@ -139,7 +161,7 @@ class MoveTTtoRedis extends ScriptAction
                 'description' => 'chunk to get tt.'
             ],
             'organisation_id' => [
-                'prefix'      => 'o',
+                'prefix'      => 'org',
                 'longPrefix'  => 'organisation_id',
                 'cast'        => 'string',
                 'required'    => false,
