@@ -24,18 +24,25 @@ use oat\oatbox\extension\script\ScriptAction;
 use common_report_Report as Report;
 use oat\tao\model\TaoOntology;
 use oat\tao\model\user\TaoRoles;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
+use oat\taoTestCenter\model\EligibilityService;
 
 class MoveTTtoRedis extends ScriptAction
 {
+    use OrganisationIdTrait;
     use OntologyAwareTrait;
     /**
      * @param $params
+     * @return Report
      * @throws \Exception
      */
     public function run()
     {
         $limit = $this->getOption('limit');
         $chunk = $this->getOption('chunk');
+        $organisationId = $this->getOption('organisation_id');
+        $force = $this->getOption('force');
+        $merge = $this->getOption('merge');
         $offset = $this->getOption('offset');
         $report = Report::createInfo('Mapping TestTakers Redis');
 
@@ -46,18 +53,40 @@ class MoveTTtoRedis extends ScriptAction
         $this->propagate($redisTable);
 
         do {
-            $results = $class->searchInstances(
-                [
-                    UserRdf::PROPERTY_ROLES => TaoRoles::DELIVERY,
-                ],
-                [
-                    'like' => false,
-                    'limit' => $limit,
-                    'offset' => $offset
-                ]
-            );
+            if (!is_null($organisationId)) {
+                $eligibilities = $this->getEligibilitiesByOrganisationId($organisationId);
+                $testtakerResources = [];
+
+                /** @var \core_kernel_classes_Resource $eligibility */
+                foreach ($eligibilities as $eligibility) {
+                    $tTakers = $eligibility->getPropertyValues($this->getProperty(EligibilityService::PROPERTY_TESTTAKER_URI));
+
+                    foreach ($tTakers as $testTaker) {
+                        $testtakerResources[] = $this->getResource($testTaker);
+                    }
+                }
+
+                $results = array_slice($testtakerResources, $offset, $limit);
+            } else {
+                $results = $class->searchInstances(
+                    [
+                        UserRdf::PROPERTY_ROLES => TaoRoles::DELIVERY,
+                    ],
+                    [
+                        'like' => false,
+                        'limit' => $limit,
+                        'offset' => $offset
+                    ]
+                );
+            }
+
+            if(empty($results)) {
+                $report->add(Report::createSuccess('No TT found.'));
+                break;
+            }
+
             foreach ($results as $result) {
-                if ($count === $chunk) {
+                if ($chunk !== null & $count === $chunk) {
                     $results = [];
                     break;
                 }
@@ -66,7 +95,18 @@ class MoveTTtoRedis extends ScriptAction
                     $key =  $result->getUri();
                     $values = serialize($result->getRdfTriples()->toArray()) ;
 
-                    if ($redisTable->has($key) == false && $redisTable->set($key,$values)){
+                    if ($force === true)  {
+                        if ($merge === true) {
+                            $previousRdfTriples = unserialize($redisTable->get($key)) ;
+                            $values = array_merge($previousRdfTriples, $values);
+                        }
+
+                        $redisTable->set($key,$values);
+                        $redisTable->cleanTTInfo($result);
+                        $count++;
+
+                    } elseif ($redisTable->has($key) == false) {
+                        $redisTable->set($key,$values);
                         $redisTable->cleanTTInfo($result);
                         $count++;
                     }
@@ -95,8 +135,29 @@ class MoveTTtoRedis extends ScriptAction
                 'prefix'      => 'c',
                 'longPrefix'  => 'chunk',
                 'cast'        => 'integer',
-                'required'    => true,
+                'required'    => false,
                 'description' => 'chunk to get tt.'
+            ],
+            'organisation_id' => [
+                'prefix'      => 'o',
+                'longPrefix'  => 'organisation_id',
+                'cast'        => 'string',
+                'required'    => false,
+                'description' => 'organisation_id'
+            ],
+            'force' => [
+                'prefix'      => 'f',
+                'longPrefix'  => 'force',
+                'cast'        => 'bool',
+                'required'    => false,
+                'description' => 'force remap'
+            ],
+            'merge' => [
+                'prefix'      => 'm',
+                'longPrefix'  => 'merge',
+                'cast'        => 'bool',
+                'required'    => false,
+                'description' => 'merge test taker with redis'
             ],
             'offset' => [
                 'prefix'      => 'o',
