@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\controller;
 
+use oat\taoSync\model\synchronizer\ltiuser\SyncLtiUserServiceInterface;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogServiceInterface;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\TestSession\SyncTestSessionServiceInterface;
@@ -34,6 +35,8 @@ class ResultApi extends \tao_actions_RestController
     const PARAM_RESULTS = 'results';
 
     const PARAM_DELIVERY_LOGS = 'delivery_logs';
+
+    const PARAM_LTI_USERS = 'lti_users';
 
     const PARAM_TEST_SESSIONS = 'test_sessions';
 
@@ -102,6 +105,36 @@ class ResultApi extends \tao_actions_RestController
     /**
      * @throws \common_exception_NotImplemented
      */
+    public function syncLtiUsers()
+    {
+        try {
+            if ($this->getRequestMethod() != \Request::HTTP_POST) {
+                throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
+            }
+
+            $parameters = file_get_contents('php://input');
+            if (
+                is_array($parameters = json_decode($parameters, true))
+                && json_last_error() === JSON_ERROR_NONE
+                && isset($parameters[self::PARAM_LTI_USERS])
+                && is_array($parameters[self::PARAM_LTI_USERS])
+            ) {
+                $ltiUsers = $parameters[self::PARAM_LTI_USERS];
+            } else {
+                throw new \InvalidArgumentException('A valid "' . self::PARAM_LTI_USERS . '" parameter is required to access ' . __FUNCTION__);
+            }
+
+            $response = $this->getSyncLtiUsersService()->importLtiUsers($ltiUsers);
+
+            $this->returnJson($response);
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        }
+    }
+
+    /**
+     * @throws \common_exception_NotImplemented
+     */
     public function syncTestSessions()
     {
         try {
@@ -143,6 +176,14 @@ class ResultApi extends \tao_actions_RestController
     protected function getSyncResultLogService()
     {
         return $this->getServiceLocator()->get(SyncDeliveryLogServiceInterface::SERVICE_ID);
+    }
+
+    /**
+     * @return array|SyncLtiUserServiceInterface|object
+     */
+    protected function getSyncLtiUsersService()
+    {
+        return $this->getServiceLocator()->get(SyncLtiUserServiceInterface::SERVICE_ID);
     }
 
     /**
