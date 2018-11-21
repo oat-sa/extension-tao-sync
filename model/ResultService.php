@@ -48,7 +48,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     const OPTION_DELETE_AFTER_SEND = 'deleteAfterSend';
     const OPTION_STATUS_EXECUTIONS_TO_SYNC = 'statusExecutionsToSync';
 
-    const DEFAULT_CHUNK_SIZE = 100;
+    const DEFAULT_CHUNK_SIZE = 10;
 
     /** @var \common_report_Report */
     protected $report;
