@@ -23,6 +23,7 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
+use oat\taoSync\model\exceptions\ActiveSessionException;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -69,7 +70,16 @@ class Synchronizer extends \tao_actions_CommonModule
             $this->setLastSyncTask($task);
 
             return $this->returnTaskJson($task);
-        } catch (\Exception $e) {
+        }
+        catch (ActiveSessionException $e) {
+            return $this->returnJson([
+                'success' => true,
+                'data' => ['task' => ['id' => 'empty'], 'errorMsg' => $e->getMessage()],
+                'errorMsg' => $e->getMessage(),
+                'errorCode' => $e->getCode()
+            ]);
+        }
+        catch (\Exception $e) {
             return $this->returnJson([
                 'success' => false,
                 'errorMsg' => $e->getMessage(),

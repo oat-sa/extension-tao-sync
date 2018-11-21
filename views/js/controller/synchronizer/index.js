@@ -23,8 +23,9 @@ define([
     'core/dataProvider/request',
     'util/url',
     'core/taskQueue/taskQueueModel',
-    'layout/loading-bar'
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar) {
+    'layout/loading-bar',
+    'ui/dialog/alert'
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, dialogAlert) {
     'use strict';
 
     /**
@@ -140,6 +141,10 @@ define([
                 updateTime(taskData);
             }).on('error', function () {
                 setState('error');
+            }).on('created', function (data) {
+                if (data.errorMsg) {
+                    dialogAlert(data.errorMsg);
+                }
             });
 
             /**

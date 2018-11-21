@@ -22,7 +22,11 @@ namespace oat\taoSync\model;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\taskQueue\QueueDispatcherInterface;
+use oat\tao\model\taskQueue\Task\CallbackTask;
 use oat\tao\model\taskQueue\Task\TaskInterface;
+use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
+use oat\taoSync\model\exceptions\ActiveSessionException;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 
 class SynchronizeAllTaskBuilderService extends ConfigurableService
@@ -36,9 +40,12 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
      * @param $label
      * @return TaskInterface
      * @throws \common_exception_Error
+     * @throws ActiveSessionException
      */
     public function run($data, $label)
     {
+        $this->checkActiveSessions();
+
         $data['applicationKey'] = $this->getApplicationKey();
         $data['actionsToRun']   = $this->getOption(static::OPTION_TASKS_TO_RUN_ON_SYNC);
 
@@ -65,5 +72,22 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
         }
 
         return '';
+    }
+
+    /**
+     * @throws ActiveSessionException
+     */
+    protected function checkActiveSessions()
+    {
+        /** @var DeliveryMonitoringService $deliveryMonitoringService */
+        $deliveryMonitoringService = $this->getServiceLocator()->get(DeliveryMonitoringService::SERVICE_ID);
+        $deliveryExecutionsData = $deliveryMonitoringService->find([
+            DeliveryMonitoringService::STATUS => [
+                DeliveryExecution::STATE_ACTIVE
+            ]
+        ]);
+        if ($deliveryExecutionsData) {
+            throw new ActiveSessionException(__('The data synchronization cannot be completed because there are active assessments in progress.'));
+        }
     }
 }
