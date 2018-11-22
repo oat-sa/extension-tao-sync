@@ -23,6 +23,8 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
+use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\exceptions\ActiveSessionException;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
@@ -71,14 +73,6 @@ class Synchronizer extends \tao_actions_CommonModule
 
             return $this->returnTaskJson($task);
         }
-        catch (ActiveSessionException $e) {
-            return $this->returnJson([
-                'success' => true,
-                'data' => ['task' => ['id' => 'empty'], 'errorMsg' => $e->getMessage()],
-                'errorMsg' => $e->getMessage(),
-                'errorCode' => $e->getCode()
-            ]);
-        }
         catch (\Exception $e) {
             return $this->returnJson([
                 'success' => false,
@@ -102,9 +96,14 @@ class Synchronizer extends \tao_actions_CommonModule
             $taskData = $task->toArray();
         }
 
+        $activeSessions = $this->getActiveSessions();
+
         return $this->returnJson([
             'success' => true,
-            'data' => $taskData
+            'data' => [
+                'currentTask' => $taskData,
+                'activeSessions' => $activeSessions
+            ]
         ]);
     }
 
@@ -131,6 +130,24 @@ class Synchronizer extends \tao_actions_CommonModule
         }
 
         return null;
+    }
+
+    /**
+     * @return int
+     */
+    protected function getActiveSessions()
+    {
+        /** @var DeliveryMonitoringService $deliveryMonitoringService */
+        $deliveryMonitoringService = $this->getServiceLocator()->get(DeliveryMonitoringService::SERVICE_ID);
+        $deliveryExecutionsData = $deliveryMonitoringService->find([
+            DeliveryMonitoringService::STATUS => [
+                DeliveryExecution::STATE_ACTIVE
+            ]
+        ]);
+        if ($deliveryExecutionsData) {
+            return sizeof($deliveryExecutionsData);
+        }
+        return 0;
     }
 
     /**
