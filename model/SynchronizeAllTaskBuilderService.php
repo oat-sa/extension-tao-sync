@@ -23,7 +23,6 @@ namespace oat\taoSync\model;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\taskQueue\QueueDispatcherInterface;
 use oat\tao\model\taskQueue\Task\TaskInterface;
-use oat\taoSync\model\exceptions\ActiveSessionException;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
 
 class SynchronizeAllTaskBuilderService extends ConfigurableService
@@ -37,7 +36,6 @@ class SynchronizeAllTaskBuilderService extends ConfigurableService
      * @param $label
      * @return TaskInterface
      * @throws \common_exception_Error
-     * @throws ActiveSessionException
      */
     public function run($data, $label)
     {
