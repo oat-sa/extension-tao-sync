@@ -141,10 +141,6 @@ define([
                 updateTime(taskData);
             }).on('error', function () {
                 setState('error');
-            }).on('created', function (data) {
-                if (data.errorMsg) {
-                    dialogAlert(data.errorMsg);
-                }
             });
 
             /**
@@ -248,21 +244,26 @@ define([
             });
 
             request(webservices.lastTask)
-                .then(function (currentTask) {
-                    if (currentTask && currentTask.status) {
-                        switch (currentTask.status) {
+                .then(function (data) {
+                    if (data.activeSessions) {
+                        setState('form');
+                        $container.addClass('active');
+                        $formFields.attr('disabled', 'disabled');
+                    } else if (data.currentTask && data.currentTask.status) {
+
+                        switch (data.currentTask.status) {
                             case 'failed':
                                 setState('error');
                                 break;
                             case 'completed':
                                 setState('form');
-                                updateTime(currentTask);
-                                setHistoryTime(currentTask.updatedAt, '$completed');
+                                updateTime(data.currentTask);
+                                setHistoryTime(data.currentTask.updatedAt, '$completed');
                                 break;
                             default:
                                 setState('progress');
-                                updateTime(currentTask);
-                                taskQueue.pollSingle(currentTask.id);
+                                updateTime(data.currentTask);
+                                taskQueue.pollSingle(data.currentTask.id);
                         }
                     }
                     else {
