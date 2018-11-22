@@ -25,7 +25,6 @@ use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
-use oat\taoSync\model\exceptions\ActiveSessionException;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -72,8 +71,7 @@ class Synchronizer extends \tao_actions_CommonModule
             $this->setLastSyncTask($task);
 
             return $this->returnTaskJson($task);
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $this->returnJson([
                 'success' => false,
                 'errorMsg' => $e->getMessage(),
