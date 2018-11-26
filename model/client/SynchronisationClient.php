@@ -187,6 +187,20 @@ class SynchronisationClient extends ConfigurableService
     }
 
     /**
+     * @param array $logs
+     * @return mixed
+     * @throws \common_Exception
+     */
+    public function sendLtiUsers(array $users)
+    {
+        $url = '/taoSync/ResultApi/syncLtiUsers';
+        $method = 'POST';
+
+        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_LTI_USERS => $users]));
+        return $this->decodeResponseBody($response);
+    }
+
+    /**
      * @param array $sessions
      * @return mixed
      * @throws \common_Exception
