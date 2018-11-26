@@ -45,7 +45,8 @@ define([
         archive: urlHelper.route('archive', tq.api, tq.ext),
         all: urlHelper.route('getAll', tq.api, tq.ext),
         download: urlHelper.route('download', tq.api, tq.ext),
-        lastTask: urlHelper.route('lastTask', 'Synchronizer', 'taoSync')
+        lastTask: urlHelper.route('lastTask', 'Synchronizer', 'taoSync'),
+        activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync')
     };
 
     /**
@@ -233,9 +234,24 @@ define([
 
             // set form actions
             $form.on('submit', function (e) {
+                var action = this.action;
                 e.preventDefault();
                 setState('progress');
-                taskQueue.create(this.action, getData());
+                $container.removeClass('active');
+                request(webservices.activeSessions)
+                    .then(function (data) {
+                         if(data.activeSessions > 0) {
+                             setState('form');
+                             $container.addClass('active');
+                             $container.removeClass('history');
+                             loadingBar.stop();
+                         } else {
+                             taskQueue.create(action, getData());
+                         }
+                    })
+                    .catch(function () {
+                        setState('error');
+                    });
             });
             $form.find('button[data-control="close"]').on('click', function (e) {
                 e.preventDefault();
