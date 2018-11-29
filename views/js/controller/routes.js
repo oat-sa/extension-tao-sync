@@ -25,6 +25,11 @@ define(function(){
             'actions' : {
                 'index' : 'taoSync/controller/synchronizer/index'
             }
+        },
+        'SynchronizationHistory': {
+            'actions': {
+                'index' : 'taoSync/controller/SynchronizationHistory/index'
+            }
         }
     };
 });

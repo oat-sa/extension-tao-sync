@@ -152,3 +152,8 @@
         font-family: $headingFont;
     }
 }
+
+.sync-report-modal {
+    height: 600px;
+    overflow: auto;
+}
