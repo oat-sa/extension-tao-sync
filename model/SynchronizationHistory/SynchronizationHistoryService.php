@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
+use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\user\User;
 use oat\tao\model\datatable\DatatableRequest;
 use oat\tao\model\taskQueue\TaskLog;
@@ -27,41 +28,20 @@ use oat\tao\model\taskQueue\TaskLog\DataTablePayload;
 use oat\tao\model\taskQueue\TaskLog\TaskLogFilter;
 use oat\tao\model\taskQueue\TaskLogInterface;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
-
 /**
  * Class SynchronizationHistoryService
  * @package oat\taoSync\model\SynchronizationHistory
  */
-class SynchronizationHistoryService implements ServiceLocatorAwareInterface
+class SynchronizationHistoryService extends ConfigurableService implements SynchronizationHistoryServiceInterface
 {
-    use ServiceLocatorAwareTrait;
-
-    const SERVICE_ID = 'taoSync/SynchronizationHistoryService';
-
-
-
-    /**
-     * @var HistoryPayloadFormatter
-     */
-    private $payloadFormatter;
-
-    /**
-     * SynchronizationHistoryService constructor.
-     * @param HistoryPayloadFormatter $payloadFormatter
-     */
-    public function __construct(HistoryPayloadFormatter $payloadFormatter)
-    {
-        $this->payloadFormatter = $payloadFormatter;
-    }
+    const OPTION_PAYLOAD_FORMATTER = 'payload_formatter';
 
     /**
      * Return synchronization history payload
      *
      * @param User $user
      * @param DatatableRequest $request
-     * @return mixed
+     * @return array
      */
     public function getSyncHistory(User $user, DatatableRequest $request) {
         /** @var TaskLog $taskLogService */
@@ -80,7 +60,7 @@ class SynchronizationHistoryService implements ServiceLocatorAwareInterface
      * @param DataTablePayload $payload
      */
     private function addPayloadCustomization(DataTablePayload $payload) {
-        $historyFormatter = $this->payloadFormatter;
+        $historyFormatter = $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID);
 
         $payload->customiseRowBy(function () use ($historyFormatter) {
             return $historyFormatter->format($this);
@@ -102,7 +82,7 @@ class SynchronizationHistoryService implements ServiceLocatorAwareInterface
     /**
      * @param User $user
      * @param $id
-     * @return \common_report_Report|null
+     * @return \JsonSerializable
      * @throws \common_exception_NotFound
      */
     public function getSyncReport(User $user, $id) {

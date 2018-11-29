@@ -20,8 +20,7 @@
 namespace oat\taoSync\controller;
 
 use oat\tao\model\datatable\implementation\DatatableRequest;
-use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
-use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
+use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 use tao_actions_CommonModule;
 
 /**
@@ -46,7 +45,7 @@ class SynchronizationHistory extends tao_actions_CommonModule
      */
     public function getHistory()
     {
-        $syncHistoryService = $this->getSyncHistoryService();
+        $syncHistoryService = $this->getServiceLocator()->get(SynchronizationHistoryServiceInterface::SERVICE_ID);
 
         $user = \common_session_SessionManager::getSession()->getUser();
         $payload = $syncHistoryService->getSyncHistory($user, DatatableRequest::fromGlobals());
@@ -68,19 +67,8 @@ class SynchronizationHistory extends tao_actions_CommonModule
 
         $id = $this->getRequestParameter('id');
         $user = \common_session_SessionManager::getSession()->getUser();
-        $syncHistoryService = $this->getSyncHistoryService();
+        $syncHistoryService = $this->getServiceLocator()->get(SynchronizationHistoryServiceInterface::SERVICE_ID);
 
         $this->returnJson($syncHistoryService->getSyncReport($user, $id)->toArray());
-    }
-
-    /**
-     * @return SynchronizationHistoryService
-     */
-    private function getSyncHistoryService()
-    {
-        $payloadFormatter = new HistoryPayloadFormatter();
-        $syncHistoryService = new SynchronizationHistoryService($payloadFormatter);
-        $this->propagate($syncHistoryService);
-        return $syncHistoryService;
     }
 }

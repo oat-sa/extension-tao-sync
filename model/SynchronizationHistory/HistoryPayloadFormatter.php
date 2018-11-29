@@ -20,13 +20,14 @@
 namespace oat\taoSync\model\SynchronizationHistory;
 
 use common_report_Report;
+use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
 
 /**
  * Class HistoryOutputFormatter
  * @package oat\taoSync\model\SynchronizationHistory
  */
-class HistoryPayloadFormatter
+class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayloadFormatterInterface
 {
     const TIME_FORMAT = 'd/m/Y h:i a';
 
