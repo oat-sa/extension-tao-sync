@@ -32,7 +32,7 @@ return array(
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
-        'tao'             => '>=21.13.1',
+        'tao'             => '>=21.15.1',
         'taoOauth'        => '>=1.0.3',
         'taoTestCenter'   => '>=4.0.0',
         'taoResultServer' => '>=7.0.0',
