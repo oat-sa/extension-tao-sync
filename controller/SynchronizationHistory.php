@@ -19,6 +19,9 @@
 
 namespace oat\taoSync\controller;
 
+use oat\tao\model\datatable\implementation\DatatableRequest;
+use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
+use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
 use tao_actions_CommonModule;
 
 /**
@@ -33,5 +36,51 @@ class SynchronizationHistory extends tao_actions_CommonModule
     public function index()
     {
         $this->setView('sync/history.tpl', 'taoSync');
+    }
+
+    /**
+     * Return synchronization history payload
+     *
+     * @return string
+     * @throws \common_exception_Error
+     */
+    public function getHistory()
+    {
+        $syncHistoryService = $this->getSyncHistoryService();
+
+        $user = \common_session_SessionManager::getSession()->getUser();
+        $payload = $syncHistoryService->getSyncHistory($user, DatatableRequest::fromGlobals());
+
+        $this->returnJson($payload);
+    }
+
+    /**
+     * Return detailed synchronisation report.
+     *
+     * @throws \common_exception_Error
+     * @throws \common_exception_MissingParameter
+     * @throws \common_exception_NotFound
+     */
+    public function viewReport() {
+        if (!$this->hasRequestParameter('id')) {
+            throw new \common_exception_MissingParameter('id');
+        }
+
+        $id = $this->getRequestParameter('id');
+        $user = \common_session_SessionManager::getSession()->getUser();
+        $syncHistoryService = $this->getSyncHistoryService();
+
+        $this->returnJson($syncHistoryService->getSyncReport($user, $id)->toArray());
+    }
+
+    /**
+     * @return SynchronizationHistoryService
+     */
+    private function getSyncHistoryService()
+    {
+        $payloadFormatter = new HistoryPayloadFormatter();
+        $syncHistoryService = new SynchronizationHistoryService($payloadFormatter);
+        $this->propagate($syncHistoryService);
+        return $syncHistoryService;
     }
 }

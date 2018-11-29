@@ -44,6 +44,15 @@ class Synchronizer extends \tao_actions_CommonModule
     {
         $this->setData('form-fields', $this->getFormFieldsService()->getFormFields());
         $this->setData('form-action', _url('createTask'));
+
+        $dashboardUrl = _url('index', 'Main', 'tao', [
+            'structure' => 'tools',
+            'ext' => 'taoSync',
+            'section' => 'sync-history',
+        ]);
+
+        $this->setData('dashboard-url', $dashboardUrl);
+
         $this->setView('sync/index.tpl', self::EXTENSION_ID);
     }
 

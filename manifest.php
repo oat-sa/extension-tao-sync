@@ -21,6 +21,7 @@
 use oat\taoSync\controller\HandShake;
 use oat\taoSync\scripts\install\InstallEnhancedDeliveryLog;
 use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
+use oat\taoSync\controller\SynchronizationHistory;
 
 return array(
     'name' => 'taoSync',
@@ -42,6 +43,7 @@ return array(
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', SynchronizationHistory::class],
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class],
     ],
     'install' => [
