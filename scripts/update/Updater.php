@@ -435,7 +435,7 @@ class Updater extends \common_ext_ExtensionUpdater
             /** @var SyncService $service */
             $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
             if (!$service->hasOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)) {
-                $service->setOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS, true);
+                $service->setOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS, false);
             }
             $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
 
