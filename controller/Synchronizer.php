@@ -27,6 +27,7 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
+use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
 
 class Synchronizer extends \tao_actions_CommonModule
@@ -107,7 +108,12 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     public function activeSessions()
     {
-        $activeSessions = $this->getActiveSessions();
+        /** @var SyncService $syncService */
+        $syncService = $this->getServiceLocator()->get(SyncService::SERVICE_ID);
+
+        $activeSessions = $syncService->getOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)
+            ? $this->getActiveSessions()
+            : 0;
 
         return $this->returnJson([
             'success' => true,

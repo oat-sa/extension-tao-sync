@@ -54,6 +54,7 @@ class RegisterSyncService extends InstallAction
     {
         $options = array(
             SyncService::OPTION_CHUNK_SIZE => SyncService::DEFAULT_CHUNK_SIZE,
+            SyncService::OPTION_CHECK_ACTIVE_SESSIONS => true,
             SyncService::OPTION_SYNCHRONIZERS => array(
                 TestCenterSynchronizer::SYNC_TEST_CENTER => new RdfTestCenterSynchronizer(array(
                     AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
