@@ -98,7 +98,7 @@ define([
          * Controller entry point
          */
         start: function () {
-            const model = [
+            var model = [
                 {
                     id: 'status',
                     label: __('Result'),
@@ -122,7 +122,7 @@ define([
                 }
             ];
 
-            const actions = {
+            var actions = {
                 'view': {
                     action: viewReport,
                     id: 'view',
