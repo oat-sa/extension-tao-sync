@@ -29,6 +29,15 @@ $formFields = get_data('form-fields');
                 </div>
             </div>
 
+            <div class="feedback-error status-active">
+                <span class="icon-error"></span>
+                <div class="messages">
+                    <p>
+                        <?=  __('The data synchronization cannot be completed because there are active assessments in progress.') ?>
+                    </p>
+                </div>
+            </div>
+
             <div class="feedback-info status-progress">
                 <span class="icon-loop"></span>
                 <div class="messages">
