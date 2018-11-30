@@ -23,8 +23,11 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
+use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
+use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
 
 class Synchronizer extends \tao_actions_CommonModule
@@ -108,6 +111,28 @@ class Synchronizer extends \tao_actions_CommonModule
     }
 
     /**
+     * Get count of active sessions
+     * @return mixed
+     * @throws \core_kernel_persistence_Exception
+     */
+    public function activeSessions()
+    {
+        /** @var SyncService $syncService */
+        $syncService = $this->getServiceLocator()->get(SyncService::SERVICE_ID);
+
+        $activeSessions = $syncService->getOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)
+            ? $this->getActiveSessions()
+            : 0;
+
+        return $this->returnJson([
+            'success' => true,
+            'data' => [
+                'activeSessions' => $activeSessions
+            ]
+        ]);
+    }
+
+    /**
      * @param TaskInterface $task
      */
     protected function setLastSyncTask($task)
@@ -138,5 +163,21 @@ class Synchronizer extends \tao_actions_CommonModule
     protected function getFormFieldsService()
     {
         return $this->getServiceLocator()->get(FormFieldsService::SERVICE_ID);
+    }
+
+    /**
+     * @return int
+     */
+    protected function getActiveSessions()
+    {
+        /** @var DeliveryMonitoringService $deliveryMonitoringService */
+        $deliveryMonitoringService = $this->getServiceLocator()->get(DeliveryMonitoringService::SERVICE_ID);
+
+        $deliveryExecutionsData = $deliveryMonitoringService->count([
+            DeliveryMonitoringService::STATUS => [
+                DeliveryExecution::STATE_ACTIVE
+            ]
+        ]);
+        return $deliveryExecutionsData;
     }
 }

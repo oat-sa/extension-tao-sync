@@ -28,11 +28,11 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '2.2.0',
+    'version' => '3.0.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
-        'tao'             => '>=21.15.1',
+        'tao'             => '>=22.0.0',
         'taoOauth'        => '>=1.0.3',
         'taoTestCenter'   => '>=4.0.0',
         'taoResultServer' => '>=7.0.0',

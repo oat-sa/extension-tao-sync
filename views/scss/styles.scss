@@ -94,6 +94,11 @@
                     display: block;
                 }
             }
+            &.active {
+                .status-active {
+                    display: block;
+                }
+            }
             .intro {
                 visibility: visible;
             }
