@@ -8,4 +8,11 @@
             <section id="taoSync_synchronizer" name="Data Synchronization" url="/taoSync/Synchronizer/index"/>
         </sections>
     </structure>
+    <structure id="tools" name="Tools" level="18" group="settings">
+        <description/>
+        <icon id="icon-tools" src=""/>
+        <sections>
+            <section id="sync-history" name="Synchronization History" url="/taoSync/SynchronizationHistory/index" />
+        </sections>
+    </structure>
 </structures>

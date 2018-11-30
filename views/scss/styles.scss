@@ -94,6 +94,11 @@
                     display: block;
                 }
             }
+            &.active {
+                .status-active {
+                    display: block;
+                }
+            }
             .intro {
                 visibility: visible;
             }
@@ -151,4 +156,9 @@
         @include font-size(23);
         font-family: $headingFont;
     }
+}
+
+.sync-report-modal {
+    height: 600px;
+    overflow: auto;
 }

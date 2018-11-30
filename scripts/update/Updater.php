@@ -431,8 +431,18 @@ class Updater extends \common_ext_ExtensionUpdater
                 $this->setVersion('1.6.6');
             }
         }
+        if ($this->isVersion('2.1.0')) {
+            /** @var SyncService $service */
+            $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
+            if (!$service->hasOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)) {
+                $service->setOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS, false);
+            }
+            $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
 
-        $this->skip('1.6.6', '2.1.0');
+            $this->setVersion('2.2.0');
+        }
+
+        $this->skip('2.2.0', '3.0.1');
     }
 
     /**

@@ -49,6 +49,7 @@ class SyncService extends ConfigurableService
     const PROPERTY_ASSIGNED_SYNC_USER = 'http://www.taotesting.com/Ontologies/TAOTestCenter.rdf#assignedSyncUser';
 
     const OPTION_SYNCHRONIZERS = 'synchronizers';
+    const OPTION_CHECK_ACTIVE_SESSIONS = 'checkActiveSessions';
     const OPTION_CHUNK_SIZE = 'chunkSize';
 
     const DEFAULT_CHUNK_SIZE = 100;
