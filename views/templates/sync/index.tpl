@@ -24,8 +24,10 @@ $formFields = get_data('form-fields');
                 <span class="icon-info"></span>
                 <div class="messages">
                     <p>
-                        <?= __('Last task has been completed at %s', '<time class="complete-time"></time>') ?>
+                        <span><?= __('Last task has been completed at %s', '<time class="complete-time"></time>') ?>.</span>
+                        <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                     </p>
+
                 </div>
             </div>
 
@@ -58,14 +60,20 @@ $formFields = get_data('form-fields');
             <div class="feedback-success status-success">
                 <span class="icon-result-ok"></span>
                 <div class="messages">
-                    <p><?= __('The synchronization process has been finished.') ?></p>
+                    <p>
+                        <span><?= __('The synchronization process has been finished.') ?></span>
+                        <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
+                    </p>
                 </div>
             </div>
 
             <div class="feedback-error status-error">
                 <span class="icon-error"></span>
                 <div class="messages">
-                    <p><?= __('The synchronization process has failed. Please contact the administrator.') ?></p>
+                    <p>
+                        <span><?= __('The synchronization process has failed. Please contact the administrator.') ?></span>
+                        <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
+                    </p>
                 </div>
             </div>
         </section>

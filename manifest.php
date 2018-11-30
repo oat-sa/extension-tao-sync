@@ -21,17 +21,18 @@
 use oat\taoSync\controller\HandShake;
 use oat\taoSync\scripts\install\InstallEnhancedDeliveryLog;
 use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
+use oat\taoSync\controller\SynchronizationHistory;
 
 return array(
     'name' => 'taoSync',
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '2.2.0',
+    'version' => '3.0.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
-        'tao'             => '>=21.0.0',
+        'tao'             => '>=22.0.0',
         'taoOauth'        => '>=1.0.3',
         'taoTestCenter'   => '>=4.0.0',
         'taoResultServer' => '>=7.0.0',
@@ -42,6 +43,7 @@ return array(
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
+        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', SynchronizationHistory::class],
         ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class],
     ],
     'install' => [
