@@ -24,6 +24,7 @@ use oat\taoSync\model\synchronizer\ltiuser\SyncLtiUserServiceInterface;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogServiceInterface;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\TestSession\SyncTestSessionServiceInterface;
+use oat\taoSync\model\SyncServiceInterface;
 
 /**
  * Class ResultApi
@@ -65,7 +66,7 @@ class ResultApi extends \tao_actions_RestController
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_RESULTS . '" parameter is required to access ' . __FUNCTION__);
             }
 
-            $response = $this->getSyncResultService()->importDeliveryResults($results);
+            $response = $this->getSyncResultService()->importDeliveryResults($results, $this->getImportOptions());
             $this->returnJson($response);
         } catch (\Exception $e) {
             $this->returnFailure($e);
@@ -194,4 +195,27 @@ class ResultApi extends \tao_actions_RestController
         return $this->getServiceLocator()->get(SyncTestSessionServiceInterface::SERVICE_ID);
     }
 
+    /**
+     * Get import options to be passed to importer
+     * @return array
+     */
+    private function getImportOptions()
+    {
+        return [
+            SyncServiceInterface::IMPORT_OPTION_BOX_ID => $this->getBoxId()
+        ];
+    }
+
+    /**
+     * Get identifier of Tao instance the request came from
+     * @return string|null
+     */
+    private function getBoxId()
+    {
+        $result = null;
+        if ($this->hasHeader(SyncServiceInterface::BOX_ID_HEADER)) {
+            $result = $this->getHeader(SyncServiceInterface::BOX_ID_HEADER);
+        }
+        return $result;
+    }
 }

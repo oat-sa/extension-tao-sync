@@ -24,7 +24,7 @@ namespace oat\taoSync\model;
  * Class SyncService
  * @package oat\taoSync\model
  */
-interface SyncResultServiceInterface
+interface SyncResultServiceInterface extends SyncServiceInterface
 {
     /**
      * Scan delivery execution to format it
@@ -60,9 +60,10 @@ interface SyncResultServiceInterface
      * Create and inject variables
      *
      * @param array $results
+     * @param array $options
      * @return array
      */
-    public function importDeliveryResults(array $results);
+    public function importDeliveryResults(array $results, array $options = []);
 
     /**
      * @param string $offlineResultId

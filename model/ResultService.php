@@ -33,6 +33,7 @@ use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use Psr\Log\LogLevel;
+use qtism\common\enums\Cardinality;
 
 /**
  * Class SyncService
@@ -174,9 +175,10 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * Create and inject variables
      *
      * @param array $results
+     * @param array $options
      * @return array
      */
-    public function importDeliveryResults(array $results)
+    public function importDeliveryResults(array $results, array $options = [])
     {
         $importAcknowledgment = [];
 
@@ -198,7 +200,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
                 $this->getResultStorage($deliveryId)->storeRelatedTestTaker($deliveryExecution->getIdentifier(), $testtaker->getUri());
                 $this->getResultStorage($deliveryId)->storeRelatedDelivery($deliveryExecution->getIdentifier(), $delivery->getUri());
-
 
                 foreach ($variables as $variable) {
                     /** @var \taoResultServer_models_classes_Variable $resultVariable */
@@ -229,6 +230,10 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
                 }
 
+                $this->saveBoxId(
+                    $deliveryExecution,
+                    $options[SyncServiceInterface::IMPORT_OPTION_BOX_ID] ?? null
+                );
                 $this->mapOfflineResultIdToOnlineResultId($resultId, $deliveryExecution->getIdentifier());
             } catch (\Exception $e) {
                 $success = false;
@@ -589,4 +594,40 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         return $deliveryExecution;
     }
 
+    /**
+     * Save in the result storage the box id of the Tao instance the results came from.
+     * @param DeliveryExecution $deliveryExecution
+     * @param string|null $boxId
+     * @return boolean
+     * @throws \common_Exception
+     * @throws \common_exception_InvalidArgumentType
+     * @throws \common_exception_NotFound
+     * @throws \core_kernel_classes_EmptyProperty
+     */
+    public function saveBoxId(DeliveryExecution $deliveryExecution, $boxId)
+    {
+        if ($boxId === null) {
+            return;
+        }
+        $delivery = $deliveryExecution->getDelivery();
+        $testResource = DeliveryAssemblyService::singleton()->getOrigin($deliveryExecution->getDelivery());
+        $resultVariable = new \taoResultServer_models_classes_TraceVariable();
+        $resultVariable->setIdentifier('tao-boxId');
+        $resultVariable->setBaseType('string');
+        $resultVariable->setCardinality(Cardinality::getNameByConstant(Cardinality::SINGLE));
+        $resultVariable->setTrace($boxId);
+
+        try {
+            $this->getResultStorage($delivery->getUri())->storeTestVariable(
+                $deliveryExecution->getIdentifier(),
+                $testResource->getUri(),
+                $resultVariable,
+                $deliveryExecution->getIdentifier()
+            );
+            return true;
+        } catch (\common_Exception $e) {
+            $this->logError(sprintf('Saving of box id has been failed. %s. Box id: %s; Result id: %s', $e->getMessage(), $deliveryExecution->getIdentifier(), $boxId));
+            return false;
+        }
+    }
 }
