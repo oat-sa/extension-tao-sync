@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: TAO 3.3.0-sprint76\n"
-"PO-Revision-Date: 2018-05-18T14:00:32\n"
+"Project-Id-Version: TAO 3.3.0-sprint91\n"
+"PO-Revision-Date: 2018-12-14T13:58:14\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
 "Language: en-US\n"
@@ -13,6 +13,9 @@ msgstr ""
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-SearchPath-0: .\n"
 
+msgid "Data"
+msgstr ""
+
 #, tao-public
 msgid "Data Synchronization"
 msgstr ""
@@ -20,7 +23,13 @@ msgstr ""
 msgid "Depending on the workload this process may take a while."
 msgstr ""
 
+msgid "Detail view"
+msgstr ""
+
 msgid "Done"
+msgstr ""
+
+msgid "Go to"
 msgstr ""
 
 msgid "Last status check at %s"
@@ -32,16 +41,35 @@ msgstr ""
 msgid "Note that all time data refer to the server time."
 msgstr ""
 
+msgid "Organisation ID"
+msgstr ""
+
 msgid "Required field"
 msgstr ""
 
+msgid "Result"
+msgstr ""
+
+#, tao-public
+msgid "Synchronization History"
+msgstr ""
+
 msgid "Synchronization in progress."
+msgstr ""
+
+msgid "Synchronization report data"
 msgstr ""
 
 msgid "Synchronize Data"
 msgstr ""
 
 msgid "Task has been enqueued at %s"
+msgstr ""
+
+msgid "TestCenter must have an organisation id property to associate it to sync manager(s)."
+msgstr ""
+
+msgid "The data synchronization cannot be completed because there are active assessments in progress."
 msgstr ""
 
 msgid "The synchronisation is already running!"
@@ -51,5 +79,15 @@ msgid "The synchronization process has been finished."
 msgstr ""
 
 msgid "The synchronization process has failed. Please contact the administrator."
+msgstr ""
+
+msgid "Time"
+msgstr ""
+
+#, tao-public
+msgid "Tools"
+msgstr ""
+
+msgid "View"
 msgstr ""
 
