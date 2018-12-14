@@ -152,7 +152,9 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 foreach ($logsToBeInserted as $deliveryLog) {
                     $this->postImportDeliverLogProcess($deliveryLog);
                 }
-                $this->saveBoxId($logsToBeInserted, $options[SyncServiceInterface::IMPORT_OPTION_BOX_ID] ?? null);
+                $boxId = isset($options[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
+                    $options[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
+                $this->saveBoxId($logsToBeInserted, $boxId);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'logsSynced' => $logsSynced
