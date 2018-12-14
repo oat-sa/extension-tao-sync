@@ -30,12 +30,15 @@ use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use Psr\Log\LogLevel;
+use oat\taoSync\model\SyncServiceInterface;
+use oat\oatbox\session\SessionService;
 
 class SyncDeliveryLogService extends ConfigurableService implements SyncDeliveryLogServiceInterface
 {
     const OPTION_CHUNK_SIZE = 'chunkSize';
     const DEFAULT_CHUNK_SIZE = 200;
     const OPTION_SHOULD_DECODE_BEFORE_SYNC = 'shouldDecodeBeforeSync';
+    const DELIVERY_LOG_SYNC_EVENT = 'SYNC_EVENT';
 
     /** @var Report */
     protected $report;
@@ -122,7 +125,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
      * @param array $logs
      * @return array
      */
-    public function importDeliveryLogs(array $logs)
+    public function importDeliveryLogs(array $logs, array $options = [])
     {
         $importAcknowledgment = [];
         foreach ($logs as $resultId => $resultLogs) {
@@ -150,6 +153,9 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 foreach ($logsToBeInserted as $deliveryLog) {
                     $this->postImportDeliverLogProcess($deliveryLog);
                 }
+                $boxId = isset($options[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
+                    $options[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
+                $this->saveBoxId($logsToBeInserted, $boxId);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'logsSynced' => $logsSynced
@@ -304,6 +310,29 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
             }
         }
+    }
+
+    /**
+     * @param array $events
+     * @param string $boxId
+     * @return bool|void
+     * @throws \common_exception_Error
+     */
+    public function saveBoxId($events, $boxId)
+    {
+
+        $user = $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentUser()->getIdentifier();
+        if (empty($user) && PHP_SAPI == 'cli') {
+            $user = 'cli';
+        }
+        $syncEvent = [
+            DeliveryLog::DELIVERY_EXECUTION_ID => $events[0][DeliveryLog::DELIVERY_EXECUTION_ID],
+            DeliveryLog::EVENT_ID => static::DELIVERY_LOG_SYNC_EVENT,
+            DeliveryLog::DATA => json_encode([SyncServiceInterface::IMPORT_OPTION_BOX_ID => $boxId]),
+            DeliveryLog::CREATED_AT => microtime(true),
+            DeliveryLog::CREATED_BY => $user,
+        ];
+        $this->getDeliveryLogService()->insertMultiple([$syncEvent]);
     }
 
 }
