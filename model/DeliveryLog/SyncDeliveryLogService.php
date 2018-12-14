@@ -31,6 +31,7 @@ use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use Psr\Log\LogLevel;
 use oat\taoSync\model\SyncServiceInterface;
+use oat\oatbox\session\SessionService;
 
 class SyncDeliveryLogService extends ConfigurableService implements SyncDeliveryLogServiceInterface
 {
@@ -319,7 +320,8 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
      */
     public function saveBoxId($events, $boxId)
     {
-        $user = \common_session_SessionManager::getSession()->getUser()->getIdentifier();
+
+        $user = $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentUser()->getIdentifier();
         if (empty($user) && PHP_SAPI == 'cli') {
             $user = 'cli';
         }
