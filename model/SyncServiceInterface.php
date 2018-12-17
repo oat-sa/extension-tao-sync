@@ -17,34 +17,23 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
-namespace oat\taoSync\model\DeliveryLog;
-
-use oat\taoSync\model\SyncServiceInterface;
+namespace oat\taoSync\model;
 
 /**
- * Interface SyncDeliveryLogServiceInterface
- * @package oat\taoSync\model\DeliveryLog
+ * Interface SyncServiceInterface
+ * @package oat\taoSync\model
  */
-interface SyncDeliveryLogServiceInterface extends SyncServiceInterface
+interface SyncServiceInterface
 {
-    const SERVICE_ID = 'taoSync/SyncDeliveryLogService';
 
-    const SYNC_ENTITY = 'delivery log';
-
-    /**
-     * @param array $params
-     */
-    public function synchronizeDeliveryLogs(array $params = []);
+    const IMPORT_OPTION_BOX_ID = 'box-id';
+    const BOX_ID_HEADER = 'x-tao-box-id';
 
     /**
-     * @param array $logs
+     * Save the box id of the Tao instance the data came from.
+     * @param array $data Data given from client environment
+     * @param string $boxId
+     * @return boolean
      */
-    public function sendDeliveryLogs(array $logs);
-
-    /**
-     * @param array $logs
-     * @return array
-     * @param array $options
-     */
-    public function importDeliveryLogs(array $logs, array $options = []);
+    public function saveBoxId($data, $boxId);
 }
