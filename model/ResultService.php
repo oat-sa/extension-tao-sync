@@ -32,6 +32,7 @@ use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\report\SynchronizationReport;
 use Psr\Log\LogLevel;
 
 /**
@@ -50,7 +51,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
     const DEFAULT_CHUNK_SIZE = 10;
 
-    /** @var \common_report_Report */
+    /** @var SynchronizationReport */
     protected $report;
 
     /**
@@ -69,7 +70,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      */
     public function synchronizeResults(array $params = [])
     {
-        $this->report = \common_report_Report::createInfo('Starting delivery results synchronisation...');
+        $this->report = SynchronizationReport::createInfo('Starting delivery results synchronisation...');
         $results = [];
         $counter = 0;
 
@@ -156,10 +157,12 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         if (!empty($syncSuccess)) {
             $this->getResultSyncHistory()->logResultsAsExported(array_keys($syncSuccess));
             $this->report(count($syncSuccess) . ' delivery execution exports have been acknowledged.', LogLevel::INFO);
+            $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_SUCCESSFUL_UPLOAD, $syncSuccess);
         }
         if (!empty($syncFailed)) {
             $this->getResultSyncHistory()->logResultsAsExported($syncFailed, ResultSyncHistoryService::STATUS_FAILED);
             $this->report(count($syncFailed) . ' delivery execution exports have not been acknowledged.', LogLevel::ERROR);
+            $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_FAILED_UPLOAD, $syncFailed);
         }
 
         if ($this->hasDeleteAfterSending()) {

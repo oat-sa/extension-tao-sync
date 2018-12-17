@@ -22,13 +22,13 @@ namespace oat\taoSync\model\DeliveryLog;
 
 use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
-use \common_report_Report as Report;
 use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\event\DeliveryExecutionIrregularityReport;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\report\SynchronizationReport;
 use Psr\Log\LogLevel;
 
 class SyncDeliveryLogService extends ConfigurableService implements SyncDeliveryLogServiceInterface
@@ -37,7 +37,9 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
     const DEFAULT_CHUNK_SIZE = 200;
     const OPTION_SHOULD_DECODE_BEFORE_SYNC = 'shouldDecodeBeforeSync';
 
-    /** @var Report */
+
+
+    /** @var SynchronizationReport */
     protected $report;
 
     /**
@@ -48,7 +50,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
      */
     public function synchronizeDeliveryLogs(array $params = [])
     {
-        $this->report = Report::createInfo('Starting delivery log synchronisation...');
+        $this->report = SynchronizationReport::createInfo('Starting delivery log synchronisation...');
 
         $deliveryLogService = $this->getDeliveryLogService();
         $logsToSync = $deliveryLogService->getLogsToSynced($this->getOption(static::OPTION_SHOULD_DECODE_BEFORE_SYNC));
@@ -108,10 +110,12 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
                 $this->report(count($syncSuccess[$id]). ' result logs exports have been acknowledged.', LogLevel::INFO);
+                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_SUCCESSFUL_UPLOAD, $syncSuccess);
             }
 
             if (!empty($syncFailed)) {
                 $this->report(count($syncFailed) . ' result logs exports have not been acknowledged.', LogLevel::ERROR);
+                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_FAILED_UPLOAD, $syncFailed);
             }
         }
 

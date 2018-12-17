@@ -34,6 +34,7 @@ use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use \common_report_Report as Report;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\report\SynchronizationReport;
 
 /**
  * Class SyncTestSessionService
@@ -42,7 +43,7 @@ use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 class SyncTestSessionService extends ConfigurableService implements SyncTestSessionServiceInterface
 {
 
-    /** @var Report */
+    /** @var SynchronizationReport */
     protected $report;
 
     /**
@@ -53,7 +54,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
      */
     public function synchronizeTestSession(array $params = [])
     {
-        $this->report = Report::createInfo('Starting Test sessions synchronisation...');
+        $this->report = SynchronizationReport::createInfo('Starting Test sessions synchronisation...');
 
         $sessionsToSync = $this->getResultSyncHistory()->getResultsWithTestSessionNotSynced();
 
@@ -106,10 +107,12 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
                 $this->report->add(Report::createInfo($syncSuccess[$id] . ' sync sessions acknowledged.'));
+                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_SUCCESSFUL_UPLOAD, $syncSuccess);
             }
 
             if (!empty($syncFailed)) {
                 $this->report->add(Report::createInfo(count($syncFailed) . ' sync sessions have not been acknowledged.'));
+                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_FAILED_UPLOAD, $syncFailed);
             }
         }
 

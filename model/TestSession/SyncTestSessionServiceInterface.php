@@ -24,6 +24,9 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 interface SyncTestSessionServiceInterface
 {
     const SERVICE_ID = 'taoSync/SyncTestSessionService';
+
+    const SYNC_ENTITY = 'sync session';
+
     /**
      * @param array $params
      */

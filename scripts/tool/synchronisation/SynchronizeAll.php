@@ -21,7 +21,13 @@
 namespace oat\taoSync\scripts\tool\synchronisation;
 
 use oat\oatbox\action\Action;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\extension\AbstractAction;
+use oat\taoSync\model\event\SynchronizationFinished;
+use oat\taoSync\model\event\SynchronizationStarted;
+use oat\taoSync\model\history\DataSyncHistoryService;
+use oat\taoSync\model\SyncLog\SyncLogEntity;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 
 class SynchronizeAll extends AbstractAction
 {
@@ -35,7 +41,18 @@ class SynchronizeAll extends AbstractAction
         $actionsToRun = $params['actionsToRun'];
         unset($params['actionsToRun']);
 
+        $syncId = $this->getServiceLocator()->get(DataSyncHistoryService::SERVICE_ID)->createSynchronisation($params);
+        $params[DataSyncHistoryService::SYNC_NUMBER] = $syncId;
+        $params['tao_box_id'] = 4619; // @todo: Use real VM client ID when it's implemented
+
         $report = \common_report_Report::createInfo('Synchronizing data');
+
+        /** @var EventManager $eventManager */
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $eventManager->trigger(
+            new SynchronizationStarted($params, $report)
+        );
+
         try {
             foreach ($actionsToRun as $action){
                 if (is_subclass_of($action, Action::class)){
@@ -44,8 +61,10 @@ class SynchronizeAll extends AbstractAction
             }
         } catch (\Exception $e) {
             $report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
+        } finally {
+            $eventManager->trigger(new SynchronizationFinished($params, $report));
         }
+
         return $report;
     }
-
 }

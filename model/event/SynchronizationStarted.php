@@ -14,31 +14,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\synchronizer\ltiuser;
+namespace oat\taoSync\model\event;
 
-interface SyncLtiUserServiceInterface
-{
-    const SERVICE_ID = 'taoSync/SyncLtiUser';
-
-    const SYNC_ENTITY = 'lti user';
-
-    /**
-     * @param array $params
-     */
-    public function synchronizeLtiUser(array $params = []);
-
-    /**
-     * @param array $ltiUsers
-     */
-    public function sendLtiUsers(array $ltiUsers);
-
-    /**
-     * @param array $ltiUsers
-     * @return array
-     */
-    public function importLtiUsers(array $ltiUsers);
-}
+/**
+ * Class SynchronizationStarted
+ * @package oat\taoSync\model\event
+ */
+class SynchronizationStarted extends AbstractSynchronizationEvent {}

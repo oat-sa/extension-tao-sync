@@ -26,8 +26,9 @@ use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
-use oat\taoSync\model\event\SynchronisationStart;
+use oat\taoSync\model\event\DataSynchronisationStarted;
 use oat\taoSync\model\history\DataSyncHistoryService;
+use oat\taoSync\model\report\SynchronizationReport;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
 use Psr\Log\LogLevel;
@@ -57,8 +58,11 @@ class SyncService extends ConfigurableService
     /** @var Synchronizer[]  */
     protected $synchronizers = array();
 
-    /** @var \common_report_Report */
+    /** @var SynchronizationReport */
     protected $report;
+
+    /** @var array Synchronization parameters */
+    protected $params;
 
     /**
      * Starting point to synchronization
@@ -77,11 +81,11 @@ class SyncService extends ConfigurableService
      */
     public function synchronize($type = null, array $params = [])
     {
-        $syncId = $this->getSyncHistoryService()->createSynchronisation($params);
-        $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
+        $syncId = $this->getSyncId($params);
+        $this->report = SynchronizationReport::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
         $this->getEventManager()->trigger(
-            new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
+            new DataSynchronisationStarted($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
         );
 
         try {
@@ -287,7 +291,7 @@ class SyncService extends ConfigurableService
      * Fetch all entities not processed by synchro. It means that there are not in remote server.
      * Then delete it
      *
-     * @param $type
+     * @param string $type Entity type
      * @throws \common_exception_BadRequest
      * @throws \common_exception_Error
      * @throws \core_kernel_persistence_Exception
@@ -298,6 +302,9 @@ class SyncService extends ConfigurableService
         $this->getSynchronizer($type)->deleteMultiple($entityIds);
         $this->getSyncHistoryService()->logDeletedEntities($type, $entityIds);
         $this->report(count($entityIds) . ' deleted.', LogLevel::INFO);
+        if (!empty($entityIds)) {
+            $this->report->addSyncData($type, 'delete', $entityIds);
+        }
     }
 
     /**
@@ -364,6 +371,7 @@ class SyncService extends ConfigurableService
             }
 
             $this->report('(' . $synchronizer->getId() . ') ' . count($created) . ' entities created.', LogLevel::INFO);
+            $this->report->addSyncData($synchronizer->getId(), 'create', $created);
             $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $created);
         }
 
@@ -371,6 +379,7 @@ class SyncService extends ConfigurableService
             $synchronizer->updateMultiple($entities['update']);
             $this->report('(' . $synchronizer->getId() . ') ' . count($entities['update']) . ' entities updated.', LogLevel::INFO);
             $entityIds = array_column($entities['update'], 'id');
+            $this->report->addSyncData($synchronizer->getId(), 'update', $entityIds);
             $this->getSyncHistoryService()->logUpdatedEntities($synchronizer->getId(), $entityIds);
         }
 
@@ -454,7 +463,7 @@ class SyncService extends ConfigurableService
     /**
      * Get a synchronizer from config
      *
-     * @param $type
+     * @param string $type Synchronizer type
      * @return Synchronizer
      * @throws \common_exception_BadRequest
      */
@@ -463,7 +472,7 @@ class SyncService extends ConfigurableService
         if (!isset($this->synchronizers[$type])) {
             if ($this->hasOption(self::OPTION_SYNCHRONIZERS)) {
                 $synchronizers = $this->getOption(self::OPTION_SYNCHRONIZERS);
-                if (is_array($synchronizers) && array_key_exists($type, $synchronizers)) {
+                if (is_array($synchronizers) && isset($synchronizers[$type])) {
                     $synchronizer = $synchronizers[$type];
                     if (is_object($synchronizer)) {
                         $this->synchronizers[$type] = $this->propagate($synchronizer);
@@ -493,4 +502,18 @@ class SyncService extends ConfigurableService
         return $this->synchronizers[$type];
     }
 
+    /**
+     * @param array $params
+     * @return int
+     * @throws \core_kernel_persistence_Exception
+     */
+    private function getSyncId(array $params)
+    {
+        if (empty($params[DataSyncHistoryService::SYNC_NUMBER]))
+        {
+            $params[DataSyncHistoryService::SYNC_NUMBER] = $this->getSyncHistoryService()->createSynchronisation($params);
+        }
+
+        return $params[DataSyncHistoryService::SYNC_NUMBER];
+    }
 }

@@ -26,6 +26,8 @@ namespace oat\taoSync\model;
  */
 interface SyncResultServiceInterface
 {
+    const SYNC_ENTITY = 'delivery execution';
+
     /**
      * Scan delivery execution to format it
      *

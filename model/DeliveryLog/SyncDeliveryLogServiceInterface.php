@@ -23,6 +23,9 @@ namespace oat\taoSync\model\DeliveryLog;
 interface SyncDeliveryLogServiceInterface
 {
     const SERVICE_ID = 'taoSync/SyncDeliveryLogService';
+
+    const SYNC_ENTITY = 'delivery log';
+
     /**
      * @param array $params
      */

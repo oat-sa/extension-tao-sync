@@ -18,27 +18,22 @@
  *
  */
 
-namespace oat\taoSync\model\synchronizer\ltiuser;
+namespace oat\taoSync\model\event;
 
-interface SyncLtiUserServiceInterface
+use oat\oatbox\event\Event;
+
+class DataSynchronisationStarted implements Event
 {
-    const SERVICE_ID = 'taoSync/SyncLtiUser';
+    protected $synchronisation;
 
-    const SYNC_ENTITY = 'lti user';
+    public function __construct(\core_kernel_classes_Resource $synchronisation)
+    {
+        $this->synchronisation = $synchronisation;
+    }
 
-    /**
-     * @param array $params
-     */
-    public function synchronizeLtiUser(array $params = []);
+    public function getName()
+    {
+        return get_class($this);
+    }
 
-    /**
-     * @param array $ltiUsers
-     */
-    public function sendLtiUsers(array $ltiUsers);
-
-    /**
-     * @param array $ltiUsers
-     * @return array
-     */
-    public function importLtiUsers(array $ltiUsers);
 }

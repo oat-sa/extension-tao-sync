@@ -14,26 +14,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
 
 namespace oat\taoSync\model\event;
 
-use oat\oatbox\event\Event;
-
-class SynchronisationStart implements Event
-{
-    protected $synchronisation;
-
-    public function __construct(\core_kernel_classes_Resource $synchronisation)
-    {
-        $this->synchronisation = $synchronisation;
-    }
-
-    public function getName()
-    {
-        return get_class($this);
-    }
-
-}
+/**
+ * Class SynchronizationFinished
+ * @package oat\taoSync\model\event
+ */
+class SynchronizationFinished extends AbstractSynchronizationEvent {}

@@ -14,31 +14,30 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\synchronizer\ltiuser;
+namespace oat\taoSync\model\listener;
 
-interface SyncLtiUserServiceInterface
+use oat\taoSync\model\event\SynchronizationFinished;
+use oat\taoSync\model\event\SynchronizationStarted;
+
+interface SyncLogListenerInterface
 {
-    const SERVICE_ID = 'taoSync/SyncLtiUser';
-
-    const SYNC_ENTITY = 'lti user';
+    const SERVICE_ID = 'taoSync/SynchronizationLogListener';
 
     /**
-     * @param array $params
+     * Create log record about started synchronization.
+     *
+     * @param SynchronizationStarted $event
+     * @return mixed
      */
-    public function synchronizeLtiUser(array $params = []);
+    public function logSyncStarted(SynchronizationStarted $event);
 
     /**
-     * @param array $ltiUsers
+     * Update log record for finished synchronization.
+     *
+     * @param SynchronizationFinished $event
      */
-    public function sendLtiUsers(array $ltiUsers);
-
-    /**
-     * @param array $ltiUsers
-     * @return array
-     */
-    public function importLtiUsers(array $ltiUsers);
+    public function logSyncFinished(SynchronizationFinished $event);
 }
