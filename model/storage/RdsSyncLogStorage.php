@@ -34,17 +34,6 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
 
     const TABLE_NAME = 'synchronisation_log';
 
-    const COLUMN_ID = 'id';
-    const COLUMN_BOX_ID = 'box_id';
-    const COLUMN_SYNC_ID = 'sync_id';
-    const COLUMN_ORGANIZATION_ID = 'organization_id';
-    const COLUMN_PARAMETERS = 'parameters';
-    const COLUMN_DATA = 'data';
-    const COLUMN_STATUS = 'status';
-    const COLUMN_REPORT = 'report';
-    const COLUMN_STARTED_AT = 'created_at';
-    const COLUMN_FINISHED_AT = 'finished_at';
-
     /**
      * @var string
      */
@@ -54,19 +43,6 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
      * @var common_persistence_SqlPersistence
      */
     private $persistence = null;
-
-    private $tableColumns = [
-        self::COLUMN_ID,
-        self::COLUMN_BOX_ID,
-        self::COLUMN_SYNC_ID,
-        self::COLUMN_ORGANIZATION_ID,
-        self::COLUMN_PARAMETERS,
-        self::COLUMN_DATA,
-        self::COLUMN_STATUS,
-        self::COLUMN_REPORT,
-        self::COLUMN_STARTED_AT,
-        self::COLUMN_FINISHED_AT,
-    ];
 
     /**
      * SyncLogService constructor.
@@ -117,13 +93,13 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         $this->getPersistence()->insert(
             self::TABLE_NAME,
             [
-                self::COLUMN_SYNC_ID => $entity->getSyncId(),
-                self::COLUMN_BOX_ID => $entity->getBoxId(),
-                self::COLUMN_ORGANIZATION_ID => $entity->getOrganizationId(),
-                self::COLUMN_DATA => json_encode($entity->getData()),
-                self::COLUMN_STATUS => $entity->getStatus(),
-                self::COLUMN_REPORT => json_encode($entity->getReport()),
-                self::COLUMN_STARTED_AT => $entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT)
+                SyncLogStorageInterface::COLUMN_SYNC_ID => $entity->getSyncId(),
+                SyncLogStorageInterface::COLUMN_BOX_ID => $entity->getBoxId(),
+                SyncLogStorageInterface::COLUMN_ORGANIZATION_ID => $entity->getOrganizationId(),
+                SyncLogStorageInterface::COLUMN_DATA => json_encode($entity->getData()),
+                SyncLogStorageInterface::COLUMN_STATUS => $entity->getStatus(),
+                SyncLogStorageInterface::COLUMN_REPORT => json_encode($entity->getReport()),
+                SyncLogStorageInterface::COLUMN_STARTED_AT => $entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT)
             ]
         );
     }
@@ -139,11 +115,11 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         $finishedAt = $entity->getFinishTime()->format(SyncLogEntity::DATE_TIME_FORMAT);
         $qb = $this->getQueryBuilder();
         $qb->update(self::TABLE_NAME)
-            ->set(self::COLUMN_STATUS, $qb->createNamedParameter($entity->getStatus()))
-            ->set(self::COLUMN_DATA, $qb->createNamedParameter(json_encode($entity->getData())))
-            ->set(self::COLUMN_REPORT, $qb->createNamedParameter(json_encode($entity->getReport())))
-            ->set(self::COLUMN_FINISHED_AT, $qb->createNamedParameter($finishedAt))
-            ->where(self::COLUMN_ID . ' = ' . $qb->createNamedParameter($entity->getId()));
+            ->set(SyncLogStorageInterface::COLUMN_STATUS, $qb->createNamedParameter($entity->getStatus()))
+            ->set(SyncLogStorageInterface::COLUMN_DATA, $qb->createNamedParameter(json_encode($entity->getData())))
+            ->set(SyncLogStorageInterface::COLUMN_REPORT, $qb->createNamedParameter(json_encode($entity->getReport())))
+            ->set(SyncLogStorageInterface::COLUMN_FINISHED_AT, $qb->createNamedParameter($finishedAt))
+            ->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $qb->createNamedParameter($entity->getId()));
 
         return $this->getPersistence()->exec($qb->getSQL(), $qb->getParameters());
     }
@@ -165,8 +141,8 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         $queryBuilder = $this->getQueryBuilder();
         $queryBuilder->select('*')
             ->from(self::TABLE_NAME)
-            ->where(self::COLUMN_SYNC_ID . ' = ' . $queryBuilder->createNamedParameter($syncId, \PDO::PARAM_INT))
-            ->andWhere(self::COLUMN_BOX_ID . ' = ' . $queryBuilder->createNamedParameter($boxId, \PDO::PARAM_STR));
+            ->where(SyncLogStorageInterface::COLUMN_SYNC_ID . ' = ' . $queryBuilder->createNamedParameter($syncId, \PDO::PARAM_INT))
+            ->andWhere(SyncLogStorageInterface::COLUMN_BOX_ID . ' = ' . $queryBuilder->createNamedParameter($boxId, \PDO::PARAM_STR));
 
         $sql = $queryBuilder->getSQL();
         $params = $queryBuilder->getParameters();

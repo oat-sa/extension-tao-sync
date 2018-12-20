@@ -22,6 +22,7 @@ namespace oat\taoSync\scripts\tool\synchronizationLog;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\storage\RdsSyncLogStorage;
+use oat\taoSync\model\SyncLogStorageInterface;
 
 /**
  * Class RegisterRdsSyncLogStorage
@@ -57,19 +58,19 @@ class RegisterRdsSyncLogStorage extends InstallAction
         if(false === $fromSchema->hasTable($tableName)) {
             $table = $toSchema->createTable($tableName);
             $table->addOption('engine', 'InnoDB');
-            $table->addColumn(RdsSyncLogStorage::COLUMN_ID, 'integer', ["notnull" => true, "autoincrement" => true, "unsigned" => true]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_BOX_ID, 'string', ["notnull" => true, "length" => 50]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_SYNC_ID, 'integer', ["notnull" => true, "unsigned" => true]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_ORGANIZATION_ID, 'string', ["notnull" => true, "length" => 50]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_DATA, 'text', ["notnull" => false, "default" => null]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_STATUS, 'string', ["notnull" => true, "length" => 20]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_REPORT, 'text', ["notnull" => false, "default" => null]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_STARTED_AT, 'datetime', ['notnull' => true]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_FINISHED_AT, 'datetime', ['notnull' => false]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_ID, 'integer', ["notnull" => true, "autoincrement" => true, "unsigned" => true]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_BOX_ID, 'string', ["notnull" => true, "length" => 50]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_SYNC_ID, 'integer', ["notnull" => true, "unsigned" => true]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_ORGANIZATION_ID, 'string', ["notnull" => true, "length" => 50]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_DATA, 'text', ["notnull" => false, "default" => null]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_STATUS, 'string', ["notnull" => true, "length" => 20]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_REPORT, 'text', ["notnull" => false, "default" => null]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_STARTED_AT, 'datetime', ['notnull' => true]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_FINISHED_AT, 'datetime', ['notnull' => false]);
             $table->setPrimaryKey(['id']);
-            $table->addUniqueIndex([RdsSyncLogStorage::COLUMN_SYNC_ID, RdsSyncLogStorage::COLUMN_BOX_ID], "{$tableName}_IDX_sync_id_box_id");
-            $table->addIndex([RdsSyncLogStorage::COLUMN_STATUS], "{$tableName}_IDX_status");
-            $table->addIndex([RdsSyncLogStorage::COLUMN_STARTED_AT], "{$tableName}_IDX_created_at");
+            $table->addUniqueIndex([SyncLogStorageInterface::COLUMN_SYNC_ID, SyncLogStorageInterface::COLUMN_BOX_ID], "{$tableName}_IDX_sync_id_box_id");
+            $table->addIndex([SyncLogStorageInterface::COLUMN_STATUS], "{$tableName}_IDX_status");
+            $table->addIndex([SyncLogStorageInterface::COLUMN_STARTED_AT], "{$tableName}_IDX_created_at");
 
             $queries = $persistence->getPlatForm()->getMigrateSchemaSql($fromSchema, $toSchema);
             foreach ($queries as $query) {

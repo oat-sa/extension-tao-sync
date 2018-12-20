@@ -27,6 +27,16 @@ use oat\taoSync\model\SyncLog\SyncLogEntity;
  */
 interface SyncLogStorageInterface
 {
+    const COLUMN_ID = 'id';
+    const COLUMN_BOX_ID = 'box_id';
+    const COLUMN_SYNC_ID = 'sync_id';
+    const COLUMN_ORGANIZATION_ID = 'organization_id';
+    const COLUMN_DATA = 'data';
+    const COLUMN_STATUS = 'status';
+    const COLUMN_REPORT = 'report';
+    const COLUMN_STARTED_AT = 'created_at';
+    const COLUMN_FINISHED_AT = 'finished_at';
+
     /**
      * Store synchronization log record.
      *
