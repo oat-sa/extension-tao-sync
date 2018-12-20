@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\listener;
 
+use oat\taoSync\model\event\SynchronizationFailed;
 use oat\taoSync\model\event\SynchronizationFinished;
 use oat\taoSync\model\event\SynchronizationStarted;
 
@@ -40,4 +41,11 @@ interface SyncLogListenerInterface
      * @param SynchronizationFinished $event
      */
     public function logSyncFinished(SynchronizationFinished $event);
+
+    /**
+     * Update log record for failed synchronization.
+     *
+     * @param SynchronizationFailed $event
+     */
+    public function logSyncFailed(SynchronizationFailed $event);
 }

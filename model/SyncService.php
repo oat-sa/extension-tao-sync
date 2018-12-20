@@ -28,9 +28,10 @@ use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\event\DataSynchronisationStarted;
 use oat\taoSync\model\history\DataSyncHistoryService;
-use oat\taoSync\model\report\SynchronizationReport;
+use common_report_Report as Report;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use Psr\Log\LogLevel;
 
 /**
@@ -58,7 +59,7 @@ class SyncService extends ConfigurableService
     /** @var Synchronizer[]  */
     protected $synchronizers = array();
 
-    /** @var SynchronizationReport */
+    /** @var Report */
     protected $report;
 
     /** @var array Synchronization parameters */
@@ -73,7 +74,7 @@ class SyncService extends ConfigurableService
      *
      * @param null $type
      * @param array $params
-     * @return \common_report_Report
+     * @return Report
      * @throws \common_Exception
      * @throws \common_exception_BadRequest
      * @throws \common_exception_NotFound
@@ -82,7 +83,7 @@ class SyncService extends ConfigurableService
     public function synchronize($type = null, array $params = [])
     {
         $syncId = $this->getSyncId($params);
-        $this->report = SynchronizationReport::createInfo('Starting synchronization n° "' . $syncId . '" ...');
+        $this->report = Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
         $this->getEventManager()->trigger(
             new DataSynchronisationStarted($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
@@ -97,7 +98,7 @@ class SyncService extends ConfigurableService
                 $this->synchronizeType($type, $params);
             }
         } catch (\Exception $e) {
-            $this->report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
+            $this->report->add(Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
 
         return $this->report;
@@ -303,7 +304,8 @@ class SyncService extends ConfigurableService
         $this->getSyncHistoryService()->logDeletedEntities($type, $entityIds);
         $this->report(count($entityIds) . ' deleted.', LogLevel::INFO);
         if (!empty($entityIds)) {
-            $this->report->addSyncData($type, 'delete', $entityIds);
+            $logData = [$type => ['deleted' => count($entityIds)]];
+            $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
         }
     }
 
@@ -359,6 +361,7 @@ class SyncService extends ConfigurableService
             $this->getSyncHistoryService()->logNotChangedEntities($synchronizer->getId(), $entities['existing']);
         }
 
+        $logData = [$synchronizer->getId() => []];
         if (!empty($entities['create'])) {
             $created = $synchronizer->insertMultiple($entities['create']);
 
@@ -371,7 +374,7 @@ class SyncService extends ConfigurableService
             }
 
             $this->report('(' . $synchronizer->getId() . ') ' . count($created) . ' entities created.', LogLevel::INFO);
-            $this->report->addSyncData($synchronizer->getId(), 'create', $created);
+            $logData[$synchronizer->getId()]['created'] = count($created);
             $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $created);
         }
 
@@ -379,9 +382,10 @@ class SyncService extends ConfigurableService
             $synchronizer->updateMultiple($entities['update']);
             $this->report('(' . $synchronizer->getId() . ') ' . count($entities['update']) . ' entities updated.', LogLevel::INFO);
             $entityIds = array_column($entities['update'], 'id');
-            $this->report->addSyncData($synchronizer->getId(), 'update', $entityIds);
+            $logData[$synchronizer->getId()]['updated'] = count($entityIds);
             $this->getSyncHistoryService()->logUpdatedEntities($synchronizer->getId(), $entityIds);
         }
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         $synchronizer->after($entities);
 
@@ -400,19 +404,19 @@ class SyncService extends ConfigurableService
         switch ($level) {
             case LogLevel::INFO:
                 $this->logInfo($message);
-                $reportLevel = \common_report_Report::TYPE_SUCCESS;
+                $reportLevel = Report::TYPE_SUCCESS;
                 break;
             case LogLevel::ERROR:
                 $this->logError($message);
-                $reportLevel = \common_report_Report::TYPE_ERROR;
+                $reportLevel = Report::TYPE_ERROR;
                 break;
             case LogLevel::DEBUG:
             default:
                 $this->logDebug($message);
-                $reportLevel = \common_report_Report::TYPE_INFO;
+                $reportLevel = Report::TYPE_INFO;
                 break;
         }
-        $this->report->add(new \common_report_Report($reportLevel, $message));
+        $this->report->add(new Report($reportLevel, $message));
     }
 
     /**

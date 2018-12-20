@@ -32,7 +32,8 @@ use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
-use oat\taoSync\model\report\SynchronizationReport;
+use common_report_Report as Report;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use Psr\Log\LogLevel;
 
 /**
@@ -51,7 +52,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
     const DEFAULT_CHUNK_SIZE = 10;
 
-    /** @var SynchronizationReport */
+    /** @var Report */
     protected $report;
 
     /**
@@ -63,14 +64,14 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * Log result has been sent into ResultHistoryService
      *
      * @param array $params
-     * @return \common_report_Report
+     * @return Report
      * @throws \common_Exception
      * @throws \common_exception_Error
      * @throws \common_exception_NotFound
      */
     public function synchronizeResults(array $params = [])
     {
-        $this->report = SynchronizationReport::createInfo('Starting delivery results synchronisation...');
+        $this->report = Report::createInfo('Starting delivery results synchronisation...');
         $results = [];
         $counter = 0;
 
@@ -154,16 +155,18 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
             }
         }
 
+        $logData = [self::SYNC_ENTITY => []];
         if (!empty($syncSuccess)) {
             $this->getResultSyncHistory()->logResultsAsExported(array_keys($syncSuccess));
             $this->report(count($syncSuccess) . ' delivery execution exports have been acknowledged.', LogLevel::INFO);
-            $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_SUCCESSFUL_UPLOAD, $syncSuccess);
+            $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
         }
         if (!empty($syncFailed)) {
             $this->getResultSyncHistory()->logResultsAsExported($syncFailed, ResultSyncHistoryService::STATUS_FAILED);
             $this->report(count($syncFailed) . ' delivery execution exports have not been acknowledged.', LogLevel::ERROR);
-            $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_FAILED_UPLOAD, $syncFailed);
+            $logData[self::SYNC_ENTITY]['upload failed'] = count($syncFailed);
         }
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         if ($this->hasDeleteAfterSending()) {
             $this->deleteSynchronizedResult($syncSuccess);
@@ -507,19 +510,19 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         switch ($level) {
             case LogLevel::INFO:
                 $this->logInfo($message);
-                $reportLevel = \common_report_Report::TYPE_SUCCESS;
+                $reportLevel = Report::TYPE_SUCCESS;
                 break;
             case LogLevel::ERROR:
                 $this->logError($message);
-                $reportLevel = \common_report_Report::TYPE_ERROR;
+                $reportLevel = Report::TYPE_ERROR;
                 break;
             case LogLevel::DEBUG:
             default:
                 $this->logDebug($message);
-                $reportLevel = \common_report_Report::TYPE_INFO;
+                $reportLevel = Report::TYPE_INFO;
                 break;
         }
-        $this->report->add(new \common_report_Report($reportLevel, $message));
+        $this->report->add(new Report($reportLevel, $message));
     }
 
     /**

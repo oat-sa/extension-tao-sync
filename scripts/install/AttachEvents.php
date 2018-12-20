@@ -24,6 +24,7 @@ use oat\generis\model\data\event\ResourceCreated;
 use oat\oatbox\extension\InstallAction;
 use oat\taoDeliveryRdf\model\event\DeliveryCreatedEvent;
 use oat\taoDeliveryRdf\model\event\DeliveryUpdatedEvent;
+use oat\taoSync\model\event\SynchronizationFailed;
 use oat\taoSync\model\event\SynchronizationFinished;
 use oat\taoSync\model\event\SynchronizationStarted;
 use oat\taoSync\model\listener\ListenerService;
@@ -45,6 +46,7 @@ class AttachEvents extends InstallAction
         $this->registerEvent(ResourceCreated::class, [ListenerService::SERVICE_ID, 'listen']);
         $this->registerEvent(SynchronizationStarted::class, [SyncLogListener::SERVICE_ID, 'logSyncStarted']);
         $this->registerEvent(SynchronizationFinished::class, [SyncLogListener::SERVICE_ID, 'logSyncFinished']);
+        $this->registerEvent(SynchronizationFailed::class, [SyncLogListener::SERVICE_ID, 'logSyncFailed']);
 
         return \common_report_Report::createSuccess('SyncService successfully registered.');
     }

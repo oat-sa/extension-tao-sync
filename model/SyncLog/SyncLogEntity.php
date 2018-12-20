@@ -20,7 +20,6 @@
 namespace oat\taoSync\model\SyncLog;
 
 use DateTime;
-use oat\taoSync\model\report\SynchronizationReport;
 use common_report_Report as Report;
 
 /**
@@ -44,7 +43,7 @@ class SyncLogEntity
     private $syncId;
 
     /** @var string */
-    private $clientId;
+    private $boxId;
 
     /** @var string */
     private $organizationId;
@@ -55,7 +54,7 @@ class SyncLogEntity
     /** @var string */
     private $status;
 
-    /** @var SynchronizationReport */
+    /** @var Report */
     private $report;
 
     /** @var DateTime */
@@ -67,18 +66,18 @@ class SyncLogEntity
     /**
      * SyncLogEntity constructor.
      * @param integer $syncId
-     * @param string $clientId
+     * @param string $boxId
      * @param string $organizationId
      * @param array $data
      * @param string $status
      * @param Report $report
      * @param DateTime $startTime
      */
-    public function __construct($syncId, $clientId, $organizationId, array $data, $status, Report $report, DateTime $startTime, $id = null)
+    public function __construct($syncId, $boxId, $organizationId, array $data, $status, Report $report, DateTime $startTime, $id = null)
     {
         $this->id = $id;
         $this->syncId = $syncId;
-        $this->clientId = $clientId;
+        $this->boxId = $boxId;
         $this->organizationId = $organizationId;
         $this->data = $data;
         $this->status = $status;
@@ -102,9 +101,9 @@ class SyncLogEntity
     /**
      * @return string
      */
-    public function getClientId()
+    public function getBoxId()
     {
-        return $this->clientId;
+        return $this->boxId;
     }
 
     /**
@@ -156,7 +155,7 @@ class SyncLogEntity
     }
 
     /**
-     * @return SynchronizationReport
+     * @return Report
      */
     public function getReport()
     {

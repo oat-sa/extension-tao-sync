@@ -55,8 +55,8 @@ interface SyncLogStorageInterface
      * Get synchronization log record by synchronization ID and client ID.
      *
      * @param $syncId
-     * @param $clientId
+     * @param $boxId
      * @return SyncLogEntity
      */
-    public function getBySyncIdAndClientId($syncId, $clientId);
+    public function getBySyncIdAndBoxId($syncId, $boxId);
 }

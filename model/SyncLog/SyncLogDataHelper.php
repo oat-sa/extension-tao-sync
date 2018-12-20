@@ -20,43 +20,36 @@
 namespace oat\taoSync\model\SyncLog;
 
 /**
- * Interface SyncLogServiceInterface
+ * Class SyncLogDataHelper
  * @package oat\taoSync\model\SyncLog
  */
-interface SyncLogServiceInterface
+class SyncLogDataHelper
 {
-    const SERVICE_ID = 'taoSync/SyncLogService';
-
     /**
-     * Create new synchronization log record.
+     * Merge synchronization log data.
      *
-     * @param SyncLogEntity $entity
-     * @return mixed
+     * @param array $initialData
+     * @param array $newData
+     * @return array
      */
-    public function create(SyncLogEntity $entity);
+    public static function mergeSyncData($initialData = [], array $newData)
+    {
+        if (!is_array($initialData)) {
+            $initialData = [$initialData];
+        }
 
-    /**
-     * Update existing synchronization log record.
-     *
-     * @param SyncLogEntity $entity
-     * @return mixed
-     */
-    public function update(SyncLogEntity $entity);
+        foreach ($newData as $entityName => $entityData) {
+            if (!is_array($entityData)) {
+                continue;
+            }
 
-    /**
-     * Get synchronization log record by id.
-     *
-     * @param $id
-     * @return SyncLogEntity
-     */
-    public function getById($id);
+            foreach ($entityData as $action => $amount) {
+                $currentAmount = isset($initialData[$entityName][$action]) ? $initialData[$entityName][$action] : 0;
 
-    /**
-     * Get synchronization log record by synchronization ID and client ID.
-     *
-     * @param $syncId
-     * @param $boxId
-     * @return SyncLogEntity
-     */
-    public function getBySyncIdAndBoxId($syncId, $boxId);
+                $initialData[$entityName][$action] = $currentAmount + $amount;
+            }
+        }
+
+        return $initialData;
+    }
 }

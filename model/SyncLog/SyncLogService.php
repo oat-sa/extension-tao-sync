@@ -22,8 +22,8 @@ namespace oat\taoSync\model\SyncLog;
 use DateTime;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\report\SynchronizationReport;
 use oat\taoSync\model\SyncLogStorageInterface;
+use common_report_Report as Report;
 
 class SyncLogService extends ConfigurableService implements SyncLogServiceInterface
 {
@@ -90,13 +90,13 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
 
     /**
      * @param $syncId
-     * @param $clientId
+     * @param $boxId
      * @return SyncLogEntity
      * @throws \common_exception_Error
      */
-    public function getBySyncIdAndClientId($syncId, $clientId)
+    public function getBySyncIdAndBoxId($syncId, $boxId)
     {
-        $syncData = $this->getStorage()->getBySyncIdAndClientId($syncId, $clientId);
+        $syncData = $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
 
         return $this->createEntityFromArray($syncData);
     }
@@ -108,14 +108,24 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      */
     private function createEntityFromArray($data)
     {
+        if (!is_array($data['data'])) {
+            $data['data'] = json_decode($data['data']);
+        }
+        if (!$data['report'] instanceof Report) {
+            $data['report'] =  Report::jsonUnserialize($data['report']);
+        }
+        if (!$data['created_at'] instanceof DateTime) {
+            $data['created_at'] = DateTime::createFromFormat(SyncLogEntity::DATE_TIME_FORMAT, $data['created_at']);
+        }
+
         $syncLogEntity = new SyncLogEntity(
             $data['sync_id'],
-            $data['client_id'],
+            $data['box_id'],
             $data['organization_id'],
             $data['data'],
             $data['status'],
-            SynchronizationReport::jsonUnserialize($data['data']),
-            DateTime::createFromFormat(SyncLogEntity::DATE_TIME_FORMAT, $data['created_at']),
+            $data['report'],
+            $data['created_at'],
             $data['id']
         );
         return $syncLogEntity;

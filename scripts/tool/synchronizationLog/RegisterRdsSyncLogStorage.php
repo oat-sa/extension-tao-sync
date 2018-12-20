@@ -58,7 +58,7 @@ class RegisterRdsSyncLogStorage extends InstallAction
             $table = $toSchema->createTable($tableName);
             $table->addOption('engine', 'InnoDB');
             $table->addColumn(RdsSyncLogStorage::COLUMN_ID, 'integer', ["notnull" => true, "autoincrement" => true, "unsigned" => true]);
-            $table->addColumn(RdsSyncLogStorage::COLUMN_CLIENT_ID, 'string', ["notnull" => true, "length" => 50]);
+            $table->addColumn(RdsSyncLogStorage::COLUMN_BOX_ID, 'string', ["notnull" => true, "length" => 50]);
             $table->addColumn(RdsSyncLogStorage::COLUMN_SYNC_ID, 'integer', ["notnull" => true, "unsigned" => true]);
             $table->addColumn(RdsSyncLogStorage::COLUMN_ORGANIZATION_ID, 'string', ["notnull" => true, "length" => 50]);
             $table->addColumn(RdsSyncLogStorage::COLUMN_DATA, 'text', ["notnull" => false, "default" => null]);
@@ -67,6 +67,7 @@ class RegisterRdsSyncLogStorage extends InstallAction
             $table->addColumn(RdsSyncLogStorage::COLUMN_STARTED_AT, 'datetime', ['notnull' => true]);
             $table->addColumn(RdsSyncLogStorage::COLUMN_FINISHED_AT, 'datetime', ['notnull' => false]);
             $table->setPrimaryKey(['id']);
+            $table->addUniqueIndex([RdsSyncLogStorage::COLUMN_SYNC_ID, RdsSyncLogStorage::COLUMN_BOX_ID], "{$tableName}_IDX_sync_id_box_id");
             $table->addIndex([RdsSyncLogStorage::COLUMN_STATUS], "{$tableName}_IDX_status");
             $table->addIndex([RdsSyncLogStorage::COLUMN_STARTED_AT], "{$tableName}_IDX_created_at");
 

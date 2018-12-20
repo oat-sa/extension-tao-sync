@@ -55,21 +55,8 @@ class SyncLogDataParser extends ConfigurableService
             }
         }
 
-        $data = $report->getData() ? $report->getData() : [];
+        $reportData = $report->getData() ? $report->getData() : [];
 
-        // @todo: merge data
-        $this->parsedData = $data;
-
-
-//        if (strpos($message, 'entities created.')) {
-//            $this->messages[] = trim($message, '.');
-//        }
-//
-//        if ($position = strpos($message, 'exports have been acknowledged')) {
-//            $message = substr($message, 0, $position - 1);
-//            list($amount, $entity) = explode(' ', $message, 2);
-//
-//            $this->entities[$entity] = isset($this->entities[$entity]) ? $this->entities[$entity] + $amount : $amount;
-//        }
+        $this->parsedData = SyncLogDataHelper::mergeSyncData($this->parsedData, $reportData);
     }
 }

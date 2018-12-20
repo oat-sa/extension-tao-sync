@@ -21,6 +21,7 @@ namespace oat\taoSync\model\listener;
 
 use DateTime;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\model\event\SynchronizationFailed;
 use oat\taoSync\model\event\SynchronizationFinished;
 use oat\taoSync\model\event\SynchronizationStarted;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
@@ -44,7 +45,7 @@ class SyncLogListener extends ConfigurableService implements SyncLogListenerInte
         $params = $event->getSyncParameters();
         $syncLogEntity = new SyncLogEntity(
             $params['sync_id'],
-            $params['tao_box_id'],
+            $params['box_id'],
             $params['organisation_id'],
             $this->parseSyncData($event->getReport()),
             SyncLogEntity::STATUS_IN_PROGRESS,
@@ -63,10 +64,10 @@ class SyncLogListener extends ConfigurableService implements SyncLogListenerInte
     public function logSyncFinished(SynchronizationFinished $event)
     {
         $parameters = $event->getSyncParameters();
-        $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndClientId($parameters['sync_id'], $parameters['client_id']);
+        $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
 
         $eventReport = $event->getReport();
-        if (count($eventReport->getErrors())) {
+        if ($eventReport->containsError()) {
             $syncLogEntity->setFailed();
         } else {
             $syncLogEntity->setCompleted();
@@ -77,6 +78,25 @@ class SyncLogListener extends ConfigurableService implements SyncLogListenerInte
 
         $this->getSyncLogService()->update($syncLogEntity);
     }
+
+    /**
+     * Update log record for failed synchronization.
+     *
+     * @param SynchronizationFailed $event
+     */
+    public function logSyncFailed(SynchronizationFailed $event)
+    {
+        $parameters = $event->getSyncParameters();
+        $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
+
+        $syncLogEntity->setFailed();
+        $syncLogEntity->setData($this->parseSyncData($event->getReport()));
+        $syncLogEntity->setReport($event->getReport());
+        $syncLogEntity->setFinishTime(new DateTime());
+
+        $this->getSyncLogService()->update($syncLogEntity);
+    }
+
 
     /**
      * @param \common_report_Report $report

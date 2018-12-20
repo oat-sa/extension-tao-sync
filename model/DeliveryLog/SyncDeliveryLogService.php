@@ -28,7 +28,8 @@ use oat\taoProctoring\model\event\DeliveryExecutionIrregularityReport;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
-use oat\taoSync\model\report\SynchronizationReport;
+use common_report_Report as Report;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use Psr\Log\LogLevel;
 use oat\taoSync\model\SyncServiceInterface;
 use oat\oatbox\session\SessionService;
@@ -42,18 +43,18 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
 
 
-    /** @var SynchronizationReport */
+    /** @var Report */
     protected $report;
 
     /**
      * @param array $params
-     * @return \common_report_Report
+     * @return Report
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
     public function synchronizeDeliveryLogs(array $params = [])
     {
-        $this->report = SynchronizationReport::createInfo('Starting delivery log synchronisation...');
+        $this->report = Report::createInfo('Starting delivery log synchronisation...');
 
         $deliveryLogService = $this->getDeliveryLogService();
         $logsToSync = $deliveryLogService->getLogsToSynced($this->getOption(static::OPTION_SHOULD_DECODE_BEFORE_SYNC));
@@ -111,15 +112,17 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 $syncFailed[] = $id;
             }
 
+            $logData = [self::SYNC_ENTITY => []];
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
                 $this->report(count($syncSuccess[$id]). ' result logs exports have been acknowledged.', LogLevel::INFO);
-                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_SUCCESSFUL_UPLOAD, $syncSuccess);
+                $logData[self::SYNC_ENTITY]['uploaded'] = 1;
             }
 
             if (!empty($syncFailed)) {
                 $this->report(count($syncFailed) . ' result logs exports have not been acknowledged.', LogLevel::ERROR);
-                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_FAILED_UPLOAD, $syncFailed);
+                $logData[self::SYNC_ENTITY]['upload failed'] = 1;
             }
+            $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
         }
 
         return $syncSuccess;
@@ -217,19 +220,19 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         switch ($level) {
             case LogLevel::INFO:
                 $this->logInfo($message);
-                $reportLevel = \common_report_Report::TYPE_SUCCESS;
+                $reportLevel = Report::TYPE_SUCCESS;
                 break;
             case LogLevel::ERROR:
                 $this->logError($message);
-                $reportLevel = \common_report_Report::TYPE_ERROR;
+                $reportLevel = Report::TYPE_ERROR;
                 break;
             case LogLevel::DEBUG:
             default:
                 $this->logDebug($message);
-                $reportLevel = \common_report_Report::TYPE_INFO;
+                $reportLevel = Report::TYPE_INFO;
                 break;
         }
-        $this->report->add(new \common_report_Report($reportLevel, $message));
+        $this->report->add(new Report($reportLevel, $message));
     }
 
 

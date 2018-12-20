@@ -32,9 +32,9 @@ use oat\taoResultServer\models\Events\ResultCreated;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
-use \common_report_Report as Report;
+use common_report_Report as Report;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
-use oat\taoSync\model\report\SynchronizationReport;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 
 /**
  * Class SyncTestSessionService
@@ -43,7 +43,7 @@ use oat\taoSync\model\report\SynchronizationReport;
 class SyncTestSessionService extends ConfigurableService implements SyncTestSessionServiceInterface
 {
 
-    /** @var SynchronizationReport */
+    /** @var Report */
     protected $report;
 
     /**
@@ -54,7 +54,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
      */
     public function synchronizeTestSession(array $params = [])
     {
-        $this->report = SynchronizationReport::createInfo('Starting Test sessions synchronisation...');
+        $this->report = Report::createInfo('Starting Test sessions synchronisation...');
 
         $sessionsToSync = $this->getResultSyncHistory()->getResultsWithTestSessionNotSynced();
 
@@ -105,15 +105,17 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
                 $syncFailed[] = $id;
             }
 
+            $logData = [self::SYNC_ENTITY => []];
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
                 $this->report->add(Report::createInfo($syncSuccess[$id] . ' sync sessions acknowledged.'));
-                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_SUCCESSFUL_UPLOAD, $syncSuccess);
+                $logData[self::SYNC_ENTITY]['uploaded'] = 1;
             }
 
             if (!empty($syncFailed)) {
                 $this->report->add(Report::createInfo(count($syncFailed) . ' sync sessions have not been acknowledged.'));
-                $this->report->addSyncData(self::SYNC_ENTITY, SynchronizationReport::ACTION_FAILED_UPLOAD, $syncFailed);
+                $logData[self::SYNC_ENTITY]['upload failed'] = 1;
             }
+            $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
         }
 
         return $syncSuccess;
