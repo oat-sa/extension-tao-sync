@@ -106,7 +106,12 @@ define([
                 },
                 {
                     id: 'created_at',
-                    label: __('Time'),
+                    label: __('Started at'),
+                    sortable: true
+                },
+                {
+                    id: 'finished_at',
+                    label: __('Finished at'),
                     sortable: true
                 },
                 {

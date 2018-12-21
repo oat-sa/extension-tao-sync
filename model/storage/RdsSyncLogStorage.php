@@ -127,9 +127,29 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         return $this->getPersistence()->exec($qb->getSQL(), $qb->getParameters());
     }
 
+    /**
+     * @param $id
+     * @return SyncLogEntity
+     * @throws DatabaseObjectNotFoundException
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     */
     public function getById($id)
     {
-        // TODO: Implement getById() method.
+        $queryBuilder = $this->getQueryBuilder();
+        $queryBuilder->select('*')
+            ->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $queryBuilder->createNamedParameter($id, \PDO::PARAM_INT));
+
+        $sql = $queryBuilder->getSQL();
+        $params = $queryBuilder->getParameters();
+        /** @var \PDOStatement $stmt */
+        $stmt = $this->getPersistence()->query($sql, $params);
+        $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (count($data) != 1) {
+            throw new DatabaseObjectNotFoundException('There is no synchronization log record for provided ID.');
+        }
+
+        return $data[0];
     }
 
     /**
@@ -219,7 +239,7 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
     {
         foreach ($syncLogFilter->getFilters() as $filter) {
             if (is_array($filter['value'])) {
-                $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'])));
+                $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
             } else {
                 $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));
             }

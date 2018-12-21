@@ -131,7 +131,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     private function createEntityFromArray($data)
     {
         if (!is_array($data['data'])) {
-            $data['data'] = json_decode($data['data']);
+            $data['data'] = json_decode($data['data'], true);
         }
         if (!$data['report'] instanceof Report) {
             $data['report'] =  Report::jsonUnserialize($data['report']);

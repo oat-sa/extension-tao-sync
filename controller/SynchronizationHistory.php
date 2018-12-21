@@ -67,11 +67,9 @@ class SynchronizationHistory extends tao_actions_CommonModule
         if (!$this->hasRequestParameter('id')) {
             throw new \common_exception_MissingParameter('id');
         }
-
         $id = $this->getRequestParameter('id');
-        $user = \common_session_SessionManager::getSession()->getUser();
         $syncHistoryService = $this->getServiceLocator()->get(SynchronizationHistoryServiceInterface::SERVICE_ID);
 
-        $this->returnJson($syncHistoryService->getSyncReport($user, $id)->toArray());
+        $this->returnJson($syncHistoryService->getSyncReport($id)->toArray());
     }
 }

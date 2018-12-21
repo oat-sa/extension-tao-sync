@@ -124,9 +124,6 @@ class DataTablePayload implements DataTablePayloadInterface
     {
         if (!is_null($this->rowCustomizer)) {
             foreach ($collection as $key => $row) {
-//                $newCustomiser = $this->rowCustomizer->bindTo($row, $row);
-//                $customizedRecord = (array) $newCustomiser();
-
                 $collection[$key] = call_user_func($this->rowCustomizer, $row);
             }
         }

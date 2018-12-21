@@ -47,7 +47,6 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
     {
         $filter = new SyncLogFilter();
         $this->setBoxIdFilter($filter);
-        // @TODO: Set user filters.
 
         /** @var SyncLogServiceInterface $syncLogService */
         $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
@@ -61,6 +60,18 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      * Filter payload data be box id if available.
      */
     private function setBoxIdFilter(SyncLogFilter $filter)
+    {
+        $boxId = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
+
+        if (!empty($boxId)) {
+            $filter->eq(SyncLogStorageInterface::COLUMN_BOX_ID, $boxId);
+        }
+    }
+
+    /**
+     * Filter payload data be box id if available.
+     */
+    private function setOrganizationBoxIdFilter(SyncLogFilter $filter)
     {
         $boxId = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
 
@@ -85,16 +96,15 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
 
 
     /**
-     * @param User $user
      * @param $id
      * @return \JsonSerializable
      * @throws \common_exception_NotFound
      */
-    public function getSyncReport(User $user, $id) {
-        /** @var TaskLog $taskLogService */
-        $taskLogService = $this->getServiceLocator()->get(TaskLogInterface::SERVICE_ID);
-        $taskLogEntity = $taskLogService->getByIdAndUser($id, $user->getIdentifier());
+    public function getSyncReport($id) {
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $syncLogEntity = $syncLogService->getById($id);
 
-        return $taskLogEntity->getReport();
+        return $syncLogEntity->getReport();
     }
 }

@@ -19,9 +19,7 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
-use common_report_Report as Report;
 use oat\oatbox\service\ConfigurableService;
-use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
 use oat\taoSync\model\SyncLogStorageInterface;
 
 /**
@@ -40,6 +38,7 @@ class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayl
             'id' => $data[SyncLogStorageInterface::COLUMN_ID],
             'status' => $data[SyncLogStorageInterface::COLUMN_STATUS],
             'created_at' => $data[SyncLogStorageInterface::COLUMN_STARTED_AT],
+            'finished_at' => $data[SyncLogStorageInterface::COLUMN_FINISHED_AT],
             'organisation' => $data[SyncLogStorageInterface::COLUMN_ORGANIZATION_ID],
             'data' => $this->parseSyncDetails(json_decode($data[SyncLogStorageInterface::COLUMN_DATA], true))
         ];
@@ -58,7 +57,7 @@ class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayl
         foreach ($syncData as $entityType => $entityData) {
             $message = "{$entityType}: ";
             foreach ($entityData as $action => $amount) {
-                $message .= "{$amount} {$action};";
+                $message .= "{$amount} {$action}; ";
             }
             $messages[] = $message;
         }

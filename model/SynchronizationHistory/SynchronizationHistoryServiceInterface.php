@@ -42,9 +42,8 @@ interface SynchronizationHistoryServiceInterface
     /**
      * Return synchronization Report
      *
-     * @param User $user
      * @param string $id
      * @return \JsonSerializable
      */
-    public function getSyncReport(User $user, $id);
+    public function getSyncReport($id);
 }

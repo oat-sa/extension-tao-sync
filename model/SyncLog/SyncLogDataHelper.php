@@ -35,7 +35,7 @@ class SyncLogDataHelper
     public static function mergeSyncData($initialData = [], array $newData)
     {
         if (!is_array($initialData)) {
-            $initialData = [$initialData];
+            $initialData = is_null($initialData) ? [] : [$initialData];
         }
 
         foreach ($newData as $entityName => $entityData) {
