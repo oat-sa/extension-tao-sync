@@ -102,6 +102,28 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     }
 
     /**
+     * Get total amount of synchronization logs by provided filters.
+     *
+     * @param SyncLogFilter $filter
+     * @return array
+     */
+    public function count(SyncLogFilter $filter)
+    {
+        return $this->getStorage()->count($filter);
+    }
+
+    /**
+     * Search synchronization records by provided filters.
+     *
+     * @param SyncLogFilter $filter
+     * @return array
+     */
+    public function search(SyncLogFilter $filter)
+    {
+        return $this->getStorage()->search($filter);
+    }
+
+    /**
      * @param $data
      * @return SyncLogEntity
      * @throws \common_exception_Error

@@ -30,8 +30,8 @@ interface HistoryPayloadFormatterInterface
     const SERVICE_ID = 'taoSync/HistoryPayloadFormatter';
 
     /**
-     * @param TaskLogEntity $log
+     * @param array $data
      * @return array
      */
-    public function format(TaskLogEntity $log);
+    public function format(array $data);
 }

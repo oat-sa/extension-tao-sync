@@ -20,6 +20,7 @@
 namespace oat\taoSync\model;
 
 use oat\taoSync\model\SyncLog\SyncLogEntity;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
 
 /**
  * Class StorageInterface
@@ -69,4 +70,20 @@ interface SyncLogStorageInterface
      * @return SyncLogEntity
      */
     public function getBySyncIdAndBoxId($syncId, $boxId);
+
+    /**
+     * Get total amount of synchronization logs by provided filters.
+     *
+     * @param SyncLogFilter $filter
+     * @return integer
+     */
+    public function count(SyncLogFilter $filter);
+
+    /**
+     * Search synchronization logs by provided filters.
+     *
+     * @param SyncLogFilter $syncLogFilter
+     * @return array
+     */
+    public function search(SyncLogFilter $syncLogFilter);
 }

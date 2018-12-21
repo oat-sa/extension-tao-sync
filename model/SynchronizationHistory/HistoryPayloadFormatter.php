@@ -19,9 +19,10 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
-use common_report_Report;
+use common_report_Report as Report;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
+use oat\taoSync\model\SyncLogStorageInterface;
 
 /**
  * Class HistoryOutputFormatter
@@ -29,65 +30,39 @@ use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
  */
 class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayloadFormatterInterface
 {
-    const TIME_FORMAT = 'd/m/Y h:i a';
-
-    private $entities = [];
-    private $messages = [];
-
     /**
-     * @param TaskLogEntity $log
+     * @param array $data
      * @return array
      */
-    public function format(TaskLogEntity $log)
+    public function format(array $data)
     {
-        $parameters = $log->getParameters();
         $output = [
-            'id' => $log->getId(),
-            'status' => $log->getStatus()->getLabel(),
-            'created_at' => $log->getCreatedAt()->format(self::TIME_FORMAT),
-            'organisation' => $parameters['organisation_id'] ?: '',
-            'data' => $this->parseSyncDetails($log->getReport())
+            'id' => $data[SyncLogStorageInterface::COLUMN_ID],
+            'status' => $data[SyncLogStorageInterface::COLUMN_STATUS],
+            'created_at' => $data[SyncLogStorageInterface::COLUMN_STARTED_AT],
+            'organisation' => $data[SyncLogStorageInterface::COLUMN_ORGANIZATION_ID],
+            'data' => $this->parseSyncDetails(json_decode($data[SyncLogStorageInterface::COLUMN_DATA], true))
         ];
 
         return $output;
     }
 
     /**
-     * @param common_report_Report $report
+     * @param array $syncData
      * @return string
      */
-    private function parseSyncDetails(common_report_Report $report) {
-        $this->entities = [];
-        $this->messages = [];
-        $this->parseSynchronizedEntities($report);
+    private function parseSyncDetails(array $syncData)
+    {
+        $messages = [];
 
-        foreach ($this->entities as $entity => $amount) {
-            $this->messages[] = "{$amount} {$entity} synchronized";
-        }
-
-        return empty($this->messages) ? 'No synchronized data' : implode(PHP_EOL, $this->messages);
-    }
-
-    /**
-     * @param common_report_Report $report
-     */
-    private function parseSynchronizedEntities(common_report_Report $report) {
-        if ($report->hasChildren()) {
-            foreach ($report->getIterator() as $child) {
-                $this->parseSynchronizedEntities($child);
+        foreach ($syncData as $entityType => $entityData) {
+            $message = "{$entityType}: ";
+            foreach ($entityData as $action => $amount) {
+                $message .= "{$amount} {$action};";
             }
+            $messages[] = $message;
         }
 
-        $message = $report->getMessage();
-        if (strpos($message, 'entities created.')) {
-            $this->messages[] = trim($message, '.');
-        }
-
-        if ($position = strpos($message, 'exports have been acknowledged')) {
-            $message = substr($message, 0, $position - 1);
-            list($amount, $entity) = explode(' ', $message, 2);
-
-            $this->entities[$entity] = isset($this->entities[$entity]) ? $this->entities[$entity] + $amount : $amount;
-        }
+        return empty($messages) ? 'No synchronized data' : implode(PHP_EOL, $messages);
     }
 }

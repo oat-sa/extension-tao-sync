@@ -20,11 +20,14 @@
 namespace oat\taoSync\model\storage;
 
 use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
+use Doctrine\DBAL\Query\QueryBuilder;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
 use oat\taoSync\model\SyncLogStorageInterface;
 use common_persistence_SqlPersistence;
+use Doctrine\DBAL\Connection;
 
 class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInterface
 {
@@ -155,5 +158,71 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         }
 
         return $data[0];
+    }
+
+    /**
+     * Get total amount of synchronization logs by provided filters.
+     *
+     * @param SyncLogFilter $filter
+     * @return integer
+     */
+    public function count(SyncLogFilter $filter)
+    {
+        try {
+            $qb = $this->getQueryBuilder()
+                ->select('COUNT(*)')
+                ->from(self::TABLE_NAME);
+
+            $this->applyFilters($qb, $filter);
+
+            return (int) $qb->execute()->fetchColumn();
+        } catch (\Exception $e) {
+            $this->logError('Counting synchronization logs failed: '. $e->getMessage());
+        }
+
+        return 0;
+    }
+
+
+    /**
+     * @param SyncLogFilter $filter
+     * @return array
+     */
+    public function search(SyncLogFilter $filter)
+    {
+        try {
+            $qb = $this->getQueryBuilder()
+                ->select($filter->getColumns())
+                ->from(self::TABLE_NAME);
+
+            $qb->setMaxResults($filter->getLimit());
+            $qb->setFirstResult($filter->getOffset());
+
+            if ($filter->getSortBy()) {
+                $qb->orderBy($filter->getSortBy(), $filter->getSortOrder());
+            }
+            $this->applyFilters($qb, $filter);
+
+            return $qb->execute()->fetchAll();
+        } catch (\Exception $e) {
+            $this->logError('Error searching for synchronization logs: ' . $e->getMessage());
+
+            return [];
+        }
+    }
+
+    /**
+     * @param QueryBuilder $qb
+     * @param SyncLogFilter $syncLogFilter
+     */
+    private function applyFilters(QueryBuilder $qb, SyncLogFilter $syncLogFilter)
+    {
+        foreach ($syncLogFilter->getFilters() as $filter) {
+            if (is_array($filter['value'])) {
+                $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'])));
+            } else {
+                $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));
+            }
+        }
     }
 }

@@ -19,23 +19,23 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
+use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\user\User;
 use oat\tao\model\datatable\DatatableRequest;
-use oat\tao\model\taskQueue\TaskLog;
-use oat\tao\model\taskQueue\TaskLog\Broker\TaskLogBrokerInterface;
-use oat\tao\model\taskQueue\TaskLog\DataTablePayload;
-use oat\tao\model\taskQueue\TaskLog\TaskLogFilter;
-use oat\tao\model\taskQueue\TaskLogInterface;
-use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
+use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\model\SyncLogStorageInterface;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\taoSync\model\SyncLog\Payload\DataTablePayload;
+use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
+
 /**
  * Class SynchronizationHistoryService
  * @package oat\taoSync\model\SynchronizationHistory
  */
 class SynchronizationHistoryService extends ConfigurableService implements SynchronizationHistoryServiceInterface
 {
-    const OPTION_PAYLOAD_FORMATTER = 'payload_formatter';
-
     /**
      * Return synchronization history payload
      *
@@ -43,15 +43,30 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      * @param DatatableRequest $request
      * @return array
      */
-    public function getSyncHistory(User $user, DatatableRequest $request) {
-        /** @var TaskLog $taskLogService */
-        $taskLogService = $this->getServiceLocator()->get(TaskLogInterface::SERVICE_ID);
-        $filter = $this->getFilter($user);
+    public function getSyncHistory(User $user, DatatableRequest $request)
+    {
+        $filter = new SyncLogFilter();
+        $this->setBoxIdFilter($filter);
+        // @TODO: Set user filters.
 
-        $payload = $taskLogService->getDataTablePayload($filter, $request);
-        $this->addPayloadCustomization($payload);
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $payload = new DataTablePayload($filter, $request, $syncLogService);
+        $this->setPayloadCustomizer($payload);
 
         return $payload->getPayload();
+    }
+
+    /**
+     * Filter payload data be box id if available.
+     */
+    private function setBoxIdFilter(SyncLogFilter $filter)
+    {
+        $boxId = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
+
+        if (!empty($boxId)) {
+            $filter->eq(SyncLogStorageInterface::COLUMN_BOX_ID, $boxId);
+        }
     }
 
     /**
@@ -59,25 +74,15 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      *
      * @param DataTablePayload $payload
      */
-    private function addPayloadCustomization(DataTablePayload $payload) {
+    private function setPayloadCustomizer(DataTablePayload $payload) {
         $historyFormatter = $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID);
 
-        $payload->customiseRowBy(function () use ($historyFormatter) {
-            return $historyFormatter->format($this);
+        $payload->customiseRowBy(function ($row) use ($historyFormatter) {
+            return $historyFormatter->format($row);
         }, true);
     }
 
-    /**
-     * @param User $user
-     * @return TaskLogFilter
-     */
-    private function getFilter(User $user) {
-        $filter = new TaskLogFilter();
-        $filter->addFilter(TaskLogBrokerInterface::COLUMN_TASK_NAME, TaskLogFilter::OP_EQ, SynchronizeAll::class);
-        $filter->addFilter(TaskLogBrokerInterface::COLUMN_OWNER, TaskLogFilter::OP_EQ, $user->getIdentifier());
 
-        return $filter;
-    }
 
     /**
      * @param User $user

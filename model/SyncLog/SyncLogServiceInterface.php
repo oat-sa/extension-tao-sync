@@ -59,4 +59,20 @@ interface SyncLogServiceInterface
      * @return SyncLogEntity
      */
     public function getBySyncIdAndBoxId($syncId, $boxId);
+
+    /**
+     * Get total amount of synchronization logs by provided filters.
+     *
+     * @param SyncLogFilter $filter
+     * @return array
+     */
+    public function count(SyncLogFilter $filter);
+
+    /**
+     * Search synchronization logs by provided filters.
+     *
+     * @param SyncLogFilter $filter
+     * @return array
+     */
+    public function search(SyncLogFilter $filter);
 }
