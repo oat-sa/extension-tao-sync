@@ -28,7 +28,7 @@ use oat\taoSync\model\event\SynchronizationFailed;
 use oat\taoSync\model\event\SynchronizationFinished;
 use oat\taoSync\model\event\SynchronizationStarted;
 use oat\taoSync\model\listener\ListenerService;
-use oat\taoSync\model\listener\SyncLogListener;
+use oat\taoSync\model\listener\SyncLogListenerInterface;
 
 /**
  * Class RegisterListenerService
@@ -44,9 +44,9 @@ class AttachEvents extends InstallAction
         $this->registerEvent(DeliveryCreatedEvent::class, [ListenerService::SERVICE_ID, 'listen']);
         $this->registerEvent(DeliveryUpdatedEvent::class, [ListenerService::SERVICE_ID, 'listen']);
         $this->registerEvent(ResourceCreated::class, [ListenerService::SERVICE_ID, 'listen']);
-        $this->registerEvent(SynchronizationStarted::class, [SyncLogListener::SERVICE_ID, 'logSyncStarted']);
-        $this->registerEvent(SynchronizationFinished::class, [SyncLogListener::SERVICE_ID, 'logSyncFinished']);
-        $this->registerEvent(SynchronizationFailed::class, [SyncLogListener::SERVICE_ID, 'logSyncFailed']);
+        $this->registerEvent(SynchronizationStarted::class, [SyncLogListenerInterface::SERVICE_ID, 'logSyncStarted']);
+        $this->registerEvent(SynchronizationFinished::class, [SyncLogListenerInterface::SERVICE_ID, 'logSyncFinished']);
+        $this->registerEvent(SynchronizationFailed::class, [SyncLogListenerInterface::SERVICE_ID, 'logSyncFailed']);
 
         return \common_report_Report::createSuccess('SyncService successfully registered.');
     }

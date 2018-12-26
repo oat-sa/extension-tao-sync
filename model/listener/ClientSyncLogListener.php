@@ -29,10 +29,10 @@ use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 
 /**
- * Class SynchronizationLogListener
+ * Class ClientSyncLogListener
  * @package oat\taoSync\model\listener
  */
-class SyncLogListener extends ConfigurableService implements SyncLogListenerInterface
+class ClientSyncLogListener extends ConfigurableService implements SyncLogListenerInterface
 {
     /**
      * Create log record about started synchronization.
