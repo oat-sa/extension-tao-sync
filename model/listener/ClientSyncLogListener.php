@@ -24,6 +24,8 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\event\SynchronizationFailed;
 use oat\taoSync\model\event\SynchronizationFinished;
 use oat\taoSync\model\event\SynchronizationStarted;
+use oat\taoSync\model\event\SynchronizationUpdated;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
@@ -57,6 +59,15 @@ class ClientSyncLogListener extends ConfigurableService implements SyncLogListen
     }
 
     /**
+     * @param SynchronizationUpdated $event
+     * @return mixed|void
+     */
+    public function logSyncUpdated(SynchronizationUpdated $event)
+    {
+        // TODO: Implement logSyncUpdated() method.
+    }
+
+    /**
      * Update log record for finished synchronization.
      *
      * @param SynchronizationFinished $event
@@ -72,7 +83,11 @@ class ClientSyncLogListener extends ConfigurableService implements SyncLogListen
         } else {
             $syncLogEntity->setCompleted();
         }
-        $syncLogEntity->setData($this->parseSyncData($eventReport));
+
+        $eventData = $this->parseSyncData($event->getReport());
+        $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
+        $syncLogEntity->setData($newSyncData);
+
         $syncLogEntity->setReport($eventReport);
         $syncLogEntity->setFinishTime(new DateTime());
 
@@ -89,8 +104,11 @@ class ClientSyncLogListener extends ConfigurableService implements SyncLogListen
         $parameters = $event->getSyncParameters();
         $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
 
+        $eventData = $this->parseSyncData($event->getReport());
+        $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
+        $syncLogEntity->setData($newSyncData);
+
         $syncLogEntity->setFailed();
-        $syncLogEntity->setData($this->parseSyncData($event->getReport()));
         $syncLogEntity->setReport($event->getReport());
         $syncLogEntity->setFinishTime(new DateTime());
 

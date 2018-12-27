@@ -22,6 +22,7 @@ namespace oat\taoSync\model\SyncLog;
 use DateTime;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\model\exception\SyncLogEntityNotFound;
 use oat\taoSync\model\SyncLogStorageInterface;
 use common_report_Report as Report;
 
@@ -83,9 +84,13 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      */
     public function getById($id)
     {
-        $syncData = $this->getStorage()->getById($id);
+        try {
+            $syncData = $this->getStorage()->getById($id);
 
-        return $this->createEntityFromArray($syncData);
+            return $this->createEntityFromArray($syncData);
+        } catch (\common_exception_NotFound $e) {
+            throw new SyncLogEntityNotFound($e->getMessage());
+        }
     }
 
     /**
@@ -96,9 +101,14 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      */
     public function getBySyncIdAndBoxId($syncId, $boxId)
     {
-        $syncData = $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
+        try {
+            $syncData = $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
 
-        return $this->createEntityFromArray($syncData);
+            return $this->createEntityFromArray($syncData);
+        } catch (\common_exception_NotFound $e) {
+            throw new SyncLogEntityNotFound($e->getMessage());
+        }
+
     }
 
     /**

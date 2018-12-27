@@ -27,6 +27,10 @@ interface SyncLogServiceInterface
 {
     const SERVICE_ID = 'taoSync/SyncLogService';
 
+    const PARAM_SYNC_ID = 'sync_id';
+    const PARAM_BOX_ID = 'box_id';
+    const PARAM_ORGANIZATION_ID = 'organisation_id';
+
     /**
      * Create new synchronization log record.
      *

@@ -19,13 +19,14 @@
 
 namespace oat\taoSync\model\storage;
 
-use Doctrine\DBAL\Exception\DatabaseObjectNotFoundException;
 use Doctrine\DBAL\Query\QueryBuilder;
+use oat\oatbox\service\exception\InvalidServiceManagerException;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 use oat\taoSync\model\SyncLogStorageInterface;
+use common_exception_NotFound;
 use common_persistence_SqlPersistence;
 use Doctrine\DBAL\Connection;
 
@@ -130,8 +131,8 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
     /**
      * @param $id
      * @return SyncLogEntity
-     * @throws DatabaseObjectNotFoundException
-     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     * @throws common_exception_NotFound
+     * @throws InvalidServiceManagerException
      */
     public function getById($id)
     {
@@ -146,7 +147,7 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (count($data) != 1) {
-            throw new DatabaseObjectNotFoundException('There is no synchronization log record for provided ID.');
+            throw new common_exception_NotFound('There is no synchronization log record for provided ID.');
         }
 
         return $data[0];
@@ -156,8 +157,8 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
      * @param $syncId
      * @param $boxId
      * @return SyncLogEntity
-     * @throws DatabaseObjectNotFoundException
-     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     * @throws common_exception_NotFound
+     * @throws InvalidServiceManagerException
      */
     public function getBySyncIdAndBoxId($syncId, $boxId)
     {
@@ -174,7 +175,7 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         if (count($data) != 1) {
-            throw new DatabaseObjectNotFoundException('There is no unique synchronization log record.');
+            throw new common_exception_NotFound('There is no unique synchronization log record.');
         }
 
         return $data[0];

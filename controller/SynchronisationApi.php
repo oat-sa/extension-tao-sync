@@ -20,8 +20,12 @@
 
 namespace oat\taoSync\controller;
 
-use oat\taoOauth\model\OauthController;
-use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
+use common_report_Report as Report;
+use oat\oatbox\event\EventManager;
+use oat\taoSync\model\event\SynchronizationFailed;
+use oat\taoSync\model\event\SynchronizationFinished;
+use oat\taoSync\model\event\SynchronizationUpdated;
+use oat\taoSync\model\event\SynchronizationStarted;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
@@ -78,6 +82,10 @@ class SynchronisationApi extends \tao_actions_RestController
      */
     public function fetchEntityDetails()
     {
+        $report = Report::createInfo('Synchronization request received.');
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $params = [];
+
         try {
             $this->assertHttpMethod(\Request::HTTP_POST);
 
@@ -94,12 +102,22 @@ class SynchronisationApi extends \tao_actions_RestController
             $type = $parameters[self::PARAM_TYPE];
             $entityIds = $parameters[self::PARAM_ENTITY_IDS];
             $entityIds = is_array($entityIds) ? $entityIds : [$entityIds];
-            $params = isset($parameters[self::PARAM_PARAMETERS]) ? $parameters[self::PARAM_PARAMETERS] : [];
+            if (isset($parameters[self::PARAM_PARAMETERS])) {
+                $params = $parameters[self::PARAM_PARAMETERS];
+            }
 
-            $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds, $params));
+            $eventManager->trigger(new SynchronizationStarted($params, $report));
 
+            $entities = $this->getSyncService()->fetchEntityDetails($type, $entityIds, $params);
+            $report->setData($logData = [$type => ['pushed' => count($entities)]]);
+            $report->add(Report::createInfo(sprintf('(%s) %d entities pushed.', $type, count($entities))));
+
+            $this->returnJson($entities);
         } catch (\Exception $e) {
+            $report->add(Report::createFailure('Synchronization request failed: ' . $e->getMessage()));
             $this->returnFailure($e);
+        } finally {
+            $eventManager->trigger(new SynchronizationUpdated($params, $report));
         }
     }
 

@@ -22,6 +22,7 @@ namespace oat\taoSync\model\listener;
 use oat\taoSync\model\event\SynchronizationFailed;
 use oat\taoSync\model\event\SynchronizationFinished;
 use oat\taoSync\model\event\SynchronizationStarted;
+use oat\taoSync\model\event\SynchronizationUpdated;
 
 interface SyncLogListenerInterface
 {
@@ -34,6 +35,14 @@ interface SyncLogListenerInterface
      * @return mixed
      */
     public function logSyncStarted(SynchronizationStarted $event);
+
+    /**
+     * Update synchronization log record with ned details.
+     *
+     * @param SynchronizationUpdated $event
+     * @return mixed
+     */
+    public function logSyncUpdated(SynchronizationUpdated $event);
 
     /**
      * Update log record for finished synchronization.
