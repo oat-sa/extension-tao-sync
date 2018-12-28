@@ -21,9 +21,11 @@ namespace oat\taoSync\model\listener;
 
 use DateTime;
 use common_report_Report as Report;
+use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\model\event\AbstractSyncEvent;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
-use oat\taoSync\model\event\SyncStartedEvent;
+use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\exception\SyncLogEntityNotFound;
 use oat\taoSync\model\SyncLog\SyncLogDataHelper;
@@ -35,17 +37,19 @@ use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
  * Class CentralSyncLogListener
  * @package oat\taoSync\model\listener
  */
-class CentralSyncLogListener implements SyncLogListenerInterface
+class CentralSyncLogListener extends ConfigurableService
 {
+    const SERVICE_ID = 'taoSync/CentralSyncLogListener';
+
     /**
-     * @param SyncStartedEvent $event
-     * @return mixed|void
-     * @throws \common_exception_Error
+     * Handler synchronization request event.
+     *
+     * @param SyncRequestEvent $event
      */
-    public function logSyncStarted(SyncStartedEvent $event)
+    public function logSyncRequest(SyncRequestEvent $event)
     {
         try {
-            $this->logSyncUpdated($event);
+            $this->updateSyncLogRecord($event);
         } catch (SyncLogEntityNotFound $e) {
             $params = $event->getSyncParameters();
             $this->validateParameters($params);
@@ -68,32 +72,42 @@ class CentralSyncLogListener implements SyncLogListenerInterface
     }
 
     /**
+     * Handle synchronization response event.
+     *
      * @param SyncResponseEvent $event
-     * @return mixed|void
      */
-    public function logSyncUpdated(SyncResponseEvent $event)
+    public function logSyncResponse(SyncResponseEvent $event)
     {
         try {
-            $params = $event->getSyncParameters();
-            $this->validateParameters($params);
-            $syncLogService = $this->getSyncLogService();
-
-            /** @var SyncLogEntity $syncLogEntity */
-            $syncLogEntity = $syncLogService->getBySyncIdAndBoxId($params[SyncLogServiceInterface::PARAM_SYNC_ID], $params[SyncLogServiceInterface::PARAM_BOX_ID]);
-
-            $report = $syncLogEntity->getReport();
-            $report->add($event->getReport());
-
-            $eventData = $this->parseSyncData($event->getReport());
-            $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
-            $syncLogEntity->setData($newSyncData);
-
-            $syncLogService->update($syncLogEntity);
-        } catch (SyncLogEntityNotFound $e) {
-            throw $e;
+            $this->updateSyncLogRecord($event);
         } catch (\Exception $e) {
             return;
         }
+    }
+
+    /**
+     * Update synchronization response record.
+     *
+     * @param AbstractSyncEvent $event
+     * @throws \common_exception_Error
+     */
+    public function updateSyncLogRecord(AbstractSyncEvent $event)
+    {
+        $params = $event->getSyncParameters();
+        $this->validateParameters($params);
+        $syncLogService = $this->getSyncLogService();
+
+        /** @var SyncLogEntity $syncLogEntity */
+        $syncLogEntity = $syncLogService->getBySyncIdAndBoxId($params[SyncLogServiceInterface::PARAM_SYNC_ID], $params[SyncLogServiceInterface::PARAM_BOX_ID]);
+
+        $report = $syncLogEntity->getReport();
+        $report->add($event->getReport());
+
+        $eventData = $this->parseSyncData($event->getReport());
+        $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
+        $syncLogEntity->setData($newSyncData);
+
+        $syncLogService->update($syncLogEntity);
     }
 
     /**

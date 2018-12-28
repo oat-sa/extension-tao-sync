@@ -20,9 +20,9 @@
 namespace oat\taoSync\scripts\tool\synchronizationLog;
 
 use oat\oatbox\extension\InstallAction;
+use oat\taoSync\model\event\SyncRequestEvent;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\listener\CentralSyncLogListener;
-use oat\taoSync\model\listener\ClientSyncLogListener;
-use oat\taoSync\model\listener\SyncLogListenerInterface;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 
 /**
@@ -35,12 +35,15 @@ class RegisterCentralSyncLogListener extends InstallAction
      */
     public function __invoke($params)
     {
+        $this->registerEvent(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncStarted']);
+        $this->registerEvent(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFinished']);
+
         $syncLogDataParser = new SyncLogDataParser([]);
         $this->registerService(SyncLogDataParser::SERVICE_ID, $syncLogDataParser);
 
         $syncLogListener = new CentralSyncLogListener([]);
-        $this->registerService(SyncLogListenerInterface::SERVICE_ID, $syncLogListener);
+        $this->registerService(CentralSyncLogListener::SERVICE_ID, $syncLogListener);
 
-        return \common_report_Report::createSuccess('SynchronizationLogListener successfully registered.');
+        return \common_report_Report::createSuccess('CentralSyncLogListener successfully registered.');
     }
 }

@@ -22,10 +22,8 @@ namespace oat\taoSync\controller;
 
 use common_report_Report as Report;
 use oat\oatbox\event\EventManager;
-use oat\taoSync\model\event\SyncFailedEvent;
-use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
-use oat\taoSync\model\event\SyncStartedEvent;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
@@ -106,7 +104,7 @@ class SynchronisationApi extends \tao_actions_RestController
                 $params = $parameters[self::PARAM_PARAMETERS];
             }
 
-            $eventManager->trigger(new SyncStartedEvent($params, $report));
+            $eventManager->trigger(new SyncRequestEvent($params, $report));
 
             $entities = $this->getSyncService()->fetchEntityDetails($type, $entityIds, $params);
             $report->setData($logData = [$type => ['pushed' => count($entities)]]);

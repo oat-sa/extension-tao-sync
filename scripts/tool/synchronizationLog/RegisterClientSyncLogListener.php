@@ -20,8 +20,10 @@
 namespace oat\taoSync\scripts\tool\synchronizationLog;
 
 use oat\oatbox\extension\InstallAction;
+use oat\taoSync\model\event\SyncFailedEvent;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncStartedEvent;
 use oat\taoSync\model\listener\ClientSyncLogListener;
-use oat\taoSync\model\listener\SyncLogListenerInterface;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 
 /**
@@ -34,12 +36,16 @@ class RegisterClientSyncLogListener extends InstallAction
      */
     public function __invoke($params)
     {
+        $this->registerEvent(SyncStartedEvent::class, [ClientSyncLogListener::SERVICE_ID, 'logSyncStarted']);
+        $this->registerEvent(SyncFinishedEvent::class, [ClientSyncLogListener::SERVICE_ID, 'logSyncFinished']);
+        $this->registerEvent(SyncFailedEvent::class, [ClientSyncLogListener::SERVICE_ID, 'logSyncFailed']);
+
         $syncLogDataParser = new SyncLogDataParser([]);
         $this->registerService(SyncLogDataParser::SERVICE_ID, $syncLogDataParser);
 
-        $synchronizationLogListener = new ClientSyncLogListener([]);
-        $this->registerService(SyncLogListenerInterface::SERVICE_ID, $synchronizationLogListener);
+        $syncLogListener = new ClientSyncLogListener([]);
+        $this->registerService(ClientSyncLogListener::SERVICE_ID, $syncLogListener);
 
-        return \common_report_Report::createSuccess('SynchronizationLogListener successfully registered.');
+        return \common_report_Report::createSuccess('ClientSyncLogListener successfully registered.');
     }
 }

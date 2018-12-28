@@ -24,7 +24,6 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncStartedEvent;
-use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
@@ -34,8 +33,10 @@ use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
  * Class ClientSyncLogListener
  * @package oat\taoSync\model\listener
  */
-class ClientSyncLogListener extends ConfigurableService implements SyncLogListenerInterface
+class ClientSyncLogListener extends ConfigurableService
 {
+    const SERVICE_ID = 'taoSync/ClientSyncLogListener';
+
     /**
      * Create log record about started synchronization.
      *
@@ -56,15 +57,6 @@ class ClientSyncLogListener extends ConfigurableService implements SyncLogListen
         );
 
         $syncLogService->create($syncLogEntity);
-    }
-
-    /**
-     * @param SyncResponseEvent $event
-     * @return mixed|void
-     */
-    public function logSyncUpdated(SyncResponseEvent $event)
-    {
-        // TODO: Implement logSyncUpdated() method.
     }
 
     /**
