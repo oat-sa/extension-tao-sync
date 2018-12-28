@@ -24,9 +24,9 @@ use oat\oatbox\action\Action;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\extension\AbstractAction;
 use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\event\SynchronizationFailed;
-use oat\taoSync\model\event\SynchronizationFinished;
-use oat\taoSync\model\event\SynchronizationStarted;
+use oat\taoSync\model\event\SyncFailedEvent;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncStartedEvent;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use common_report_Report as Report;
 
@@ -50,7 +50,7 @@ class SynchronizeAll extends AbstractAction
         /** @var EventManager $eventManager */
         $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
         $eventManager->trigger(
-            new SynchronizationStarted($params, $report)
+            new SyncStartedEvent($params, $report)
         );
 
         $success = false;
@@ -65,10 +65,10 @@ class SynchronizeAll extends AbstractAction
             $report->add(Report::createFailure('An error has occurred : ' . $e->getMessage()));
         } finally {
             if ($success === true) {
-                $event = new SynchronizationFinished($params, $report);
+                $event = new SyncFinishedEvent($params, $report);
             } else {
                 $report->add(Report::createFailure('An unexpected PHP error has occurred.'));
-                $event = new SynchronizationFailed($params, $report);
+                $event = new SyncFailedEvent($params, $report);
             }
             $eventManager->trigger($event);
         }

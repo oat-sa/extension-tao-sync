@@ -20,9 +20,9 @@
 namespace oat\taoSync\model\event;
 
 /**
- * Class SynchronizationUpdated
+ * Class SyncRequestEvent
  * @package oat\taoSync\model\event
  */
-class SynchronizationUpdated extends AbstractSynchronizationEvent
+class SyncRequestEvent extends AbstractSyncEvent
 {
 }

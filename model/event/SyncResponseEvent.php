@@ -20,7 +20,9 @@
 namespace oat\taoSync\model\event;
 
 /**
- * Class SynchronizationStarted
+ * Class SyncResponseEvent
  * @package oat\taoSync\model\event
  */
-class SynchronizationStarted extends AbstractSynchronizationEvent {}
+class SyncResponseEvent extends AbstractSyncEvent
+{
+}

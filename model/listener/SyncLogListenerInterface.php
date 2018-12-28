@@ -19,10 +19,10 @@
 
 namespace oat\taoSync\model\listener;
 
-use oat\taoSync\model\event\SynchronizationFailed;
-use oat\taoSync\model\event\SynchronizationFinished;
-use oat\taoSync\model\event\SynchronizationStarted;
-use oat\taoSync\model\event\SynchronizationUpdated;
+use oat\taoSync\model\event\SyncFailedEvent;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncStartedEvent;
+use oat\taoSync\model\event\SyncResponseEvent;
 
 interface SyncLogListenerInterface
 {
@@ -31,30 +31,30 @@ interface SyncLogListenerInterface
     /**
      * Create log record about started synchronization.
      *
-     * @param SynchronizationStarted $event
+     * @param SyncStartedEvent $event
      * @return mixed
      */
-    public function logSyncStarted(SynchronizationStarted $event);
+    public function logSyncStarted(SyncStartedEvent $event);
 
     /**
      * Update synchronization log record with ned details.
      *
-     * @param SynchronizationUpdated $event
+     * @param SyncResponseEvent $event
      * @return mixed
      */
-    public function logSyncUpdated(SynchronizationUpdated $event);
+    public function logSyncUpdated(SyncResponseEvent $event);
 
     /**
      * Update log record for finished synchronization.
      *
-     * @param SynchronizationFinished $event
+     * @param SyncFinishedEvent $event
      */
-    public function logSyncFinished(SynchronizationFinished $event);
+    public function logSyncFinished(SyncFinishedEvent $event);
 
     /**
      * Update log record for failed synchronization.
      *
-     * @param SynchronizationFailed $event
+     * @param SyncFailedEvent $event
      */
-    public function logSyncFailed(SynchronizationFailed $event);
+    public function logSyncFailed(SyncFailedEvent $event);
 }

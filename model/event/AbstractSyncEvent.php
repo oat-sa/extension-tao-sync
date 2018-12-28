@@ -22,7 +22,11 @@ namespace oat\taoSync\model\event;
 use common_report_Report as Report;
 use oat\oatbox\event\Event;
 
-abstract class AbstractSynchronizationEvent implements Event
+/**
+ * Class AbstractSyncEvent
+ * @package oat\taoSync\model\event
+ */
+abstract class AbstractSyncEvent implements Event
 {
     /**
      * @var array

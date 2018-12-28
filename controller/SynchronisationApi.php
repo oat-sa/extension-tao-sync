@@ -22,10 +22,10 @@ namespace oat\taoSync\controller;
 
 use common_report_Report as Report;
 use oat\oatbox\event\EventManager;
-use oat\taoSync\model\event\SynchronizationFailed;
-use oat\taoSync\model\event\SynchronizationFinished;
-use oat\taoSync\model\event\SynchronizationUpdated;
-use oat\taoSync\model\event\SynchronizationStarted;
+use oat\taoSync\model\event\SyncFailedEvent;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncResponseEvent;
+use oat\taoSync\model\event\SyncStartedEvent;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
 
@@ -106,7 +106,7 @@ class SynchronisationApi extends \tao_actions_RestController
                 $params = $parameters[self::PARAM_PARAMETERS];
             }
 
-            $eventManager->trigger(new SynchronizationStarted($params, $report));
+            $eventManager->trigger(new SyncStartedEvent($params, $report));
 
             $entities = $this->getSyncService()->fetchEntityDetails($type, $entityIds, $params);
             $report->setData($logData = [$type => ['pushed' => count($entities)]]);
@@ -117,7 +117,7 @@ class SynchronisationApi extends \tao_actions_RestController
             $report->add(Report::createFailure('Synchronization request failed: ' . $e->getMessage()));
             $this->returnFailure($e);
         } finally {
-            $eventManager->trigger(new SynchronizationUpdated($params, $report));
+            $eventManager->trigger(new SyncResponseEvent($params, $report));
         }
     }
 

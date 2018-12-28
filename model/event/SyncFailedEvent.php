@@ -20,7 +20,7 @@
 namespace oat\taoSync\model\event;
 
 /**
- * Class SynchronizationFailed
+ * Class SyncFailedEvent
  * @package oat\taoSync\model\event
  */
-class SynchronizationFailed extends AbstractSynchronizationEvent {}
+class SyncFailedEvent extends AbstractSyncEvent {}

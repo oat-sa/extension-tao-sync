@@ -21,10 +21,10 @@ namespace oat\taoSync\model\listener;
 
 use DateTime;
 use common_report_Report as Report;
-use oat\taoSync\model\event\SynchronizationFailed;
-use oat\taoSync\model\event\SynchronizationFinished;
-use oat\taoSync\model\event\SynchronizationStarted;
-use oat\taoSync\model\event\SynchronizationUpdated;
+use oat\taoSync\model\event\SyncFailedEvent;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncStartedEvent;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\exception\SyncLogEntityNotFound;
 use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
@@ -38,11 +38,11 @@ use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 class CentralSyncLogListener implements SyncLogListenerInterface
 {
     /**
-     * @param SynchronizationStarted $event
+     * @param SyncStartedEvent $event
      * @return mixed|void
      * @throws \common_exception_Error
      */
-    public function logSyncStarted(SynchronizationStarted $event)
+    public function logSyncStarted(SyncStartedEvent $event)
     {
         try {
             $this->logSyncUpdated($event);
@@ -68,10 +68,10 @@ class CentralSyncLogListener implements SyncLogListenerInterface
     }
 
     /**
-     * @param SynchronizationUpdated $event
+     * @param SyncResponseEvent $event
      * @return mixed|void
      */
-    public function logSyncUpdated(SynchronizationUpdated $event)
+    public function logSyncUpdated(SyncResponseEvent $event)
     {
         try {
             $params = $event->getSyncParameters();
@@ -97,17 +97,17 @@ class CentralSyncLogListener implements SyncLogListenerInterface
     }
 
     /**
-     * @param SynchronizationFinished $event
+     * @param SyncFinishedEvent $event
      */
-    public function logSyncFinished(SynchronizationFinished $event)
+    public function logSyncFinished(SyncFinishedEvent $event)
     {
         // TODO: Implement logSyncFinished() method.
     }
 
     /**
-     * @param SynchronizationFailed $event
+     * @param SyncFailedEvent $event
      */
-    public function logSyncFailed(SynchronizationFailed $event)
+    public function logSyncFailed(SyncFailedEvent $event)
     {
         // TODO: Implement logSyncFailed() method.
     }
