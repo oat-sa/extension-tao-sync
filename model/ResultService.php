@@ -21,6 +21,7 @@
 namespace oat\taoSync\model;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
@@ -30,6 +31,7 @@ use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use common_report_Report as Report;
@@ -55,6 +57,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     /** @var Report */
     protected $report;
 
+    /** @var array Synchronization parameters */
+    protected $syncParams = [];
+
     /**
      * Scan delivery execution to format it
      *
@@ -72,6 +77,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     public function synchronizeResults(array $params = [])
     {
         $this->report = Report::createInfo('Starting delivery results synchronisation...');
+        $this->syncParams = $params;
         $results = [];
         $counter = 0;
 
@@ -140,9 +146,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    public function sendResults($results)
+    private function sendResults($results)
     {
-        $importAcknowledgment = $this->getSyncClient()->sendResults($results);
+        $importAcknowledgment = $this->getSyncClient()->sendResults($results, $this->syncParams);
         if (empty($importAcknowledgment)) {
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
         }
@@ -180,10 +186,13 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * Create and inject variables
      *
      * @param array $results
+     * @param array $params Synchronization parameters.
      * @return array
      */
-    public function importDeliveryResults(array $results)
+    public function importDeliveryResults(array $results, array $params = [])
     {
+        $report = Report::createInfo('Import delivery executions');
+        $imported = $importFailed = 0;
         $importAcknowledgment = [];
 
         foreach ($results as $resultId => $result) {
@@ -245,12 +254,20 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                     'success' => (int) $success,
                     'deliveryId' => $deliveryId,
                 ];
+                $report->add(Report::createInfo(sprintf('(%1$s) Successfully imported %1$s %2$s', self::SYNC_ENTITY, $resultId)));
+                $imported++;
             } else {
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
                 ];
+                $report->add(Report::createFailure(sprintf('(%1$s) Problem with import of %1$s %2$s', self::SYNC_ENTITY, $resultId)));
+                $importFailed++;
             }
         }
+        $report->setData([self::SYNC_ENTITY => ['imported' => $imported, 'import failed' => $importFailed]]);
+        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+            new SyncResponseEvent($params, $report)
+        );
 
         return $importAcknowledgment;
     }

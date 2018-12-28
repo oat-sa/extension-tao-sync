@@ -20,6 +20,9 @@
 
 namespace oat\taoSync\controller;
 
+use common_report_Report as Report;
+use oat\oatbox\event\EventManager;
+use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\synchronizer\ltiuser\SyncLtiUserServiceInterface;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogServiceInterface;
 use oat\taoSync\model\ResultService;
@@ -41,6 +44,8 @@ class ResultApi extends \tao_actions_RestController
 
     const PARAM_TEST_SESSIONS = 'test_sessions';
 
+    const PARAM_SYNC_PARAMETERS = 'sync_params';
+
     /**
      * Api endpoint to receive results
      * An acknowledgment list is returned to confirm which results are imported
@@ -50,6 +55,8 @@ class ResultApi extends \tao_actions_RestController
     public function syncResults()
     {
         try {
+            $report = Report::createInfo('Synchronization request for delivery execution results received.');
+
             if ($this->getRequestMethod() != \Request::HTTP_POST) {
                 throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
@@ -65,8 +72,10 @@ class ResultApi extends \tao_actions_RestController
             } else {
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_RESULTS . '" parameter is required to access ' . __FUNCTION__);
             }
+            $syncParams = $this->getSyncParams($parameters);
+            $this->getEventManager()->trigger(new SyncRequestEvent($syncParams, $report));
 
-            $response = $this->getSyncResultService()->importDeliveryResults($results);
+            $response = $this->getSyncResultService()->importDeliveryResults($results, $syncParams);
             $this->returnJson($response);
         } catch (\Exception $e) {
             $this->returnFailure($e);
@@ -218,5 +227,24 @@ class ResultApi extends \tao_actions_RestController
             $result = $this->getHeader(SyncServiceInterface::BOX_ID_HEADER);
         }
         return $result;
+    }
+
+    /**
+     * Get synchronization parameters from request data.
+     *
+     * @param array $requestData
+     * @return array
+     */
+    private function getSyncParams(array $requestData)
+    {
+        return isset($requestData[self::PARAM_SYNC_PARAMETERS]) ? $requestData[self::PARAM_SYNC_PARAMETERS] : [];
+    }
+
+    /**
+     * @return EventManager
+     */
+    private function getEventManager()
+    {
+        return $this->getServiceLocator()->get(EventManager::SERVICE_ID);
     }
 }

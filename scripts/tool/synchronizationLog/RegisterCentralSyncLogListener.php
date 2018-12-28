@@ -35,8 +35,8 @@ class RegisterCentralSyncLogListener extends InstallAction
      */
     public function __invoke($params)
     {
-        $this->registerEvent(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncStarted']);
-        $this->registerEvent(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFinished']);
+        $this->registerEvent(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncRequest']);
+        $this->registerEvent(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncResponse']);
 
         $syncLogDataParser = new SyncLogDataParser([]);
         $this->registerService(SyncLogDataParser::SERVICE_ID, $syncLogDataParser);
