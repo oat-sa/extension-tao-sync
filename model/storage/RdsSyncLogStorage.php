@@ -116,14 +116,19 @@ class RdsSyncLogStorage extends ConfigurableService implements SyncLogStorageInt
      */
     public function update(SyncLogEntity $entity)
     {
-        $finishedAt = $entity->getFinishTime()->format(SyncLogEntity::DATE_TIME_FORMAT);
         $qb = $this->getQueryBuilder();
         $qb->update(self::TABLE_NAME)
             ->set(SyncLogStorageInterface::COLUMN_STATUS, $qb->createNamedParameter($entity->getStatus()))
             ->set(SyncLogStorageInterface::COLUMN_DATA, $qb->createNamedParameter(json_encode($entity->getData())))
-            ->set(SyncLogStorageInterface::COLUMN_REPORT, $qb->createNamedParameter(json_encode($entity->getReport())))
-            ->set(SyncLogStorageInterface::COLUMN_FINISHED_AT, $qb->createNamedParameter($finishedAt))
-            ->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $qb->createNamedParameter($entity->getId()));
+            ->set(SyncLogStorageInterface::COLUMN_REPORT, $qb->createNamedParameter(json_encode($entity->getReport())));
+
+        $finishTime = $entity->getFinishTime();
+        if ($finishTime instanceof \DateTime) {
+            $finishedAt = $entity->getFinishTime()->format(SyncLogEntity::DATE_TIME_FORMAT);
+            $qb->set(SyncLogStorageInterface::COLUMN_FINISHED_AT, $qb->createNamedParameter($finishedAt));
+        }
+
+        $qb->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $qb->createNamedParameter($entity->getId()));
 
         return $this->getPersistence()->exec($qb->getSQL(), $qb->getParameters());
     }
