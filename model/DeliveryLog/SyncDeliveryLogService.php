@@ -26,6 +26,7 @@ use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\event\DeliveryExecutionIrregularityReport;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use common_report_Report as Report;
@@ -42,7 +43,13 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
     const DELIVERY_LOG_SYNC_EVENT = 'SYNC_EVENT';
 
     /** @var Report */
-    protected $report;
+    private $report;
+
+    /** @var array Import acknowledgement response data */
+    private $importAcknowledgment = [];
+
+    /** @var array Synchronization parameters */
+    private $syncParams = [];
 
     /**
      * @param array $params
@@ -102,37 +109,35 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             throw new \common_Exception('Error during result log synchronisation.
              No acknowledgment was provided by remote server.');
         }
-        $syncSuccess = $syncFailed = [];
 
-        foreach ($syncAcknowledgment as $id => $data) {
-            if ((bool)$data['success']) {
-                $syncSuccess[$id] = $data['logsSynced'];
-            } else {
-                $syncFailed[] = $id;
+        $logData = [self::SYNC_ENTITY => []];
+        $syncSuccess = [];
+        if (!empty($syncAcknowledgment['success']) && is_array($syncAcknowledgment['success'])) {
+            $syncSuccess = $syncAcknowledgment['success'];
+            foreach ($syncSuccess as $resultId => $logsSynced) {
+                $this->report(count($logsSynced). ' result logs exports have been acknowledged.', LogLevel::INFO);
             }
-
-            $logData = [self::SYNC_ENTITY => []];
-            if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
-                $this->report(count($syncSuccess[$id]). ' result logs exports have been acknowledged.', LogLevel::INFO);
-                $logData[self::SYNC_ENTITY]['uploaded'] = 1;
-            }
-
-            if (!empty($syncFailed)) {
-                $this->report(count($syncFailed) . ' result logs exports have not been acknowledged.', LogLevel::ERROR);
-                $logData[self::SYNC_ENTITY]['upload failed'] = 1;
-            }
-            $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
+            $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
         }
+
+        if (!empty($syncAcknowledgment['failed']) && is_array($syncAcknowledgment['failed'])) {
+            $this->report(count($syncAcknowledgment['failed']) . ' result logs exports have not been acknowledged.', LogLevel::ERROR);
+            $logData[self::SYNC_ENTITY]['upload failed'] = count($syncAcknowledgment['failed']);
+        }
+
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         return $syncSuccess;
     }
 
     /**
      * @param array $logs
+     * @param array $params Synchronization parameters.
      * @return array
      */
-    public function importDeliveryLogs(array $logs, array $options = [])
+    public function importDeliveryLogs(array $logs, array $params = [])
     {
+        $this->initImport($params);
         $importAcknowledgment = [];
         foreach ($logs as $resultId => $resultLogs) {
             $logsToBeInserted = [];
@@ -159,22 +164,17 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 foreach ($logsToBeInserted as $deliveryLog) {
                     $this->postImportDeliverLogProcess($deliveryLog);
                 }
-                $boxId = isset($options[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
-                    $options[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
+                $boxId = isset($params[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
+                    $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
                 $this->saveBoxId($logsToBeInserted, $boxId);
-                $importAcknowledgment[$resultId] = [
-                    'success' => 1,
-                    'logsSynced' => $logsSynced
-                ];
-
+                $this->importAcknowledgment['success'][$resultId] = $logsSynced;
             } catch (\Exception $exception) {
-                $importAcknowledgment[$resultId] = [
-                    'success' => 0
-                ];
+                $this->importAcknowledgment['failed'][] = $resultId;
             }
         }
-
-        return $importAcknowledgment;
+        $this->reportImportCompleted();
+        
+        return $this->importAcknowledgment;
     }
 
 
@@ -341,4 +341,34 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $this->getDeliveryLogService()->insertMultiple([$syncEvent]);
     }
 
+    /**
+     * Initialize import.
+     *
+     * @param array $params
+     */
+    private function initImport(array $params)
+    {
+        $this->report = Report::createInfo('Starting delivery executions import...');
+        $this->syncParams = $params;
+        $this->importAcknowledgment = [];
+    }
+
+    /**
+     * Update report with import results.
+     */
+    private function reportImportCompleted()
+    {
+        $syncReportData = [];
+        if (!empty($this->importAcknowledgment['success'])) {
+            $syncReportData[self::SYNC_ENTITY]['imported'] = count($this->importAcknowledgment['success']);
+        }
+
+        if (!empty($this->importAcknowledgment['failed'])) {
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($this->importAcknowledgment['failed']);
+        }
+        $this->report->setData($syncReportData);
+        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+            new SyncResponseEvent($this->syncParams, $this->report)
+        );
+    }
 }

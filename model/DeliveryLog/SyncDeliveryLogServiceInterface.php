@@ -45,7 +45,7 @@ interface SyncDeliveryLogServiceInterface extends SyncServiceInterface
     /**
      * @param array $logs
      * @return array
-     * @param array $options
+     * @param array $params Synchronization parameters.
      */
-    public function importDeliveryLogs(array $logs, array $options = []);
+    public function importDeliveryLogs(array $logs, array $params = []);
 }

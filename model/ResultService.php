@@ -60,6 +60,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     /** @var array Import acknowledgement response data */
     protected $importAcknowledgment = [];
 
+    /** @var array Synchronization parameters */
+    protected $syncParams = [];
+
     /**
      * Scan delivery execution to format it
      *
