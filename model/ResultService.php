@@ -60,6 +60,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     /** @var array Synchronization parameters */
     protected $syncParams = [];
 
+    /** @var array Import acknowledgement response data */
+    protected $importAcknowledgment = [];
+
     /**
      * Scan delivery execution to format it
      *
@@ -152,14 +155,9 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         if (empty($importAcknowledgment)) {
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
         }
-        $syncSuccess = $syncFailed = [];
-        foreach ($importAcknowledgment as $id => $data) {
-            if ((bool) $data['success'] == true) {
-                $syncSuccess[$id] = $data['deliveryId'];
-            } else {
-                $syncFailed[] = $id;
-            }
-        }
+
+        $syncSuccess = $importAcknowledgment['success'];
+        $syncFailed = $importAcknowledgment['failed'];
 
         $logData = [self::SYNC_ENTITY => []];
         if (!empty($syncSuccess)) {
@@ -191,9 +189,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      */
     public function importDeliveryResults(array $results, array $params = [])
     {
-        $report = Report::createInfo('Import delivery executions');
-        $imported = $importFailed = 0;
-        $importAcknowledgment = [];
+        $this->initImport($params);
 
         foreach ($results as $resultId => $result) {
             $success = true;
@@ -249,27 +245,16 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                 $success = false;
             }
 
-            if (isset($deliveryId)) {
-                $importAcknowledgment[$resultId] = [
-                    'success' => (int) $success,
-                    'deliveryId' => $deliveryId,
-                ];
-                $report->add(Report::createInfo(sprintf('(%1$s) Successfully imported %1$s %2$s', self::SYNC_ENTITY, $resultId)));
-                $imported++;
+            if ($success && isset($deliveryId)) {
+                $this->importAcknowledgment['success'][$resultId] = $deliveryId;
             } else {
-                $importAcknowledgment[$resultId] = [
-                    'success' => (int) $success,
-                ];
-                $report->add(Report::createFailure(sprintf('(%1$s) Problem with import of %1$s %2$s', self::SYNC_ENTITY, $resultId)));
-                $importFailed++;
+                $this->importAcknowledgment['failed'][] = $resultId;
             }
         }
-        $report->setData([self::SYNC_ENTITY => ['imported' => $imported, 'import failed' => $importFailed]]);
-        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
-            new SyncResponseEvent($params, $report)
-        );
 
-        return $importAcknowledgment;
+        $this->reportImportCompleted();
+
+        return $this->importAcknowledgment;
     }
 
     /**
@@ -610,6 +595,37 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         return $deliveryExecution;
+    }
+
+    /**
+     * Initialize import.
+     *
+     * @param array $params
+     */
+    protected function initImport(array $params)
+    {
+        $this->report = Report::createInfo('Starting delivery executions import...');
+        $this->syncParams = $params;
+        $this->importAcknowledgment = [];
+    }
+
+    /**
+     * Update report with import results.
+     */
+    protected function reportImportCompleted()
+    {
+        $syncReportData = [];
+        if (!empty($this->importAcknowledgment['success'])) {
+            $syncReportData[self::SYNC_ENTITY]['imported'] = count($this->importAcknowledgment['success']);
+        }
+
+        if (!empty($this->importAcknowledgment['failed'])) {
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($this->importAcknowledgment['failed']);
+        }
+        $this->report->setData($syncReportData);
+        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+            new SyncResponseEvent($this->syncParams, $this->report)
+        );
     }
 
 }
