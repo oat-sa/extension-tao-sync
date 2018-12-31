@@ -41,8 +41,6 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
     const OPTION_SHOULD_DECODE_BEFORE_SYNC = 'shouldDecodeBeforeSync';
     const DELIVERY_LOG_SYNC_EVENT = 'SYNC_EVENT';
 
-
-
     /** @var Report */
     protected $report;
 
@@ -75,7 +73,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             $counter++;
             if (($counter % $this->getChunkSize() === 0) || count($logsToSync) === $counter) {
                 $this->report($counter . ' results logs to send to remote server. Sending...', LogLevel::INFO);
-                $syncSuccess = $this->sendDeliveryLogs($logs);
+                $syncSuccess = $this->sendDeliveryLogs($logs, $params);
                 $logs = [];
 
                 $this->markLogsAsSynced($syncSuccess);
@@ -91,13 +89,14 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
     /**
      * @param array $logs
+     * @param array $params Synchronization parameters.
      * @return array
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    public function sendDeliveryLogs(array $logs)
+    public function sendDeliveryLogs(array $logs, array $params)
     {
-        $syncAcknowledgment = $this->getSyncClient()->sendDeliveryLogs($logs);
+        $syncAcknowledgment = $this->getSyncClient()->sendDeliveryLogs($logs, $params);
 
         if (empty($syncAcknowledgment)) {
             throw new \common_Exception('Error during result log synchronisation.

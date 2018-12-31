@@ -179,15 +179,20 @@ class SynchronisationClient extends ConfigurableService
 
     /**
      * @param array $logs
+     * @param array $params
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendDeliveryLogs(array $logs)
+    public function sendDeliveryLogs(array $logs, array $params)
     {
         $url = '/taoSync/ResultApi/syncDeliveryLogs';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_DELIVERY_LOGS => $logs]));
+        $requestData = [
+            ResultApi::PARAM_DELIVERY_LOGS => $logs,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
         return $this->decodeResponseBody($response);
     }
 
