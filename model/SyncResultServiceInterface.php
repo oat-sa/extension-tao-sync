@@ -45,6 +45,18 @@ interface SyncResultServiceInterface
     public function synchronizeResults(array $params = []);
 
     /**
+     * Send results to remote server and process acknowledgment
+     *
+     * Delete results following configuration
+     *
+     * @param $results
+     * @param array $params Synchronization parameters
+     * @throws \common_Exception
+     * @throws \common_exception_Error
+     */
+    public function sendResults($results, array $params);
+
+    /**
      * Import delivery by scanning $results
      *
      * Spawn a delivery execution with delivery and test-taker

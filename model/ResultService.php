@@ -57,9 +57,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     /** @var Report */
     protected $report;
 
-    /** @var array Synchronization parameters */
-    protected $syncParams = [];
-
     /** @var array Import acknowledgement response data */
     protected $importAcknowledgment = [];
 
@@ -80,7 +77,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     public function synchronizeResults(array $params = [])
     {
         $this->report = Report::createInfo('Starting delivery results synchronisation...');
-        $this->syncParams = $params;
         $results = [];
         $counter = 0;
 
@@ -122,7 +118,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
                 if ($counter % $this->getChunkSize() === 0) {
                     $this->report($counter . ' delivery executions to send to remote server. Sending...', LogLevel::INFO);
-                    $this->sendResults($results);
+                    $this->sendResults($results, $params);
                     $results = [];
                 }
             }
@@ -133,7 +129,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         if (!empty($results)) {
-            $this->sendResults($results);
+            $this->sendResults($results, $params);
         }
 
         return $this->report;
@@ -146,12 +142,13 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * Delete results following configuration
      *
      * @param $results
+     * @param array $params Synchronization parameters
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    private function sendResults($results)
+    public function sendResults($results, array $params)
     {
-        $importAcknowledgment = $this->getSyncClient()->sendResults($results, $this->syncParams);
+        $importAcknowledgment = $this->getSyncClient()->sendResults($results, $params);
         if (empty($importAcknowledgment)) {
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
         }
