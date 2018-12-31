@@ -34,14 +34,17 @@ interface SyncTestSessionServiceInterface
 
     /**
      * @param array $session
+     * @param array $params Synchronization params
+     * @return
      */
-    public function sendTestSessions(array $session);
+    public function sendTestSessions(array $session, array $params);
 
     /**
      * @param array $session
+     * @param array $params Synchronization params
      * @return array
      */
-    public function importTestSessions(array $session);
+    public function importTestSessions(array $session, array $params);
 
     /**
      * @param DeliveryExecution $deliveryExecution

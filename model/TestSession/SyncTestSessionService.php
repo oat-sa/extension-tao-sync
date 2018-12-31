@@ -31,6 +31,7 @@ use oat\taoQtiTest\models\TestSessionService;
 use oat\taoResultServer\models\Events\ResultCreated;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use common_report_Report as Report;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -45,6 +46,12 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
     /** @var Report */
     protected $report;
+
+    /** @var array Import acknowledgement response data */
+    private $importAcknowledgment = [];
+
+    /** @var array Synchronization parameters */
+    private $syncParams = [];
 
     /**
      * @param array $params
@@ -74,7 +81,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
         }
 
         if (!empty($sessions)) {
-            $this->sendTestSessions($sessions);
+            $this->sendTestSessions($sessions, $params);
         }
 
         $this->getResultSyncHistory()->logTestSessionAsExported($sessions);
@@ -84,64 +91,61 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
     /**
      * @param array $session
+     * @param array $params
      * @return array
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    public function sendTestSessions(array $session)
+    public function sendTestSessions(array $session, array $params)
     {
-        $syncAcknowledgment = $this->getSyncClient()->sendTestSessions($session);
+        $syncAcknowledgment = $this->getSyncClient()->sendTestSessions($session, $params);
 
         if (empty($syncAcknowledgment)) {
             throw new \common_Exception('Error during test sessions synchronisation.
              No acknowledgment was provided by remote server.');
         }
-        $syncSuccess = $syncFailed = [];
 
-        foreach ($syncAcknowledgment as $id => $data) {
-            if ((bool)$data['success']) {
-                $syncSuccess[$id] = 1;
-            } else {
-                $syncFailed[] = $id;
-            }
-
-            $logData = [self::SYNC_ENTITY => []];
-            if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
-                $this->report->add(Report::createInfo($syncSuccess[$id] . ' sync sessions acknowledged.'));
-                $logData[self::SYNC_ENTITY]['uploaded'] = 1;
-            }
-
-            if (!empty($syncFailed)) {
-                $this->report->add(Report::createInfo(count($syncFailed) . ' sync sessions have not been acknowledged.'));
-                $logData[self::SYNC_ENTITY]['upload failed'] = 1;
-            }
-            $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
+        $logData = [self::SYNC_ENTITY => []];
+        $syncSuccess = [];
+        if (!empty($syncAcknowledgment['success']) && is_array($syncAcknowledgment['success'])) {
+            $syncSuccess = $syncAcknowledgment['success'];
+            $this->report->add(Report::createInfo(count($syncSuccess) . ' sync sessions acknowledged.'));
+            $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
         }
+
+        if (!empty($syncAcknowledgment['failed']) && is_array($syncAcknowledgment['failed'])) {
+            $this->report->add(Report::createInfo(count($syncAcknowledgment['failed']) . ' sync sessions have not been acknowledged.'));
+            $logData[self::SYNC_ENTITY]['upload failed'] = count($syncAcknowledgment['failed']);
+        }
+
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         return $syncSuccess;
     }
 
     /**
      * @param array $session
+     * @param array $params Synchronization params
      * @return array
      */
-    public function importTestSessions(array $session)
+    public function importTestSessions(array $session, array $params)
     {
-        $importAcknowledgment = [];
+        $this->initImport($params);
         foreach ($session as $resultId) {
             try {
                 $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultId);
                 $deliveryExecution = $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID)->getDeliveryExecution($onlineResultId);
                 $this->afterImportSession($deliveryExecution);
-                $importAcknowledgment[$resultId] = [
-                    'success' => 1
-                ];
+                $this->importAcknowledgment['success'][] = $resultId;
             } catch (\Exception $exception) {
                 $this->logError($exception->getMessage());
+                $this->importAcknowledgment['failed'][] = $resultId;
             }
 
         }
-        return $importAcknowledgment;
+        $this->reportImportCompleted();
+
+        return $this->importAcknowledgment;
     }
 
 
@@ -243,4 +247,34 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
         return $this->getServiceLocator()->get(EnhancedDeliveryLogService::SERVICE_ID);
     }
 
+    /**
+     * Initialize import.
+     *
+     * @param array $params
+     */
+    private function initImport(array $params)
+    {
+        $this->report = Report::createInfo('Starting sync sessions import...');
+        $this->syncParams = $params;
+        $this->importAcknowledgment = [];
+    }
+
+    /**
+     * Update report with import results.
+     */
+    private function reportImportCompleted()
+    {
+        $syncReportData = [];
+        if (!empty($this->importAcknowledgment['success']) && is_array($this->importAcknowledgment['success'])) {
+            $syncReportData[self::SYNC_ENTITY]['imported'] = count($this->importAcknowledgment['success']);
+        }
+
+        if (!empty($this->importAcknowledgment['failed']) && is_array($this->importAcknowledgment['failed'])) {
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($this->importAcknowledgment['failed']);
+        }
+        $this->report->setData($syncReportData);
+        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+            new SyncResponseEvent($this->syncParams, $this->report)
+        );
+    }
 }
