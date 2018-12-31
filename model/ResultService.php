@@ -156,16 +156,16 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
         }
 
-        $syncSuccess = $importAcknowledgment['success'];
-        $syncFailed = $importAcknowledgment['failed'];
-
+        $syncSuccess = [];
         $logData = [self::SYNC_ENTITY => []];
-        if (!empty($syncSuccess)) {
+        if (!empty($importAcknowledgment['success']) && is_array($importAcknowledgment['success'])) {
+            $syncSuccess = $importAcknowledgment['success'];
             $this->getResultSyncHistory()->logResultsAsExported(array_keys($syncSuccess));
             $this->report(count($syncSuccess) . ' delivery execution exports have been acknowledged.', LogLevel::INFO);
             $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
         }
-        if (!empty($syncFailed)) {
+        if (!empty($importAcknowledgment['failed']) && is_array($importAcknowledgment['failed'])) {
+            $syncFailed = $importAcknowledgment['failed'];
             $this->getResultSyncHistory()->logResultsAsExported($syncFailed, ResultSyncHistoryService::STATUS_FAILED);
             $this->report(count($syncFailed) . ' delivery execution exports have not been acknowledged.', LogLevel::ERROR);
             $logData[self::SYNC_ENTITY]['upload failed'] = count($syncFailed);
