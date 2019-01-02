@@ -21,6 +21,7 @@ namespace oat\taoSync\controller;
 
 use oat\oatbox\session\SessionService;
 use oat\tao\model\datatable\implementation\DatatableRequest;
+use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 use tao_actions_CommonModule;
 
@@ -35,6 +36,11 @@ class SynchronizationHistory extends tao_actions_CommonModule
      */
     public function index()
     {
+        $a = 'a';
+        $this->setData('config', [
+            'dataModel' => $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID)->getDataModel()
+        ]);
+
         $this->setView('sync/history.tpl', 'taoSync');
     }
 

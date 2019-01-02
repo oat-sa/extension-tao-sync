@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
+use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\SyncLogStorageInterface;
 
@@ -28,6 +29,25 @@ use oat\taoSync\model\SyncLogStorageInterface;
  */
 class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayloadFormatterInterface
 {
+    const OPTION_DATA_MODEL = 'dataModel';
+
+    public function __construct(array $options = array())
+    {
+        parent::__construct($options);
+
+        if (!$this->hasOption(self::OPTION_DATA_MODEL)) {
+            throw new MissingOptionException(self::OPTION_DATA_MODEL . ' is required option.', self::OPTION_DATA_MODEL);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getDataModel()
+    {
+        return $this->getOption(self::OPTION_DATA_MODEL);
+    }
+
     /**
      * @param array $data
      * @return array

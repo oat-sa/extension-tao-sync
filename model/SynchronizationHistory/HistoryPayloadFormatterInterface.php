@@ -19,8 +19,6 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
-use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
-
 /**
  * Class HistoryOutputFormatter
  * @package oat\taoSync\model\SynchronizationHistory
@@ -28,6 +26,13 @@ use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
 interface HistoryPayloadFormatterInterface
 {
     const SERVICE_ID = 'taoSync/HistoryPayloadFormatter';
+
+    /**
+     * Return datamodel config
+     *
+     * @return array
+     */
+    public function getDataModel();
 
     /**
      * @param array $data

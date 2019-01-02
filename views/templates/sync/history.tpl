@@ -19,3 +19,11 @@ use oat\tao\helpers\Template;
 <?php
 Template::inc('footer.tpl', 'tao');
 ?>
+
+<script>
+    requirejs.config({
+        config: {
+            'taoSync/controller/SynchronizationHistory/index' : <?= json_encode(get_data('config')) ?>
+        }
+    });
+</script>

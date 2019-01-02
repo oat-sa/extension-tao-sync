@@ -98,34 +98,7 @@ define([
          * Controller entry point
          */
         start: function () {
-            var model = [
-                {
-                    id: 'status',
-                    label: __('Result'),
-                    sortable: true
-                },
-                {
-                    id: 'created_at',
-                    label: __('Started at'),
-                    sortable: true
-                },
-                {
-                    id: 'finished_at',
-                    label: __('Finished at'),
-                    sortable: true
-                },
-                {
-                    id: 'data',
-                    label: __('Data'),
-                    transform: function(value, row) {
-                        return value.replace(/\n/g, '<br />');
-                    }
-                },
-                {
-                    id: 'organisation',
-                    label: __('Organisation ID')
-                }
-            ];
+            var config = module.config() || {};
 
             var actions = {
                 'view': {
@@ -137,7 +110,11 @@ define([
                 }
             };
 
-            var config = module.config() || {};
+            var model = config.dataModel;
+            model.data['transform'] = function(value, row) {
+                return value.replace(/\n/g, '<br />');
+            };
+
             var listConfig = {
                 sortby: 'created_at',
                 sortorder: 'desc',
