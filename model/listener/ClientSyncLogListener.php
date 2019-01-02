@@ -44,19 +44,23 @@ class ClientSyncLogListener extends ConfigurableService
      */
     public function logSyncStarted(SyncStartedEvent $event)
     {
-        $syncLogService = $this->getSyncLogService();
-        $params = $event->getSyncParameters();
-        $syncLogEntity = new SyncLogEntity(
-            $params['sync_id'],
-            $params['box_id'],
-            $params['organisation_id'],
-            $this->parseSyncData($event->getReport()),
-            SyncLogEntity::STATUS_IN_PROGRESS,
-            $event->getReport(),
-            new DateTime()
-        );
+        try {
+            $syncLogService = $this->getSyncLogService();
+            $params = $event->getSyncParameters();
+            $syncLogEntity = new SyncLogEntity(
+                $params['sync_id'],
+                $params['box_id'],
+                $params['organisation_id'],
+                $this->parseSyncData($event->getReport()),
+                SyncLogEntity::STATUS_IN_PROGRESS,
+                $event->getReport(),
+                new DateTime()
+            );
 
-        $syncLogService->create($syncLogEntity);
+            $syncLogService->create($syncLogEntity);
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+        }
     }
 
     /**
@@ -66,24 +70,27 @@ class ClientSyncLogListener extends ConfigurableService
      */
     public function logSyncFinished(SyncFinishedEvent $event)
     {
-        $parameters = $event->getSyncParameters();
-        $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
+        try {
+            $parameters = $event->getSyncParameters();
+            $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
 
-        $eventReport = $event->getReport();
-        if ($eventReport->containsError()) {
-            $syncLogEntity->setFailed();
-        } else {
-            $syncLogEntity->setCompleted();
+            $report = $syncLogEntity->getReport();
+            $report->add($event->getReport());
+            if ($report->containsError()) {
+                $syncLogEntity->setFailed();
+            } else {
+                $syncLogEntity->setCompleted();
+            }
+            $eventData = $this->parseSyncData($event->getReport());
+            $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
+
+            $syncLogEntity->setData($newSyncData);
+            $syncLogEntity->setFinishTime(new DateTime());
+
+            $this->getSyncLogService()->update($syncLogEntity);
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
         }
-
-        $eventData = $this->parseSyncData($event->getReport());
-        $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
-        $syncLogEntity->setData($newSyncData);
-
-        $syncLogEntity->setReport($eventReport);
-        $syncLogEntity->setFinishTime(new DateTime());
-
-        $this->getSyncLogService()->update($syncLogEntity);
     }
 
     /**
@@ -93,18 +100,24 @@ class ClientSyncLogListener extends ConfigurableService
      */
     public function logSyncFailed(SyncFailedEvent $event)
     {
-        $parameters = $event->getSyncParameters();
-        $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
+        try {
+            $parameters = $event->getSyncParameters();
+            $syncLogEntity = $this->getSyncLogService()->getBySyncIdAndBoxId($parameters['sync_id'], $parameters['box_id']);
 
-        $eventData = $this->parseSyncData($event->getReport());
-        $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
-        $syncLogEntity->setData($newSyncData);
+            $report = $syncLogEntity->getReport();
+            $report->add($event->getReport());
 
-        $syncLogEntity->setFailed();
-        $syncLogEntity->setReport($event->getReport());
-        $syncLogEntity->setFinishTime(new DateTime());
+            $eventData = $this->parseSyncData($event->getReport());
+            $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
 
-        $this->getSyncLogService()->update($syncLogEntity);
+            $syncLogEntity->setData($newSyncData);
+            $syncLogEntity->setFailed();
+            $syncLogEntity->setFinishTime(new DateTime());
+
+            $this->getSyncLogService()->update($syncLogEntity);
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+        }
     }
 
 

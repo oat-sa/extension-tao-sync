@@ -23,7 +23,6 @@ use DateTime;
 use common_report_Report as Report;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\event\AbstractSyncEvent;
-use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
@@ -55,19 +54,21 @@ class CentralSyncLogListener extends ConfigurableService
             $this->validateParameters($params);
             $syncLogService = $this->getSyncLogService();
 
+            $report = Report::createInfo('Synchronization started...');
+            $report->add($event->getReport());
             $syncLogEntity = new SyncLogEntity(
                 $params[SyncLogServiceInterface::PARAM_SYNC_ID],
                 $params[SyncLogServiceInterface::PARAM_BOX_ID],
                 $params[SyncLogServiceInterface::PARAM_ORGANIZATION_ID],
-                $this->parseSyncData($event->getReport()),
+                $this->parseSyncData($report),
                 SyncLogEntity::STATUS_IN_PROGRESS,
-                $event->getReport(),
+                $report,
                 new DateTime()
             );
 
             $syncLogService->create($syncLogEntity);
         } catch (\Exception $e) {
-            return;
+            $this->logError($e->getMessage());
         }
     }
 
@@ -81,7 +82,7 @@ class CentralSyncLogListener extends ConfigurableService
         try {
             $this->updateSyncLogRecord($event);
         } catch (\Exception $e) {
-            return;
+            $this->logError($e->getMessage());
         }
     }
 
@@ -91,7 +92,7 @@ class CentralSyncLogListener extends ConfigurableService
      * @param AbstractSyncEvent $event
      * @throws \common_exception_Error
      */
-    public function updateSyncLogRecord(AbstractSyncEvent $event)
+    private function updateSyncLogRecord(AbstractSyncEvent $event)
     {
         $params = $event->getSyncParameters();
         $this->validateParameters($params);
@@ -115,15 +116,26 @@ class CentralSyncLogListener extends ConfigurableService
      */
     public function logSyncFinished(SyncFinishedEvent $event)
     {
-        // TODO: Implement logSyncFinished() method.
-    }
+        try {
+            $params = $event->getSyncParameters();
+            $this->validateParameters($params);
+            $syncLogService = $this->getSyncLogService();
 
-    /**
-     * @param SyncFailedEvent $event
-     */
-    public function logSyncFailed(SyncFailedEvent $event)
-    {
-        // TODO: Implement logSyncFailed() method.
+            /** @var SyncLogEntity $syncLogEntity */
+            $syncLogEntity = $syncLogService->getBySyncIdAndBoxId($params[SyncLogServiceInterface::PARAM_SYNC_ID], $params[SyncLogServiceInterface::PARAM_BOX_ID]);
+
+            $report = $syncLogEntity->getReport();
+            $report->add($event->getReport());
+            if ($report->containsError()) {
+                $syncLogEntity->setFailed();
+            } else {
+                $syncLogEntity->setCompleted();
+            }
+
+            $syncLogService->update($syncLogEntity);
+        } catch (\Exception $e) {
+            return;
+        }
     }
 
     private function validateParameters(array $params)
