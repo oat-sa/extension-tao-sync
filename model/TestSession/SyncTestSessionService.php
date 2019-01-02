@@ -137,9 +137,11 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
                 $deliveryExecution = $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID)->getDeliveryExecution($onlineResultId);
                 $this->afterImportSession($deliveryExecution);
                 $this->importAcknowledgment['success'][] = $resultId;
+                $this->report->add(Report::createInfo("Test sessions for delivery execution {$resultId} successfully imported."));
             } catch (\Exception $exception) {
                 $this->logError($exception->getMessage());
                 $this->importAcknowledgment['failed'][] = $resultId;
+                $this->report->add(Report::createInfo("Import of test sessions for delivery execution {$resultId} failed."));
             }
 
         }

@@ -138,7 +138,6 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
     public function importDeliveryLogs(array $logs, array $params = [])
     {
         $this->initImport($params);
-        $importAcknowledgment = [];
         foreach ($logs as $resultId => $resultLogs) {
             $logsToBeInserted = [];
             $logsSynced       = [];
@@ -168,8 +167,10 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                     $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
                 $this->saveBoxId($logsToBeInserted, $boxId);
                 $this->importAcknowledgment['success'][$resultId] = $logsSynced;
+                $this->report->add(Report::createInfo("Logs for delivery execution {$resultId} successfully imported."));
             } catch (\Exception $exception) {
                 $this->importAcknowledgment['failed'][] = $resultId;
+                $this->report->add(Report::createInfo("Import failed for logs of delivery execution {$resultId}."));
             }
         }
         $this->reportImportCompleted();
@@ -348,7 +349,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
      */
     private function initImport(array $params)
     {
-        $this->report = Report::createInfo('Starting delivery executions import...');
+        $this->report = Report::createInfo('Starting delivery logs import...');
         $this->syncParams = $params;
         $this->importAcknowledgment = [];
     }

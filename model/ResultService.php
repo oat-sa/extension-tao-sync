@@ -247,8 +247,11 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
             if ($success && isset($deliveryId)) {
                 $this->importAcknowledgment['success'][$resultId] = $deliveryId;
+                $this->report->add(Report::createInfo("Delivery execution {$resultId} successfully imported."));
+
             } else {
                 $this->importAcknowledgment['failed'][] = $resultId;
+                $this->report->add(Report::createInfo("Import failed for delivery execution {$resultId}."));
             }
         }
 
