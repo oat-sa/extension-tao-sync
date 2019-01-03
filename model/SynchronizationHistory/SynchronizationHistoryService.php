@@ -33,6 +33,11 @@ use oat\taoSync\model\SyncLog\Payload\DataTablePayload;
 class SynchronizationHistoryService extends ConfigurableService implements SynchronizationHistoryServiceInterface
 {
     /**
+     * @var User
+     */
+    protected $currentUser;
+
+    /**
      * Return synchronization history payload
      *
      * @param User $user
@@ -41,6 +46,7 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      */
     public function getSyncHistory(User $user, DatatableRequest $request)
     {
+        $this->currentUser = $user;
         $filter = new SyncLogFilter();
         $this->setFilters($filter);
 

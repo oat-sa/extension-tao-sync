@@ -20,6 +20,7 @@
 namespace oat\taoSync\model\SynchronizationHistory;
 
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 use oat\taoSync\model\SyncLogStorageInterface;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
@@ -37,10 +38,13 @@ class ClientSynchronizationHistoryService extends SynchronizationHistoryService
     {
         parent::setFilters($filter);
         $this->setBoxIdFilter($filter);
+        $this->setOrganizationIdFilter($filter);
     }
 
     /**
-     * Filter payload data be box id if available.
+     * Filter payload data by box id if available.
+     *
+     * @param SyncLogFilter $filter
      */
     private function setBoxIdFilter(SyncLogFilter $filter)
     {
@@ -48,6 +52,20 @@ class ClientSynchronizationHistoryService extends SynchronizationHistoryService
 
         if (!empty($boxId)) {
             $filter->eq(SyncLogStorageInterface::COLUMN_BOX_ID, $boxId);
+        }
+    }
+
+    /**
+     * Filter payload data by organization id if available.
+     *
+     * @param SyncLogFilter $filter
+     */
+    private function setOrganizationIdFilter(SyncLogFilter $filter)
+    {
+        $orgId = $this->currentUser->getPropertyValues(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
+
+        if (isset($orgId[0])) {
+            $filter->eq(SyncLogStorageInterface::COLUMN_ORGANIZATION_ID, $orgId[0]);
         }
     }
 }
