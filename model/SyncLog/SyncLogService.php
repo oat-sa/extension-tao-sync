@@ -147,7 +147,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
             $data['report'] =  Report::jsonUnserialize($data['report']);
         }
         if (!$data['created_at'] instanceof DateTime) {
-            $data['created_at'] = DateTime::createFromFormat(SyncLogEntity::DATE_TIME_FORMAT, $data['created_at']);
+            $data['created_at'] = new DateTime((string) $data['created_at']);
         }
 
         $syncLogEntity = new SyncLogEntity(

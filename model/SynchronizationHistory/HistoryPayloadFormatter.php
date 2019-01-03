@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
+use tao_helpers_Date as DateTimeHelper;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\SyncLogStorageInterface;
@@ -54,11 +55,13 @@ class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayl
      */
     public function format(array $data)
     {
+        $createdAt = new \DateTime($data[SyncLogStorageInterface::COLUMN_STARTED_AT]);
+        $finishedAt = new \DateTime($data[SyncLogStorageInterface::COLUMN_FINISHED_AT]);
         $output = [
             'id' => $data[SyncLogStorageInterface::COLUMN_ID],
             'status' => $data[SyncLogStorageInterface::COLUMN_STATUS],
-            'created_at' => $data[SyncLogStorageInterface::COLUMN_STARTED_AT],
-            'finished_at' => $data[SyncLogStorageInterface::COLUMN_FINISHED_AT],
+            'created_at' => DateTimeHelper::displayeDate($createdAt->getTimestamp()),
+            'finished_at' => DateTimeHelper::displayeDate($finishedAt->getTimestamp()),
             'organisation' => $data[SyncLogStorageInterface::COLUMN_ORGANIZATION_ID],
             'box_id' => $data[SyncLogStorageInterface::COLUMN_BOX_ID],
             'data' => $this->parseSyncDetails(json_decode($data[SyncLogStorageInterface::COLUMN_DATA], true))
