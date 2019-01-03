@@ -57,6 +57,11 @@ class SetupCentralSynchronizationHistory extends InstallAction
                     'label' => __('Organisation ID'),
                     'sortable' => false,
                 ],
+                'box_id' => [
+                    'id' => 'box_id',
+                    'label' => __('Box ID'),
+                    'sortable' => false
+                ],
             ]
         ];
         $payloadFormatter = new HistoryPayloadFormatter($options);

@@ -131,6 +131,7 @@ class CentralSyncLogListener extends ConfigurableService
             } else {
                 $syncLogEntity->setCompleted();
             }
+            $syncLogEntity->setFinishTime(new DateTime());
 
             $syncLogService->update($syncLogEntity);
         } catch (\Exception $e) {
@@ -138,6 +139,10 @@ class CentralSyncLogListener extends ConfigurableService
         }
     }
 
+    /**
+     * @param array $params
+     * @return bool
+     */
     private function validateParameters(array $params)
     {
         if (empty($params[SyncLogServiceInterface::PARAM_SYNC_ID])) {

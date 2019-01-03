@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\tool\synchronisationHistory;
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
-use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
+use oat\taoSync\model\SynchronizationHistory\ClientSynchronizationHistoryService;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 
 /**
@@ -65,7 +65,7 @@ class SetupClientSynchronisationHistory extends InstallAction
         $payloadFormatter = new HistoryPayloadFormatter($options);
         $this->registerService(HistoryPayloadFormatterInterface::SERVICE_ID, $payloadFormatter);
 
-        $synchronisationHistoryService = new SynchronizationHistoryService([]);
+        $synchronisationHistoryService = new ClientSynchronizationHistoryService([]);
         $this->registerService(SynchronizationHistoryServiceInterface::SERVICE_ID, $synchronisationHistoryService);
 
         return \common_report_Report::createSuccess('SynchronizationHistoryService successfully registered.');

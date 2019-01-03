@@ -60,6 +60,7 @@ class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayl
             'created_at' => $data[SyncLogStorageInterface::COLUMN_STARTED_AT],
             'finished_at' => $data[SyncLogStorageInterface::COLUMN_FINISHED_AT],
             'organisation' => $data[SyncLogStorageInterface::COLUMN_ORGANIZATION_ID],
+            'box_id' => $data[SyncLogStorageInterface::COLUMN_BOX_ID],
             'data' => $this->parseSyncDetails(json_decode($data[SyncLogStorageInterface::COLUMN_DATA], true))
         ];
 

@@ -36,7 +36,6 @@ class SynchronizationHistory extends tao_actions_CommonModule
      */
     public function index()
     {
-        $a = 'a';
         $this->setData('config', [
             'dataModel' => $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID)->getDataModel()
         ]);
