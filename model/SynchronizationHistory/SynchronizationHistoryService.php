@@ -19,16 +19,12 @@
 
 namespace oat\taoSync\model\SynchronizationHistory;
 
-use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\user\User;
 use oat\tao\model\datatable\DatatableRequest;
-use oat\taoPublishing\model\publishing\PublishingService;
-use oat\taoSync\model\SyncLogStorageInterface;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 use oat\taoSync\model\SyncLog\Payload\DataTablePayload;
-use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 
 /**
  * Class SynchronizationHistoryService
@@ -46,7 +42,7 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
     public function getSyncHistory(User $user, DatatableRequest $request)
     {
         $filter = new SyncLogFilter();
-        $this->setBoxIdFilter($filter);
+        $this->setFilters($filter);
 
         /** @var SyncLogServiceInterface $syncLogService */
         $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
@@ -57,27 +53,10 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
     }
 
     /**
-     * Filter payload data be box id if available.
+     * @param SyncLogFilter $filter
      */
-    private function setBoxIdFilter(SyncLogFilter $filter)
+    protected function setFilters(SyncLogFilter $filter)
     {
-        $boxId = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
-
-        if (!empty($boxId)) {
-            $filter->eq(SyncLogStorageInterface::COLUMN_BOX_ID, $boxId);
-        }
-    }
-
-    /**
-     * Filter payload data be box id if available.
-     */
-    private function setOrganizationBoxIdFilter(SyncLogFilter $filter)
-    {
-        $boxId = $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
-
-        if (!empty($boxId)) {
-            $filter->eq(SyncLogStorageInterface::COLUMN_BOX_ID, $boxId);
-        }
     }
 
     /**
