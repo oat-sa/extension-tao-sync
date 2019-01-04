@@ -22,13 +22,14 @@ use oat\taoSync\controller\HandShake;
 use oat\taoSync\scripts\install\InstallEnhancedDeliveryLog;
 use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
 use oat\taoSync\controller\SynchronizationHistory;
+use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 
 return array(
     'name' => 'taoSync',
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '3.1.0',
+    'version' => '3.2.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
@@ -38,7 +39,8 @@ return array(
         'taoResultServer' => '>=7.0.0',
         'taoTaskQueue'    => '>=1.0.0',
         'taoDeliveryRdf'  => '>=6.0.0',
-        'taoProctoring'   => '>=11.0.0'
+        'taoProctoring'   => '>=11.0.0',
+        'taoPublishing'   => '>=1.3.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
@@ -62,6 +64,7 @@ return array(
             \oat\taoSync\scripts\install\SetupSyncUserCsvImporter::class,
             RegisterOfflineToOnlineResultMapper::class,
             InstallEnhancedDeliveryLog::class,
+            RegisterRdsSyncLogStorage::class,
         ]
     ],
     'uninstall' => array(
