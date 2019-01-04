@@ -51,6 +51,7 @@ use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenter
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
+use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 use oat\taoSync\model\SyncService;
@@ -470,6 +471,14 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(SyncLogServiceInterface::SERVICE_ID, $syncLogService);
 
             $this->setVersion('3.3.0');
+        }
+
+        if ($this->isVersion('3.3.0')) {
+            $syncLogDataParser = new SyncLogDataParser([]);
+            $syncLogDataParser->setServiceLocator($this->getServiceManager());
+            $this->getServiceManager()->register(SyncLogDataParser::SERVICE_ID, $syncLogDataParser);
+
+            $this->setVersion('3.4.0');
         }
     }
 
