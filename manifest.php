@@ -40,7 +40,7 @@ return array(
         'taoTaskQueue'    => '>=1.0.0',
         'taoDeliveryRdf'  => '>=6.0.0',
         'taoProctoring'   => '>=11.0.0',
-        'taoPublishing'   => '>=1.3.0',
+        'taoPublishing'   => '>=1.2.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
