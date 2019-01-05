@@ -247,10 +247,12 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                     'success' => (int) $success,
                     'deliveryId' => $deliveryId,
                 ];
+                $this->report->add(Report::createInfo("Delivery execution {$resultId} successfully imported."));
             } else {
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
                 ];
+                $this->report->add(Report::createInfo("Import failed for delivery execution {$resultId}."));
             }
         }
 
