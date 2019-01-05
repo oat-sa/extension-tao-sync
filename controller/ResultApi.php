@@ -121,6 +121,7 @@ class ResultApi extends \tao_actions_RestController
     public function syncLtiUsers()
     {
         try {
+            $report = Report::createInfo('Synchronization request for LTI users received.');
             if ($this->getRequestMethod() != \Request::HTTP_POST) {
                 throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
@@ -136,8 +137,10 @@ class ResultApi extends \tao_actions_RestController
             } else {
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_LTI_USERS . '" parameter is required to access ' . __FUNCTION__);
             }
+            $syncParams = $this->getSyncParams($parameters);
+            $this->getEventManager()->trigger(new SyncRequestEvent($syncParams, $report));
 
-            $response = $this->getSyncLtiUsersService()->importLtiUsers($ltiUsers);
+            $response = $this->getSyncLtiUsersService()->importLtiUsers($ltiUsers, $syncParams);
 
             $this->returnJson($response);
         } catch (\Exception $e) {
