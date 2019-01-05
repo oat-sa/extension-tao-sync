@@ -217,15 +217,20 @@ class SynchronisationClient extends ConfigurableService
 
     /**
      * @param array $sessions
+     * @param array $params Synchronization params
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendTestSessions(array $sessions)
+    public function sendTestSessions(array $sessions, array $params)
     {
         $url = '/taoSync/ResultApi/syncTestSessions';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_TEST_SESSIONS => $sessions]));
+        $requestData = [
+            ResultApi::PARAM_TEST_SESSIONS => $sessions,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
         return $this->decodeResponseBody($response);
     }
 

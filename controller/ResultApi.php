@@ -154,6 +154,8 @@ class ResultApi extends \tao_actions_RestController
     public function syncTestSessions()
     {
         try {
+            $report = Report::createInfo('Synchronization request for test sessions received.');
+
             if ($this->getRequestMethod() != \Request::HTTP_POST) {
                 throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
@@ -169,8 +171,10 @@ class ResultApi extends \tao_actions_RestController
             } else {
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_TEST_SESSIONS . '" parameter is required to access ' . __FUNCTION__);
             }
+            $syncParams = $this->getSyncParams($parameters);
+            $this->getEventManager()->trigger(new SyncRequestEvent($syncParams, $report));
 
-            $response = $this->getSyncTestSessionsService()->importTestSessions($sessions);
+            $response = $this->getSyncTestSessionsService()->importTestSessions($sessions, $syncParams);
 
             $this->returnJson($response);
         } catch (\Exception $e) {
