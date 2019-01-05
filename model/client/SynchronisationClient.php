@@ -160,15 +160,20 @@ class SynchronisationClient extends ConfigurableService
      * Send results to be synchronized to remote host
      *
      * @param array $results
+     * @param array $params Synchronization parameters
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendResults(array $results)
+    public function sendResults(array $results, array $params)
     {
         $url = '/taoSync/ResultApi/syncResults';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_RESULTS => $results]));
+        $requestData = [
+            ResultApi::PARAM_RESULTS => $results,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
         return $this->decodeResponseBody($response);
     }
 
