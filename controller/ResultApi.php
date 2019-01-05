@@ -88,6 +88,7 @@ class ResultApi extends \tao_actions_RestController
     public function syncDeliveryLogs()
     {
         try {
+            $report = Report::createInfo('Synchronization request for delivery logs received.');
             if ($this->getRequestMethod() != \Request::HTTP_POST) {
                 throw new \BadMethodCallException('Only POST method is accepted to access ' . __FUNCTION__);
             }
@@ -103,8 +104,10 @@ class ResultApi extends \tao_actions_RestController
             } else {
                 throw new \InvalidArgumentException('A valid "' . self::PARAM_DELIVERY_LOGS . '" parameter is required to access ' . __FUNCTION__);
             }
+            $syncParams = $this->getSyncParams($parameters);
+            $this->getEventManager()->trigger(new SyncRequestEvent($syncParams, $report));
 
-            $response = $this->getSyncResultLogService()->importDeliveryLogs($logs, $this->getImportOptions());
+            $response = $this->getSyncResultLogService()->importDeliveryLogs($logs, $syncParams);
 
             $this->returnJson($response);
         } catch (\Exception $e) {

@@ -27,6 +27,7 @@ use oat\taoDelivery\model\execution\ServiceProxy;
 use oat\taoProctoring\model\deliveryLog\DeliveryLog;
 use oat\taoProctoring\model\event\DeliveryExecutionIrregularityReport;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use Psr\Log\LogLevel;
@@ -42,6 +43,9 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
     /** @var Report */
     protected $report;
+
+    /** @var array Synchronization parameters */
+    private $syncParams = [];
 
     /**
      * @param array $params
@@ -72,7 +76,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             $counter++;
             if (($counter % $this->getChunkSize() === 0) || count($logsToSync) === $counter) {
                 $this->report($counter . ' results logs to send to remote server. Sending...', LogLevel::INFO);
-                $syncSuccess = $this->sendDeliveryLogs($logs);
+                $syncSuccess = $this->sendDeliveryLogs($logs, $params);
                 $logs = [];
 
                 $this->markLogsAsSynced($syncSuccess);
@@ -88,13 +92,14 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
     /**
      * @param array $logs
+     * @param array $params Synchronization parameters.
      * @return array
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    public function sendDeliveryLogs(array $logs)
+    public function sendDeliveryLogs(array $logs, array $params = [])
     {
-        $syncAcknowledgment = $this->getSyncClient()->sendDeliveryLogs($logs);
+        $syncAcknowledgment = $this->getSyncClient()->sendDeliveryLogs($logs, $params);
 
         if (empty($syncAcknowledgment)) {
             throw new \common_Exception('Error during result log synchronisation.
@@ -123,10 +128,12 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
 
     /**
      * @param array $logs
+     * @param array $params Synchronization parameters.
      * @return array
      */
-    public function importDeliveryLogs(array $logs, array $options = [])
+    public function importDeliveryLogs(array $logs, array $params = [])
     {
+        $this->initImport($params);
         $importAcknowledgment = [];
         foreach ($logs as $resultId => $resultLogs) {
             $logsToBeInserted = [];
@@ -153,20 +160,22 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 foreach ($logsToBeInserted as $deliveryLog) {
                     $this->postImportDeliverLogProcess($deliveryLog);
                 }
-                $boxId = isset($options[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
-                    $options[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
+                $boxId = isset($params[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
+                    $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
                 $this->saveBoxId($logsToBeInserted, $boxId);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'logsSynced' => $logsSynced
                 ];
-
+                $this->report->add(Report::createInfo("Logs for delivery execution {$resultId} successfully imported."));
             } catch (\Exception $exception) {
                 $importAcknowledgment[$resultId] = [
                     'success' => 0
                 ];
+                $this->report->add(Report::createInfo("Import failed for logs of delivery execution {$resultId}."));
             }
         }
+        $this->reportImportCompleted($importAcknowledgment);
 
         return $importAcknowledgment;
     }
@@ -335,4 +344,44 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         $this->getDeliveryLogService()->insertMultiple([$syncEvent]);
     }
 
+    /**
+     * Initialize import.
+     *
+     * @param array $params
+     */
+    private function initImport(array $params)
+    {
+        $this->report = Report::createInfo('Starting delivery logs import...');
+        $this->syncParams = $params;
+    }
+
+    /**
+     * Update report with import results.
+     *
+     * @param array $importAcknowledgment
+     */
+    private function reportImportCompleted(array $importAcknowledgment)
+    {
+        $syncSuccess = $syncFailed = [];
+        foreach ($importAcknowledgment as $id => $data) {
+            if ((bool) $data['success'] == true) {
+                $syncSuccess[$id] = $data['deliveryId'];
+            } else {
+                $syncFailed[] = $id;
+            }
+        }
+
+        $syncReportData = [];
+        if (!empty($syncSuccess)) {
+            $syncReportData[self::SYNC_ENTITY]['imported'] = count($syncSuccess);
+        }
+
+        if (!empty($syncFailed)) {
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($syncFailed);
+        }
+        $this->report->setData($syncReportData);
+        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+            new SyncResponseEvent($this->syncParams, $this->report)
+        );
+    }
 }
