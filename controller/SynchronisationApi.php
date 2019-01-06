@@ -20,7 +20,9 @@
 
 namespace oat\taoSync\controller;
 
+use oat\oatbox\event\EventManager;
 use oat\taoOauth\model\OauthController;
+use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
@@ -163,6 +165,31 @@ class SynchronisationApi extends \tao_actions_RestController
 
         } catch (\Exception $e) {
             $this->returnFailure($e);
+        }
+    }
+
+    /**
+     * Receive confirmation message from client that synchronization finished.
+     */
+    public function confirmSyncFinished()
+    {
+        $syncParams = [];
+        $report = \common_report_Report::createInfo('Synchronization finished.');
+        try {
+            $this->assertHttpMethod(\Request::HTTP_POST);
+            $parameters = $this->getInputParameters();
+
+            if (isset($parameters[self::PARAM_PARAMETERS])) {
+                $syncParams = $parameters[self::PARAM_PARAMETERS];
+            }
+
+            $this->returnJson(['message' => 'Confirmation received.']);
+        } catch (\Exception $e) {
+            $this->returnFailure($e);
+        } finally {
+            $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+                new SyncFinishedEvent($syncParams, $report)
+            );
         }
     }
 
