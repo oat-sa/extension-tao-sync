@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\tool\synchronisationHistory;
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
-use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
+use oat\taoSync\model\SynchronizationHistory\ClientSynchronizationHistoryService;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 
 /**
@@ -33,10 +33,39 @@ class SetupClientSynchronisationHistory extends InstallAction
 {
     public function __invoke($params)
     {
-        $payloadFormatter = new HistoryPayloadFormatter([]);
+        $options = [
+            HistoryPayloadFormatter::OPTION_DATA_MODEL => [
+                'status' => [
+                    'id' => 'status',
+                    'label' => __('Result'),
+                    'sortable' => true,
+                ],
+                'created_at' => [
+                    'id' => 'created_at',
+                    'label' => __('Started at'),
+                    'sortable' => true,
+                ],
+                'finished_at' => [
+                    'id' => 'finished_at',
+                    'label' => __('Finished at'),
+                    'sortable' => true,
+                ],
+                'data' => [
+                    'id' => 'data',
+                    'label' => __('Data'),
+                    'sortable' => false,
+                ],
+                'organisation' => [
+                    'id' => 'organisation',
+                    'label' => __('Organisation ID'),
+                    'sortable' => false,
+                ],
+            ]
+        ];
+        $payloadFormatter = new HistoryPayloadFormatter($options);
         $this->registerService(HistoryPayloadFormatterInterface::SERVICE_ID, $payloadFormatter);
 
-        $synchronisationHistoryService = new SynchronizationHistoryService([]);
+        $synchronisationHistoryService = new ClientSynchronizationHistoryService([]);
         $this->registerService(SynchronizationHistoryServiceInterface::SERVICE_ID, $synchronisationHistoryService);
 
         return \common_report_Report::createSuccess('SynchronizationHistoryService successfully registered.');
