@@ -25,8 +25,11 @@ use oat\tao\model\taskQueue\TaskLog\DataTablePayload;
 use oat\tao\model\taskQueue\TaskLog\Entity\TaskLogEntity;
 use oat\tao\model\taskQueue\TaskLogInterface;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
+use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
 use oat\generis\test\TestCase;
+use oat\taoSync\model\SyncLog\SyncLogEntity;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 
 class SynchronizationHistoryServiceTest extends TestCase
 {
@@ -41,14 +44,9 @@ class SynchronizationHistoryServiceTest extends TestCase
     private $formatterMock;
 
     /**
-     * @var TaskLogInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SyncLogServiceInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $taskLogMock;
-
-    /**
-     * @var User|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $userMock;
+    private $syncLogServiceMock;
 
     /**
      * @inheritdoc
@@ -58,12 +56,12 @@ class SynchronizationHistoryServiceTest extends TestCase
         parent::setUp();
 
         $this->formatterMock = $this->createMock(HistoryPayloadFormatter::class);
-        $this->taskLogMock = $this->createMock(TaskLogInterface::class);
-        $this->userMock = $this->createMock(User::class);
-        $this->object = new SynchronizationHistoryService($this->formatterMock);
+        $this->syncLogServiceMock = $this->createMock(SyncLogServiceInterface::class);
+        $this->object = new SynchronizationHistoryService([]);
 
         $serviceLocatorMock = $this->getServiceLocatorMock([
-            TaskLogInterface::SERVICE_ID => $this->taskLogMock
+            SyncLogServiceInterface::SERVICE_ID => $this->syncLogServiceMock,
+            HistoryPayloadFormatterInterface::SERVICE_ID => $this->formatterMock,
         ]);
         $this->object->setServiceLocator($serviceLocatorMock);
     }
@@ -73,24 +71,48 @@ class SynchronizationHistoryServiceTest extends TestCase
      */
     public function testGetSyncHistory()
     {
-        $expectedPayload = ['Payload results array'];
-        $this->userMock->expects($this->once())
-            ->method('getIdentifier')
-            ->willReturn('ID');
+        $rows = 10;
+        $page = 1;
+        $totalCount = 49;
+        $syncLogRecords = [
+            0 => ['SYNC LOG RECORDS']
+        ];
 
-        $datatableRequestMock = $this->createMock(DatatableRequest::class);
-        $payloadMock = $this->createMock(DataTablePayload::class);
-        $payloadMock->expects($this->once())
-            ->method('getPayload')
-            ->willReturn($expectedPayload);
+        $expectedResult = [
+            'rows'    => $rows,
+            'page'    => $page,
+            'amount'  => 1,
+            'total'   => 5,
+            'data'    => $syncLogRecords,
+        ];
 
-        $this->taskLogMock->expects($this->once())
-            ->method('getDataTablePayload')
-            ->willReturn($payloadMock);
+        $requestMock = $this->createMock(DatatableRequest::class);
+        $requestMock->expects($this->once())
+            ->method('getFilters')
+            ->willReturn([]);
+        $requestMock->expects($this->once())
+            ->method('getPage')
+            ->willReturn($page);
+        $requestMock->expects($this->once())
+            ->method('getRows')
+            ->willReturn(10);
 
-        $result = $this->object->getSyncHistory($this->userMock, $datatableRequestMock);
+        $this->syncLogServiceMock->expects($this->once())
+            ->method('count')
+            ->willReturn($totalCount);
+        $this->syncLogServiceMock->expects($this->once())
+            ->method('search')
+            ->willReturn($syncLogRecords);
 
-        $this->assertEquals($expectedPayload, $result, 'Synchronization history payload must be as expected.');
+        $this->formatterMock->expects($this->once())
+            ->method('format')
+            ->willReturn($syncLogRecords[0]);
+
+        $userMock = $this->createMock(User::class);
+
+        $result = $this->object->getSyncHistory($userMock, $requestMock);
+
+        $this->assertEquals($expectedResult, $result, 'Synchronization history payload must be as expected.');
     }
 
     /**
@@ -99,23 +121,18 @@ class SynchronizationHistoryServiceTest extends TestCase
     public function testGetSyncReport()
     {
         $id = 'ID';
-        $userId = 'UserID';
         $expectedReport = $this->createMock(\common_report_Report::class);
-        $this->userMock->expects($this->once())
-            ->method('getIdentifier')
-            ->willReturn($userId);
-
-        $taskLogEntityMock = $this->createMock(TaskLogEntity::class);
-        $taskLogEntityMock->expects($this->once())
+        $syncLogEntityMock = $this->createMock(SyncLogEntity::class);
+        $syncLogEntityMock->expects($this->once())
             ->method('getReport')
             ->willReturn($expectedReport);
 
-        $this->taskLogMock->expects($this->once())
-            ->method('getByIdAndUser')
-            ->with($id, $userId)
-            ->willReturn($taskLogEntityMock);
+        $this->syncLogServiceMock->expects($this->once())
+            ->method('getById')
+            ->with($id)
+            ->willReturn($syncLogEntityMock);
 
-        $result = $this->object->getSyncReport($this->userMock, $id);
+        $result = $this->object->getSyncReport($id);
 
         $this->assertEquals($expectedReport, $result, 'Returned report must be as expected.');
     }
