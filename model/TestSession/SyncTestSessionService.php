@@ -150,7 +150,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
                 $importAcknowledgment[$resultId] = [
                     'success' => 0
                 ];
-                $this->report->add(Report::createInfo("Import of test sessions for delivery execution {$resultId} failed."));
+                $this->report->add(Report::createFailure("Import of test sessions for delivery execution {$resultId} failed."));
             }
 
         }

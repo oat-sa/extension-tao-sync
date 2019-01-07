@@ -178,7 +178,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
                 $importAcknowledgment[$resultId] = [
                     'success' => 0
                 ];
-                $this->report->add(Report::createInfo("Import failed for logs of delivery execution {$resultId}."));
+                $this->report->add(Report::createFailure("Import failed for logs of delivery execution {$resultId}."));
             }
         }
         $this->reportImportCompleted($importAcknowledgment);
