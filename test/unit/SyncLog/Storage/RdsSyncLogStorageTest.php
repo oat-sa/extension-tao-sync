@@ -24,13 +24,20 @@ use oat\oatbox\extension\script\MissingOptionException;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
 use oat\generis\test\TestCase;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 
 /**
  * Class RdsSyncLogStorageTest
  */
 class RdsSyncLogStorageTest extends TestCase
 {
-    const PERSISTENCE_ID = 'PERSISTENCE_ID';
+    const SYNC_ID = '111';
+    const BOX_ID = 'BOX_ID';
+    const ORGANIZATION_ID = 'TEST_ORGANIZATION_ID';
+    const STATUS = 'TEST_STATUS';
+    const CREATED_AT = '2019-01-01 12:00:00';
+    const FINISHED_AT = '2019-01-02 12:00:00';
 
     /**
      * @var RdsSyncLogStorage
@@ -38,14 +45,11 @@ class RdsSyncLogStorageTest extends TestCase
     private $object;
 
     /**
-     * @var \common_persistence_Manager|\PHPUnit_Framework_MockObject_MockObject
+     * @var \common_report_Report|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $persistenceManagerMock;
+    private $reportMock;
 
-    /**
-     * @var \common_persistence_SqlPersistence|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $persistenceMock;
+    private $logData = ['ENTITY_TYPE' => ['ACTION' => 'AMOUNT']];
 
     /**
      * @inheritdoc
@@ -54,18 +58,21 @@ class RdsSyncLogStorageTest extends TestCase
     {
         parent::setUp();
 
-        $this->persistenceMock = $this->createMock(\common_persistence_SqlPersistence::class);
+        $this->reportMock = $this->createMock(\common_report_Report::class);
+        $this->reportMock->method('JsonSerialize')
+            ->willReturn(['data' => 'REPORT_DATA']);
+        $sqlMock = $this->getSqlMock('sync_log_storage_test');
+        $persistence = $sqlMock->getPersistenceById('sync_log_storage_test');
 
-        $this->persistenceManagerMock = $this->createMock(\common_persistence_Manager::class);
-        $this->persistenceManagerMock ->method('getPersistenceById')
-            ->willReturn($this->persistenceMock);
+        $registerRdsSyncLog = new RegisterRdsSyncLogStorage();
+        $registerRdsSyncLog->createTable($persistence);
 
         $serviceLocatorMock = $this->getServiceLocatorMock([
-            \common_persistence_Manager::SERVICE_ID => $this->persistenceManagerMock
+            'generis/persistences' => $sqlMock,
         ]);
 
         $this->object = new RdsSyncLogStorage([
-            RdsSyncLogStorage::OPTION_PERSISTENCE_ID => self::PERSISTENCE_ID
+            RdsSyncLogStorage::OPTION_PERSISTENCE_ID => 'sync_log_storage_test'
         ]);
         $this->object->setServiceLocator($serviceLocatorMock);
     }
@@ -97,34 +104,271 @@ class RdsSyncLogStorageTest extends TestCase
      */
     public function testCreate()
     {
-        $tableName = 'synchronisation_log';
-        $syncId = 'SYNC_ID';
-        $boxId = 'BOX_ID';
-        $orgId = 'ORG_ID';
-        $data = ['ENTITY_TYPE' => ['ACTION' => 'AMOUNT']];
-        $status = 'SYNC_STATUS';
-        $createdAt = new \DateTime('2019-01-01 12:00:00');
-        $report = $this->createMock(\common_report_Report::class);
-        $report->expects($this->once())
-            ->method('JsonSerialize')
-            ->willReturn(['data' => 'REPORT_DATA']);
+        $entity = $this->getEntity();
 
-        $expectedInsertData = [
-            'sync_id' => $syncId,
-            'box_id' => $boxId,
-            'organization_id' => $orgId,
+        $filter = new SyncLogFilter();
+
+        $totalCountBefore = $this->object->count($filter);
+        $this->assertEquals(0, $totalCountBefore, 'There should not be any records before insert.');
+
+        $this->object->create($entity);
+
+        $totalCountAfter = $this->object->count($filter);
+        $this->assertEquals(1, $totalCountAfter, 'There must be only one record after insert.');
+    }
+
+    /**
+     * Test getById method.
+     */
+    public function testGetByIdNoRecord()
+    {
+        $this->expectException(\common_exception_NotFound::class);
+
+        $this->object->getById(1);
+    }
+
+
+    /**
+     * Test getById method.
+     */
+    public function testGetById()
+    {
+        $entity = $this->getEntity();
+
+        $id = $this->object->create($entity);
+        $storedData = $this->object->getById($id);
+
+        $expectedData = [
+            'box_id' => self::BOX_ID,
+            'sync_id' => self::SYNC_ID,
+            'organization_id' => self::ORGANIZATION_ID,
+            'status' => self::STATUS,
             'data' => '{"ENTITY_TYPE":{"ACTION":"AMOUNT"}}',
-            'status' => $status,
-            'report' => '{"data":"REPORT_DATA"}',
-            'created_at' => '2019-01-01 12:00:00',
+            'created_at' => self::CREATED_AT,
+            'finished_at' => null,
         ];
 
-        $this->persistenceMock->expects($this->once())
-            ->method('insert')
-            ->with($tableName, $expectedInsertData);
+        $this->assertArraySubset($expectedData, $storedData);
+    }
 
-        $entity = new SyncLogEntity($syncId, $boxId, $orgId, $data, $status, $report, $createdAt);
-        $this->object->create($entity);
+    /**
+     * Test getBySyncIdAndBoxId method.
+     */
+    public function testGetBySyncIdAndBoxIdNoRecord()
+    {
+        $this->expectException(\common_exception_NotFound::class);
+
+        $this->object->getBySyncIdAndBoxId(self::SYNC_ID, self::BOX_ID);
+    }
+
+
+    /**
+     * Test getBySyncIdAndBoxId method.
+     */
+    public function testGetBySyncIdAndBoxId()
+    {
+        $entity = $this->getEntity();
+
+        $id = $this->object->create($entity);
+        $storedData = $this->object->getBySyncIdAndBoxId(self::SYNC_ID, self::BOX_ID);
+
+        $expectedData = [
+            'box_id' => self::BOX_ID,
+            'sync_id' => self::SYNC_ID,
+            'organization_id' => self::ORGANIZATION_ID,
+            'status' => self::STATUS,
+            'data' => '{"ENTITY_TYPE":{"ACTION":"AMOUNT"}}',
+            'created_at' => self::CREATED_AT,
+            'finished_at' => null,
+        ];
+
+        $this->assertArraySubset($expectedData, $storedData);
+    }
+
+    /**
+     * Test count method.
+     */
+    public function testCount()
+    {
+        $entity1 = new SyncLogEntity(
+            111,
+            self::BOX_ID,
+            self::ORGANIZATION_ID,
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT)
+        );
+
+        $entity2 = new SyncLogEntity(
+            222,
+            self::BOX_ID,
+            self::ORGANIZATION_ID,
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT)
+        );
+
+        $entity3 = new SyncLogEntity(
+            333,
+            self::BOX_ID,
+            self::ORGANIZATION_ID,
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT)
+        );
+
+        $filter = new SyncLogFilter();
+
+        $totalCountBefore = $this->object->count($filter);
+        $this->assertEquals(0, $totalCountBefore, 'There should not be any records before insert.');
+
+        $this->object->create($entity1);
+        $this->object->create($entity2);
+        $this->object->create($entity3);
+
+        $totalCountAfter = $this->object->count($filter);
+        $this->assertEquals(3, $totalCountAfter, 'Total amount must be as expected.');
+    }
+
+    /**
+     * Test search method.
+     */
+    public function testSearch()
+    {
+        $entity1 = new SyncLogEntity(
+            111,
+            self::BOX_ID,
+            'orgId1',
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT)
+        );
+
+        $entity2 = new SyncLogEntity(
+            222,
+            self::BOX_ID,
+            'orgId2',
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT)
+        );
+
+        $entity3 = new SyncLogEntity(
+            333,
+            self::BOX_ID,
+            'organizationId3',
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT)
+        );
+
+        $filter = new SyncLogFilter();
+
+        $totalCountBefore = $this->object->count($filter);
+        $this->assertEquals(0, $totalCountBefore, 'There should not be any records before insert.');
+
+        $this->object->create($entity1);
+        $this->object->create($entity2);
+        $this->object->create($entity3);
+
+        $filter = new SyncLogFilter();
+        $filter->eq('organization_id', 'orgId1');
+        $result = $this->object->search($filter);
+        $this->assertEquals(1, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->neq('organization_id', 'orgId1');
+        $result = $this->object->search($filter);
+        $this->assertEquals(2, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->lt('sync_id', 222);
+        $result = $this->object->search($filter);
+        $this->assertEquals(1, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->lte('sync_id', 222);
+        $result = $this->object->search($filter);
+        $this->assertEquals(2, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->gt('sync_id', 222);
+        $result = $this->object->search($filter);
+        $this->assertEquals(1, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->lte('sync_id', 222);
+        $result = $this->object->search($filter);
+        $this->assertEquals(2, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->notIn('sync_id', ['111', '222']);
+        $result = $this->object->search($filter);
+        $this->assertEquals(1, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->in('sync_id', [111, 222]);
+        $result = $this->object->search($filter);
+        $this->assertEquals(2, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->like('organization_id', 'orgId');
+        $result = $this->object->search($filter);
+        $this->assertEquals(2, count($result));
+
+        $filter = new SyncLogFilter();
+        $filter->notLike('organization_id', 'orgId');
+        $result = $this->object->search($filter);
+        $this->assertEquals(1, count($result));
+    }
+
+    /**
+     * Test update method.
+     */
+    public function testUpdate()
+    {
+        $entity = $this->getEntity();
+
+        $id = $this->object->create($entity);
+
+        $storedEntity = $this->getEntity($id);
+        $storedEntity->setData(['NEW DATA' => 'NEW VALUE']);
+        $storedEntity->setFinishTime(new \DateTime(self::FINISHED_AT));
+
+        $this->object->update($storedEntity);
+        $storedData = $this->object->getById($id);
+
+        $expectedData = [
+            'box_id' => self::BOX_ID,
+            'sync_id' => self::SYNC_ID,
+            'organization_id' => self::ORGANIZATION_ID,
+            'data' => '{"NEW DATA":"NEW VALUE"}',
+            'finished_at' => self::FINISHED_AT,
+        ];
+
+        $this->assertArraySubset($expectedData, $storedData, 'Returned log record data must be updated.');
+    }
+
+
+    private function getEntity($id = null)
+    {
+
+        return new SyncLogEntity(
+            self::SYNC_ID,
+            self::BOX_ID,
+            self::ORGANIZATION_ID,
+            $this->logData,
+            self::STATUS,
+            $this->reportMock,
+            new \DateTime(self::CREATED_AT),
+            $id
+        );
     }
 }
 
