@@ -228,7 +228,7 @@ class SyncLogFilter
      */
     public function like($field, $value)
     {
-        return $this->addFilter($field, self::OP_LIKE, $value);
+        return $this->addFilter($field, self::OP_LIKE, "%{$value}%");
     }
 
     /**
@@ -238,7 +238,7 @@ class SyncLogFilter
      */
     public function notLike($field, $value)
     {
-        return $this->addFilter($field, self::OP_NOT_LIKE, $value);
+        return $this->addFilter($field, self::OP_NOT_LIKE, "%{$value}%");
     }
 
     /**

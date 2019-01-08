@@ -93,7 +93,7 @@
       */
      public function create(SyncLogEntity $entity)
      {
-         $this->getPersistence()->insert(
+         return $this->getPersistence()->insert(
              self::TABLE_NAME,
              [
                  SyncLogStorageInterface::COLUMN_SYNC_ID => $entity->getSyncId(),
@@ -129,7 +129,7 @@
 
          $qb->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $qb->createNamedParameter($entity->getId()));
 
-         return $this->getPersistence()->exec($qb->getSQL(), $qb->getParameters());
+         return $qb->execute();
      }
 
      /**
@@ -144,11 +144,7 @@
          $queryBuilder->select('*')
              ->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $queryBuilder->createNamedParameter($id, \PDO::PARAM_INT));
 
-         $sql = $queryBuilder->getSQL();
-         $params = $queryBuilder->getParameters();
-         /** @var \PDOStatement $stmt */
-         $stmt = $this->getPersistence()->query($sql, $params);
-         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+         $data = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
          if (count($data) != 1) {
              throw new common_exception_NotFound('There is no synchronization log record for provided ID.');
@@ -172,12 +168,7 @@
              ->where(SyncLogStorageInterface::COLUMN_SYNC_ID . ' = ' . $queryBuilder->createNamedParameter($syncId, \PDO::PARAM_INT))
              ->andWhere(SyncLogStorageInterface::COLUMN_BOX_ID . ' = ' . $queryBuilder->createNamedParameter($boxId, \PDO::PARAM_STR));
 
-         $sql = $queryBuilder->getSQL();
-         $params = $queryBuilder->getParameters();
-         /** @var \PDOStatement $stmt */
-         $stmt = $this->getPersistence()->query($sql, $params);
-         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
+         $data = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
          if (count($data) != 1) {
              throw new common_exception_NotFound('There is no unique synchronization log record.');
          }
@@ -244,10 +235,19 @@
      {
          foreach ($syncLogFilter->getFilters() as $filter) {
              if (is_array($filter['value'])) {
-                 $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
+                 if ($filter['operator'] == SyncLogFilter::OP_NOT_IN) {
+                     $qb->andWhere($qb->expr()->notIn($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
+                 } else {
+                     $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
+                 }
+             } else if ($filter['operator'] == SyncLogFilter::OP_LIKE) {
+                 $qb->andWhere($qb->expr()->like($filter['column'], $qb->createNamedParameter($filter['value'])));
+             } else if ($filter['operator'] == SyncLogFilter::OP_NOT_LIKE) {
+                 $qb->andWhere($qb->expr()->notLike($filter['column'], $qb->createNamedParameter($filter['value'])));
              } else {
                  $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));
              }
+
          }
      }
  }
