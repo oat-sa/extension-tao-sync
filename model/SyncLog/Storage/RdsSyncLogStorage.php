@@ -52,7 +52,7 @@
       * @param array $options
       * @throws MissingOptionException
       */
-     public function __construct(array $options = array())
+     public function __construct(array $options)
      {
          parent::__construct($options);
 
@@ -194,9 +194,9 @@
              return (int) $qb->execute()->fetchColumn();
          } catch (\Exception $e) {
              $this->logError('Counting synchronization logs failed: '. $e->getMessage());
+             
+             return 0;
          }
-
-         return 0;
      }
 
 
