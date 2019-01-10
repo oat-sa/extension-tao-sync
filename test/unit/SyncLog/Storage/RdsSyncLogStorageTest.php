@@ -169,7 +169,7 @@ class RdsSyncLogStorageTest extends TestCase
     {
         $entity = $this->getEntity();
 
-        $id = $this->object->create($entity);
+        $this->object->create($entity);
         $storedData = $this->object->getBySyncIdAndBoxId(self::SYNC_ID, self::BOX_ID);
 
         $expectedData = [
@@ -280,52 +280,52 @@ class RdsSyncLogStorageTest extends TestCase
         $filter = new SyncLogFilter();
         $filter->eq('organization_id', 'orgId1');
         $result = $this->object->search($filter);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
 
         $filter = new SyncLogFilter();
         $filter->neq('organization_id', 'orgId1');
         $result = $this->object->search($filter);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $filter = new SyncLogFilter();
         $filter->lt('sync_id', 222);
         $result = $this->object->search($filter);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
 
         $filter = new SyncLogFilter();
         $filter->lte('sync_id', 222);
         $result = $this->object->search($filter);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $filter = new SyncLogFilter();
         $filter->gt('sync_id', 222);
         $result = $this->object->search($filter);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
 
         $filter = new SyncLogFilter();
         $filter->lte('sync_id', 222);
         $result = $this->object->search($filter);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $filter = new SyncLogFilter();
         $filter->notIn('sync_id', ['111', '222']);
         $result = $this->object->search($filter);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
 
         $filter = new SyncLogFilter();
         $filter->in('sync_id', [111, 222]);
         $result = $this->object->search($filter);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $filter = new SyncLogFilter();
         $filter->like('organization_id', 'orgId');
         $result = $this->object->search($filter);
-        $this->assertEquals(2, count($result));
+        $this->assertCount(2, $result);
 
         $filter = new SyncLogFilter();
         $filter->notLike('organization_id', 'orgId');
         $result = $this->object->search($filter);
-        $this->assertEquals(1, count($result));
+        $this->assertCount(1, $result);
     }
 
     /**
@@ -355,7 +355,10 @@ class RdsSyncLogStorageTest extends TestCase
         $this->assertArraySubset($expectedData, $storedData, 'Returned log record data must be updated.');
     }
 
-
+    /**
+     * @param integer|null $id
+     * @return SyncLogEntity
+     */
     private function getEntity($id = null)
     {
 
