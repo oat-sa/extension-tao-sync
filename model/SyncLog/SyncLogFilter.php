@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\model\SyncLog;
 
+use InvalidArgumentException;
 use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
 
 /**
@@ -73,11 +74,14 @@ class SyncLogFilter
     }
 
     /**
-     * @param mixed $sortBy
+     * @param string $sortBy
      * @return SyncLogFilter
      */
     public function setSortBy($sortBy)
     {
+        if (!is_string($sortBy)) {
+            throw new InvalidArgumentException('Invalid column name provided.');
+        }
         $this->sortBy = $sortBy;
         return $this;
     }
@@ -91,11 +95,14 @@ class SyncLogFilter
     }
 
     /**
-     * @param mixed $sortOrder
+     * @param string $sortOrder
      * @return SyncLogFilter
      */
     public function setSortOrder($sortOrder)
     {
+        if (!is_string($sortOrder)) {
+            throw new InvalidArgumentException('Invalid value for sort order provided.');
+        }
         $this->sortOrder = $sortOrder;
         return $this;
     }
@@ -152,12 +159,17 @@ class SyncLogFilter
      */
     public function addFilter($field, $operator, $value)
     {
+        if (!is_string($field)) {
+            throw new InvalidArgumentException('Invalid field name provided.');
+        }
+
         $this->assertValidOperator($operator);
         $this->filters[] =  [
             'column' => (string) $field,
             'operator' => $operator,
             'value' => $value
         ];
+
         return $this;
     }
 
@@ -263,7 +275,7 @@ class SyncLogFilter
 
     /**
      * @param $op
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     private function assertValidOperator($op)
     {
@@ -280,7 +292,7 @@ class SyncLogFilter
             self::OP_NOT_IN,
         ];
         if (!in_array($op, $operators)) {
-            throw new \InvalidArgumentException('Operator "'. $op .'"" is not a valid operator.');
+            throw new InvalidArgumentException('Operator "'. $op .'"" is not a valid operator.');
         }
     }
 }
