@@ -77,8 +77,7 @@
      }
 
      /**
-      * @return \Doctrine\DBAL\Query\QueryBuilder
-      * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+      * @return QueryBuilder
       */
      private function getQueryBuilder()
      {
@@ -89,7 +88,7 @@
       * Store SyncLogEntity in rds storage.
       *
       * @param SyncLogEntity $entity
-      * @return mixed|void
+      * @return integer
       */
      public function create(SyncLogEntity $entity)
      {
@@ -133,10 +132,9 @@
      }
 
      /**
-      * @param $id
-      * @return SyncLogEntity
+      * @param integer $id
+      * @return array Synchronization log details.
       * @throws common_exception_NotFound
-      * @throws InvalidServiceManagerException
       */
      public function getById($id)
      {
@@ -169,7 +167,7 @@
              ->andWhere(SyncLogStorageInterface::COLUMN_BOX_ID . ' = ' . $queryBuilder->createNamedParameter($boxId, \PDO::PARAM_STR));
 
          $data = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
-         if (count($data) != 1) {
+         if (count($data) !== 1) {
              throw new common_exception_NotFound('There is no unique synchronization log record.');
          }
 
