@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\SyncLog\Payload;
 
+use Closure;
 use oat\tao\model\datatable\DatatablePayload as DataTablePayloadInterface;
 use oat\tao\model\datatable\DatatableRequest;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
@@ -30,11 +31,19 @@ class DataTablePayload implements DataTablePayloadInterface
      * @var SyncLogFilter;
      */
     private $syncLogFilter;
+
+    /**
+     * @var SyncLogServiceInterface
+     */
     private $syncLogService;
+
+    /**
+     * @var DatatableRequest
+     */
     private $request;
 
     /**
-     * @var \Closure
+     * @var Closure
      */
     private $rowCustomizer;
 
@@ -52,32 +61,25 @@ class DataTablePayload implements DataTablePayloadInterface
         $this->syncLogService = $syncLogService;
     }
 
+    /**
+     * Set filters.
+     *
+     * @param SyncLogFilter $filters
+     */
     public function setFilters (SyncLogFilter $filters)
     {
         $this->syncLogFilter = $filters;
     }
 
     /**
-     * You can pass an anonymous function to customise the final payload: either to change the value of a field or to add extra field(s);
+     * Set function to customise result row.
      *
-     * The function will be bind to the task log entity (TaskLogEntity) so $this can be used inside of the closure.
-     * The return value needs to be an array.
+     * You can control list of returned fields, change the value of a field or add extra field(s);
      *
-     * For example:
-     * <code>
-     *  $payload->customiseRowBy(function (){
-     *      $row['extraField'] = 'value';
-     *      $row['extraField2'] = $this->getParameters()['some_parameter_key'];
-     *      $row['createdAt'] = \tao_helpers_Date::displayeDate($this->getCreatedAt());
-     *
-     *      return $row;
-     *  });
-     * </code>
-     *
-     * @param \Closure $func
+     * @param Closure $func
      * @return DataTablePayload
      */
-    public function customiseRowBy($func)
+    public function customiseRowBy(Closure $func)
     {
         $this->rowCustomizer = $func;
 
@@ -85,6 +87,8 @@ class DataTablePayload implements DataTablePayloadInterface
     }
 
     /**
+     * Get DataTable payload.
+     *
      * @return array
      */
     public function getPayload()
