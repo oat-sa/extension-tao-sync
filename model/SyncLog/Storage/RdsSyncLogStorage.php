@@ -88,29 +88,32 @@
       * Store SyncLogEntity in rds storage.
       *
       * @param SyncLogEntity $entity
-      * @return integer
+      * @return integer Id of created record.
       */
      public function create(SyncLogEntity $entity)
      {
-         return $this->getPersistence()->insert(
-             self::TABLE_NAME,
-             [
-                 SyncLogStorageInterface::COLUMN_SYNC_ID => $entity->getSyncId(),
-                 SyncLogStorageInterface::COLUMN_BOX_ID => $entity->getBoxId(),
-                 SyncLogStorageInterface::COLUMN_ORGANIZATION_ID => $entity->getOrganizationId(),
-                 SyncLogStorageInterface::COLUMN_DATA => json_encode($entity->getData()),
-                 SyncLogStorageInterface::COLUMN_STATUS => $entity->getStatus(),
-                 SyncLogStorageInterface::COLUMN_REPORT => json_encode($entity->getReport()),
-                 SyncLogStorageInterface::COLUMN_STARTED_AT => $entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT)
-             ]
-         );
+
+         $qb = $this->getQueryBuilder();
+         $id = $qb->insert(self::TABLE_NAME)
+             ->values([
+                 SyncLogStorageInterface::COLUMN_SYNC_ID            => $qb->createNamedParameter($entity->getSyncId()),
+                 SyncLogStorageInterface::COLUMN_BOX_ID             => $qb->createNamedParameter($entity->getBoxId()),
+                 SyncLogStorageInterface::COLUMN_ORGANIZATION_ID    => $qb->createNamedParameter($entity->getOrganizationId()),
+                 SyncLogStorageInterface::COLUMN_DATA               => $qb->createNamedParameter(json_encode($entity->getData())),
+                 SyncLogStorageInterface::COLUMN_STATUS             => $qb->createNamedParameter($entity->getStatus()),
+                 SyncLogStorageInterface::COLUMN_REPORT             => $qb->createNamedParameter(json_encode($entity->getReport())),
+                 SyncLogStorageInterface::COLUMN_STARTED_AT         => $qb->createNamedParameter($entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT))
+             ])
+             ->execute();
+
+         return $id;
      }
 
      /**
       * Update synchronization log record.
       *
       * @param SyncLogEntity $entity
-      * @return mixed
+      * @return integer Number of updated records.
       */
      public function update(SyncLogEntity $entity)
      {
