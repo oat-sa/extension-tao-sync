@@ -52,7 +52,7 @@
       * @param array $options
       * @throws MissingOptionException
       */
-     public function __construct(array $options = array())
+     public function __construct(array $options)
      {
          parent::__construct($options);
 
@@ -77,8 +77,7 @@
      }
 
      /**
-      * @return \Doctrine\DBAL\Query\QueryBuilder
-      * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+      * @return QueryBuilder
       */
      private function getQueryBuilder()
      {
@@ -89,29 +88,32 @@
       * Store SyncLogEntity in rds storage.
       *
       * @param SyncLogEntity $entity
-      * @return mixed|void
+      * @return integer Id of created record.
       */
      public function create(SyncLogEntity $entity)
      {
-         $this->getPersistence()->insert(
-             self::TABLE_NAME,
-             [
-                 SyncLogStorageInterface::COLUMN_SYNC_ID => $entity->getSyncId(),
-                 SyncLogStorageInterface::COLUMN_BOX_ID => $entity->getBoxId(),
-                 SyncLogStorageInterface::COLUMN_ORGANIZATION_ID => $entity->getOrganizationId(),
-                 SyncLogStorageInterface::COLUMN_DATA => json_encode($entity->getData()),
-                 SyncLogStorageInterface::COLUMN_STATUS => $entity->getStatus(),
-                 SyncLogStorageInterface::COLUMN_REPORT => json_encode($entity->getReport()),
-                 SyncLogStorageInterface::COLUMN_STARTED_AT => $entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT)
-             ]
-         );
+
+         $qb = $this->getQueryBuilder();
+         $id = $qb->insert(self::TABLE_NAME)
+             ->values([
+                 SyncLogStorageInterface::COLUMN_SYNC_ID            => $qb->createNamedParameter($entity->getSyncId()),
+                 SyncLogStorageInterface::COLUMN_BOX_ID             => $qb->createNamedParameter($entity->getBoxId()),
+                 SyncLogStorageInterface::COLUMN_ORGANIZATION_ID    => $qb->createNamedParameter($entity->getOrganizationId()),
+                 SyncLogStorageInterface::COLUMN_DATA               => $qb->createNamedParameter(json_encode($entity->getData())),
+                 SyncLogStorageInterface::COLUMN_STATUS             => $qb->createNamedParameter($entity->getStatus()),
+                 SyncLogStorageInterface::COLUMN_REPORT             => $qb->createNamedParameter(json_encode($entity->getReport())),
+                 SyncLogStorageInterface::COLUMN_STARTED_AT         => $qb->createNamedParameter($entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT))
+             ])
+             ->execute();
+
+         return $id;
      }
 
      /**
       * Update synchronization log record.
       *
       * @param SyncLogEntity $entity
-      * @return mixed
+      * @return integer Number of updated records.
       */
      public function update(SyncLogEntity $entity)
      {
@@ -129,14 +131,13 @@
 
          $qb->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $qb->createNamedParameter($entity->getId()));
 
-         return $this->getPersistence()->exec($qb->getSQL(), $qb->getParameters());
+         return $qb->execute();
      }
 
      /**
-      * @param $id
-      * @return SyncLogEntity
+      * @param integer $id
+      * @return array Synchronization log details.
       * @throws common_exception_NotFound
-      * @throws InvalidServiceManagerException
       */
      public function getById($id)
      {
@@ -144,11 +145,7 @@
          $queryBuilder->select('*')
              ->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $queryBuilder->createNamedParameter($id, \PDO::PARAM_INT));
 
-         $sql = $queryBuilder->getSQL();
-         $params = $queryBuilder->getParameters();
-         /** @var \PDOStatement $stmt */
-         $stmt = $this->getPersistence()->query($sql, $params);
-         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+         $data = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
          if (count($data) != 1) {
              throw new common_exception_NotFound('There is no synchronization log record for provided ID.');
@@ -172,13 +169,8 @@
              ->where(SyncLogStorageInterface::COLUMN_SYNC_ID . ' = ' . $queryBuilder->createNamedParameter($syncId, \PDO::PARAM_INT))
              ->andWhere(SyncLogStorageInterface::COLUMN_BOX_ID . ' = ' . $queryBuilder->createNamedParameter($boxId, \PDO::PARAM_STR));
 
-         $sql = $queryBuilder->getSQL();
-         $params = $queryBuilder->getParameters();
-         /** @var \PDOStatement $stmt */
-         $stmt = $this->getPersistence()->query($sql, $params);
-         $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
-         if (count($data) != 1) {
+         $data = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
+         if (count($data) !== 1) {
              throw new common_exception_NotFound('There is no unique synchronization log record.');
          }
 
@@ -193,19 +185,12 @@
       */
      public function count(SyncLogFilter $filter)
      {
-         try {
-             $qb = $this->getQueryBuilder()
-                 ->select('COUNT(*)')
-                 ->from(self::TABLE_NAME);
+         $qb = $this->getQueryBuilder()
+             ->select('COUNT(*)')
+             ->from(self::TABLE_NAME);
+         $this->applyFilters($qb, $filter);
 
-             $this->applyFilters($qb, $filter);
-
-             return (int) $qb->execute()->fetchColumn();
-         } catch (\Exception $e) {
-             $this->logError('Counting synchronization logs failed: '. $e->getMessage());
-         }
-
-         return 0;
+         return (int) $qb->execute()->fetchColumn();
      }
 
 
@@ -215,25 +200,19 @@
       */
      public function search(SyncLogFilter $filter)
      {
-         try {
-             $qb = $this->getQueryBuilder()
-                 ->select($filter->getColumns())
-                 ->from(self::TABLE_NAME);
+         $qb = $this->getQueryBuilder()
+             ->select($filter->getColumns())
+             ->from(self::TABLE_NAME);
 
-             $qb->setMaxResults($filter->getLimit());
-             $qb->setFirstResult($filter->getOffset());
+         $qb->setMaxResults($filter->getLimit());
+         $qb->setFirstResult($filter->getOffset());
 
-             if ($filter->getSortBy()) {
-                 $qb->orderBy($filter->getSortBy(), $filter->getSortOrder());
-             }
-             $this->applyFilters($qb, $filter);
-
-             return $qb->execute()->fetchAll();
-         } catch (\Exception $e) {
-             $this->logError('Error searching for synchronization logs: ' . $e->getMessage());
-
-             return [];
+         if ($filter->getSortBy()) {
+             $qb->orderBy($filter->getSortBy(), $filter->getSortOrder());
          }
+         $this->applyFilters($qb, $filter);
+
+         return $qb->execute()->fetchAll();
      }
 
      /**
@@ -244,7 +223,15 @@
      {
          foreach ($syncLogFilter->getFilters() as $filter) {
              if (is_array($filter['value'])) {
-                 $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
+                 if ($filter['operator'] == SyncLogFilter::OP_NOT_IN) {
+                     $qb->andWhere($qb->expr()->notIn($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
+                 } else {
+                     $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
+                 }
+             } else if ($filter['operator'] == SyncLogFilter::OP_LIKE) {
+                 $qb->andWhere($qb->expr()->like($filter['column'], $qb->createNamedParameter($filter['value'])));
+             } else if ($filter['operator'] == SyncLogFilter::OP_NOT_LIKE) {
+                 $qb->andWhere($qb->expr()->notLike($filter['column'], $qb->createNamedParameter($filter['value'])));
              } else {
                  $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));
              }

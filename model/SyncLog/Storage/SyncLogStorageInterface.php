@@ -42,7 +42,7 @@ interface SyncLogStorageInterface
      * Store synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return mixed
+     * @return integer Id of created record.
      */
     public function create(SyncLogEntity $entity);
 
@@ -50,7 +50,7 @@ interface SyncLogStorageInterface
      * Update synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return mixed
+     * @return integer Number of updated records.
      */
     public function update(SyncLogEntity $entity);
 

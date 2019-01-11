@@ -72,6 +72,7 @@ class SyncLogEntity
      * @param string $status
      * @param Report $report
      * @param DateTime $startTime
+     * @param integer|null $id
      */
     public function __construct($syncId, $boxId, $organizationId, array $data, $status, Report $report, DateTime $startTime, $id = null)
     {
