@@ -17,7 +17,7 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\scripts\tool\synchronizationLog;
+namespace oat\taoSync\scripts\tool\SyncLog;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\event\SyncFailedEvent;
