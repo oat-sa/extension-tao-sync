@@ -272,16 +272,16 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
     /**
      * Update report with import results.
      *
-     * @param array $importAcknowledgment
+     * @param array $importAcknowledgments
      */
-    protected function reportImportCompleted(array $importAcknowledgment)
+    protected function reportImportCompleted(array $importAcknowledgments)
     {
         $syncSuccess = $syncFailed = [];
-        foreach ($importAcknowledgment as $id => $data) {
-            if ((bool) $data['success'] == true) {
-                $syncSuccess[$id] = $data['deliveryId'];
+        foreach ($importAcknowledgments as $acknowledgementId => $acknowledgementData) {
+            if ((bool) $acknowledgementData['success'] == true) {
+                $syncSuccess[$acknowledgementId] = $acknowledgementData['deliveryId'];
             } else {
-                $syncFailed[] = $id;
+                $syncFailed[] = $acknowledgementId;
             }
         }
 
