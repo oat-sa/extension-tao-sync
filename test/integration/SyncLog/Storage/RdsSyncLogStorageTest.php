@@ -19,10 +19,11 @@
 
 namespace oat\taoSync\test\unit\SyncLog\Storage;
 
-
+use DateTime;
+use common_report_Report as Report;
+use oat\generis\test\GenerisTestCase;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
-use oat\generis\test\TestCase;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
@@ -30,7 +31,7 @@ use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 /**
  * Class RdsSyncLogStorageTest
  */
-class RdsSyncLogStorageTest extends TestCase
+class RdsSyncLogStorageTest extends GenerisTestCase
 {
     const SYNC_ID = '111';
     const BOX_ID = 'BOX_ID';
@@ -45,9 +46,9 @@ class RdsSyncLogStorageTest extends TestCase
     private $object;
 
     /**
-     * @var \common_report_Report|\PHPUnit_Framework_MockObject_MockObject
+     * @var Report
      */
-    private $reportMock;
+    private $report;
 
     private $logData = ['ENTITY_TYPE' => ['ACTION' => 'AMOUNT']];
 
@@ -58,9 +59,7 @@ class RdsSyncLogStorageTest extends TestCase
     {
         parent::setUp();
 
-        $this->reportMock = $this->createMock(\common_report_Report::class);
-        $this->reportMock->method('JsonSerialize')
-            ->willReturn(['data' => 'REPORT_DATA']);
+        $this->report = Report::createInfo('TEST REPORT');
         $sqlMock = $this->getSqlMock('sync_log_storage_test');
         $persistence = $sqlMock->getPersistenceById('sync_log_storage_test');
 
@@ -134,21 +133,12 @@ class RdsSyncLogStorageTest extends TestCase
     public function testGetById()
     {
         $entity = $this->getEntity();
-
         $id = $this->object->create($entity);
-        $storedData = $this->object->getById($id);
 
-        $expectedData = [
-            'box_id' => self::BOX_ID,
-            'sync_id' => self::SYNC_ID,
-            'organization_id' => self::ORGANIZATION_ID,
-            'status' => self::STATUS,
-            'data' => '{"ENTITY_TYPE":{"ACTION":"AMOUNT"}}',
-            'created_at' => self::CREATED_AT,
-            'finished_at' => null,
-        ];
+        $storedEntity = $this->object->getById($id);
 
-        $this->assertArraySubset($expectedData, $storedData);
+        $this->assertInstanceOf(SyncLogEntity::class, $storedEntity);
+        $this->assertEquals($id, $storedEntity->getId(), 'Entity with correct ID must be returned.');
     }
 
     /**
@@ -170,19 +160,11 @@ class RdsSyncLogStorageTest extends TestCase
         $entity = $this->getEntity();
 
         $this->object->create($entity);
-        $storedData = $this->object->getBySyncIdAndBoxId(self::SYNC_ID, self::BOX_ID);
+        $storedEntity = $this->object->getBySyncIdAndBoxId(self::SYNC_ID, self::BOX_ID);
 
-        $expectedData = [
-            'box_id' => self::BOX_ID,
-            'sync_id' => self::SYNC_ID,
-            'organization_id' => self::ORGANIZATION_ID,
-            'status' => self::STATUS,
-            'data' => '{"ENTITY_TYPE":{"ACTION":"AMOUNT"}}',
-            'created_at' => self::CREATED_AT,
-            'finished_at' => null,
-        ];
-
-        $this->assertArraySubset($expectedData, $storedData);
+        $this->assertInstanceOf(SyncLogEntity::class, $storedEntity);
+        $this->assertEquals(self::SYNC_ID, $storedEntity->getSyncId(), 'Entity with correct synchronization id must be returned.');
+        $this->assertEquals(self::BOX_ID, $storedEntity->getBoxId(), 'Entity with correct box id must be returned.');
     }
 
     /**
@@ -196,8 +178,8 @@ class RdsSyncLogStorageTest extends TestCase
             self::ORGANIZATION_ID,
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT)
+            $this->report,
+            new DateTime(self::CREATED_AT)
         );
 
         $entity2 = new SyncLogEntity(
@@ -206,8 +188,8 @@ class RdsSyncLogStorageTest extends TestCase
             self::ORGANIZATION_ID,
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT)
+            $this->report,
+            new DateTime(self::CREATED_AT)
         );
 
         $entity3 = new SyncLogEntity(
@@ -216,8 +198,8 @@ class RdsSyncLogStorageTest extends TestCase
             self::ORGANIZATION_ID,
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT)
+            $this->report,
+            new DateTime(self::CREATED_AT)
         );
 
         $filter = new SyncLogFilter();
@@ -244,8 +226,8 @@ class RdsSyncLogStorageTest extends TestCase
             'orgId1',
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT)
+            $this->report,
+            new DateTime(self::CREATED_AT)
         );
 
         $entity2 = new SyncLogEntity(
@@ -254,8 +236,8 @@ class RdsSyncLogStorageTest extends TestCase
             'orgId2',
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT)
+            $this->report,
+            new DateTime(self::CREATED_AT)
         );
 
         $entity3 = new SyncLogEntity(
@@ -264,8 +246,8 @@ class RdsSyncLogStorageTest extends TestCase
             'organizationId3',
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT)
+            $this->report,
+            new DateTime(self::CREATED_AT)
         );
 
         $filter = new SyncLogFilter();
@@ -334,25 +316,21 @@ class RdsSyncLogStorageTest extends TestCase
     public function testUpdate()
     {
         $entity = $this->getEntity();
+        $newData = ['NEW DATA' => 'NEW VALUE'];
+        $finishedAt = new DateTime(self::FINISHED_AT);
 
         $id = $this->object->create($entity);
 
         $storedEntity = $this->getEntity($id);
-        $storedEntity->setData(['NEW DATA' => 'NEW VALUE']);
-        $storedEntity->setFinishTime(new \DateTime(self::FINISHED_AT));
+        $storedEntity->setData($newData);
+        $storedEntity->setFinishTime($finishedAt);
 
         $this->object->update($storedEntity);
-        $storedData = $this->object->getById($id);
+        $storedEntity = $this->object->getById($id);
 
-        $expectedData = [
-            'box_id' => self::BOX_ID,
-            'sync_id' => self::SYNC_ID,
-            'organization_id' => self::ORGANIZATION_ID,
-            'data' => '{"NEW DATA":"NEW VALUE"}',
-            'finished_at' => self::FINISHED_AT,
-        ];
-
-        $this->assertArraySubset($expectedData, $storedData, 'Returned log record data must be updated.');
+        $this->assertInstanceOf(SyncLogEntity::class, $storedEntity);
+        $this->assertEquals($newData, $storedEntity->getData(), 'Data value must be updated.');
+        $this->assertEquals($finishedAt, $storedEntity->getFinishTime(), 'Finised time must be stored.');
     }
 
     /**
@@ -368,8 +346,9 @@ class RdsSyncLogStorageTest extends TestCase
             self::ORGANIZATION_ID,
             $this->logData,
             self::STATUS,
-            $this->reportMock,
-            new \DateTime(self::CREATED_AT),
+            $this->report,
+            new DateTime(self::CREATED_AT),
+            new DateTime(self::FINISHED_AT),
             $id
         );
     }
