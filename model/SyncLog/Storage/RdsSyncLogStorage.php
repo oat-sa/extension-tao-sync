@@ -182,19 +182,12 @@
       */
      public function count(SyncLogFilter $filter)
      {
-         try {
-             $qb = $this->getQueryBuilder()
-                 ->select('COUNT(*)')
-                 ->from(self::TABLE_NAME);
+         $qb = $this->getQueryBuilder()
+             ->select('COUNT(*)')
+             ->from(self::TABLE_NAME);
+         $this->applyFilters($qb, $filter);
 
-             $this->applyFilters($qb, $filter);
-
-             return (int) $qb->execute()->fetchColumn();
-         } catch (\Exception $e) {
-             $this->logError('Counting synchronization logs failed: '. $e->getMessage());
-             
-             return 0;
-         }
+         return (int) $qb->execute()->fetchColumn();
      }
 
 
@@ -204,25 +197,19 @@
       */
      public function search(SyncLogFilter $filter)
      {
-         try {
-             $qb = $this->getQueryBuilder()
-                 ->select($filter->getColumns())
-                 ->from(self::TABLE_NAME);
+         $qb = $this->getQueryBuilder()
+             ->select($filter->getColumns())
+             ->from(self::TABLE_NAME);
 
-             $qb->setMaxResults($filter->getLimit());
-             $qb->setFirstResult($filter->getOffset());
+         $qb->setMaxResults($filter->getLimit());
+         $qb->setFirstResult($filter->getOffset());
 
-             if ($filter->getSortBy()) {
-                 $qb->orderBy($filter->getSortBy(), $filter->getSortOrder());
-             }
-             $this->applyFilters($qb, $filter);
-
-             return $qb->execute()->fetchAll();
-         } catch (\Exception $e) {
-             $this->logError('Error searching for synchronization logs: ' . $e->getMessage());
-
-             return [];
+         if ($filter->getSortBy()) {
+             $qb->orderBy($filter->getSortBy(), $filter->getSortOrder());
          }
+         $this->applyFilters($qb, $filter);
+
+         return $qb->execute()->fetchAll();
      }
 
      /**
@@ -245,7 +232,6 @@
              } else {
                  $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));
              }
-
          }
      }
  }
