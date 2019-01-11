@@ -109,15 +109,17 @@ class SynchronisationApi extends \tao_actions_RestController
             $eventManager->trigger(new SyncRequestEvent($params, $report));
 
             $entities = $this->getSyncService()->fetchEntityDetails($type, $entityIds, $params);
+
             $report->setData($logData = [$type => ['pushed' => count($entities)]]);
             $report->add(\common_report_Report::createInfo(sprintf('(%s) %d entities pushed.', $type, count($entities))));
+            $eventManager->trigger(new SyncResponseEvent($params, $report));
 
             $this->returnJson($entities);
         } catch (\Exception $e) {
             $report->add(\common_report_Report::createFailure('Synchronization request failed: ' . $e->getMessage()));
-            $this->returnFailure($e);
-        } finally {
             $eventManager->trigger(new SyncResponseEvent($params, $report));
+
+            $this->returnFailure($e);
         }
     }
 
