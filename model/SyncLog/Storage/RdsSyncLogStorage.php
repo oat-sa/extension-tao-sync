@@ -279,6 +279,7 @@
              $data[self::COLUMN_ORGANIZATION_ID],
              $data[self::COLUMN_REPORT],
              $data[self::COLUMN_STARTED_AT],
+             $data[self::COLUMN_FINISHED_AT],
              $data[self::COLUMN_ID]
          );
 

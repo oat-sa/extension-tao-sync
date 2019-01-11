@@ -72,9 +72,10 @@ class SyncLogEntity
      * @param string $status
      * @param Report $report
      * @param DateTime $startTime
+     * @param DateTime $finishTime
      * @param integer|null $id
      */
-    public function __construct($syncId, $boxId, $organizationId, array $data, $status, Report $report, DateTime $startTime, $id = null)
+    public function __construct($syncId, $boxId, $organizationId, array $data, $status, Report $report, DateTime $startTime, DateTime $finishTime = null, $id = null)
     {
         $this->id = $id;
         $this->syncId = $syncId;
@@ -84,6 +85,7 @@ class SyncLogEntity
         $this->status = $status;
         $this->report = $report;
         $this->startTime = $startTime;
+        $this->finishTime = $finishTime;
     }
 
     /**
