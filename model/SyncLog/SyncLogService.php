@@ -19,14 +19,12 @@
 
 namespace oat\taoSync\model\SyncLog;
 
-use DateTime;
 use common_exception_NotFound;
 use common_exception_Error;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\SyncLogEntityNotFound;
 use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
-use common_report_Report as Report;
 
 /**
  * Class SyncLogService
@@ -43,7 +41,12 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      */
     private $storage;
 
-    public function __construct(array $options = array())
+    /**
+     * SyncLogService constructor.
+     * @param array $options
+     * @throws MissingOptionException
+     */
+    public function __construct(array $options)
     {
         parent::__construct($options);
 
@@ -97,9 +100,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     public function getById($id)
     {
         try {
-            $syncData = $this->getStorage()->getById($id);
-
-            return $this->createEntityFromArray($syncData);
+            return $this->getStorage()->getById($id);
         } catch (common_exception_NotFound $e) {
             throw new SyncLogEntityNotFound($e->getMessage());
         }
@@ -118,9 +119,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     public function getBySyncIdAndBoxId($syncId, $boxId)
     {
         try {
-            $syncData = $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
-
-            return $this->createEntityFromArray($syncData);
+            return $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
         } catch (common_exception_NotFound $e) {
             throw new SyncLogEntityNotFound($e->getMessage());
         }
@@ -147,35 +146,5 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     public function search(SyncLogFilter $filter)
     {
         return $this->getStorage()->search($filter);
-    }
-
-    /**
-     * @param $data
-     * @return SyncLogEntity
-     * @throws common_exception_Error
-     */
-    private function createEntityFromArray($data)
-    {
-        if (!is_array($data['data'])) {
-            $data['data'] = json_decode($data['data'], true);
-        }
-        if (!$data['report'] instanceof Report) {
-            $data['report'] =  Report::jsonUnserialize($data['report']);
-        }
-        if (!$data['created_at'] instanceof DateTime) {
-            $data['created_at'] = new DateTime((string) $data['created_at']);
-        }
-
-        $syncLogEntity = new SyncLogEntity(
-            $data['sync_id'],
-            $data['box_id'],
-            $data['organization_id'],
-            $data['data'],
-            $data['status'],
-            $data['report'],
-            $data['created_at'],
-            $data['id']
-        );
-        return $syncLogEntity;
     }
 }

@@ -86,6 +86,9 @@ class SyncLogEntity
         $this->startTime = $startTime;
     }
 
+    /**
+     * @return int|null
+     */
     public function getId()
     {
         return $this->id;

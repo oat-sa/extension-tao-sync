@@ -19,6 +19,8 @@
 
 namespace oat\taoSync\model\SyncLog\Storage;
 
+use common_exception_NotFound;
+use common_exception_Error;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 
@@ -59,15 +61,21 @@ interface SyncLogStorageInterface
      *
      * @param $id
      * @return SyncLogEntity
+     *
+     * @throws common_exception_Error
+     * @throws common_exception_NotFound
      */
     public function getById($id);
 
     /**
      * Get synchronization log record by synchronization ID and client ID.
      *
-     * @param $syncId
-     * @param $boxId
+     * @param integer $syncId
+     * @param string $boxId
      * @return SyncLogEntity
+     *
+     * @throws common_exception_Error
+     * @throws common_exception_NotFound
      */
     public function getBySyncIdAndBoxId($syncId, $boxId);
 

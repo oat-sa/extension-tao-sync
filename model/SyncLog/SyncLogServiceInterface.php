@@ -19,7 +19,6 @@
 
 namespace oat\taoSync\model\SyncLog;
 
-use common_exception_NotFound;
 use common_exception_Error;
 use oat\taoSync\model\Exception\SyncLogEntityNotFound;
 
