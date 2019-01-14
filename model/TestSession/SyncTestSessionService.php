@@ -35,6 +35,7 @@ use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use \common_report_Report as Report;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 
 /**
  * Class SyncTestSessionService
@@ -100,8 +101,9 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
             throw new \common_Exception('Error during test sessions synchronisation.
              No acknowledgment was provided by remote server.');
         }
-        $syncSuccess = $syncFailed = [];
 
+        $logData = [self::SYNC_ENTITY => []];
+        $syncSuccess = $syncFailed = [];
         foreach ($syncAcknowledgment as $id => $data) {
             if ((bool)$data['success']) {
                 $syncSuccess[$id] = 1;
@@ -111,12 +113,16 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
                 $this->report->add(Report::createInfo($syncSuccess[$id] . ' sync sessions acknowledged.'));
-            }
-
-            if (!empty($syncFailed)) {
-                $this->report->add(Report::createInfo(count($syncFailed) . ' sync sessions have not been acknowledged.'));
+                $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
             }
         }
+
+        if (!empty($syncFailed)) {
+            $this->report->add(Report::createInfo(count($syncFailed) . ' sync sessions have not been acknowledged.'));
+            $logData[self::SYNC_ENTITY]['upload failed'] = count($syncAcknowledgment['failed']);
+        }
+
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         return $syncSuccess;
     }
@@ -266,16 +272,16 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
     /**
      * Update report with import results.
      *
-     * @param array $importAcknowledgment
+     * @param array $importAcknowledgments
      */
-    protected function reportImportCompleted(array $importAcknowledgment)
+    protected function reportImportCompleted(array $importAcknowledgments)
     {
         $syncSuccess = $syncFailed = [];
-        foreach ($importAcknowledgment as $id => $data) {
-            if ((bool) $data['success'] == true) {
-                $syncSuccess[$id] = $data['deliveryId'];
+        foreach ($importAcknowledgments as $acknowledgementId => $acknowledgementData) {
+            if ((bool) $acknowledgementData['success'] == true) {
+                $syncSuccess[$acknowledgementId] = $acknowledgementData['deliveryId'];
             } else {
-                $syncFailed[] = $id;
+                $syncFailed[] = $acknowledgementId;
             }
         }
 
