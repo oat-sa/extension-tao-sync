@@ -20,6 +20,7 @@
 namespace oat\taoSync\model\SyncLog;
 
 use DateTime;
+use InvalidArgumentException;
 use common_report_Report as Report;
 
 /**
@@ -77,6 +78,26 @@ class SyncLogEntity
      */
     public function __construct($syncId, $boxId, $organizationId, array $data, $status, Report $report, DateTime $startTime, DateTime $finishTime = null, $id = null)
     {
+        if (!is_int($id) && $id !== null) {
+            throw new InvalidArgumentException('Invalid value for "id" parameter provided.');
+        }
+
+        if (!is_int($syncId)) {
+            throw new InvalidArgumentException('Invalid value for "syncId" parameter provided.');
+        }
+
+        if (!is_string($boxId)) {
+            throw new InvalidArgumentException('Invalid value for "boxId" parameter provided.');
+        }
+
+        if (!is_string($organizationId)) {
+            throw new InvalidArgumentException('Invalid value for "organizationId" parameter provided.');
+        }
+
+        if (!is_string($status)) {
+            throw new InvalidArgumentException('Invalid value for "status" parameter provided.');
+        }
+
         $this->id = $id;
         $this->syncId = $syncId;
         $this->boxId = $boxId;
@@ -182,7 +203,7 @@ class SyncLogEntity
     }
 
     /**
-     * @return DateTime
+     * @return DateTime|null
      */
     public function getFinishTime()
     {
@@ -194,6 +215,10 @@ class SyncLogEntity
      */
     public function setFinishTime(DateTime $finishTime)
     {
+        if ($finishTime < $this->startTime) {
+            throw new InvalidArgumentException('Finish time can not be smaller than start time.');
+        }
+
         $this->finishTime = $finishTime;
     }
 }

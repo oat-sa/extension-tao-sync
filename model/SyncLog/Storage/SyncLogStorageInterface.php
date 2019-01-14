@@ -25,8 +25,8 @@ use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 
 /**
- * Class StorageInterface
- * @package oat\taoSync\model
+ * Interface SyncLogStorageInterface
+ * @package oat\taoSync\model\SyncLog\Storage
  */
 interface SyncLogStorageInterface
 {
@@ -59,7 +59,7 @@ interface SyncLogStorageInterface
     /**
      * Get synchronization log record by id.
      *
-     * @param $id
+     * @param integer $id
      * @return SyncLogEntity
      *
      * @throws common_exception_Error

@@ -33,7 +33,7 @@ use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
  */
 class RdsSyncLogStorageTest extends GenerisTestCase
 {
-    const SYNC_ID = '111';
+    const SYNC_ID = 111;
     const BOX_ID = 'BOX_ID';
     const ORGANIZATION_ID = 'TEST_ORGANIZATION_ID';
     const STATUS = 'TEST_STATUS';
@@ -207,9 +207,13 @@ class RdsSyncLogStorageTest extends GenerisTestCase
         $totalCountBefore = $this->object->count($filter);
         $this->assertEquals(0, $totalCountBefore, 'There should not be any records before insert.');
 
-        $this->object->create($entity1);
-        $this->object->create($entity2);
-        $this->object->create($entity3);
+        $id1 = $this->object->create($entity1);
+        $id2 = $this->object->create($entity2);
+        $id3 = $this->object->create($entity3);
+
+        $this->assertEquals(1, $id1, 'Returned ID must be as expected.');
+        $this->assertEquals(2, $id2, 'Returned ID must be as expected.');
+        $this->assertEquals(3, $id3, 'Returned ID must be as expected.');
 
         $totalCountAfter = $this->object->count($filter);
         $this->assertEquals(3, $totalCountAfter, 'Total amount must be as expected.');
