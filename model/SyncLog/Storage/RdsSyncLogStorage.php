@@ -26,6 +26,7 @@
  use oat\taoSync\model\SyncLog\SyncLogEntity;
  use oat\taoSync\model\SyncLog\SyncLogFilter;
  use common_exception_NotFound;
+ use InvalidArgumentException;
  use common_persistence_SqlPersistence;
  use Doctrine\DBAL\Connection;
 
@@ -106,7 +107,7 @@
              ])
              ->execute();
 
-         return $qb->getConnection()->lastInsertId();
+         return (int) $qb->getConnection()->lastInsertId();
      }
 
      /**
@@ -117,6 +118,10 @@
       */
      public function update(SyncLogEntity $entity)
      {
+         if (!$entity->getId()) {
+             throw new InvalidArgumentException('Provided entity must have unique identifier.');
+         }
+
          $qb = $this->getQueryBuilder();
          $qb->update(self::TABLE_NAME)
              ->set(SyncLogStorageInterface::COLUMN_STATUS, $qb->createNamedParameter($entity->getStatus()))
@@ -141,13 +146,26 @@
       */
      public function getById($id)
      {
+         if (!is_int($id)) {
+             throw new InvalidArgumentException('Provided ID parameter must be an integer.');
+         }
          $queryBuilder = $this->getQueryBuilder();
-         $queryBuilder->select('*')
+         $queryBuilder->select([
+                self::COLUMN_ID,
+                self::COLUMN_BOX_ID,
+                self::COLUMN_SYNC_ID,
+                self::COLUMN_ORGANIZATION_ID,
+                self::COLUMN_DATA,
+                self::COLUMN_STATUS,
+                self::COLUMN_REPORT,
+                self::COLUMN_STARTED_AT,
+                self::COLUMN_FINISHED_AT,
+             ])
              ->where(SyncLogStorageInterface::COLUMN_ID . ' = ' . $queryBuilder->createNamedParameter($id, \PDO::PARAM_INT));
 
          $data = $queryBuilder->execute()->fetchAll(\PDO::FETCH_ASSOC);
 
-         if (count($data) != 1) {
+         if (count($data) !== 1) {
              throw new common_exception_NotFound('There is no synchronization log record for provided ID.');
          }
 
@@ -155,8 +173,8 @@
      }
 
      /**
-      * @param $syncId
-      * @param $boxId
+      * @param integer $syncId
+      * @param string $boxId
       * @return SyncLogEntity
       * @throws common_exception_NotFound
       * @throws InvalidServiceManagerException
@@ -223,14 +241,14 @@
      {
          foreach ($syncLogFilter->getFilters() as $filter) {
              if (is_array($filter['value'])) {
-                 if ($filter['operator'] == SyncLogFilter::OP_NOT_IN) {
+                 if ($filter['operator'] === SyncLogFilter::OP_NOT_IN) {
                      $qb->andWhere($qb->expr()->notIn($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
                  } else {
                      $qb->andWhere($qb->expr()->in($filter['column'], $qb->createNamedParameter($filter['value'], Connection::PARAM_STR_ARRAY)));
                  }
-             } else if ($filter['operator'] == SyncLogFilter::OP_LIKE) {
+             } else if ($filter['operator'] === SyncLogFilter::OP_LIKE) {
                  $qb->andWhere($qb->expr()->like($filter['column'], $qb->createNamedParameter($filter['value'])));
-             } else if ($filter['operator'] == SyncLogFilter::OP_NOT_LIKE) {
+             } else if ($filter['operator'] === SyncLogFilter::OP_NOT_LIKE) {
                  $qb->andWhere($qb->expr()->notLike($filter['column'], $qb->createNamedParameter($filter['value'])));
              } else {
                  $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));

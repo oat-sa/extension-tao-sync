@@ -32,7 +32,7 @@ use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
  */
 class RdsSyncLogStorageTest extends TestCase
 {
-    const SYNC_ID = '111';
+    const SYNC_ID = 111;
     const BOX_ID = 'BOX_ID';
     const ORGANIZATION_ID = 'TEST_ORGANIZATION_ID';
     const STATUS = 'TEST_STATUS';
@@ -350,7 +350,7 @@ class RdsSyncLogStorageTest extends TestCase
 
         $expectedData = [
             'box_id' => self::BOX_ID,
-            'sync_id' => self::SYNC_ID,
+            'sync_id' => '111',
             'organization_id' => self::ORGANIZATION_ID,
             'data' => '{"NEW DATA":"NEW VALUE"}',
             'finished_at' => self::FINISHED_AT,

@@ -23,8 +23,8 @@ use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogFilter;
 
 /**
- * Class StorageInterface
- * @package oat\taoSync\model
+ * Interface SyncLogStorageInterface
+ * @package oat\taoSync\model\SyncLog\Storage
  */
 interface SyncLogStorageInterface
 {
@@ -57,7 +57,7 @@ interface SyncLogStorageInterface
     /**
      * Get synchronization log record by id.
      *
-     * @param $id
+     * @param integer $id
      * @return SyncLogEntity
      */
     public function getById($id);
@@ -65,8 +65,8 @@ interface SyncLogStorageInterface
     /**
      * Get synchronization log record by synchronization ID and client ID.
      *
-     * @param $syncId
-     * @param $boxId
+     * @param integer $syncId
+     * @param string $boxId
      * @return SyncLogEntity
      */
     public function getBySyncIdAndBoxId($syncId, $boxId);
