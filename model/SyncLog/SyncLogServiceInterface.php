@@ -14,42 +14,36 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\SyncLog\Storage;
+namespace oat\taoSync\model\SyncLog;
 
-use common_exception_NotFound;
 use common_exception_Error;
-use oat\taoSync\model\SyncLog\SyncLogEntity;
-use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\model\Exception\SyncLogEntityNotFound;
 
 /**
- * Interface SyncLogStorageInterface
- * @package oat\taoSync\model\SyncLog\Storage
+ * Interface SyncLogServiceInterface
+ * @package oat\taoSync\model\SyncLog
  */
-interface SyncLogStorageInterface
+interface SyncLogServiceInterface
 {
-    const COLUMN_ID = 'id';
-    const COLUMN_BOX_ID = 'box_id';
-    const COLUMN_SYNC_ID = 'sync_id';
-    const COLUMN_ORGANIZATION_ID = 'organization_id';
-    const COLUMN_DATA = 'data';
-    const COLUMN_STATUS = 'status';
-    const COLUMN_REPORT = 'report';
-    const COLUMN_STARTED_AT = 'created_at';
-    const COLUMN_FINISHED_AT = 'finished_at';
+    const SERVICE_ID = 'taoSync/SyncLogService';
+
+    const PARAM_SYNC_ID = 'sync_id';
+    const PARAM_BOX_ID = 'box_id';
+    const PARAM_ORGANIZATION_ID = 'organisation_id';
 
     /**
-     * Store synchronization log record.
+     * Create new synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return integer Id of created record.
+     * @return integer Created record ID
      */
     public function create(SyncLogEntity $entity);
 
     /**
-     * Update synchronization log record.
+     * Update existing synchronization log record.
      *
      * @param SyncLogEntity $entity
      * @return integer Number of updated records.
@@ -57,25 +51,25 @@ interface SyncLogStorageInterface
     public function update(SyncLogEntity $entity);
 
     /**
-     * Get synchronization log record by id.
+     * Get SyncLogEntity by ID.
      *
      * @param integer $id
      * @return SyncLogEntity
      *
+     * @throws SyncLogEntityNotFound
      * @throws common_exception_Error
-     * @throws common_exception_NotFound
      */
     public function getById($id);
 
     /**
-     * Get synchronization log record by synchronization ID and client ID.
+     * Get SyncLogEntity by synchronization ID and box ID.
      *
      * @param integer $syncId
      * @param string $boxId
      * @return SyncLogEntity
      *
+     * @throws SyncLogEntityNotFound
      * @throws common_exception_Error
-     * @throws common_exception_NotFound
      */
     public function getBySyncIdAndBoxId($syncId, $boxId);
 
@@ -90,8 +84,8 @@ interface SyncLogStorageInterface
     /**
      * Search synchronization logs by provided filters.
      *
-     * @param SyncLogFilter $syncLogFilter
+     * @param SyncLogFilter $filter
      * @return array
      */
-    public function search(SyncLogFilter $syncLogFilter);
+    public function search(SyncLogFilter $filter);
 }

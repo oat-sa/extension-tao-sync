@@ -19,6 +19,8 @@
 
  namespace oat\taoSync\model\SyncLog\Storage;
 
+ use DateTime;
+ use common_report_Report as Report;
  use Doctrine\DBAL\Query\QueryBuilder;
  use oat\oatbox\service\exception\InvalidServiceManagerException;
  use oat\oatbox\extension\script\MissingOptionException;
@@ -27,6 +29,7 @@
  use oat\taoSync\model\SyncLog\SyncLogFilter;
  use common_exception_NotFound;
  use InvalidArgumentException;
+ use common_exception_Error;
  use common_persistence_SqlPersistence;
  use Doctrine\DBAL\Connection;
 
@@ -140,8 +143,12 @@
      }
 
      /**
+      * Get synchronization log record by id.
+      *
       * @param integer $id
-      * @return array Synchronization log details.
+      * @return SyncLogEntity
+      *
+      * @throws common_exception_Error
       * @throws common_exception_NotFound
       */
      public function getById($id)
@@ -169,15 +176,21 @@
              throw new common_exception_NotFound('There is no synchronization log record for provided ID.');
          }
 
-         return $data[0];
+         $data[0][self::COLUMN_ID] = (int) $data[0][self::COLUMN_ID];
+         $data[0][self::COLUMN_SYNC_ID] = (int) $data[0][self::COLUMN_SYNC_ID];
+
+         return $this->createEntityFromArray($data[0]);
      }
 
      /**
+      * Get synchronization log record by synchronization ID and client ID.
+      *
       * @param integer $syncId
       * @param string $boxId
       * @return SyncLogEntity
+      *
+      * @throws common_exception_Error
       * @throws common_exception_NotFound
-      * @throws InvalidServiceManagerException
       */
      public function getBySyncIdAndBoxId($syncId, $boxId)
      {
@@ -192,7 +205,10 @@
              throw new common_exception_NotFound('There is no unique synchronization log record.');
          }
 
-         return $data[0];
+         $data[0][self::COLUMN_ID] = (int) $data[0][self::COLUMN_ID];
+         $data[0][self::COLUMN_SYNC_ID] = (int) $data[0][self::COLUMN_SYNC_ID];
+
+         return $this->createEntityFromArray($data[0]);
      }
 
      /**
@@ -254,5 +270,43 @@
                  $qb->andWhere("{$filter['column']} {$filter['operator']} " . $qb->createNamedParameter($filter['value']));
              }
          }
+     }
+
+     /**
+      * @param array $data
+      * @return SyncLogEntity
+      * @throws common_exception_Error
+      */
+     private function createEntityFromArray(array $data)
+     {
+         if (!is_array($data[self::COLUMN_DATA])) {
+             $data[self::COLUMN_DATA] = json_decode($data[self::COLUMN_DATA], true);
+         }
+
+         if (!$data[self::COLUMN_REPORT] instanceof Report) {
+             $data[self::COLUMN_REPORT] =  Report::jsonUnserialize($data[self::COLUMN_REPORT]);
+         }
+
+         if (!$data[self::COLUMN_STARTED_AT] instanceof DateTime) {
+             $data[self::COLUMN_STARTED_AT] = new DateTime((string) $data[self::COLUMN_STARTED_AT]);
+         }
+
+         if (!$data[self::COLUMN_FINISHED_AT] instanceof DateTime) {
+             $data[self::COLUMN_FINISHED_AT] = new DateTime((string) $data[self::COLUMN_FINISHED_AT]);
+         }
+
+         $syncLogEntity = new SyncLogEntity(
+             $data[self::COLUMN_SYNC_ID],
+             $data[self::COLUMN_BOX_ID],
+             $data[self::COLUMN_ORGANIZATION_ID],
+             $data[self::COLUMN_DATA],
+             $data[self::COLUMN_ORGANIZATION_ID],
+             $data[self::COLUMN_REPORT],
+             $data[self::COLUMN_STARTED_AT],
+             $data[self::COLUMN_FINISHED_AT],
+             $data[self::COLUMN_ID]
+         );
+
+         return $syncLogEntity;
      }
  }
