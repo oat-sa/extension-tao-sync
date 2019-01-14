@@ -20,6 +20,6 @@
 use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
 
-return $syncLogService = new SyncLogService([SyncLogService::OPTION_STORAGE => RdsSyncLogStorage::SERVICE_ID]);
+return new SyncLogService([SyncLogService::OPTION_STORAGE => RdsSyncLogStorage::SERVICE_ID]);
 
 
