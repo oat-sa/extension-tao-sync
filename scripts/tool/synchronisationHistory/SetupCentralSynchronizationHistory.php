@@ -14,22 +14,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
 namespace oat\taoSync\scripts\tool\synchronisationHistory;
 
+
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
-use oat\taoSync\model\SynchronizationHistory\ClientSynchronizationHistoryService;
+use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 
-/**
- * Class SetupClientSynchronisationHistory
- * @package oat\taoSync\scripts\tool\synchronisationHistory
- */
-class SetupClientSynchronisationHistory extends InstallAction
+class SetupCentralSynchronizationHistory extends InstallAction
 {
     public function __invoke($params)
     {
@@ -60,12 +57,17 @@ class SetupClientSynchronisationHistory extends InstallAction
                     'label' => __('Organisation ID'),
                     'sortable' => false,
                 ],
+                'box_id' => [
+                    'id' => 'box_id',
+                    'label' => __('Box ID'),
+                    'sortable' => false
+                ],
             ]
         ];
         $payloadFormatter = new HistoryPayloadFormatter($options);
         $this->registerService(HistoryPayloadFormatterInterface::SERVICE_ID, $payloadFormatter);
 
-        $synchronisationHistoryService = new ClientSynchronizationHistoryService([]);
+        $synchronisationHistoryService = new SynchronizationHistoryService([]);
         $this->registerService(SynchronizationHistoryServiceInterface::SERVICE_ID, $synchronisationHistoryService);
 
         return \common_report_Report::createSuccess('SynchronizationHistoryService successfully registered.');
