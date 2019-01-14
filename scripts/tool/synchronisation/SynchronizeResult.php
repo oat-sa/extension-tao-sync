@@ -45,7 +45,7 @@ class SynchronizeResult extends AbstractAction
      */
     public function __invoke($params)
     {
-        return $this->getSyncResultService()->synchronizeResults();
+        return $this->getSyncResultService()->synchronizeResults($params);
     }
 
     /**

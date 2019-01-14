@@ -22,19 +22,20 @@ namespace oat\taoSync\model\SynchronizationHistory;
 use oat\oatbox\service\ConfigurableService;
 use oat\oatbox\user\User;
 use oat\tao\model\datatable\DatatableRequest;
-use oat\tao\model\taskQueue\TaskLog;
-use oat\tao\model\taskQueue\TaskLog\Broker\TaskLogBrokerInterface;
-use oat\tao\model\taskQueue\TaskLog\DataTablePayload;
-use oat\tao\model\taskQueue\TaskLog\TaskLogFilter;
-use oat\tao\model\taskQueue\TaskLogInterface;
-use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\taoSync\model\SyncLog\Payload\DataTablePayload;
+
 /**
  * Class SynchronizationHistoryService
  * @package oat\taoSync\model\SynchronizationHistory
  */
 class SynchronizationHistoryService extends ConfigurableService implements SynchronizationHistoryServiceInterface
 {
-    const OPTION_PAYLOAD_FORMATTER = 'payload_formatter';
+    /**
+     * @var User
+     */
+    protected $currentUser;
 
     /**
      * Return synchronization history payload
@@ -43,15 +44,25 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      * @param DatatableRequest $request
      * @return array
      */
-    public function getSyncHistory(User $user, DatatableRequest $request) {
-        /** @var TaskLog $taskLogService */
-        $taskLogService = $this->getServiceLocator()->get(TaskLogInterface::SERVICE_ID);
-        $filter = $this->getFilter($user);
+    public function getSyncHistory(User $user, DatatableRequest $request)
+    {
+        $this->currentUser = $user;
+        $filter = new SyncLogFilter();
+        $this->setFilters($filter);
 
-        $payload = $taskLogService->getDataTablePayload($filter, $request);
-        $this->addPayloadCustomization($payload);
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $payload = new DataTablePayload($filter, $request, $syncLogService);
+        $this->setPayloadCustomizer($payload);
 
         return $payload->getPayload();
+    }
+
+    /**
+     * @param SyncLogFilter $filter
+     */
+    protected function setFilters(SyncLogFilter $filter)
+    {
     }
 
     /**
@@ -59,37 +70,24 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      *
      * @param DataTablePayload $payload
      */
-    private function addPayloadCustomization(DataTablePayload $payload) {
+    private function setPayloadCustomizer(DataTablePayload $payload) {
         $historyFormatter = $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID);
 
-        $payload->customiseRowBy(function () use ($historyFormatter) {
-            return $historyFormatter->format($this);
+        $payload->customiseRowBy(function ($row) use ($historyFormatter) {
+            return $historyFormatter->format($row);
         }, true);
     }
 
     /**
-     * @param User $user
-     * @return TaskLogFilter
-     */
-    private function getFilter(User $user) {
-        $filter = new TaskLogFilter();
-        $filter->addFilter(TaskLogBrokerInterface::COLUMN_TASK_NAME, TaskLogFilter::OP_EQ, SynchronizeAll::class);
-        $filter->addFilter(TaskLogBrokerInterface::COLUMN_OWNER, TaskLogFilter::OP_EQ, $user->getIdentifier());
-
-        return $filter;
-    }
-
-    /**
-     * @param User $user
      * @param $id
      * @return \JsonSerializable
      * @throws \common_exception_NotFound
      */
-    public function getSyncReport(User $user, $id) {
-        /** @var TaskLog $taskLogService */
-        $taskLogService = $this->getServiceLocator()->get(TaskLogInterface::SERVICE_ID);
-        $taskLogEntity = $taskLogService->getByIdAndUser($id, $user->getIdentifier());
+    public function getSyncReport($id) {
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $syncLogEntity = $syncLogService->getById($id);
 
-        return $taskLogEntity->getReport();
+        return $syncLogEntity->getReport();
     }
 }

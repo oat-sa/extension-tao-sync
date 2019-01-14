@@ -19,7 +19,9 @@
 
 namespace oat\taoSync\controller;
 
+use oat\oatbox\session\SessionService;
 use oat\tao\model\datatable\implementation\DatatableRequest;
+use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 use tao_actions_CommonModule;
 
@@ -34,6 +36,10 @@ class SynchronizationHistory extends tao_actions_CommonModule
      */
     public function index()
     {
+        $this->setData('config', [
+            'dataModel' => $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID)->getDataModel()
+        ]);
+
         $this->setView('sync/history.tpl', 'taoSync');
     }
 
@@ -45,10 +51,12 @@ class SynchronizationHistory extends tao_actions_CommonModule
      */
     public function getHistory()
     {
+        /** @var SynchronizationHistoryServiceInterface $syncHistoryService */
         $syncHistoryService = $this->getServiceLocator()->get(SynchronizationHistoryServiceInterface::SERVICE_ID);
 
-        $user = \common_session_SessionManager::getSession()->getUser();
-        $payload = $syncHistoryService->getSyncHistory($user, DatatableRequest::fromGlobals());
+        $user = $this->getServiceLocator()->get(SessionService::SERVICE_ID)->getCurrentUser();
+        $request = DatatableRequest::fromGlobals();
+        $payload = $syncHistoryService->getSyncHistory($user, $request);
 
         $this->returnJson($payload);
     }
@@ -64,11 +72,9 @@ class SynchronizationHistory extends tao_actions_CommonModule
         if (!$this->hasRequestParameter('id')) {
             throw new \common_exception_MissingParameter('id');
         }
-
         $id = $this->getRequestParameter('id');
-        $user = \common_session_SessionManager::getSession()->getUser();
         $syncHistoryService = $this->getServiceLocator()->get(SynchronizationHistoryServiceInterface::SERVICE_ID);
 
-        $this->returnJson($syncHistoryService->getSyncReport($user, $id)->toArray());
+        $this->returnJson($syncHistoryService->getSyncReport($id)->toArray());
     }
 }

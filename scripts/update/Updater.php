@@ -50,6 +50,10 @@ use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
+use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
+use oat\taoSync\model\SyncLog\SyncLogDataParser;
+use oat\taoSync\model\SyncLog\SyncLogService;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
@@ -59,6 +63,7 @@ use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
 use oat\taoSync\scripts\tool\RenameColumnOrgId;
+use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
@@ -446,6 +451,37 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('2.2.0', '3.1.0');
+
+        if ($this->isVersion('3.1.0')) {
+            $storage = new RdsSyncLogStorage([
+                RdsSyncLogStorage::OPTION_PERSISTENCE_ID => 'default'
+            ]);
+            $this->getServiceManager()->register(RdsSyncLogStorage::SERVICE_ID, $storage);
+            $registerRdsSyncLogStorage = new RegisterRdsSyncLogStorage();
+            $registerRdsSyncLogStorage->setServiceLocator($this->getServiceManager());
+            $registerRdsSyncLogStorage->createTable($storage->getPersistence());
+            $this->setVersion('3.2.0');
+        }
+
+        if ($this->isVersion('3.2.0')) {
+            $syncLogService = new SyncLogService([
+                SyncLogService::OPTION_STORAGE => RdsSyncLogStorage::SERVICE_ID
+            ]);
+            $syncLogService->setServiceLocator($this->getServiceManager());
+            $this->getServiceManager()->register(SyncLogServiceInterface::SERVICE_ID, $syncLogService);
+
+            $this->setVersion('3.3.0');
+        }
+
+        if ($this->isVersion('3.3.0')) {
+            $syncLogDataParser = new SyncLogDataParser([]);
+            $syncLogDataParser->setServiceLocator($this->getServiceManager());
+            $this->getServiceManager()->register(SyncLogDataParser::SERVICE_ID, $syncLogDataParser);
+
+            $this->setVersion('3.4.0');
+        }
+
+        $this->skip('3.4.0', '4.2.0');
     }
 
     /**

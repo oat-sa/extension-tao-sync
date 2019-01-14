@@ -20,7 +20,9 @@
 
 namespace oat\taoSync\model;
 
+use common_report_Report as Report;
 use oat\generis\model\OntologyAwareTrait;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\Monitoring;
@@ -30,8 +32,10 @@ use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use Psr\Log\LogLevel;
 
 /**
@@ -52,6 +56,8 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
     /** @var \common_report_Report */
     protected $report;
+    /** @var array Synchronization parameters */
+    protected $syncParams = [];
 
     /**
      * Scan delivery execution to format it
@@ -111,7 +117,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
                 if ($counter % $this->getChunkSize() === 0) {
                     $this->report($counter . ' delivery executions to send to remote server. Sending...', LogLevel::INFO);
-                    $this->sendResults($results);
+                    $this->sendResults($results, $params);
                     $results = [];
                 }
             }
@@ -122,7 +128,7 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         if (!empty($results)) {
-            $this->sendResults($results);
+            $this->sendResults($results, $params);
         }
 
         return $this->report;
@@ -135,15 +141,18 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * Delete results following configuration
      *
      * @param $results
+     * @param array $params Synchronization parameters
      * @throws \common_Exception
      * @throws \common_exception_Error
      */
-    public function sendResults($results)
+    public function sendResults($results, array $params = [])
     {
-        $importAcknowledgment = $this->getSyncClient()->sendResults($results);
+        $importAcknowledgment = $this->getSyncClient()->sendResults($results, $params);
         if (empty($importAcknowledgment)) {
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
         }
+
+        $logData = [self::SYNC_ENTITY => []];
         $syncSuccess = $syncFailed = [];
         foreach ($importAcknowledgment as $id => $data) {
             if ((bool) $data['success'] == true) {
@@ -156,11 +165,14 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         if (!empty($syncSuccess)) {
             $this->getResultSyncHistory()->logResultsAsExported(array_keys($syncSuccess));
             $this->report(count($syncSuccess) . ' delivery execution exports have been acknowledged.', LogLevel::INFO);
+            $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
         }
         if (!empty($syncFailed)) {
             $this->getResultSyncHistory()->logResultsAsExported($syncFailed, ResultSyncHistoryService::STATUS_FAILED);
             $this->report(count($syncFailed) . ' delivery execution exports have not been acknowledged.', LogLevel::ERROR);
+            $logData[self::SYNC_ENTITY]['upload failed'] = count($syncFailed);
         }
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         if ($this->hasDeleteAfterSending()) {
             $this->deleteSynchronizedResult($syncSuccess);
@@ -174,10 +186,12 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      * Create and inject variables
      *
      * @param array $results
+     * @param array $params Synchronization parameters.
      * @return array
      */
-    public function importDeliveryResults(array $results)
+    public function importDeliveryResults(array $results, array $params = [])
     {
+        $this->initImport($params);
         $importAcknowledgment = [];
 
         foreach ($results as $resultId => $result) {
@@ -239,12 +253,16 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                     'success' => (int) $success,
                     'deliveryId' => $deliveryId,
                 ];
+                $this->report->add(Report::createInfo("Delivery execution {$resultId} successfully imported."));
             } else {
                 $importAcknowledgment[$resultId] = [
                     'success' => (int) $success,
                 ];
+                $this->report->add(Report::createFailure("Import failed for delivery execution {$resultId}."));
             }
         }
+
+        $this->reportImportCompleted($importAcknowledgment);
 
         return $importAcknowledgment;
     }
@@ -589,4 +607,44 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         return $deliveryExecution;
     }
 
+    /**
+     * Initialize import.
+     *
+     * @param array $params
+     */
+    protected function initImport(array $params)
+    {
+        $this->report = Report::createInfo('Starting delivery executions import...');
+        $this->syncParams = $params;
+    }
+
+    /**
+     * Update report with import results.
+     *
+     * @param array $importAcknowledgments
+     */
+    protected function reportImportCompleted(array $importAcknowledgments)
+    {
+        $syncSuccess = $syncFailed = [];
+        foreach ($importAcknowledgments as $acknowledgementId => $acknowledgementData) {
+            if ((bool) $acknowledgementData['success'] == true) {
+                $syncSuccess[$acknowledgementId] = $acknowledgementData['deliveryId'];
+            } else {
+                $syncFailed[] = $acknowledgementId;
+            }
+        }
+
+        $syncReportData = [];
+        if (!empty($syncSuccess)) {
+            $syncReportData[self::SYNC_ENTITY]['imported'] = count($syncSuccess);
+        }
+
+        if (!empty($syncFailed)) {
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($syncFailed);
+        }
+        $this->report->setData($syncReportData);
+        $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
+            new SyncResponseEvent($this->syncParams, $this->report)
+        );
+    }
 }

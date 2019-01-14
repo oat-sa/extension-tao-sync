@@ -28,8 +28,10 @@ use oat\taoSync\controller\SynchronisationApi;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\event\SynchronisationStart;
 use oat\taoSync\model\history\DataSyncHistoryService;
+use common_report_Report as Report;
 use oat\taoSync\model\synchronizer\RdfClassSynchronizer;
 use oat\taoSync\model\synchronizer\Synchronizer;
+use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use Psr\Log\LogLevel;
 
 /**
@@ -60,6 +62,9 @@ class SyncService extends ConfigurableService
     /** @var \common_report_Report */
     protected $report;
 
+    /** @var array Synchronization parameters */
+    protected $params;
+
     /**
      * Starting point to synchronization
      *
@@ -69,7 +74,7 @@ class SyncService extends ConfigurableService
      *
      * @param null $type
      * @param array $params
-     * @return \common_report_Report
+     * @return Report
      * @throws \common_Exception
      * @throws \common_exception_BadRequest
      * @throws \common_exception_NotFound
@@ -77,8 +82,8 @@ class SyncService extends ConfigurableService
      */
     public function synchronize($type = null, array $params = [])
     {
-        $syncId = $this->getSyncHistoryService()->createSynchronisation($params);
-        $this->report = \common_report_Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
+        $syncId = $this->getSyncId($params);
+        $this->report = Report::createInfo('Starting synchronization n° "' . $syncId . '" ...');
 
         $this->getEventManager()->trigger(
             new SynchronisationStart($this->getResource(DataSyncHistoryService::SYNCHRO_URI))
@@ -93,7 +98,7 @@ class SyncService extends ConfigurableService
                 $this->synchronizeType($type, $params);
             }
         } catch (\Exception $e) {
-            $this->report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
+            $this->report->add(Report::createFailure('An error has occurred : ' . $e->getMessage()));
         }
 
         return $this->report;
@@ -287,7 +292,7 @@ class SyncService extends ConfigurableService
      * Fetch all entities not processed by synchro. It means that there are not in remote server.
      * Then delete it
      *
-     * @param $type
+     * @param string $type Entity type
      * @throws \common_exception_BadRequest
      * @throws \common_exception_Error
      * @throws \core_kernel_persistence_Exception
@@ -298,6 +303,10 @@ class SyncService extends ConfigurableService
         $this->getSynchronizer($type)->deleteMultiple($entityIds);
         $this->getSyncHistoryService()->logDeletedEntities($type, $entityIds);
         $this->report(count($entityIds) . ' deleted.', LogLevel::INFO);
+        if (!empty($entityIds)) {
+            $logData = [$type => ['deleted' => count($entityIds)]];
+            $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
+        }
     }
 
     /**
@@ -352,6 +361,7 @@ class SyncService extends ConfigurableService
             $this->getSyncHistoryService()->logNotChangedEntities($synchronizer->getId(), $entities['existing']);
         }
 
+        $logData = [$synchronizer->getId() => []];
         if (!empty($entities['create'])) {
             $created = $synchronizer->insertMultiple($entities['create']);
 
@@ -364,6 +374,7 @@ class SyncService extends ConfigurableService
             }
 
             $this->report('(' . $synchronizer->getId() . ') ' . count($created) . ' entities created.', LogLevel::INFO);
+            $logData[$synchronizer->getId()]['created'] = count($created);
             $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $created);
         }
 
@@ -371,8 +382,10 @@ class SyncService extends ConfigurableService
             $synchronizer->updateMultiple($entities['update']);
             $this->report('(' . $synchronizer->getId() . ') ' . count($entities['update']) . ' entities updated.', LogLevel::INFO);
             $entityIds = array_column($entities['update'], 'id');
+            $logData[$synchronizer->getId()]['updated'] = count($entityIds);
             $this->getSyncHistoryService()->logUpdatedEntities($synchronizer->getId(), $entityIds);
         }
+        $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
         $synchronizer->after($entities);
 
@@ -454,7 +467,7 @@ class SyncService extends ConfigurableService
     /**
      * Get a synchronizer from config
      *
-     * @param $type
+     * @param string $type Synchronizer type
      * @return Synchronizer
      * @throws \common_exception_BadRequest
      */
@@ -493,4 +506,18 @@ class SyncService extends ConfigurableService
         return $this->synchronizers[$type];
     }
 
+    /**
+     * @param array $params
+     * @return int
+     * @throws \core_kernel_persistence_Exception
+     */
+    private function getSyncId(array $params)
+    {
+        if (empty($params[DataSyncHistoryService::SYNC_NUMBER]))
+        {
+            $params[DataSyncHistoryService::SYNC_NUMBER] = $this->getSyncHistoryService()->createSynchronisation($params);
+        }
+
+        return $params[DataSyncHistoryService::SYNC_NUMBER];
+    }
 }

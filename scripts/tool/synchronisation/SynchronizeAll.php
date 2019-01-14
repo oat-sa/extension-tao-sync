@@ -20,14 +20,21 @@
 
 namespace oat\taoSync\scripts\tool\synchronisation;
 
+use common_report_Report as Report;
 use oat\oatbox\action\Action;
+use oat\oatbox\event\EventManager;
 use oat\oatbox\extension\AbstractAction;
+use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\model\event\SyncFailedEvent;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncStartedEvent;
+use oat\taoSync\model\history\DataSyncHistoryService;
 
 class SynchronizeAll extends AbstractAction
 {
     /**
      * @param $params
-     * @return \common_report_Report
+     * @return Report
      * @throws \common_exception_Error
      */
     public function __invoke($params)
@@ -35,17 +42,54 @@ class SynchronizeAll extends AbstractAction
         $actionsToRun = $params['actionsToRun'];
         unset($params['actionsToRun']);
 
-        $report = \common_report_Report::createInfo('Synchronizing data');
+        $params['sync_id'] = $this->getSyncId($params);
+        $params['box_id'] = $this->getBoxId();
+
+        $report = Report::createInfo('Synchronizing data');
+
+        /** @var EventManager $eventManager */
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $eventManager->trigger(
+            new SyncStartedEvent($params, $report)
+        );
+
+        $success = false;
         try {
             foreach ($actionsToRun as $action){
                 if (is_subclass_of($action, Action::class)){
                     $report->add(call_user_func($this->propagate(new $action), $params));
                 }
             }
+            $success = true;
         } catch (\Exception $e) {
-            $report->add(\common_report_Report::createFailure('An error has occurred : ' . $e->getMessage()));
+            $report->add(Report::createFailure('An error has occurred : ' . $e->getMessage()));
+        } finally {
+            if ($success === true) {
+                $event = new SyncFinishedEvent($params, $report);
+            } else {
+                $report->add(Report::createFailure('An unexpected PHP error has occurred.'));
+                $event = new SyncFailedEvent($params, $report);
+            }
+            $eventManager->trigger($event);
         }
+
         return $report;
     }
 
+    /**
+     * @param $params
+     * @return mixed
+     */
+    private function getSyncId($params)
+    {
+        return $this->getServiceLocator()->get(DataSyncHistoryService::SERVICE_ID)->createSynchronisation($params);
+    }
+
+    /**
+     * @return string
+     */
+    private function getBoxId()
+    {
+        return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
+    }
 }

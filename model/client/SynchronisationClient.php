@@ -160,57 +160,93 @@ class SynchronisationClient extends ConfigurableService
      * Send results to be synchronized to remote host
      *
      * @param array $results
+     * @param array $params Synchronization parameters
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendResults(array $results)
+    public function sendResults(array $results, array $params)
     {
         $url = '/taoSync/ResultApi/syncResults';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_RESULTS => $results]));
+        $requestData = [
+            ResultApi::PARAM_RESULTS => $results,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
         return $this->decodeResponseBody($response);
     }
 
     /**
      * @param array $logs
+     * @param array $params
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendDeliveryLogs(array $logs)
+    public function sendDeliveryLogs(array $logs, array $params)
     {
         $url = '/taoSync/ResultApi/syncDeliveryLogs';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_DELIVERY_LOGS => $logs]));
+        $requestData = [
+            ResultApi::PARAM_DELIVERY_LOGS => $logs,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
         return $this->decodeResponseBody($response);
     }
 
     /**
-     * @param array $logs
+     * @param array $users
+     * @param array $params Synchronization parameters
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendLtiUsers(array $users)
+    public function sendLtiUsers(array $users, array $params)
     {
         $url = '/taoSync/ResultApi/syncLtiUsers';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_LTI_USERS => $users]));
+        $requestData = [
+            ResultApi::PARAM_LTI_USERS => $users,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
         return $this->decodeResponseBody($response);
     }
 
     /**
      * @param array $sessions
+     * @param array $params Synchronization params
      * @return mixed
      * @throws \common_Exception
      */
-    public function sendTestSessions(array $sessions)
+    public function sendTestSessions(array $sessions, array $params)
     {
         $url = '/taoSync/ResultApi/syncTestSessions';
         $method = 'POST';
 
-        $response = $this->call($url, $method, json_encode([ResultApi::PARAM_TEST_SESSIONS => $sessions]));
+        $requestData = [
+            ResultApi::PARAM_TEST_SESSIONS => $sessions,
+            ResultApi::PARAM_SYNC_PARAMETERS => $params
+        ];
+        $response = $this->call($url, $method, json_encode($requestData));
+        return $this->decodeResponseBody($response);
+    }
+
+    /**
+     * Send confirmation to the central server about completed synchronization on the client.
+     *
+     * @param array $syncParams
+     * @return array
+     * @throws \common_Exception
+     */
+    public function sendSyncFinishedConfirmation(array $syncParams)
+    {
+        $url = '/taoSync/SynchronisationApi/confirmSyncFinished';
+        $method = \Request::HTTP_POST;
+        $response = $this->call($url, $method, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
+
         return $this->decodeResponseBody($response);
     }
 
