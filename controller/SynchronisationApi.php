@@ -193,6 +193,7 @@ class SynchronisationApi extends \tao_actions_RestController
     {
         $syncParams = [];
         $report = \common_report_Report::createInfo('Synchronization finished.');
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
         try {
             $this->assertHttpMethod(\Request::HTTP_POST);
             $parameters = $this->getInputParameters();
@@ -200,14 +201,12 @@ class SynchronisationApi extends \tao_actions_RestController
             if (isset($parameters[self::PARAM_PARAMETERS])) {
                 $syncParams = $parameters[self::PARAM_PARAMETERS];
             }
+            $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
         } catch (\Exception $e) {
+            $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
             $this->returnFailure($e);
-        } finally {
-            $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
-                new SyncFinishedEvent($syncParams, $report)
-            );
         }
     }
 

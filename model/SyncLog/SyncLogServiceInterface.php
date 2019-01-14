@@ -14,10 +14,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
 namespace oat\taoSync\model\SyncLog;
+
+use common_exception_Error;
+use oat\taoSync\model\Exception\SyncLogEntityNotFound;
 
 /**
  * Interface SyncLogServiceInterface
@@ -35,7 +38,7 @@ interface SyncLogServiceInterface
      * Create new synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return mixed
+     * @return integer Created record ID
      */
     public function create(SyncLogEntity $entity);
 
@@ -43,24 +46,30 @@ interface SyncLogServiceInterface
      * Update existing synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return mixed
+     * @return integer Number of updated records.
      */
     public function update(SyncLogEntity $entity);
 
     /**
-     * Get synchronization log record by id.
+     * Get SyncLogEntity by ID.
      *
-     * @param $id
+     * @param integer $id
      * @return SyncLogEntity
+     *
+     * @throws SyncLogEntityNotFound
+     * @throws common_exception_Error
      */
     public function getById($id);
 
     /**
-     * Get synchronization log record by synchronization ID and client ID.
+     * Get SyncLogEntity by synchronization ID and box ID.
      *
-     * @param $syncId
-     * @param $boxId
+     * @param integer $syncId
+     * @param string $boxId
      * @return SyncLogEntity
+     *
+     * @throws SyncLogEntityNotFound
+     * @throws common_exception_Error
      */
     public function getBySyncIdAndBoxId($syncId, $boxId);
 
@@ -68,7 +77,7 @@ interface SyncLogServiceInterface
      * Get total amount of synchronization logs by provided filters.
      *
      * @param SyncLogFilter $filter
-     * @return array
+     * @return integer
      */
     public function count(SyncLogFilter $filter);
 

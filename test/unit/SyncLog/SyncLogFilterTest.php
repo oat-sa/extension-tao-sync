@@ -198,7 +198,7 @@ class SyncLogFilterTest extends TestCase
             [
                 'column' => self::TEST_FIELD,
                 'operator' => 'LIKE',
-                'value' => self::TEST_VALUE,
+                'value' => '%' . self::TEST_VALUE . '%',
             ]
         ];
         $filters = $this->object->getFilters();
@@ -217,7 +217,7 @@ class SyncLogFilterTest extends TestCase
             [
                 'column' => self::TEST_FIELD,
                 'operator' => 'NOT LIKE',
-                'value' => self::TEST_VALUE,
+                'value' => '%' . self::TEST_VALUE . '%',
             ]
         ];
         $filters = $this->object->getFilters();

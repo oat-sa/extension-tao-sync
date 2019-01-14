@@ -14,18 +14,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
 namespace oat\taoSync\model\SyncLog;
 
-use DateTime;
+use common_exception_NotFound;
+use common_exception_Error;
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\SyncLogEntityNotFound;
 use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
-use common_report_Report as Report;
 
+/**
+ * Class SyncLogService
+ * Service to work with persistence implementations for synchronization logs.
+ *
+ * @package oat\taoSync\model\SyncLog
+ */
 class SyncLogService extends ConfigurableService implements SyncLogServiceInterface
 {
     const OPTION_STORAGE = 'storage';
@@ -35,7 +41,12 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      */
     private $storage;
 
-    public function __construct(array $options = array())
+    /**
+     * SyncLogService constructor.
+     * @param array $options
+     * @throws MissingOptionException
+     */
+    public function __construct(array $options)
     {
         parent::__construct($options);
 
@@ -59,7 +70,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      * Create new record in storage implementation.
      *
      * @param SyncLogEntity $entity
-     * @return mixed|void
+     * @return integer Created record ID
      */
     public function create(SyncLogEntity $entity)
     {
@@ -70,7 +81,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      * Update existing synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return mixed|void
+     * @return integer Number of updated records.
      */
     public function update(SyncLogEntity $entity)
     {
@@ -78,34 +89,38 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     }
 
     /**
-     * @param $id
+     * Get SyncLogEntity by ID.
+     *
+     * @param integer $id
      * @return SyncLogEntity
-     * @throws \common_exception_Error
+     *
+     * @throws SyncLogEntityNotFound
+     * @throws common_exception_Error
      */
     public function getById($id)
     {
         try {
-            $syncData = $this->getStorage()->getById($id);
-
-            return $this->createEntityFromArray($syncData);
-        } catch (\common_exception_NotFound $e) {
+            return $this->getStorage()->getById($id);
+        } catch (common_exception_NotFound $e) {
             throw new SyncLogEntityNotFound($e->getMessage());
         }
     }
 
     /**
-     * @param $syncId
-     * @param $boxId
+     * Get SyncLogEntity by synchronization ID and box ID.
+     *
+     * @param integer $syncId
+     * @param string $boxId
      * @return SyncLogEntity
-     * @throws \common_exception_Error
+     *
+     * @throws SyncLogEntityNotFound
+     * @throws common_exception_Error
      */
     public function getBySyncIdAndBoxId($syncId, $boxId)
     {
         try {
-            $syncData = $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
-
-            return $this->createEntityFromArray($syncData);
-        } catch (\common_exception_NotFound $e) {
+            return $this->getStorage()->getBySyncIdAndBoxId($syncId, $boxId);
+        } catch (common_exception_NotFound $e) {
             throw new SyncLogEntityNotFound($e->getMessage());
         }
 
@@ -115,7 +130,7 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      * Get total amount of synchronization logs by provided filters.
      *
      * @param SyncLogFilter $filter
-     * @return array
+     * @return integer
      */
     public function count(SyncLogFilter $filter)
     {
@@ -131,35 +146,5 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     public function search(SyncLogFilter $filter)
     {
         return $this->getStorage()->search($filter);
-    }
-
-    /**
-     * @param $data
-     * @return SyncLogEntity
-     * @throws \common_exception_Error
-     */
-    private function createEntityFromArray($data)
-    {
-        if (!is_array($data['data'])) {
-            $data['data'] = json_decode($data['data'], true);
-        }
-        if (!$data['report'] instanceof Report) {
-            $data['report'] =  Report::jsonUnserialize($data['report']);
-        }
-        if (!$data['created_at'] instanceof DateTime) {
-            $data['created_at'] = new DateTime((string) $data['created_at']);
-        }
-
-        $syncLogEntity = new SyncLogEntity(
-            $data['sync_id'],
-            $data['box_id'],
-            $data['organization_id'],
-            $data['data'],
-            $data['status'],
-            $data['report'],
-            $data['created_at'],
-            $data['id']
-        );
-        return $syncLogEntity;
     }
 }

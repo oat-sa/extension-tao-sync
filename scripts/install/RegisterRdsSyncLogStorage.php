@@ -57,13 +57,13 @@ class RegisterRdsSyncLogStorage extends InstallAction
         try {
             $table = $toSchema->createTable($tableName);
             $table->addOption('engine', 'InnoDB');
-            $table->addColumn(SyncLogStorageInterface::COLUMN_ID, 'integer', ["notnull" => true, "autoincrement" => true, "unsigned" => true]);
-            $table->addColumn(SyncLogStorageInterface::COLUMN_BOX_ID, 'string', ["notnull" => true, "length" => 50]);
-            $table->addColumn(SyncLogStorageInterface::COLUMN_SYNC_ID, 'integer', ["notnull" => true, "unsigned" => true]);
-            $table->addColumn(SyncLogStorageInterface::COLUMN_ORGANIZATION_ID, 'string', ["notnull" => true, "length" => 50]);
-            $table->addColumn(SyncLogStorageInterface::COLUMN_DATA, 'text', ["notnull" => false, "default" => null]);
-            $table->addColumn(SyncLogStorageInterface::COLUMN_STATUS, 'string', ["notnull" => true, "length" => 20]);
-            $table->addColumn(SyncLogStorageInterface::COLUMN_REPORT, 'text', ["notnull" => false, "default" => null]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_ID, 'integer', ['notnull' => true, 'autoincrement' => true, 'unsigned' => true]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_BOX_ID, 'string', ['notnull' => true, 'length' => 50]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_SYNC_ID, 'integer', ['notnull' => true, 'unsigned' => true]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_ORGANIZATION_ID, 'string', ['notnull' => true, 'length' => 50]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_DATA, 'text', ['notnull' => false, 'default' => null]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_STATUS, 'string', ['notnull' => true, 'length' => 20]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_REPORT, 'text', ['notnull' => false, 'default' => null]);
             $table->addColumn(SyncLogStorageInterface::COLUMN_STARTED_AT, 'datetime', ['notnull' => true]);
             $table->addColumn(SyncLogStorageInterface::COLUMN_FINISHED_AT, 'datetime', ['notnull' => false]);
             $table->setPrimaryKey(['id']);
