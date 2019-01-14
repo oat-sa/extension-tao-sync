@@ -50,6 +50,7 @@ use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
+use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
@@ -59,6 +60,7 @@ use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeResult;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
 use oat\taoSync\scripts\tool\RenameColumnOrgId;
+use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 use oat\taoTestCenter\model\ProctorManagementService;
 
 /**
@@ -446,6 +448,17 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('2.2.0', '3.1.0');
+
+        if ($this->isVersion('3.1.0')) {
+            $storage = new RdsSyncLogStorage([
+                RdsSyncLogStorage::OPTION_PERSISTENCE_ID => 'default'
+            ]);
+            $this->getServiceManager()->register(RdsSyncLogStorage::SERVICE_ID, $storage);
+            $registerRdsSyncLogStorage = new RegisterRdsSyncLogStorage();
+            $registerRdsSyncLogStorage->setServiceLocator($this->getServiceManager());
+            $registerRdsSyncLogStorage->createTable($storage->getPersistence());
+            $this->setVersion('3.2.0');
+        }
     }
 
     /**
