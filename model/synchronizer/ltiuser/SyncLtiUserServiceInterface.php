@@ -24,6 +24,8 @@ interface SyncLtiUserServiceInterface
 {
     const SERVICE_ID = 'taoSync/SyncLtiUser';
 
+    const SYNC_ENTITY = 'lti user';
+
     /**
      * @param array $params
      */
@@ -31,12 +33,15 @@ interface SyncLtiUserServiceInterface
 
     /**
      * @param array $ltiUsers
+     * @param array $params     Synchronization parameters
+     * @return
      */
-    public function sendLtiUsers(array $ltiUsers);
+    public function sendLtiUsers(array $ltiUsers, array $params = []);
 
     /**
      * @param array $ltiUsers
+     * @param array $params     Synchronization parameters
      * @return array
      */
-    public function importLtiUsers(array $ltiUsers);
+    public function importLtiUsers(array $ltiUsers, array $params = []);
 }

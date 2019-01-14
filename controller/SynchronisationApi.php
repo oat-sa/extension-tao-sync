@@ -23,6 +23,8 @@ namespace oat\taoSync\controller;
 use oat\oatbox\event\EventManager;
 use oat\taoOauth\model\OauthController;
 use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncRequestEvent;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
@@ -80,6 +82,10 @@ class SynchronisationApi extends \tao_actions_RestController
      */
     public function fetchEntityDetails()
     {
+        $report = \common_report_Report::createInfo('Synchronization request received.');
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $params = [];
+
         try {
             $this->assertHttpMethod(\Request::HTTP_POST);
 
@@ -96,11 +102,23 @@ class SynchronisationApi extends \tao_actions_RestController
             $type = $parameters[self::PARAM_TYPE];
             $entityIds = $parameters[self::PARAM_ENTITY_IDS];
             $entityIds = is_array($entityIds) ? $entityIds : [$entityIds];
-            $params = isset($parameters[self::PARAM_PARAMETERS]) ? $parameters[self::PARAM_PARAMETERS] : [];
+            if (isset($parameters[self::PARAM_PARAMETERS])) {
+                $params = $parameters[self::PARAM_PARAMETERS];
+            }
 
-            $this->returnJson($this->getSyncService()->fetchEntityDetails($type, $entityIds, $params));
+            $eventManager->trigger(new SyncRequestEvent($params, $report));
 
+            $entities = $this->getSyncService()->fetchEntityDetails($type, $entityIds, $params);
+
+            $report->setData($logData = [$type => ['pushed' => count($entities)]]);
+            $report->add(\common_report_Report::createInfo(sprintf('(%s) %d entities pushed.', $type, count($entities))));
+            $eventManager->trigger(new SyncResponseEvent($params, $report));
+
+            $this->returnJson($entities);
         } catch (\Exception $e) {
+            $report->add(\common_report_Report::createFailure('Synchronization request failed: ' . $e->getMessage()));
+            $eventManager->trigger(new SyncResponseEvent($params, $report));
+
             $this->returnFailure($e);
         }
     }
@@ -175,6 +193,7 @@ class SynchronisationApi extends \tao_actions_RestController
     {
         $syncParams = [];
         $report = \common_report_Report::createInfo('Synchronization finished.');
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
         try {
             $this->assertHttpMethod(\Request::HTTP_POST);
             $parameters = $this->getInputParameters();
@@ -182,14 +201,12 @@ class SynchronisationApi extends \tao_actions_RestController
             if (isset($parameters[self::PARAM_PARAMETERS])) {
                 $syncParams = $parameters[self::PARAM_PARAMETERS];
             }
+            $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
         } catch (\Exception $e) {
+            $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
             $this->returnFailure($e);
-        } finally {
-            $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
-                new SyncFinishedEvent($syncParams, $report)
-            );
         }
     }
 

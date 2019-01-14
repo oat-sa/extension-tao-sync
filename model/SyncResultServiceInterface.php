@@ -26,6 +26,8 @@ namespace oat\taoSync\model;
  */
 interface SyncResultServiceInterface
 {
+    const SYNC_ENTITY = 'delivery execution';
+
     /**
      * Scan delivery execution to format it
      *
@@ -48,10 +50,10 @@ interface SyncResultServiceInterface
      * Delete results following configuration
      *
      * @param $results
-     * @throws \common_Exception
-     * @throws \common_exception_Error
+     * @param array $params Synchronization params
+     * @return
      */
-    public function sendResults($results);
+    public function sendResults($results, array $params = []);
 
     /**
      * Import delivery by scanning $results
@@ -60,9 +62,10 @@ interface SyncResultServiceInterface
      * Create and inject variables
      *
      * @param array $results
+     * @param array $params
      * @return array
      */
-    public function importDeliveryResults(array $results);
+    public function importDeliveryResults(array $results, array $params = []);
 
     /**
      * @param string $offlineResultId
