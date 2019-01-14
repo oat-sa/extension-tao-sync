@@ -94,7 +94,7 @@
      {
 
          $qb = $this->getQueryBuilder();
-         $id = $qb->insert(self::TABLE_NAME)
+         $qb->insert(self::TABLE_NAME)
              ->values([
                  SyncLogStorageInterface::COLUMN_SYNC_ID            => $qb->createNamedParameter($entity->getSyncId()),
                  SyncLogStorageInterface::COLUMN_BOX_ID             => $qb->createNamedParameter($entity->getBoxId()),
@@ -106,7 +106,7 @@
              ])
              ->execute();
 
-         return $id;
+         return $qb->getConnection()->lastInsertId();
      }
 
      /**
