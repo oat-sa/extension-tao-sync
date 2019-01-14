@@ -148,7 +148,7 @@ class CentralSyncLogListener extends ConfigurableService
 
             $syncLogService->update($syncLogEntity);
         } catch (Exception $e) {
-            return;
+            $this->logError($e->getMessage());
         }
     }
 
