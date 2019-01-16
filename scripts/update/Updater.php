@@ -52,6 +52,7 @@ use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
+use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
@@ -556,7 +557,7 @@ class Updater extends \common_ext_ExtensionUpdater
 
             if (!$this->getServiceManager()->has(SynchronizationHistoryServiceInterface::SERVICE_ID)) {
                 $synchronisationHistoryService = new SynchronizationHistoryService([]);
-                $this->getServiceManager()->registe(SynchronizationHistoryServiceInterface::SERVICE_ID, $synchronisationHistoryService);
+                $this->getServiceManager()->register(SynchronizationHistoryServiceInterface::SERVICE_ID, $synchronisationHistoryService);
             }
 
             $this->setVersion('4.3.0');
