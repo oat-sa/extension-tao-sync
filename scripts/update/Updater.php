@@ -494,7 +494,7 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('4.2.0')) {
             /** @var EventManager $eventManager */
-            $eventManager = $this->getSe    rviceManager()->get(EventManager::SERVICE_ID);
+            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
             // Detach event listeners if registered
             $eventManager->detach(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncRequest']);
             $eventManager->detach(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncResponse']);
