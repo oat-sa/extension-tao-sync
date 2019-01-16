@@ -558,6 +558,8 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('4.3.0');
         }
+
+        $this->skip('4.3.0', '4.3.1');
     }
 
     /**
