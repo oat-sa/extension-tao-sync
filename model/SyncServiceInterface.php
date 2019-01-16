@@ -26,7 +26,7 @@ namespace oat\taoSync\model;
 interface SyncServiceInterface
 {
 
-    const IMPORT_OPTION_BOX_ID = 'box-id';
+    const IMPORT_OPTION_BOX_ID = 'box_id';
     const BOX_ID_HEADER = 'x-tao-box-id';
 
     /**

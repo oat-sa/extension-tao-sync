@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\scripts\update;
 
+use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
 use oat\tao\model\accessControl\func\AclProxy;
@@ -38,13 +39,21 @@ use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\event\SyncRequestEvent;
+use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
+use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
+use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
+use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
+use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
@@ -482,6 +491,75 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('3.4.0', '4.2.0');
+
+        if ($this->isVersion('4.2.0')) {
+            /** @var EventManager $eventManager */
+            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
+            // Detach event listeners if registered
+            $eventManager->detach(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncRequest']);
+            $eventManager->detach(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncResponse']);
+            $eventManager->detach(SyncFinishedEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFinished']);
+
+            // Attach event listeners.
+            $eventManager->attach(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncRequest']);
+            $eventManager->attach(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncResponse']);
+            $eventManager->attach(SyncFinishedEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFinished']);
+            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
+
+            if (!$this->getServiceManager()->has(CentralSyncLogListener::SERVICE_ID)) {
+                $syncLogListener = new CentralSyncLogListener([]);
+                $this->getServiceManager()->register(CentralSyncLogListener::SERVICE_ID, $syncLogListener);
+            }
+
+            // Register synchronization history services for central server.
+            if (!$this->getServiceManager()->has(HistoryPayloadFormatterInterface::SERVICE_ID)) {
+                $options = [
+                    HistoryPayloadFormatter::OPTION_DATA_MODEL => [
+                        'status' => [
+                            'id' => 'status',
+                            'label' => __('Result'),
+                            'sortable' => true,
+                        ],
+                        'created_at' => [
+                            'id' => 'created_at',
+                            'label' => __('Started at'),
+                            'sortable' => true,
+                        ],
+                        'finished_at' => [
+                            'id' => 'finished_at',
+                            'label' => __('Finished at'),
+                            'sortable' => true,
+                        ],
+                        'data' => [
+                            'id' => 'data',
+                            'label' => __('Data'),
+                            'sortable' => false,
+                        ],
+                        'organisation' => [
+                            'id' => 'organisation',
+                            'label' => __('Organisation ID'),
+                            'sortable' => false,
+                        ],
+                        'box_id' => [
+                            'id' => 'box_id',
+                            'label' => __('Box ID'),
+                            'sortable' => false
+                        ],
+                    ]
+                ];
+                $payloadFormatter = new HistoryPayloadFormatter($options);
+                $this->getServiceManager()->register(HistoryPayloadFormatterInterface::SERVICE_ID, $payloadFormatter);
+            }
+
+            if (!$this->getServiceManager()->has(SynchronizationHistoryServiceInterface::SERVICE_ID)) {
+                $synchronisationHistoryService = new SynchronizationHistoryService([]);
+                $this->getServiceManager()->register(SynchronizationHistoryServiceInterface::SERVICE_ID, $synchronisationHistoryService);
+            }
+
+            $this->setVersion('4.3.0');
+        }
+
+        $this->skip('4.3.0', '4.3.1');
     }
 
     /**
