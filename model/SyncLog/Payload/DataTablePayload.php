@@ -100,9 +100,13 @@ class DataTablePayload implements DataTablePayloadInterface
         $limit = $this->request->getRows();
 
         $this->syncLogFilter->setLimit($limit)
-            ->setOffset($limit * ($page - 1))
-            ->setSortBy($this->request->getSortBy())
-            ->setSortOrder($this->request->getSortOrder());
+            ->setOffset($limit * ($page - 1));
+
+        $sortBy = $this->request->getSortBy();
+        if ($sortBy !== null) {
+            $this->syncLogFilter->setSortBy($sortBy)
+                ->setSortOrder($this->request->getSortOrder());
+        }
 
         $syncLogRecords = $this->syncLogService->search($this->syncLogFilter);
         $syncLogRecords = $this->customizeData($syncLogRecords);
