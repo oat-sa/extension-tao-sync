@@ -125,6 +125,12 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
      */
     protected function hashProperties(array $properties)
     {
-        return md5(serialize($properties));
+        foreach ($properties as $key => $values) {
+            if (is_array($values)) {
+                sort($properties[$key]);
+            }
+        }
+
+        return md5(serialize(ksort($properties)));
     }
 }
