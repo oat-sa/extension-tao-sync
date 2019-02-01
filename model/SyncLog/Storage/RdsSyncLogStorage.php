@@ -300,7 +300,7 @@
              $data[self::COLUMN_BOX_ID],
              $data[self::COLUMN_ORGANIZATION_ID],
              $data[self::COLUMN_DATA],
-             $data[self::COLUMN_ORGANIZATION_ID],
+             $data[self::COLUMN_STATUS],
              $data[self::COLUMN_REPORT],
              $data[self::COLUMN_STARTED_AT],
              $data[self::COLUMN_FINISHED_AT],

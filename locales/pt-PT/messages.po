@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: TAO 3.3.0-sprint91\n"
-"PO-Revision-Date: 2018-12-14T13:58:14\n"
+"Project-Id-Version: TAO 3.3.0-sprint94\n"
+"PO-Revision-Date: 2019-02-01T12:16:00\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
 "Language: pt-PT\n"
@@ -12,9 +12,6 @@ msgstr ""
 "X-Poedit-Basepath: ../../\n"
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-SearchPath-0: .\n"
-
-msgid "Data"
-msgstr ""
 
 #, tao-public
 msgid "Data Synchronization"
@@ -41,13 +38,7 @@ msgstr ""
 msgid "Note that all time data refer to the server time."
 msgstr ""
 
-msgid "Organisation ID"
-msgstr ""
-
 msgid "Required field"
-msgstr ""
-
-msgid "Result"
 msgstr ""
 
 #, tao-public
@@ -79,9 +70,6 @@ msgid "The synchronization process has been finished."
 msgstr ""
 
 msgid "The synchronization process has failed. Please contact the administrator."
-msgstr ""
-
-msgid "Time"
 msgstr ""
 
 #, tao-public
