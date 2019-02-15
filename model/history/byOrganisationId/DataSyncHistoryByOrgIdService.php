@@ -238,4 +238,27 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
             return false;
         }
     }
+
+
+    /**
+     * @param string $entity
+     * @return mixed
+     */
+    public function getLatestOrganisationWithEntity($entity)
+    {
+        $queryBuilder1 = $this->getPersistence()->getPlatform()->getQueryBuilder();
+        $exprBuilder = $queryBuilder1->expr();
+        $query1 = $queryBuilder1->select(self::SYNC_ORG_ID)
+            ->from(self::SYNC_TABLE, 'a')
+            ->where($exprBuilder->eq('a.' . self::SYNC_ENTITY_ID, ':entity'))
+            ->setParameter('entity',  $entity)
+            ->orderBy(self::SYNC_TIME, 'DESC')
+            ->setMaxResults(1)
+        ;
+
+        $results = $query1->execute()->fetch();
+
+        return $results[self::SYNC_ORG_ID];
+    }
+
 }
