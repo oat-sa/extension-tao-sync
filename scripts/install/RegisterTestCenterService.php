@@ -38,7 +38,7 @@ class RegisterTestCenterService extends InstallAction
      */
     public function __invoke($params)
     {
-        $this->registerService(TestCenterService::SERVICE_ID, new TestCenterService([]));
+        $this->registerService(TestCenterService::SERVICE_ID, new TestCenterService());
         return \common_report_Report::createSuccess('TestCenterService successfully registered.');
     }
 
