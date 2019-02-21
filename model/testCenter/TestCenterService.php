@@ -48,27 +48,16 @@ class TestCenterService extends BaseTestCenterService
     public function assignUser(\core_kernel_classes_Resource $testCenter, User $user, \core_kernel_classes_Resource $role)
     {
         $userResource = $this->getResource($user->getIdentifier());
-        $userRoles = $user->getRoles();
-
-        if (!in_array($role->getUri(), $userRoles)) {
-            throw new TestCenterException(__('User with given role cannot be assigned to the test center.'));
-        }
 
         if ($role->getUri() === SyncService::TAO_SYNC_ROLE) {
-            $assignProperty = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
-        } else {
-            return parent::assignUser($testCenter, $user, $role);
+            $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
+            $id = $this->getTestCenterOrganisationId($testCenter);
+            $userResource->removePropertyValue($organisationIdProperty, $id);
+            return $userResource->setPropertyValue($organisationIdProperty, $id) &&
+                parent::assignUser($testCenter, $user, $role);
         }
 
-        $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
-        $id = $this->getTestCenterOrganisationId($testCenter);
-
-        //remove values to avoid duplication
-        $userResource->removePropertyValue($organisationIdProperty, $id);
-        $userResource->removePropertyValue($assignProperty, $testCenter);
-
-        return $userResource->setPropertyValue($organisationIdProperty, $id) &&
-            $userResource->setPropertyValue($assignProperty, $testCenter);
+        return parent::assignUser($testCenter, $user, $role);
     }
 
     /**
@@ -87,15 +76,12 @@ class TestCenterService extends BaseTestCenterService
         $userResource = $this->getResource($user->getIdentifier());
 
         if ($role->getUri() === SyncService::TAO_SYNC_ROLE) {
-            $assignProperty = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
-        } else {
-            return parent::unassignUser($testCenter, $user, $role);
+            $id = $this->getTestCenterOrganisationId($testCenter);
+            $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
+            $userResource->removePropertyValue($organisationIdProperty, $id);
         }
-        $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
 
-        $id = $this->getTestCenterOrganisationId($testCenter);
-        $userResource->removePropertyValue($organisationIdProperty, $id);
-        return $userResource->removePropertyValue($assignProperty, $testCenter);
+        return parent::unassignUser($testCenter, $user, $role);
     }
 
     /**
@@ -113,5 +99,20 @@ class TestCenterService extends BaseTestCenterService
             throw new TestCenterException(__('TestCenter must have an organisation id property to associate it to sync manager(s).'));
         }
         return $property->literal;
+    }
+
+    /**
+     * @param core_kernel_classes_Resource $role
+     * @return \core_kernel_classes_Property
+     * @throws TestCenterException
+     */
+    protected function getAssigneeProperty(\core_kernel_classes_Resource $role)
+    {
+        if ($role->getUri() === SyncService::TAO_SYNC_ROLE) {
+            $prop = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
+        } else {
+            $prop = parent::getAssigneeProperty($role);
+        }
+        return $prop;
     }
 }
