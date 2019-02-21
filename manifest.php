@@ -29,13 +29,13 @@ return array(
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '4.4.0',
+    'version' => '4.5.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
         'tao'             => '>=22.0.0',
         'taoOauth'        => '>=1.0.3',
-        'taoTestCenter'   => '>=4.0.0',
+        'taoTestCenter'   => '>=4.6.0',
         'taoResultServer' => '>=7.0.0',
         'taoTaskQueue'    => '>=1.0.0',
         'taoDeliveryRdf'  => '>=6.0.0',
@@ -65,6 +65,7 @@ return array(
             RegisterOfflineToOnlineResultMapper::class,
             InstallEnhancedDeliveryLog::class,
             RegisterRdsSyncLogStorage::class,
+            \oat\taoSync\scripts\install\RegisterTestCenterService::class,
         ]
     ],
     'uninstall' => array(
