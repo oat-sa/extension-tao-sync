@@ -34,8 +34,9 @@ use oat\taoTestCenter\model\exception\TestCenterException;
  */
 class TestCenterService extends BaseTestCenterService
 {
-
     /**
+     * Assign user to the test center
+     *
      * @param core_kernel_classes_Resource $testCenter
      * @param User $user
      * @param core_kernel_classes_Resource $role
@@ -66,11 +67,13 @@ class TestCenterService extends BaseTestCenterService
         $userResource->removePropertyValue($organisationIdProperty, $id);
         $userResource->removePropertyValue($assignProperty, $testCenter);
 
-        $userResource->setPropertyValue($organisationIdProperty, $id);
-        return $userResource->setPropertyValue($assignProperty, $testCenter);
+        return $userResource->setPropertyValue($organisationIdProperty, $id) &&
+            $userResource->setPropertyValue($assignProperty, $testCenter);
     }
 
     /**
+     * Unassign user from the test center
+     *
      * @param core_kernel_classes_Resource $testCenter
      * @param User $user
      * @param core_kernel_classes_Resource $role

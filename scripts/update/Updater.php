@@ -563,7 +563,7 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('4.3.0', '4.4.0');
 
         if ($this->isVersion('4.4.0')) {
-            $this->getServiceManager()->register(TestCenterService::SERVICE_ID, new TestCenterService([]));
+            $this->getServiceManager()->register(TestCenterService::SERVICE_ID, new TestCenterService());
             $this->setVersion('4.5.0');
         }
     }
