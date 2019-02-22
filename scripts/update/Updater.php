@@ -566,6 +566,9 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(TestCenterService::SERVICE_ID, new TestCenterService());
             $this->setVersion('4.5.0');
         }
+
+      $this->skip('4.5.0', '4.6.0');
+
     }
 
     /**
