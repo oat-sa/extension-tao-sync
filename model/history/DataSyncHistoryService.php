@@ -178,7 +178,7 @@ class DataSyncHistoryService extends ConfigurableService
      * @return int
      * @throws \core_kernel_persistence_Exception
      */
-    protected function getCurrentSynchroId()
+    public function getCurrentSynchroId()
     {
         if (!$this->synchroId) {
             $synchro = $this->getResource(self::SYNCHRO_URI);
