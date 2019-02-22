@@ -64,6 +64,7 @@ use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 use oat\taoSync\model\SyncService;
+use oat\taoSync\model\testCenter\TestCenterService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
@@ -559,7 +560,15 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('4.3.0');
         }
 
-        $this->skip('4.3.0', '4.5.0');
+        $this->skip('4.3.0', '4.4.0');
+
+        if ($this->isVersion('4.4.0')) {
+            $this->getServiceManager()->register(TestCenterService::SERVICE_ID, new TestCenterService());
+            $this->setVersion('4.5.0');
+        }
+
+      $this->skip('4.5.0', '4.6.0');
+
     }
 
     /**
