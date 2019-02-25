@@ -20,6 +20,4 @@
 
 namespace oat\taoSync\model\server;
 
-namespace oat\taoSync\model\server;
-
 class InvalidRoleForSync extends \Exception{}
