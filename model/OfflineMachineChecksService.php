@@ -70,7 +70,7 @@ class OfflineMachineChecksService extends ConfigurableService
      * @throws \oat\oatbox\service\exception\InvalidService
      * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
      */
-    protected function getReport()
+    public function getReport()
     {
         $dataUsageReport = new Report(Report::TYPE_INFO);
         $dataUsageReport->setMessage(self::REPORT_USAGE_TITLE);
@@ -88,7 +88,7 @@ class OfflineMachineChecksService extends ConfigurableService
      * @throws \oat\oatbox\service\exception\InvalidService
      * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
      */
-    public function getCheckServices()
+    protected function getCheckServices()
     {
         if (empty($this->checkServices)) {
             $subs = $this->getOption(self::OPTION_CHECKS);
