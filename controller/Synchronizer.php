@@ -26,6 +26,7 @@ use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\history\DataSyncHistoryService;
+use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -47,6 +48,9 @@ class Synchronizer extends \tao_actions_CommonModule
     {
         $this->setData('form-fields', $this->getFormFieldsService()->getFormFields());
         $this->setData('form-action', _url('createTask'));
+        $this->setData('includeTemplate', 'sync/extra.tpl');
+
+        $this->injectExtraInfo();
 
         $dashboardUrl = _url('index', 'Main', 'tao', [
             'structure' => 'tools',
@@ -69,7 +73,7 @@ class Synchronizer extends \tao_actions_CommonModule
             if ($lastTask && !in_array($lastTask->getStatus(), ['completed', 'failed'])) {
                 throw new \common_exception_RestApi(__('The synchronisation is already running!'), 423);
             }
-            
+
             $data = $this->getRequestParameters();
 
             $label = $data['label'];
@@ -179,5 +183,16 @@ class Synchronizer extends \tao_actions_CommonModule
             ]
         ]);
         return $deliveryExecutionsData;
+    }
+
+    protected function injectExtraInfo()
+    {
+        $this->setData('includeExtension', self::EXTENSION_ID);
+        $this->setData('extra', []);
+        /** @var \common_report_Report $report */
+        $report = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
+        $this->setData('extra', array_map(function (\common_report_Report $report) {
+            return $report->getMessage();
+        }, $report->getChildren()));
     }
 }

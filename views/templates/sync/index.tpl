@@ -28,6 +28,8 @@ $formFields = get_data('form-fields');
                         <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                     </p>
 
+                    <?php Template::inc(get_data('includeTemplate'), get_data('includeExtension')); ?>
+
                 </div>
             </div>
 
