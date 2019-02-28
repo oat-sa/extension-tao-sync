@@ -24,9 +24,12 @@ use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\taoDelivery\model\execution\DeliveryExecution;
+use oat\taoProctoring\model\monitorCache\DeliveryMonitoringData;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
+use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\OfflineMachineChecksService;
+use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -124,14 +127,18 @@ class Synchronizer extends \tao_actions_CommonModule
         /** @var SyncService $syncService */
         $syncService = $this->getServiceLocator()->get(SyncService::SERVICE_ID);
 
-        $activeSessions = $syncService->getOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)
-            ? $this->getActiveSessions()
-            : 0;
+        $activeSessionsData = [];
+        if ($syncService->getOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)) {
+            $serviceLocator = $this->getServiceLocator();
+            $activeSessions = $serviceLocator->get(DeliveryExecutionStatusManager::SERVICE_ID)->getExecutionsInProgress();
+            $activeSessionsData = $serviceLocator->get(DeliveryExecutionContextParser::SERVICE_ID)->parseExecutionContextDetails($activeSessions);
+        }
 
         return $this->returnJson([
             'success' => true,
             'data' => [
-                'activeSessions' => $activeSessions
+                'activeSessions' => count($activeSessionsData),
+                'activeSessionsData' => $activeSessionsData
             ]
         ]);
     }
