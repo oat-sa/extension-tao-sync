@@ -48,6 +48,7 @@ use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
@@ -567,7 +568,15 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('4.5.0');
         }
 
-      $this->skip('4.5.0', '4.6.1');
+        $this->skip('4.5.0', '4.6.0');
+
+        if ($this->isVersion('4.6.0')) {
+            $this->getServiceManager()->register(OfflineMachineChecksService::SERVICE_ID, new OfflineMachineChecksService([OfflineMachineChecksService::OPTION_CHECKS => []]));
+            $this->setVersion('4.7.0');
+        }
+
+        $this->skip('4.7.0', '4.7.1');
+
 
     }
 
