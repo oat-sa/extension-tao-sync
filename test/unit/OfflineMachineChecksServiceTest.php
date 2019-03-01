@@ -14,10 +14,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2019. (original work) Open Assessment Technologies SA;
  */
 
-namespace oat\taoSync\model\server;
+namespace oat\taoSync\test\unit\SyncLog;
 
-class InvalidRoleForSync extends \Exception{}
+use oat\generis\test\TestCase;
+use oat\taoSync\model\OfflineMachineChecksService;
+
+class OfflineMachineChecksServiceTest extends TestCase
+{
+    /**
+     * Test getReport method
+     */
+    public function testGetReport()
+    {
+        $service = new OfflineMachineChecksService([OfflineMachineChecksService::OPTION_CHECKS => []]);
+        $report = $service->getReport();
+        $this->assertInstanceOf(\common_report_Report::class, $report, 'Returned report must be as expected.');
+        $this->assertCount(0, $report->getChildren(), 'Returned report must be with no children.');
+    }
+}

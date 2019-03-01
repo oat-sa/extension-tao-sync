@@ -14,10 +14,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2019. (original work) Open Assessment Technologies SA;
  */
 
-namespace oat\taoSync\model\server;
+namespace oat\taoSync\model;
 
-class InvalidRoleForSync extends \Exception{}
+/**
+ * Interface MachineUsageStatsInterface
+ * @package oat\taoSync\model
+ */
+interface MachineUsageStatsInterface
+{
+    /**
+     * @return \common_report_Report
+     */
+    public function getReport();
+}
