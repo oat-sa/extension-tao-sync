@@ -49,9 +49,11 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     public function index()
     {
+        $this->setData('terminate-form-action', _url('terminateExecutions', 'TerminateExecution', 'taoSync'));
         $this->setData('form-fields', $this->getFormFieldsService()->getFormFields());
         $this->setData('form-action', _url('createTask'));
-        $this->setData('includeTemplate', 'sync/extra.tpl');
+            $this->setData('includeTemplate', 'sync/extra.tpl');
+
 
         $this->injectExtraInfo();
 

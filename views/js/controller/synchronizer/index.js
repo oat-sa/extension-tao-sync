@@ -66,34 +66,39 @@ define([
             var $container = $('#tao-sync-container');
 
             /**
-             * Form
+             * Synchronization form
              */
-            var $form = $container.find('form');
+            var $syncForm = $container.find('form.sync-form');
+
+            /**
+             * Terminate active sessions form
+             */
+            var $terminateForm = $container.find('form.sync-form');
 
             /**
              * Form fields, if any.
              * Note that `:input` would include the button which is not wanted.
              * Configured in config/taoSync/syncFormFields.conf.php
              */
-            var $formFields = $form.find('input, select');
+            var $syncFormFields = $syncForm.find('input, select');
 
             /**
              * Launch button
              */
-            var $launchButton = $form.find('button[data-control="launch"]');
+            var $launchButton = $syncForm.find('button[data-control="launch"]');
 
             /**
              * Spinners
              */
-            var $spinner = $form.find('.feedback-info .icon-loop');
+            var $spinner = $syncForm.find('.feedback-info .icon-loop');
 
             /**
              * Start and update time
              */
             var timeFields = {
-                $enqueued: $form.find('.enqueue-time'),
-                $updated: $form.find('.update-time'),
-                $completed: $form.find('.complete-time')
+                $enqueued: $syncForm.find('.enqueue-time'),
+                $updated: $syncForm.find('.update-time'),
+                $completed: $syncForm.find('.complete-time')
             };
 
             /**
@@ -102,7 +107,7 @@ define([
              */
             var msg = (function () {
                 var _msg = {
-                    $all: $form.find('.msg')
+                    $all: $syncForm.find('.msg')
                 };
                 _msg.$all.each(function () {
                     var $currentMsg = $(this);
@@ -152,7 +157,7 @@ define([
                 var data = {
                     label: taskLabel
                 };
-                $formFields.each(function () {
+                $syncFormFields.each(function () {
                     data[this.name] = this.value;
                 });
                 return data;
@@ -164,7 +169,7 @@ define([
              */
             function toggleLaunchButtonState() {
                 var isValid = true;
-                $formFields.each(function () {
+                $syncFormFields.each(function () {
                     isValid = this.validity.valid;
                     return isValid;
                 });
@@ -226,14 +231,14 @@ define([
             loadingBar.start();
 
             // check if all form fields are valid, if applicable
-            $formFields.on('keyup paste blur', toggleLaunchButtonState);
+            $syncFormFields.on('keyup paste blur', toggleLaunchButtonState);
 
             // there might be no form fields at all
             // or they might have received valid entries by other means
             toggleLaunchButtonState();
 
             // set form actions
-            $form.on('submit', function (e) {
+            $syncForm.on('submit', function (e) {
                 var action = this.action;
                 e.preventDefault();
                 setState('progress');
@@ -253,7 +258,7 @@ define([
                         setState('error');
                     });
             });
-            $form.find('button[data-control="close"]').on('click', function (e) {
+            $syncForm.find('button[data-control="close"]').on('click', function (e) {
                 e.preventDefault();
                 setState('form');
             });
