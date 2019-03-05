@@ -47,7 +47,8 @@ define([
         all: urlHelper.route('getAll', tq.api, tq.ext),
         download: urlHelper.route('download', tq.api, tq.ext),
         lastTask: urlHelper.route('lastTask', 'Synchronizer', 'taoSync'),
-        activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync')
+        activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync'),
+        terminateExecutions: urlHelper.route('terminateExecutions', 'TerminateExecution', 'taoSync'),
     };
 
     /**
@@ -249,8 +250,13 @@ define([
                          if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
                              var $terminateActionContainer = $container.find('.terminate-action');
                              var $syncActionContainer = $container.find('.sync-action');
+                             var dialogConfig = {
+                                 data: data.activeSessionsData,
+                                 csrfToken: data.token,
+                                 terminateUrl: webservices.terminateExecutions
+                             };
 
-                             terminateExecutionsDialogFactory($terminateActionContainer, {"data": data.activeSessionsData})
+                             terminateExecutionsDialogFactory($terminateActionContainer, dialogConfig)
                                  .on('dialogRendered', function () {
                                      $syncActionContainer.toggle();
                                      $terminateActionContainer.toggle();
@@ -264,7 +270,9 @@ define([
                                      
                                  })
                                  .on('terminationSucceeded', function () {
-                                     
+                                     $terminateActionContainer.toggle();
+                                     $syncActionContainer.toggle();
+                                     taskQueue.create(action, getData());
                                  })
                                  .render($terminateActionContainer);
                          } else {

@@ -22,9 +22,10 @@
 define([
     'i18n',
     'lodash',
+    'core/dataProvider/request',
     'ui/component',
     'tpl!taoSync/component/terminateExecutions/notification',
-], function (__, _, component, listTpl) {
+], function (__, _, request, component, listTpl) {
     'use strict';
 
     /**
@@ -36,14 +37,28 @@ define([
     function terminateExecutionsDialogFactory($container, config) {
         var terminateExecutionsDialog;
 
-
-
         if (!_.isPlainObject(config)) {
             throw new TypeError('The configuration is required');
         }
 
+        if (config.terminateUrl == undefined) {
+            throw new TypeError('terminateUrl configuration parameter is required');
+        }
+
+        if (config.csrfToken == undefined) {
+            throw new TypeError('CSRF token is missing');
+        }
+
+        function terminateDeliveryExecutions() {
+            var requestData = {
+                executionsId: config.activeExecutions
+            };
+            requestData[config.csrfToken.name] = config.csrfToken.token;
+
+            return request(config.terminateUrl, requestData, 'POST');
+        }
+
         /**
-         *
          * @typedef {terminateExecutionsDialog}
          */
         return component({})
@@ -52,7 +67,7 @@ define([
                 var aggregatedData = {};
 
                 config.messages = [];
-                config.testMessage = 'TEST';
+                config.activeExecutions = [];
 
                 config.mainMessage = (config.data.length > 1
                     ? __('There are %s assessments in progress', config.data.length)
@@ -60,6 +75,8 @@ define([
                 + ', ' + __('please ensure that everyone has completed the assessment before proceeding.');
 
                 _.forEach(config.data, function (execution) {
+                    config.activeExecutions.push(execution.execution_id);
+
                     aggregatedData[execution.context_id] = aggregatedData[execution.context_id] || {"total": 0};
                     aggregatedData[execution.context_id]['label'] = execution.label;
                     aggregatedData[execution.context_id]['total']++;
@@ -73,10 +90,23 @@ define([
             }).on('render', function() {
                 var self = this;
 
+                // Cancel button handler
                 $container.find('.cancel-button').on('click', function (e) {
                     e.preventDefault();
                     self.trigger('terminationCanceled');
                     self.destroy();
+                });
+
+                // Force and terminate button handler
+                $container.find('.force-terminate-button').on('click', function (e) {
+                    e.preventDefault();
+                    terminateDeliveryExecutions()
+                        .then(function (response) {
+                            self.trigger('terminationSucceeded');
+                        })
+                        .catch(function (error) {
+                            self.trigger('terminationFailed');
+                        });
                 });
 
                 self.trigger('dialogRendered');
