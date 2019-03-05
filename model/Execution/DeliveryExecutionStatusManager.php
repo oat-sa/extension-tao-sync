@@ -21,6 +21,9 @@ namespace oat\taoSync\model\Execution;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
+use oat\taoDelivery\model\execution\ServiceProxy;
+use oat\taoItems\model\preview\OntologyItemNotFoundException;
+use oat\taoProctoring\model\DeliveryExecutionStateService;
 use oat\taoProctoring\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringData;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
@@ -53,5 +56,52 @@ class DeliveryExecutionStatusManager extends ConfigurableService
         return $deliveryMonitoringService->find([
             DeliveryMonitoringService::STATUS => $this->getNotFinalStatuses()
         ], [], true);
+    }
+
+
+    /**
+     * @param array $executionIds
+     * @throws OntologyItemNotFoundException
+     */
+    public function terminateDeliveryExecutions(array $executionIds)
+    {
+        try {
+            $executions = $this->getDeliveryExecutions($executionIds);
+
+            /** @var DeliveryExecutionStateService $executionStateService */
+            $executionStateService = $this->getServiceLocator()->get(DeliveryExecutionStateService::SERVICE_ID);
+
+            foreach ($executions as $execution) {
+                if ($executionStateService->isCancelable($execution)) {
+                    $executionStateService->terminateExecution($execution, [
+                        'reasons' =>[
+                            'category' => 'Technical'
+                        ],
+                        'comment' => 'Terminated to proceed with synchronization.'
+                    ]);
+                }
+            }
+        } catch (\common_exception_NotFound $e) {
+            throw new OntologyItemNotFoundException('Delivery execution not found');
+        }
+    }
+
+    /**
+     * @param array $executionIds
+     * @return array
+     *
+     * @throws \common_exception_NotFound
+     */
+    private function getDeliveryExecutions(array $executionIds)
+    {
+        $executions = [];
+        /** @var ServiceProxy $serviceProxy */
+        $serviceProxy = $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID);
+
+        foreach ($executionIds as $id) {
+            $executions[] = $serviceProxy->getDeliveryExecution($id);
+        }
+
+        return $executions;
     }
 }

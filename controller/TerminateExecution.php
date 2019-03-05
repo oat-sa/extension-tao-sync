@@ -21,6 +21,7 @@ namespace oat\taoSync\controller;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\security\xsrf\TokenService;
+use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use tao_actions_CommonModule;
 use common_http_Request as Request;
 
@@ -34,38 +35,80 @@ class TerminateExecution extends tao_actions_CommonModule
             $request = Request::currentRequest();
             $this->validateRequest($request);
 
+            $executionIds = $this->getExecutionsFromRequest($request);
+            $this->getServiceLocator()->get(DeliveryExecutionStatusManager::SERVICE_ID)
+                ->terminateDeliveryExecutions($executionIds);
+
             $this->returnJson([
                 'success' => true,
                 'data' => [
                     'message' => __('Executions were successfully terminated.'),
                 ]
             ]);
+        } catch (\common_exception_ClientException $e) {
+            $this->returnJson([
+                'success' => false,
+                'errorMsg' => $e->getUserMessage()
+            ], 400);
         } catch (\Exception $e) {
             $this->returnJson([
                 'success' => false,
-                'errorMsg' => 'Invalid request.'
-            ], 400);
+                'errorMsg' => 'Unexpected error.'
+            ], 500);
         }
     }
 
+    /**
+     * @param Request $request
+     * @return array
+     */
+    private function getExecutionsFromRequest(Request $request)
+    {
+        $requestParameters = $request->getParams();
+
+        if (!isset($requestParameters['executionsId']) || !is_array($requestParameters['executionsId'])) {
+            throw new \common_exception_ValidationFailed('executionsId', 'Executions IDs parameter must be an array.');
+        }
+
+        return $requestParameters['executionsId'];
+    }
+
+    /**
+     * @param Request $request
+     *
+     * @throws \common_exception_MethodNotAllowed
+     * @throws \common_exception_ValidationFailed
+     */
     private function validateRequest(Request $request)
     {
         if ($request->getMethod() !== 'POST') {
-            throw new \HttpRequestMethodException('Only POST requests are allowed.');
+            throw new \common_exception_MethodNotAllowed('Only POST requests are allowed.');
         }
+
+        $this->validateCsrfToken($request);
+    }
+
+    /**
+     * @param Request $request
+     * @throws \common_exception_ValidationFailed
+     */
+    private function validateCsrfToken(Request $request)
+    {
+        $requestParameters = $request->getParams();
 
         /** @var TokenService $tokenService */
         $tokenService = $this->getServiceLocator()->get(TokenService::SERVICE_ID);
         $tokenName = $tokenService->getTokenName();
-//        $token = $request->getPa
-//        if () {
-//
-//        }
-    }
 
-    private function validateCsrfToken()
-    {
+        if (!isset($requestParameters[$tokenName])) {
+            throw new \common_exception_ValidationFailed('token', 'CSRF token is missing.');
+        }
 
+        $token = $requestParameters[$tokenName];
+        if (!$tokenService->checkToken($token)) {
+            throw new \common_exception_ValidationFailed('token', 'Invalid CSRF token value.');
+        }
 
+        $tokenService->revokeToken($token);
     }
 }
