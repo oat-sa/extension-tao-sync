@@ -70,9 +70,16 @@ define([
                 });
 
                 this.config = config;
-                this.render($container);
             }).on('render', function() {
+                var self = this;
 
+                $container.find('.cancel-button').on('click', function (e) {
+                    e.preventDefault();
+                    self.trigger('terminationCanceled');
+                    self.destroy();
+                });
+
+                self.trigger('dialogRendered');
             })
             .init(config);
     }

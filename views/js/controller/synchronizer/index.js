@@ -248,8 +248,25 @@ define([
                     .then(function (data) {
                          if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
                              var $terminateActionContainer = $container.find('.terminate-action');
+                             var $syncActionContainer = $container.find('.sync-action');
 
-                             terminateExecutionsDialogFactory($terminateActionContainer, {"data": data.activeSessionsData});
+                             terminateExecutionsDialogFactory($terminateActionContainer, {"data": data.activeSessionsData})
+                                 .on('dialogRendered', function () {
+                                     $syncActionContainer.toggle();
+                                     $terminateActionContainer.toggle();
+                                 })
+                                 .on('terminationCanceled', function () {
+                                     $terminateActionContainer.toggle();
+                                     setState('form');
+                                     $syncActionContainer.toggle();
+                                 })
+                                 .on('terminationFailed', function () {
+                                     
+                                 })
+                                 .on('terminationSucceeded', function () {
+                                     
+                                 })
+                                 .render($terminateActionContainer);
                          } else {
                              taskQueue.create(action, getData());
                          }
