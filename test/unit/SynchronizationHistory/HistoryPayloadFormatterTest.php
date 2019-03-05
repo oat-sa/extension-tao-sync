@@ -17,7 +17,7 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\test\unit\SyncLog;
+namespace oat\taoSync\test\unit\SynchronizationHistory;
 
 use oat\oatbox\extension\script\MissingOptionException;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
