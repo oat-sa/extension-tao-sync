@@ -20,11 +20,11 @@
 namespace oat\taoSync\controller;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\tao\model\security\xsrf\TokenService;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoProctoring\model\monitorCache\DeliveryMonitoringData;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\history\DataSyncHistoryService;
@@ -52,8 +52,7 @@ class Synchronizer extends \tao_actions_CommonModule
         $this->setData('terminate-form-action', _url('terminateExecutions', 'TerminateExecution', 'taoSync'));
         $this->setData('form-fields', $this->getFormFieldsService()->getFormFields());
         $this->setData('form-action', _url('createTask'));
-            $this->setData('includeTemplate', 'sync/extra.tpl');
-
+        $this->setData('includeTemplate', 'sync/extra.tpl');
 
         $this->injectExtraInfo();
 
@@ -129,19 +128,23 @@ class Synchronizer extends \tao_actions_CommonModule
         /** @var SyncService $syncService */
         $syncService = $this->getServiceLocator()->get(SyncService::SERVICE_ID);
 
+        $data = [];
         $activeSessionsData = [];
         if ($syncService->getOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)) {
             $serviceLocator = $this->getServiceLocator();
             $activeSessions = $serviceLocator->get(DeliveryExecutionStatusManager::SERVICE_ID)->getExecutionsInProgress();
             $activeSessionsData = $serviceLocator->get(DeliveryExecutionContextParser::SERVICE_ID)->parseExecutionContextDetails($activeSessions);
+
+            /** @var TokenService $tokenService */
+            $tokenService = $serviceLocator->get(TokenService::SERVICE_ID);
+            $data[$tokenService->getTokenName()] = $tokenService->createToken();
         }
+
+        $data['activeSessionsData'] = $activeSessionsData;
 
         return $this->returnJson([
             'success' => true,
-            'data' => [
-                'activeSessions' => count($activeSessionsData),
-                'activeSessionsData' => $activeSessionsData
-            ]
+            'data' => $data
         ]);
     }
 

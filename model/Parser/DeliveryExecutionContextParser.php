@@ -44,6 +44,10 @@ class DeliveryExecutionContextParser extends ConfigurableService
             $deliveryExecutionContext = $monitoringData->getDeliveryExecutionContext();
             if ($deliveryExecutionContext instanceof DeliveryExecutionContextInterface) {
                 $executionContextData[] = $deliveryExecutionContext;
+//                $executionContextData[$deliveryExecutionContext->getExecutionContextId()] = [
+//                    'label' => $deliveryExecutionContext->getLabel(),
+//                    'execution_id' => $deliveryExecutionContext->getExecutionId(),
+//                ];
             }
         }
 

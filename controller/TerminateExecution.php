@@ -20,7 +20,9 @@
 namespace oat\taoSync\controller;
 
 use oat\generis\model\OntologyAwareTrait;
+use oat\tao\model\security\xsrf\TokenService;
 use tao_actions_CommonModule;
+use common_http_Request as Request;
 
 class TerminateExecution extends tao_actions_CommonModule
 {
@@ -28,6 +30,42 @@ class TerminateExecution extends tao_actions_CommonModule
 
     public function terminateExecutions()
     {
+        try {
+            $request = Request::currentRequest();
+            $this->validateRequest($request);
+
+            $this->returnJson([
+                'success' => true,
+                'data' => [
+                    'message' => __('Executions were successfully terminated.'),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            $this->returnJson([
+                'success' => false,
+                'errorMsg' => 'Invalid request.'
+            ], 400);
+        }
+    }
+
+    private function validateRequest(Request $request)
+    {
+        if ($request->getMethod() !== 'POST') {
+            throw new \HttpRequestMethodException('Only POST requests are allowed.');
+        }
+
+        /** @var TokenService $tokenService */
+        $tokenService = $this->getServiceLocator()->get(TokenService::SERVICE_ID);
+        $tokenName = $tokenService->getTokenName();
+//        $token = $request->getPa
+//        if () {
+//
+//        }
+    }
+
+    private function validateCsrfToken()
+    {
+
 
     }
 }

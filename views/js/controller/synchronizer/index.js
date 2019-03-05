@@ -23,8 +23,9 @@ define([
     'core/dataProvider/request',
     'util/url',
     'core/taskQueue/taskQueueModel',
-    'layout/loading-bar'
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar) {
+    'layout/loading-bar',
+    'taoSync/component/terminateExecutions/terminateExecutions'
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory) {
     'use strict';
 
     /**
@@ -245,11 +246,10 @@ define([
                 $container.removeClass('active');
                 request(webservices.activeSessions)
                     .then(function (data) {
-                         if(data.activeSessions > 0) {
-                             setState('form');
-                             $container.addClass('active');
-                             $container.removeClass('history');
-                             loadingBar.stop();
+                         if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
+                             var $terminateActionContainer = $container.find('.terminate-action');
+
+                             terminateExecutionsDialogFactory($terminateActionContainer, {"data": data.activeSessionsData});
                          } else {
                              taskQueue.create(action, getData());
                          }

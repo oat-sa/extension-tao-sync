@@ -13,9 +13,11 @@ $formFields = get_data('form-fields');
     </header>
 
     <div class="action-area">
-        <?php Template::inc('sync/terminateExecutions.tpl', 'taoSync'); ?>
-        <div class="sync-action">
-            <form class="sync-form" action="<?= get_data('form-action'); ?>">
+        <div class="action-block terminate-action">
+
+        </div>
+
+        <form class="action-block sync-action sync-form" action="<?= get_data('form-action'); ?>">
                 <section class="intro">
                     <p>
                         <?= __('Depending on the workload this process may take a while.') ?>
@@ -111,6 +113,5 @@ $formFields = get_data('form-fields');
                 </button>
 
             </form>
-        </div>
     </div>
 </div>
