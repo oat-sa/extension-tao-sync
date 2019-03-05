@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\Execution;
 
+use common_exception_NotFound;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecutionInterface;
 use oat\taoDelivery\model\execution\ServiceProxy;
@@ -72,25 +73,25 @@ class DeliveryExecutionStatusManager extends ConfigurableService
             $executionStateService = $this->getServiceLocator()->get(DeliveryExecutionStateService::SERVICE_ID);
 
             foreach ($executions as $execution) {
-                if ($executionStateService->isCancelable($execution)) {
-                    $executionStateService->terminateExecution($execution, [
-                        'reasons' =>[
-                            'category' => 'Technical'
-                        ],
-                        'comment' => 'Terminated to proceed with synchronization.'
-                    ]);
-                }
+                $executionStateService->terminateExecution($execution, [
+                    'reasons' =>[
+                        'category' => 'Technical'
+                    ],
+                    'comment' => 'Terminated to proceed with synchronization.'
+                ]);
             }
-        } catch (\common_exception_NotFound $e) {
+        } catch (common_exception_NotFound $e) {
             throw new OntologyItemNotFoundException('Delivery execution not found');
         }
+
+        return true;
     }
 
     /**
      * @param array $executionIds
      * @return array
      *
-     * @throws \common_exception_NotFound
+     * @throws common_exception_NotFound
      */
     private function getDeliveryExecutions(array $executionIds)
     {
