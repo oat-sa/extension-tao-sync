@@ -23,8 +23,9 @@ define([
     'core/dataProvider/request',
     'util/url',
     'core/taskQueue/taskQueueModel',
-    'layout/loading-bar'
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar) {
+    'layout/loading-bar',
+    'taoSync/component/terminateExecutions/terminateExecutions'
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory) {
     'use strict';
 
     /**
@@ -46,7 +47,8 @@ define([
         all: urlHelper.route('getAll', tq.api, tq.ext),
         download: urlHelper.route('download', tq.api, tq.ext),
         lastTask: urlHelper.route('lastTask', 'Synchronizer', 'taoSync'),
-        activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync')
+        activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync'),
+        terminateExecutions: urlHelper.route('terminateExecutions', 'TerminateExecution', 'taoSync'),
     };
 
     /**
@@ -66,34 +68,39 @@ define([
             var $container = $('#tao-sync-container');
 
             /**
-             * Form
+             * Synchronization form
              */
-            var $form = $container.find('form');
+            var $syncForm = $container.find('form.sync-form');
+
+            /**
+             * Terminate active sessions form
+             */
+            var $terminateForm = $container.find('form.sync-form');
 
             /**
              * Form fields, if any.
              * Note that `:input` would include the button which is not wanted.
              * Configured in config/taoSync/syncFormFields.conf.php
              */
-            var $formFields = $form.find('input, select');
+            var $syncFormFields = $syncForm.find('input, select');
 
             /**
              * Launch button
              */
-            var $launchButton = $form.find('button[data-control="launch"]');
+            var $launchButton = $syncForm.find('button[data-control="launch"]');
 
             /**
              * Spinners
              */
-            var $spinner = $form.find('.feedback-info .icon-loop');
+            var $spinner = $syncForm.find('.feedback-info .icon-loop');
 
             /**
              * Start and update time
              */
             var timeFields = {
-                $enqueued: $form.find('.enqueue-time'),
-                $updated: $form.find('.update-time'),
-                $completed: $form.find('.complete-time')
+                $enqueued: $syncForm.find('.enqueue-time'),
+                $updated: $syncForm.find('.update-time'),
+                $completed: $syncForm.find('.complete-time')
             };
 
             /**
@@ -102,7 +109,7 @@ define([
              */
             var msg = (function () {
                 var _msg = {
-                    $all: $form.find('.msg')
+                    $all: $syncForm.find('.msg')
                 };
                 _msg.$all.each(function () {
                     var $currentMsg = $(this);
@@ -152,7 +159,7 @@ define([
                 var data = {
                     label: taskLabel
                 };
-                $formFields.each(function () {
+                $syncFormFields.each(function () {
                     data[this.name] = this.value;
                 });
                 return data;
@@ -164,7 +171,7 @@ define([
              */
             function toggleLaunchButtonState() {
                 var isValid = true;
-                $formFields.each(function () {
+                $syncFormFields.each(function () {
                     isValid = this.validity.valid;
                     return isValid;
                 });
@@ -226,25 +233,48 @@ define([
             loadingBar.start();
 
             // check if all form fields are valid, if applicable
-            $formFields.on('keyup paste blur', toggleLaunchButtonState);
+            $syncFormFields.on('keyup paste blur', toggleLaunchButtonState);
 
             // there might be no form fields at all
             // or they might have received valid entries by other means
             toggleLaunchButtonState();
 
             // set form actions
-            $form.on('submit', function (e) {
+            $syncForm.on('submit', function (e) {
                 var action = this.action;
                 e.preventDefault();
                 setState('progress');
                 $container.removeClass('active');
                 request(webservices.activeSessions)
                     .then(function (data) {
-                         if(data.activeSessions > 0) {
-                             setState('form');
-                             $container.addClass('active');
-                             $container.removeClass('history');
-                             loadingBar.stop();
+                         if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
+                             var $terminateActionContainer = $container.find('.terminate-action');
+                             var $syncActionContainer = $container.find('.sync-action');
+                             var dialogConfig = {
+                                 data: data.activeSessionsData,
+                                 csrfToken: data.token,
+                                 terminateUrl: webservices.terminateExecutions
+                             };
+
+                             terminateExecutionsDialogFactory($terminateActionContainer, dialogConfig)
+                                 .on('dialogRendered', function () {
+                                     $syncActionContainer.toggle();
+                                     $terminateActionContainer.toggle();
+                                 })
+                                 .on('terminationCanceled', function () {
+                                     $terminateActionContainer.toggle();
+                                     setState('form');
+                                     $syncActionContainer.toggle();
+                                 })
+                                 .on('terminationFailed', function () {
+                                     
+                                 })
+                                 .on('terminationSucceeded', function () {
+                                     $terminateActionContainer.toggle();
+                                     $syncActionContainer.toggle();
+                                     taskQueue.create(action, getData());
+                                 })
+                                 .render($terminateActionContainer);
                          } else {
                              taskQueue.create(action, getData());
                          }
@@ -253,7 +283,7 @@ define([
                         setState('error');
                     });
             });
-            $form.find('button[data-control="close"]').on('click', function (e) {
+            $syncForm.find('button[data-control="close"]').on('click', function (e) {
                 e.preventDefault();
                 setState('form');
             });

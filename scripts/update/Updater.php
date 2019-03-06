@@ -42,6 +42,7 @@ use oat\taoSync\model\Entity;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
+use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -49,6 +50,7 @@ use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
 use oat\taoSync\model\OfflineMachineChecksService;
+use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
@@ -577,6 +579,16 @@ class Updater extends \common_ext_ExtensionUpdater
 
         $this->skip('4.7.0', '4.7.1');
 
+
+        if ($this->isVersion('4.7.1')) {
+            $executionStatusManager = new DeliveryExecutionStatusManager();
+            $this->getServiceManager()->register(DeliveryExecutionStatusManager::SERVICE_ID, $executionStatusManager);
+
+            $executionContextParser = new DeliveryExecutionContextParser();
+            $this->getServiceManager()->register(DeliveryExecutionContextParser::SERVICE_ID, $executionContextParser);
+
+            $this->setVersion('5.0.0');
+        }
 
     }
 

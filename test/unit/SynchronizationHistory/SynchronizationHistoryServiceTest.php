@@ -17,7 +17,7 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\test\unit;
+namespace oat\taoSync\test\unit\SynchronizationHistory;
 
 use oat\oatbox\user\User;
 use oat\tao\model\datatable\DatatableRequest;

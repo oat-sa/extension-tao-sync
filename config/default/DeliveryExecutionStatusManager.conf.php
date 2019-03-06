@@ -14,29 +14,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\test\unit\SyncLog;
+use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 
-use oat\oatbox\extension\script\MissingOptionException;
-use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
-use oat\generis\test\TestCase;
-
-
-/**
- * Class HistoryPayloadFormatterTest
- */
-class HistoryPayloadFormatterTest extends TestCase
-{
-    /**
-     * @throws MissingOptionException
-     */
-    public function testConstructWithoutRequiredOption()
-    {
-        $this->expectException(MissingOptionException::class);
-
-        new HistoryPayloadFormatter([]);
-    }
-}
-
+return new DeliveryExecutionStatusManager();
