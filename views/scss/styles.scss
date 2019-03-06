@@ -52,7 +52,8 @@
         }
     }
 
-    button{
+    [class^="btn-"], [class*=" btn-"], .btn-default,
+    button, input[type="submit"], input[type="reset"] {
         height: auto;
         line-height: 1.2;
         padding: 15px 20px 15px 55px;
@@ -149,12 +150,54 @@
         padding:20px;
         position: relative;
         min-height: 330px;
-        @include font-size(16)
+        @include font-size(16);
+
+        .action-block {
+            border: 1px $uiGeneralContentBorder solid;
+            background: $canvas;
+            padding: 30px;
+            @include simple-border()
+        }
+
+        .terminate-action {
+            display: none;
+        }
+
+        .in-progress-list {
+            padding-top: 10px;
+        }
+
+        .feedback-warning {
+            display: block;
+        }
     }
 
     h2 {
         @include font-size(23);
         font-family: $headingFont;
+    }
+
+    ul {
+        list-style-type: none;
+    }
+
+    .button-area {
+        text-align: center;
+        padding: 5px 0 0 0;
+
+        .force-terminate-button, .cancel-button {
+            display: inline-block;
+            max-width: 160px;
+            margin: 0 10px !important;
+            @include font-size(18, true)
+        }
+
+        .force-terminate-button {
+            max-width: 220px;
+            line-height: 0.8;
+            padding-top: 10px;
+            padding-bottom: 11px;
+        }
     }
 }
 
