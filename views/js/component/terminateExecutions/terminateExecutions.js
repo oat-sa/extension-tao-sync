@@ -66,10 +66,10 @@ define([
             .on('init', function() {
                 var aggregatedData = {};
 
-                config.messages = [];
+                config.groupedMessages = [];
                 config.activeExecutions = [];
 
-                config.mainMessage = (config.data.length > 1
+                config.notificationMessage = (config.data.length > 1
                     ? __('There are %s assessments in progress', config.data.length)
                     : __('There is one assessment in progress'))
                 + ', ' + __('please ensure that everyone has completed the assessment before proceeding.');
@@ -83,7 +83,7 @@ define([
                 });
 
                 _.forEach(aggregatedData, function (executionContext) {
-                    config['messages'].push(executionContext.label + " / " + executionContext.total);
+                    config.groupedMessages.push(executionContext.label + " / " + executionContext.total);
                 });
 
                 this.config = config;

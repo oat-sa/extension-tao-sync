@@ -2,16 +2,16 @@
     <section class="fb-container">
         <div class="feedback-warning status-active">
             <span class="icon-warning"></span>
-            <div class="messages">
+            <div class="notification-message">
                 <p>
-                    {{mainMessage}}
+                    {{notificationMessage}}
                 </p>
             </div>
 
             <div class="in-progress-list">
                 <p class="b">{{__ "Assessments in progress:"}}</p>
                 <ul>
-                    {{#each messages}}
+                    {{#each groupedMessages}}
                         <li>- {{this}}</li>
                     {{/each}}
                 </ul>
