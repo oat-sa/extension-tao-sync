@@ -130,7 +130,8 @@ class FormatterService extends ConfigurableService implements SynchronizerFormat
                 sort($properties[$key]);
             }
         }
+        ksort($properties);
 
-        return md5(serialize(ksort($properties)));
+        return md5(serialize($properties));
     }
 }

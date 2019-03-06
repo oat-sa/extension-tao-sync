@@ -577,7 +577,10 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('4.7.0');
         }
 
-        if ($this->isVersion('4.7.0')) {
+        $this->skip('4.7.0', '4.7.1');
+
+
+        if ($this->isVersion('4.7.1')) {
             $executionStatusManager = new DeliveryExecutionStatusManager();
             $this->getServiceManager()->register(DeliveryExecutionStatusManager::SERVICE_ID, $executionStatusManager);
 
