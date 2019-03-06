@@ -103,6 +103,7 @@ define([
                     terminateDeliveryExecutions()
                         .then(function (response) {
                             self.trigger('terminationSucceeded');
+                            self.destroy();
                         })
                         .catch(function (error) {
                             self.trigger('terminationFailed');
