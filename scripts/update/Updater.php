@@ -587,7 +587,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $executionContextParser = new DeliveryExecutionContextParser();
             $this->getServiceManager()->register(DeliveryExecutionContextParser::SERVICE_ID, $executionContextParser);
 
-            $this->setVersion('4.8.0');
+            $this->setVersion('5.0.0');
         }
 
     }
