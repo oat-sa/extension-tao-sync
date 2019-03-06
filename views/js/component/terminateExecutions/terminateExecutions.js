@@ -64,10 +64,8 @@ define([
         return component({})
             .setTemplate(listTpl)
             .on('init', function() {
-                var aggregatedData = {};
-
-                config.groupedMessages = [];
                 config.activeExecutions = [];
+                config.aggregatedData = {};
 
                 config.notificationMessage = (config.data.length > 1
                     ? __('There are %s assessments in progress', config.data.length)
@@ -77,13 +75,9 @@ define([
                 _.forEach(config.data, function (execution) {
                     config.activeExecutions.push(execution.execution_id);
 
-                    aggregatedData[execution.context_id] = aggregatedData[execution.context_id] || {"total": 0};
-                    aggregatedData[execution.context_id]['label'] = execution.label;
-                    aggregatedData[execution.context_id]['total']++;
-                });
-
-                _.forEach(aggregatedData, function (executionContext) {
-                    config.groupedMessages.push(executionContext.label + " / " + executionContext.total);
+                    config.aggregatedData[execution.context_id] = config.aggregatedData[execution.context_id] || {"total": 0};
+                    config.aggregatedData[execution.context_id]['label'] = execution.label;
+                    config.aggregatedData[execution.context_id]['total']++;
                 });
 
                 this.config = config;

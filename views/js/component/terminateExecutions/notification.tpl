@@ -11,8 +11,8 @@
             <div class="in-progress-list">
                 <p class="b">{{__ "Assessments in progress:"}}</p>
                 <ul>
-                    {{#each groupedMessages}}
-                        <li>- {{this}}</li>
+                    {{#each aggregatedData}}
+                        <li>- {{this.label}} / {{this.total}}</li>
                     {{/each}}
                 </ul>
             </div>
