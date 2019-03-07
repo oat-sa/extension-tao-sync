@@ -22,6 +22,7 @@ namespace oat\taoSync\test\server;
 
 
 use core_kernel_classes_Resource;
+use oat\generis\model\data\Ontology;
 use oat\taoSync\model\formatter\SynchronizerFormatter;
 use oat\taoSync\model\server\HandShakeServerResponse;
 
@@ -30,6 +31,8 @@ class HandShakeServerResponseTest extends \PHPUnit_Framework_TestCase
     public function testAsArray()
     {
         $handShakeResponse = new HandShakeServerResponse($this->mockResource(), $this->mockResource(), $this->mockSynchronizer());
+        $handShakeResponse->setModel($this->mockModel());
+
         $this->assertEquals([
             'syncUser' => [
                 'property1' => 'value1'
@@ -81,6 +84,19 @@ class HandShakeServerResponseTest extends \PHPUnit_Framework_TestCase
             ->willReturn([
                 'property1' => 'value1'
             ]);
+
+        return $mock;
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function mockModel()
+    {
+        $mock = $this->getMockBuilder(Ontology::class)->disableOriginalConstructor()->getMock();
+        $mock
+            ->method('getProperty')
+            ->willReturn(new \core_kernel_classes_Property('PROP'));
 
         return $mock;
     }

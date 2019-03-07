@@ -58,7 +58,7 @@ class HandShakeAuthAdapterTest extends \PHPUnit_Framework_TestCase
     {
         /** @var HandShakeAuthAdapter $handShakeAdapter */
         $handShakeAdapter = $this->getMockBuilder(HandShakeAuthAdapter::class)->setMethods([
-            'callParentAuthenticate','handShakeWithServer'
+            'callParentAuthenticate', 'handShakeWithServer', 'logError'
         ])->getMockForAbstractClass();
 
         $handShakeAdapter
@@ -102,7 +102,7 @@ class HandShakeAuthAdapterTest extends \PHPUnit_Framework_TestCase
     {
         /** @var HandShakeAuthAdapter $handShakeAdapter */
         $handShakeAdapter = $this->getMockBuilder(HandShakeAuthAdapter::class)->setMethods([
-            'callParentAuthenticate','handShakeWithServer'
+            'callParentAuthenticate', 'handShakeWithServer', 'logError'
         ])->getMockForAbstractClass();
 
         $handShakeAdapter

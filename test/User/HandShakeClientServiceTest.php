@@ -23,6 +23,7 @@ namespace oat\taoSync\test\User;
 use core_kernel_classes_Class;
 use core_kernel_classes_Resource;
 use GuzzleHttp\Client;
+use oat\generis\test\TestCase;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\File;
 use oat\oatbox\filesystem\FileSystemService;
@@ -34,8 +35,26 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
+class HandShakeClientServiceTest extends TestCase
 {
+    /**
+     * @var PublishingService|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $publishingServiceMock;
+
+    /**
+     * @var PlatformService|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $platformServiceMock;
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        $this->publishingServiceMock = $this->mockPublishingService([$this->mockResource()]);
+        $this->platformServiceMock = $this->mockPlatformService($this->mockResource());
+    }
+
     /**
      * @dataProvider dataSuccessProvider
      */
@@ -63,6 +82,36 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
         $service = $this->getService($data);
 
         $this->assertFalse($service->execute($this->getRequest()));
+    }
+
+    /**
+     * @dataProvider dataSuccessProvider
+     */
+    public function testExecute_WhenRemoteConnectionAlreadyExists_ThenItIsUpdated($data)
+    {
+        $this->publishingServiceMock = $this->mockPublishingService([$this->mockResource()]);
+        $resourceMock = $this->mockResource();
+        $resourceMock->expects($this->never())->method('createInstanceWithProperties');
+        $this->platformServiceMock = $this->mockPlatformService($resourceMock);
+
+        $service = $this->getService($data);
+
+        $this->assertTrue($service->execute($this->getRequest()));
+    }
+
+    /**
+     * @dataProvider dataSuccessProvider
+     */
+    public function testExecute_WhenThereAreNoExistingRemoteConnections_ThenOneIsCreated($data)
+    {
+        $this->publishingServiceMock = $this->mockPublishingService([]);
+        $resourceMock = $this->mockResource();
+        $resourceMock->expects($this->once())->method('createInstanceWithProperties');
+        $this->platformServiceMock = $this->mockPlatformService($resourceMock);
+
+        $service = $this->getService($data);
+
+        $this->assertTrue($service->execute($this->getRequest()));
     }
 
     /**
@@ -125,42 +174,113 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
      */
     protected function getService($dataProvider = [])
     {
-        $body = $this->getMockForAbstractClass(StreamInterface::class);
-        $body
-            ->method('getContents')
-            ->willReturn($dataProvider['content']);
+        $body = $this->createMock(StreamInterface::class);
+        $body->method('getContents')->willReturn($dataProvider['content']);
 
-        $response = $this->getMockForAbstractClass(ResponseInterface::class);
-        $response
-            ->method('getStatusCode')
-            ->willReturn($dataProvider['code']);
+        $response = $this->createMock(ResponseInterface::class);
+        $response->method('getStatusCode')->willReturn($dataProvider['code']);
+        $response->method('getBody')->willReturn($body);
 
-        $response
-            ->method('getBody')
-            ->willReturn($body);
+        $client = $this->createMock(Client::class);
+        $client->method('send')->willReturn($response);
 
-        $client = $this->getMockBuilder(Client::class)->disableOriginalConstructor()->getMock();
-        $client
-            ->method('send')
-            ->willReturn($response);
+        $service = $this->createPartialMock(
+            HandShakeClientService::class,
+            [
+                'logError', 'getPlatformService', 'getClient', 'getClass', 'getResource',
+                'hasOption', 'getOption', 'getProperty', 'getOAuth2ClassUri'
+            ]
+        );
 
-        $service = $this->getMockBuilder(HandShakeClientService::class)
-            ->setMethods(['logError', 'getPlatformService', 'getClient', 'getClass', 'getResource', 'getFileSystem', 'hasOption', 'getOption'])
-            ->getMockForAbstractClass();
-
-        $fileSystem = $this->getMockBuilder(FileSystemService::class)->disableOriginalConstructor()->getMock();
-        $fileMock = $this->getMockBuilder(File::class)->disableOriginalConstructor()->getMock();
-        $fileMock
-            ->method('read')
-            ->willReturn($dataProvider['handshakedone']);
+        $service->method('getClient')->willReturn($client);
+        $service->method('getResource')->willReturn($this->mockResource());
+        $service->method('getClass')->willReturn($this->mockClass());
+        $service->method('getPlatformService')->willReturn($this->platformServiceMock);
+        $service->method('getOAuth2ClassUri')->willReturn('http://www.tao.lu/Ontologies/TAO.rdf#OauthConsumer');
+        $service->method('getProperty')->willReturn($this->mockProperty());
 
         if (array_key_exists('alwaysRemoteLogin', $dataProvider)) {
+            $service->method('hasOption')->willReturn(true);
+            $service->method('getOption')->with(HandShakeClientService::OPTION_ALWAYS_REMOTE_LOGIN)->willReturn($dataProvider['alwaysRemoteLogin']);
+        } else {
+            $service->method('hasOption')->willReturn(false);
+        }
+
+        $service->setOption(HandShakeClientService::OPTION_REMOTE_AUTH_URL, 'http://removeurl.dev/handshake');
+
+        $fileSystemMock = $this->mockFileSystem($dataProvider['handshakedone'], array_key_exists('alwaysRemoteLogin', $dataProvider));
+        $serviceLocatorMock = $this->getServiceLocatorMock([
+            FileSystemService::SERVICE_ID => $fileSystemMock,
+            PublishingService::SERVICE_ID => $this->publishingServiceMock,
+        ]);
+
+        $service->setServiceLocator($serviceLocatorMock);
+
+        return $service;
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function mockResource()
+    {
+        return $this->createPartialMock(
+            core_kernel_classes_Resource::class,
+            ['delete', 'createInstanceWithProperties', 'setType', 'setPropertiesValues', 'editPropertyValues']
+        );
+    }
+
+    protected function mockClass()
+    {
+        return $this->createMock(core_kernel_classes_Class::class);
+    }
+
+    /**
+     * @param $resource
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function mockPlatformService($resource)
+    {
+        $service = $this->createMock(PlatformService::class);
+        $service
+            ->method('getRootClass')
+            ->willReturn($resource);
+
+        return $service;
+    }
+
+    /**
+     * @param $returnValue
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function mockPublishingService($returnValue)
+    {
+        $service = $this->createMock(PublishingService::class);
+        $service
+            ->method('findByAction')
+            ->willReturn($returnValue);
+
+        return $service;
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function mockFileSystem($handShakeDone = 0, $alwaysRemoteLogin = null)
+    {
+        $fileSystem = $this->createMock(FileSystemService::class);
+        $fileMock = $this->createMock(File::class);
+        $fileMock
+            ->method('read')
+            ->willReturn($handShakeDone);
+
+        if ($alwaysRemoteLogin) {
             $fileMock->expects($this->never())->method('put');
         } else {
             $fileMock->method('put')->willReturn(true);
         }
 
-        $directoryMock = $this->getMockBuilder(Directory::class)->disableOriginalConstructor()->getMock();
+        $directoryMock = $this->createMock(Directory::class);
         $directoryMock
             ->method('getDirectory')
             ->willReturn($directoryMock);
@@ -174,72 +294,15 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getFileSystem')
             ->willReturn($fileMock);
 
-        $service->method('getClient')->willReturn($client);
-        $service->method('getResource')->willReturn($this->mockResource());
-        $service->method('getClass')->willReturn($this->mockClass());
-        $service->method('getPlatformService')->willReturn($this->mockPlatformService());
-        $service->method('getFileSystem')->willReturn($fileSystem);
-
-        if (array_key_exists('alwaysRemoteLogin', $dataProvider)) {
-            $service->method('hasOption')->willReturn(true);
-            $service->method('getOption')->with(HandShakeClientService::OPTION_ALWAYS_REMOTE_LOGIN)->willReturn($dataProvider['alwaysRemoteLogin']);
-        } else {
-            $service->method('hasOption')->willReturn(false);
-        }
-
-        $service->setOption(HandShakeClientService::OPTION_REMOTE_AUTH_URL, 'http://removeurl.dev/handshake');
-        $serviceLocator = $this->getMockForAbstractClass(ServiceLocatorInterface::class);
-        $serviceLocator
-            ->method('get')
-            ->will($this->onConsecutiveCalls(
-                $this->mockPublishingService()
-            ));
-        $service->setServiceLocator($serviceLocator);
-
-
-        return $service;
+        return $fileSystem;
     }
 
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function mockResource()
+    protected function mockProperty()
     {
-        $mock = $this->getMockBuilder(core_kernel_classes_Resource::class)
-            ->setMethods(['delete', 'createInstanceWithProperties', 'setType', 'setPropertiesValues'])
-            ->disableOriginalConstructor()->getMock();
-
-        return $mock;
-    }
-
-    protected function mockClass()
-    {
-        return $this->getMockBuilder(core_kernel_classes_Class::class)->disableOriginalConstructor()->getMock();
-    }
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function mockPlatformService()
-    {
-        $service = $this->getMockBuilder(PlatformService::class)->disableOriginalConstructor()->getMock();
-        $service
-            ->method('getRootClass')
-            ->willReturn($this->mockResource());
-
-        return $service;
-    }
-
-    /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected function mockPublishingService()
-    {
-        $service = $this->getMockBuilder(PublishingService::class)->disableOriginalConstructor()->getMock();
-        $service
-            ->method('findByAction')
-            ->willReturn([$this->mockResource()]);
-
-        return $service;
+        return $this->createMock(\core_kernel_classes_Property::class);
     }
 
     /**
@@ -247,7 +310,7 @@ class HandShakeClientServiceTest extends \PHPUnit_Framework_TestCase
      */
     protected function getRequest()
     {
-        $handShakeRequest = $this->getMockBuilder(HandShakeClientRequest::class)->disableOriginalConstructor()->getMock();
+        $handShakeRequest = $this->createMock(HandShakeClientRequest::class);
         $handShakeRequest
             ->method('getLogin')
             ->willReturn('login');
