@@ -83,8 +83,9 @@ class HandShakeClientService extends ConfigurableService
         $oauthData = $responseParsed['oauthInfo'];
         $syncUser = $responseParsed['syncUser'];
 
-        $this->removeRemoteConnections();
-        $this->createRemoteConnection($oauthData);
+        if (!$this->updateRemoteConnections($oauthData)) {
+            $this->createRemoteConnection($oauthData);
+        }
 
         return $this->insertRemoteUser($syncUser);
     }
@@ -132,18 +133,31 @@ class HandShakeClientService extends ConfigurableService
     }
 
     /**
+     * @param $oauthData
+     * @return bool
      * @throws \common_exception_NotFound
      */
-    protected function removeRemoteConnections()
+    protected function updateRemoteConnections($oauthData)
     {
         $action = 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData';
         /** @var PublishingService $publishingAuthService */
         $publishingAuthService = $this->getServiceLocator()->get(PublishingService::SERVICE_ID);
-        if ($founds = $publishingAuthService->findByAction($action)){
-            foreach ($founds as $found){
-                $found->delete();
-            }
+        $foundRemoteConnections = $publishingAuthService->findByAction($action);
+        if (empty($foundRemoteConnections)) {
+            return false;
         }
+
+        /** @var \core_kernel_classes_Resource $connection */
+        foreach ($foundRemoteConnections as $connection){
+            $connection->editPropertyValues($this->getProperty(PlatformService::PROPERTY_AUTH_TYPE), $this->getOAuth2ClassUri());
+            $connection->editPropertyValues($this->getProperty(PlatformService::PROPERTY_ROOT_URL), $this->getOption(static::OPTION_ROOT_URL));
+            $connection->editPropertyValues($this->getProperty(ConsumerStorage::CONSUMER_CLIENT_KEY), $oauthData['key']);
+            $connection->editPropertyValues($this->getProperty(ConsumerStorage::CONSUMER_CLIENT_SECRET), $oauthData['secret']);
+            $connection->editPropertyValues($this->getProperty(ConsumerStorage::CONSUMER_TOKEN_URL), $oauthData['tokenUrl']);
+            $connection->editPropertyValues($this->getProperty(ConsumerStorage::CONSUMER_TOKEN_TYPE), OAuthClient::DEFAULT_TOKEN_TYPE);
+            $connection->editPropertyValues($this->getProperty(ConsumerStorage::CONSUMER_TOKEN_GRANT_TYPE), OAuthClient::DEFAULT_GRANT_TYPE);
+        }
+        return true;
     }
 
     /**
@@ -157,7 +171,7 @@ class HandShakeClientService extends ConfigurableService
 
         $this->getPlatformService()->getRootClass()->createInstanceWithProperties(array(
             OntologyRdfs::RDFS_LABEL => 'Synchronization client',
-            PlatformService::PROPERTY_AUTH_TYPE => (new OAuth2Type())->getAuthClass()->getUri(),
+            PlatformService::PROPERTY_AUTH_TYPE => $this->getOAuth2ClassUri(),
             PublishingService::PUBLISH_ACTIONS => 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData',
             PlatformService::PROPERTY_ROOT_URL => $this->getOption(static::OPTION_ROOT_URL),
             ConsumerStorage::CONSUMER_CLIENT_KEY => $key,
@@ -213,5 +227,13 @@ class HandShakeClientService extends ConfigurableService
     protected function getFileSystem()
     {
         return $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
+    }
+
+    /**
+     * @return string
+     */
+    protected function getOAuth2ClassUri()
+    {
+        return (new OAuth2Type())->getAuthClass()->getUri();
     }
 }

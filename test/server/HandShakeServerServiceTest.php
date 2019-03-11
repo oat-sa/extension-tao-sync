@@ -44,7 +44,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \oat\taoSync\model\server\InvalidRoleForSync
      */
-    public function testHandShakeNotASyncManger()
+    public function testHandShakeNotASyncManager()
     {
         $service = $this->getService();
         $response = $service->execute('123456');
@@ -59,7 +59,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     protected function getService($roles = [])
     {
         $service = $this->getMockBuilder(HandShakeServerService::class)
-            ->setMethods(['getUsersService', 'getGeneratorOauth'])->getMockForAbstractClass();
+            ->setMethods(['getUsersService', 'getGeneratorOauth', 'getProperty'])->getMockForAbstractClass();
 
         $service
             ->method('getUsersService')
@@ -69,11 +69,15 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
             ->method('getGeneratorOauth')
             ->willReturn($this->mockGenerator());
 
+        $service
+            ->method('getProperty')
+            ->willReturn($this->mockProperty());
+
         $serviceLocator = $this->getMockForAbstractClass(ServiceLocatorInterface::class);
         $serviceLocator
             ->method('get')
             ->will($this->onConsecutiveCalls(
-                $this->mockEventManger(),
+                $this->mockEventManager(),
                 $this->mockSyncService()
 
             ));
@@ -83,6 +87,9 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
         return $service;
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     protected function mockGenerator()
     {
         $service = $this->getMockBuilder(GenerateOauthCredentials::class)
@@ -94,6 +101,17 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
         return $service;
     }
 
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function mockProperty()
+    {
+        return $this->getMockBuilder(\core_kernel_classes_Property::class)->disableOriginalConstructor()->getMock();
+    }
+
+    /**
+     * @return \PHPUnit_Framework_MockObject_MockObject
+     */
     protected function mockSyncService()
     {
         $synchronizer = $this->getMockForAbstractClass(Synchronizer::class);
@@ -136,7 +154,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     /**
      * @return \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function mockEventManger()
+    protected function mockEventManager()
     {
         return
             $this->getMockBuilder(EventManager::class)
