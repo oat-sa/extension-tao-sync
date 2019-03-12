@@ -177,8 +177,10 @@
         font-family: $headingFont;
     }
 
-    ul {
-        list-style-type: none;
+    .in-progress-list{
+        ul {
+            list-style-type: none;
+        }
     }
 
     .button-area {
