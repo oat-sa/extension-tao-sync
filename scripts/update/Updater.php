@@ -591,7 +591,7 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('5.0.0', '5.0.1');
-
+      
     }
 
     /**
