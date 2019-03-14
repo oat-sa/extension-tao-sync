@@ -27,7 +27,6 @@ use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
-use oat\taoSync\model\SyncLog\SyncLogClientStateUpdater;
 use oat\taoSync\model\SyncService;
 
 /**
@@ -203,12 +202,6 @@ class SynchronisationApi extends \tao_actions_RestController
             if (isset($parameters[self::PARAM_PARAMETERS])) {
                 $syncParams = $parameters[self::PARAM_PARAMETERS];
             }
-            if (isset($parameters[self::PARAM_CLIENT_STATE])) {
-                $clientState = $parameters[self::PARAM_CLIENT_STATE];
-                $clientStateReport = \common_report_Report::jsonUnserialize($clientState);
-                $this->getSyncLogClientStateUpdater()->update($syncParams, $clientStateReport);
-                $report->add($clientStateReport);
-            }
 
             $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
@@ -261,13 +254,5 @@ class SynchronisationApi extends \tao_actions_RestController
     protected function getSyncService()
     {
         return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
-    }
-
-    /**
-     * @return SyncLogClientStateUpdater
-     */
-    protected function getSyncLogClientStateUpdater()
-    {
-        return $this->getServiceLocator()->get(SyncLogClientStateUpdater::SERVICE_ID);
     }
 }

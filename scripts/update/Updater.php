@@ -65,7 +65,6 @@ use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
 use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
 use oat\taoSync\model\SyncLog\SyncLogClientStateParser;
-use oat\taoSync\model\SyncLog\SyncLogClientStateUpdater;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
@@ -599,10 +598,6 @@ class Updater extends \common_ext_ExtensionUpdater
             $syncLogClientStateParser = new SyncLogClientStateParser([]);
             $syncLogClientStateParser->setServiceLocator($this->getServiceManager());
             $this->getServiceManager()->register(SyncLogClientStateParser::SERVICE_ID, $syncLogClientStateParser);
-
-            $syncLogClientStateUpdater = new SyncLogClientStateUpdater([]);
-            $syncLogClientStateParser->setServiceLocator($this->getServiceManager());
-            $this->getServiceManager()->register(SyncLogClientStateUpdater::SERVICE_ID, $syncLogClientStateUpdater);
 
             if ($this->getServiceManager()->has(RdsSyncLogStorage::SERVICE_ID)) {
                 /** @var RdsSyncLogStorage $storage */

@@ -33,6 +33,7 @@ interface SyncLogServiceInterface
     const PARAM_SYNC_ID = 'sync_id';
     const PARAM_BOX_ID = 'box_id';
     const PARAM_ORGANIZATION_ID = 'organisation_id';
+    const PARAM_CLIENT_STATE = 'client_state';
 
     /**
      * Create new synchronization log record.

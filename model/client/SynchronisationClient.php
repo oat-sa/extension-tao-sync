@@ -238,19 +238,14 @@ class SynchronisationClient extends ConfigurableService
      * Send confirmation to the central server about completed synchronization on the client.
      *
      * @param array $syncParams
-     * @param array $clientState
      * @return array
      * @throws \common_Exception
      */
-    public function sendSyncFinishedConfirmation(array $syncParams, $clientState)
+    public function sendSyncFinishedConfirmation(array $syncParams)
     {
         $url = '/taoSync/SynchronisationApi/confirmSyncFinished';
         $method = \Request::HTTP_POST;
-        $requestData = [
-            SynchronisationApi::PARAM_PARAMETERS => $syncParams,
-            SynchronisationApi::PARAM_CLIENT_STATE => $clientState,
-        ];
-        $response = $this->call($url, $method, json_encode($requestData));
+        $response = $this->call($url, $method, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
 
         return $this->decodeResponseBody($response);
     }

@@ -26,7 +26,7 @@ use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\event\AbstractSyncEvent;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
-use oat\taoSync\model\SyncLog\SyncLogClientStateUpdater;
+use oat\taoSync\model\SyncLog\SyncLogClientStateParser;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
 
@@ -57,9 +57,8 @@ class OfflineMachineChecksService extends ConfigurableService
                 $offlineMachineUsageReport = $this->getReport();
                 $syncReport->add($offlineMachineUsageReport);
                 $syncLogEntity->setReport($syncReport);
+                $syncLogEntity->setClientState($this->getSyncLogClientStateParser()->parse($offlineMachineUsageReport));
                 $syncLogService->update($syncLogEntity);
-
-                $this->getSyncLogClientStateUpdater()->update($params, $offlineMachineUsageReport);
             } catch (Exception $e) {
                 $this->logError($e->getMessage());
             }
@@ -102,10 +101,10 @@ class OfflineMachineChecksService extends ConfigurableService
     }
 
     /**
-     * @return SyncLogClientStateUpdater
+     * @return SyncLogClientStateParser
      */
-    private function getSyncLogClientStateUpdater()
+    protected function getSyncLogClientStateParser()
     {
-        return $this->getServiceLocator()->get(SyncLogClientStateUpdater::SERVICE_ID);
+        return $this->getServiceLocator()->get(SyncLogClientStateParser::SERVICE_ID);
     }
 }
