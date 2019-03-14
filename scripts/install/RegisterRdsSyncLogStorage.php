@@ -64,6 +64,7 @@ class RegisterRdsSyncLogStorage extends InstallAction
             $table->addColumn(SyncLogStorageInterface::COLUMN_DATA, 'text', ['notnull' => false, 'default' => null]);
             $table->addColumn(SyncLogStorageInterface::COLUMN_STATUS, 'string', ['notnull' => true, 'length' => 20]);
             $table->addColumn(SyncLogStorageInterface::COLUMN_REPORT, 'text', ['notnull' => false, 'default' => null]);
+            $table->addColumn(SyncLogStorageInterface::COLUMN_CLIENT_STATE, 'text', ['notnull' => false, 'default' => null]);
             $table->addColumn(SyncLogStorageInterface::COLUMN_STARTED_AT, 'datetime', ['notnull' => true]);
             $table->addColumn(SyncLogStorageInterface::COLUMN_FINISHED_AT, 'datetime', ['notnull' => false]);
             $table->setPrimaryKey(['id']);

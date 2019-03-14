@@ -37,6 +37,7 @@ interface SyncLogStorageInterface
     const COLUMN_DATA = 'data';
     const COLUMN_STATUS = 'status';
     const COLUMN_REPORT = 'report';
+    const COLUMN_CLIENT_STATE = 'client_state';
     const COLUMN_STARTED_AT = 'created_at';
     const COLUMN_FINISHED_AT = 'finished_at';
 

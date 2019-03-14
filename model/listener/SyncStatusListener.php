@@ -20,6 +20,8 @@ namespace oat\taoSync\model\listener;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\OfflineMachineChecksService;
+
 /**
  * Class SyncStatusListener
  * @package oat\taoSync\model\listener
@@ -35,10 +37,19 @@ class SyncStatusListener extends ConfigurableService
         try {
             /** @var SynchronisationClient $syncClient */
             $syncClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
-            $response = $syncClient->sendSyncFinishedConfirmation($event->getSyncParameters());
+            $report = $this->getOfflineMachineChecksService()->getReport();
+            $response = $syncClient->sendSyncFinishedConfirmation($event->getSyncParameters(), $report->toArray());
             $this->logInfo(json_encode($response));
         } catch (\Exception $e) {
             $this->logError($e->getMessage());
         }
+    }
+
+    /**
+     * @return OfflineMachineChecksService
+     */
+    protected function getOfflineMachineChecksService()
+    {
+        return $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID);
     }
 }

@@ -106,6 +106,7 @@
                  SyncLogStorageInterface::COLUMN_DATA               => $qb->createNamedParameter(json_encode($entity->getData())),
                  SyncLogStorageInterface::COLUMN_STATUS             => $qb->createNamedParameter($entity->getStatus()),
                  SyncLogStorageInterface::COLUMN_REPORT             => $qb->createNamedParameter(json_encode($entity->getReport())),
+                 SyncLogStorageInterface::COLUMN_CLIENT_STATE       => $qb->createNamedParameter(json_encode($entity->getClientState())),
                  SyncLogStorageInterface::COLUMN_STARTED_AT         => $qb->createNamedParameter($entity->getStartTime()->format(SyncLogEntity::DATE_TIME_FORMAT))
              ])
              ->execute();
@@ -129,7 +130,8 @@
          $qb->update(self::TABLE_NAME)
              ->set(SyncLogStorageInterface::COLUMN_STATUS, $qb->createNamedParameter($entity->getStatus()))
              ->set(SyncLogStorageInterface::COLUMN_DATA, $qb->createNamedParameter(json_encode($entity->getData())))
-             ->set(SyncLogStorageInterface::COLUMN_REPORT, $qb->createNamedParameter(json_encode($entity->getReport())));
+             ->set(SyncLogStorageInterface::COLUMN_REPORT, $qb->createNamedParameter(json_encode($entity->getReport())))
+             ->set(SyncLogStorageInterface::COLUMN_CLIENT_STATE, $qb->createNamedParameter(json_encode($entity->getClientState())));
 
          $finishTime = $entity->getFinishTime();
          if ($finishTime instanceof \DateTime) {
@@ -165,6 +167,7 @@
                 self::COLUMN_DATA,
                 self::COLUMN_STATUS,
                 self::COLUMN_REPORT,
+                self::COLUMN_CLIENT_STATE,
                 self::COLUMN_STARTED_AT,
                 self::COLUMN_FINISHED_AT,
              ])
@@ -287,6 +290,10 @@
              $data[self::COLUMN_REPORT] =  Report::jsonUnserialize($data[self::COLUMN_REPORT]);
          }
 
+         if (!is_array($data[self::COLUMN_CLIENT_STATE])) {
+             $data[self::COLUMN_CLIENT_STATE] = json_decode($data[self::COLUMN_CLIENT_STATE], true);
+         }
+
          if (!$data[self::COLUMN_STARTED_AT] instanceof DateTime) {
              $data[self::COLUMN_STARTED_AT] = new DateTime((string) $data[self::COLUMN_STARTED_AT]);
          }
@@ -306,6 +313,7 @@
              $data[self::COLUMN_FINISHED_AT],
              $data[self::COLUMN_ID]
          );
+         $syncLogEntity->setClientState($data[self::COLUMN_CLIENT_STATE]);
 
          return $syncLogEntity;
      }

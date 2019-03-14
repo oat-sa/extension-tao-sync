@@ -58,6 +58,9 @@ class SyncLogEntity
     /** @var Report */
     private $report;
 
+    /** @var array */
+    private $clientState;
+
     /** @var DateTime */
     private $startTime;
 
@@ -105,6 +108,7 @@ class SyncLogEntity
         $this->data = $data;
         $this->status = $status;
         $this->report = $report;
+        $this->clientState = [];
         $this->startTime = $startTime;
         $this->finishTime = $finishTime;
     }
@@ -192,6 +196,22 @@ class SyncLogEntity
     public function setReport(Report $report)
     {
         $this->report = $report;
+    }
+
+    /**
+     * @return array
+     */
+    public function getClientState()
+    {
+        return $this->clientState;
+    }
+
+    /**
+     * @param array $clientState
+     */
+    public function setClientState($clientState)
+    {
+        $this->clientState = $clientState;
     }
 
     /**

@@ -53,6 +53,7 @@ class SyncLogFilter
         SyncLogStorageInterface::COLUMN_DATA,
         SyncLogStorageInterface::COLUMN_STATUS,
         SyncLogStorageInterface::COLUMN_REPORT,
+        SyncLogStorageInterface::COLUMN_CLIENT_STATE,
         SyncLogStorageInterface::COLUMN_STARTED_AT,
         SyncLogStorageInterface::COLUMN_FINISHED_AT,
     ];
