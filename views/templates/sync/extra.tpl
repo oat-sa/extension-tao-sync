@@ -1,7 +1,8 @@
 <div>
-    <?php foreach(get_data('extra') as $extra): ?>
-    <p>
-        <span>- <?=$extra?></span>
-    </p>
-    <?php endforeach; ?>
+    <ul class="square">
+        <?php foreach(get_data('extra') as $extra): ?>
+        <li><?=$extra?></li>
+        <?php endforeach; ?>
+    </ul>
+
 </div>
