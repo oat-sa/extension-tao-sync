@@ -57,7 +57,7 @@ class OfflineMachineChecksService extends ConfigurableService
                 $offlineMachineUsageReport = $this->getReport();
                 $syncReport->add($offlineMachineUsageReport);
                 $syncLogEntity->setReport($syncReport);
-                $syncLogEntity->setClientState($this->getSyncLogClientStateParser()->parse($offlineMachineUsageReport));
+                $syncLogEntity->setClientState($this->parseClientState($syncLogEntity->getClientState(), $offlineMachineUsageReport));
                 $syncLogService->update($syncLogEntity);
             } catch (Exception $e) {
                 $this->logError($e->getMessage());
@@ -106,5 +106,20 @@ class OfflineMachineChecksService extends ConfigurableService
     protected function getSyncLogClientStateParser()
     {
         return $this->getServiceLocator()->get(SyncLogClientStateParser::SERVICE_ID);
+    }
+
+    /**
+     * @param array $currentClientState
+     * @param Report $offlineMachineUsageReport
+     * @return array
+     */
+    private function parseClientState(array $currentClientState, Report $offlineMachineUsageReport)
+    {
+        $clientState = $this->getSyncLogClientStateParser()->parse($offlineMachineUsageReport);
+        if (is_array($clientState)) {
+            $clientState = array_merge($currentClientState, $clientState);
+        }
+
+        return $clientState;
     }
 }

@@ -142,7 +142,7 @@ class CentralSyncLogListener extends ConfigurableService
             if (isset($params[SyncLogServiceInterface::PARAM_CLIENT_STATE])) {
                 $clientState = $params[SyncLogServiceInterface::PARAM_CLIENT_STATE];
                 $clientStateReport = \common_report_Report::jsonUnserialize($clientState);
-                $syncLogEntity->setClientState($this->getSyncLogClientStateParser()->parse($clientStateReport));
+                $syncLogEntity->setClientState($this->parseClientState($params, $clientStateReport));
                 $eventReport->add($clientStateReport);
             }
 
@@ -206,5 +206,15 @@ class CentralSyncLogListener extends ConfigurableService
     private function getSyncLogClientStateParser()
     {
         return $this->getServiceLocator()->get(SyncLogClientStateParser::SERVICE_ID);
+    }
+
+    private function parseClientState(array $params, $clientStateReport)
+    {
+        $clientState = $this->getSyncLogClientStateParser()->parse($clientStateReport);
+        if (isset($params['tao_version'])) {
+            $clientState['tao_version'] = $params['tao_version'];
+        }
+
+        return $clientState;
     }
 }

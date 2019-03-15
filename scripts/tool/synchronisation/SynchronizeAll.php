@@ -24,6 +24,7 @@ use common_report_Report as Report;
 use oat\oatbox\action\Action;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\extension\AbstractAction;
+use oat\tao\model\service\ApplicationService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
@@ -44,6 +45,7 @@ class SynchronizeAll extends AbstractAction
 
         $params['sync_id'] = $this->getSyncId($params);
         $params['box_id'] = $this->getBoxId();
+        $params['tao_version'] = $this->getApplicationService()->getPlatformVersion();
 
         $report = Report::createInfo('Synchronizing data');
 
@@ -91,5 +93,13 @@ class SynchronizeAll extends AbstractAction
     private function getBoxId()
     {
         return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
+    }
+
+    /**
+     * @return ApplicationService
+     */
+    private function getApplicationService()
+    {
+        return $this->getServiceLocator()->get(ApplicationService::SERVICE_ID);
     }
 }
