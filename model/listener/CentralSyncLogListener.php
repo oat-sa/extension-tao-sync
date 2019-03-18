@@ -208,6 +208,11 @@ class CentralSyncLogListener extends ConfigurableService
         return $this->getServiceLocator()->get(SyncLogClientStateParser::SERVICE_ID);
     }
 
+    /**
+     * @param array $params
+     * @param Report $clientStateReport
+     * @return array
+     */
     private function parseClientState(array $params, $clientStateReport)
     {
         $clientState = $this->getSyncLogClientStateParser()->parse($clientStateReport);

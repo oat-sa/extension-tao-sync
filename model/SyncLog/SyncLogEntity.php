@@ -209,7 +209,7 @@ class SyncLogEntity
     /**
      * @param array $clientState
      */
-    public function setClientState($clientState)
+    public function setClientState(array $clientState)
     {
         $this->clientState = $clientState;
     }

@@ -205,8 +205,8 @@ class Synchronizer extends \tao_actions_CommonModule
         $this->setData('extra', []);
         /** @var \common_report_Report $report */
         $report = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
-        $this->setData('extra', array_filter(array_map(function (\common_report_Report $report) {
+        $this->setData('extra', array_map(function (\common_report_Report $report) {
             return $report->getMessage();
-        }, $report->getChildren())));
+        }, $report->getChildren()));
     }
 }
