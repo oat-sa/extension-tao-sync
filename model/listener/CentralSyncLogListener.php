@@ -29,6 +29,7 @@ use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\Exception\SyncLogEntityNotFound;
+use oat\taoSync\model\SyncLog\SyncLogClientStateParser;
 use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
@@ -137,8 +138,16 @@ class CentralSyncLogListener extends ConfigurableService
             /** @var SyncLogEntity $syncLogEntity */
             $syncLogEntity = $syncLogService->getBySyncIdAndBoxId($params[SyncLogServiceInterface::PARAM_SYNC_ID], $params[SyncLogServiceInterface::PARAM_BOX_ID]);
 
+            $eventReport = $event->getReport();
+            if (isset($params[SyncLogServiceInterface::PARAM_CLIENT_STATE])) {
+                $clientState = $params[SyncLogServiceInterface::PARAM_CLIENT_STATE];
+                $clientStateReport = \common_report_Report::jsonUnserialize($clientState);
+                $syncLogEntity->setClientState($this->parseClientState($params, $clientStateReport));
+                $eventReport->add($clientStateReport);
+            }
+
             $report = $syncLogEntity->getReport();
-            $report->add($event->getReport());
+            $report->add($eventReport);
             if ($report->containsError()) {
                 $syncLogEntity->setFailed();
             } else {
@@ -189,5 +198,28 @@ class CentralSyncLogListener extends ConfigurableService
     private function getSyncLogService()
     {
         return $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+    }
+
+    /**
+     * @return SyncLogClientStateParser
+     */
+    private function getSyncLogClientStateParser()
+    {
+        return $this->getServiceLocator()->get(SyncLogClientStateParser::SERVICE_ID);
+    }
+
+    /**
+     * @param array $params
+     * @param Report $clientStateReport
+     * @return array
+     */
+    private function parseClientState(array $params, $clientStateReport)
+    {
+        $clientState = $this->getSyncLogClientStateParser()->parse($clientStateReport);
+        if (isset($params['tao_version'])) {
+            $clientState['tao_version'] = $params['tao_version'];
+        }
+
+        return $clientState;
     }
 }

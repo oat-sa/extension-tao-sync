@@ -63,6 +63,8 @@ use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenter
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizer;
 use oat\taoSync\model\synchronizer\user\proctor\ProctorSynchronizer;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
+use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
+use oat\taoSync\model\SyncLog\SyncLogClientStateParser;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
 use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
@@ -591,7 +593,31 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('5.0.0', '5.0.2');
-      
+
+        if ($this->isVersion('5.0.2')) {
+            $syncLogClientStateParser = new SyncLogClientStateParser([]);
+            $syncLogClientStateParser->setServiceLocator($this->getServiceManager());
+            $this->getServiceManager()->register(SyncLogClientStateParser::SERVICE_ID, $syncLogClientStateParser);
+
+            if ($this->getServiceManager()->has(RdsSyncLogStorage::SERVICE_ID)) {
+                /** @var RdsSyncLogStorage $storage */
+                $storage = $this->getServiceManager()->get(RdsSyncLogStorage::SERVICE_ID);
+                $persistence = $storage->getPersistence();
+                $schemaManager = $persistence->getSchemaManager();
+                $fromSchema = $schemaManager->createSchema();
+                $toSchema = clone $fromSchema;
+                $table = $toSchema->getTable(RdsSyncLogStorage::TABLE_NAME);
+                if (!$table->hasColumn(SyncLogStorageInterface::COLUMN_CLIENT_STATE)) {
+                    $table->addColumn(SyncLogStorageInterface::COLUMN_CLIENT_STATE, 'text', ['notnull' => false, 'default' => null]);
+                    $queries = $persistence->getPlatForm()->getMigrateSchemaSql($fromSchema, $toSchema);
+                    foreach ($queries as $query) {
+                        $persistence->exec($query);
+                    }
+                }
+            }
+
+            $this->setVersion('5.1.0');
+        }
     }
 
     /**

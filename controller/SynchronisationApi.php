@@ -43,6 +43,7 @@ class SynchronisationApi extends \tao_actions_RestController
     const PARAM_DELIVERY_URI = 'delivery-uri';
     const PARAM_REQUESTED_CLASSES = 'requested-classes';
     const PARAM_ENTITY_IDS = 'entityIds';
+    const PARAM_CLIENT_STATE = 'client-state';
 
     /**
      * Fetch a set of entities based on 'params' parameter
@@ -201,6 +202,7 @@ class SynchronisationApi extends \tao_actions_RestController
             if (isset($parameters[self::PARAM_PARAMETERS])) {
                 $syncParams = $parameters[self::PARAM_PARAMETERS];
             }
+
             $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
@@ -253,5 +255,4 @@ class SynchronisationApi extends \tao_actions_RestController
     {
         return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
     }
-
 }
