@@ -39,6 +39,7 @@ use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
@@ -617,6 +618,17 @@ class Updater extends \common_ext_ExtensionUpdater
             }
 
             $this->setVersion('5.1.0');
+        }
+
+        if ($this->isVersion('5.1.0')) {
+            /** @var EventManager $eventManager */
+            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
+
+            // Attach event listener for SyncFailedEvent.
+            $eventManager->attach(SyncFailedEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFailed']);
+            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
+
+            $this->setVersion('5.2.0');
         }
     }
 
