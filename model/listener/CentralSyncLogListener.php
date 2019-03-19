@@ -51,9 +51,8 @@ class CentralSyncLogListener extends ConfigurableService
     public function logSyncRequest(SyncRequestEvent $event)
     {
         try {
-            $this->updateSyncLogRecord($event);
-        } catch (SyncLogEntityNotFound $e) {
-            $this->createSyncLogRecord($event);
+            $syncLogEntity = $this->getSyncLogEntityForEvent($event);
+            $this->updateSyncLogRecord($syncLogEntity, $event);
         } catch (Exception $e) {
             $this->logError($e->getMessage());
         }
@@ -67,7 +66,8 @@ class CentralSyncLogListener extends ConfigurableService
     public function logSyncResponse(SyncResponseEvent $event)
     {
         try {
-            $this->updateSyncLogRecord($event);
+            $syncLogEntity = $this->getSyncLogEntityForEvent($event);
+            $this->updateSyncLogRecord($syncLogEntity, $event);
         } catch (Exception $e) {
             $this->logError($e->getMessage());
         }
@@ -76,18 +76,12 @@ class CentralSyncLogListener extends ConfigurableService
     /**
      * Update synchronization response record.
      *
+     * @param SyncLogEntity $syncLogEntity
      * @param AbstractSyncEvent $event
      * @throws common_exception_Error
      */
-    private function updateSyncLogRecord(AbstractSyncEvent $event)
+    private function updateSyncLogRecord(SyncLogEntity $syncLogEntity, AbstractSyncEvent $event)
     {
-        $params = $event->getSyncParameters();
-        $this->validateParameters($params);
-        $syncLogService = $this->getSyncLogService();
-
-        /** @var SyncLogEntity $syncLogEntity */
-        $syncLogEntity = $syncLogService->getBySyncIdAndBoxId($params[SyncLogServiceInterface::PARAM_SYNC_ID], $params[SyncLogServiceInterface::PARAM_BOX_ID]);
-
         $report = $syncLogEntity->getReport();
         $report->add($event->getReport());
 
@@ -95,6 +89,7 @@ class CentralSyncLogListener extends ConfigurableService
         $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
         $syncLogEntity->setData($newSyncData);
 
+        $syncLogService = $this->getSyncLogService();
         $syncLogService->update($syncLogEntity);
     }
 
@@ -102,6 +97,8 @@ class CentralSyncLogListener extends ConfigurableService
      * Create synchronization log record.
      *
      * @param SyncRequestEvent $event
+     * @return SyncLogEntity
+     *
      * @throws common_exception_Error
      */
     private function createSyncLogRecord(SyncRequestEvent $event)
@@ -123,7 +120,42 @@ class CentralSyncLogListener extends ConfigurableService
         );
 
         $syncLogService->create($syncLogEntity);
+
+        return $syncLogEntity;
     }
+
+    /**
+     * @param AbstractSyncEvent $event
+     * @return SyncLogEntity
+     *
+     * @throws common_exception_Error
+     */
+    private function getSyncLogEntityForEvent(AbstractSyncEvent $event)
+    {
+        try {
+            $params = $event->getSyncParameters();
+            $this->validateParameters($params);
+
+            return $this->findSyncLogEntity($params[SyncLogServiceInterface::PARAM_SYNC_ID], $params[SyncLogServiceInterface::PARAM_BOX_ID]);
+        } catch (SyncLogEntityNotFound $e) {
+            return $this->createSyncLogRecord($event);
+        }
+    }
+
+    /**
+     * @param string $syncId
+     * @param string $boxId
+     * @return SyncLogEntity
+     *
+     * @throws SyncLogEntityNotFound
+     */
+    private function findSyncLogEntity($syncId, $boxId)
+    {
+        $syncLogService = $this->getSyncLogService();
+
+        return $syncLogService->getBySyncIdAndBoxId($syncId, $boxId);
+    }
+
 
     /**
      * @param SyncFinishedEvent $event
