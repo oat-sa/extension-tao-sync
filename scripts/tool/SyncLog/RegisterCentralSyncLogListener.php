@@ -19,6 +19,7 @@
 namespace oat\taoSync\scripts\tool\SyncLog;
 
 use oat\oatbox\extension\InstallAction;
+use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
@@ -37,6 +38,7 @@ class RegisterCentralSyncLogListener extends InstallAction
         $this->registerEvent(SyncRequestEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncRequest']);
         $this->registerEvent(SyncResponseEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncResponse']);
         $this->registerEvent(SyncFinishedEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFinished']);
+        $this->registerEvent(SyncFailedEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFailed']);
 
         if (!$this->getServiceManager()->has(SyncLogDataParser::SERVICE_ID)) {
             $syncLogDataParser = new SyncLogDataParser([]);
