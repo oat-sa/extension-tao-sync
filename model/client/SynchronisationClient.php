@@ -251,6 +251,22 @@ class SynchronisationClient extends ConfigurableService
     }
 
     /**
+     * Send confirmation to the central server about failed synchronization on the client.
+     *
+     * @param array $syncParams
+     * @return array
+     * @throws \common_Exception
+     */
+    public function sendSyncFailedConfirmation(array $syncParams)
+    {
+        $url = '/taoSync/SynchronisationApi/confirmSyncFailed';
+        $method = \Request::HTTP_POST;
+        $response = $this->call($url, $method, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
+
+        return $this->decodeResponseBody($response);
+    }
+
+    /**
      * json_decode the body content of given response
      *
      * Parse error to have a readable message if http code is not 2**
