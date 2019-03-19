@@ -22,6 +22,7 @@ namespace oat\taoSync\controller;
 
 use oat\oatbox\event\EventManager;
 use oat\taoOauth\model\OauthController;
+use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
@@ -206,10 +207,28 @@ class SynchronisationApi extends \tao_actions_RestController
             $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
-        } catch (\Exception $e) {
-            $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
-            $this->returnFailure($e);
-        }
+        } catch (\Exception $e) {}
+    }
+
+    /**
+     * Receive confirmation message from client that synchronization failed on VM.
+     */
+    public function confirmSyncFailed()
+    {
+        $syncParams = [];
+        $report = \common_report_Report::createInfo('Synchronization failed.');
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        try {
+            $this->assertHttpMethod(\Request::HTTP_POST);
+            $parameters = $this->getInputParameters();
+
+            if (isset($parameters[self::PARAM_PARAMETERS])) {
+                $syncParams = $parameters[self::PARAM_PARAMETERS];
+            }
+            $eventManager->trigger(new SyncFailedEvent($syncParams, $report));
+
+            $this->returnJson(['message' => 'Confirmation received.']);
+        } catch (\Exception $e) {}
     }
 
     /**
