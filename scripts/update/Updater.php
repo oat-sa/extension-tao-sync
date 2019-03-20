@@ -618,6 +618,11 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('5.1.0');
         }
+
+        if ($this->isVersion('5.1.0')) {
+            OntologyUpdater::syncModels();
+            $this->setVersion('5.2.0');
+        }
     }
 
     /**
