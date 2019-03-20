@@ -51,8 +51,9 @@ return array(
     ],
     'install' => [
         'rdf' => [
-            dirname(__FILE__) . '/model/ontology/synchronisation.rdf',
-            dirname(__FILE__). '/model/ontology/taosync.rdf',
+            __DIR__ . '/model/ontology/synchronisation.rdf',
+            __DIR__ . '/model/ontology/taosync.rdf',
+            __DIR__ . '/model/ontology/VMList.rdf'
         ],
         'php' => [
             \oat\taoSync\scripts\install\RegisterSyncService::class,
@@ -77,12 +78,12 @@ return array(
     ),
     'constants' => array(
         # views directory
-        "DIR_VIEWS" => dirname(__FILE__).DIRECTORY_SEPARATOR."views".DIRECTORY_SEPARATOR,
+        "DIR_VIEWS" => __DIR__ . DIRECTORY_SEPARATOR."views".DIRECTORY_SEPARATOR,
 
         #BASE URL (usually the domain root)
         'BASE_URL' => ROOT_URL.'taoSync/',
     ),
     'extra' => array(
-        'structures' => dirname(__FILE__).DIRECTORY_SEPARATOR.'controller'.DIRECTORY_SEPARATOR.'structures.xml',
+        'structures' => __DIR__ . DIRECTORY_SEPARATOR.'controller'.DIRECTORY_SEPARATOR.'structures.xml',
     ),
 );
