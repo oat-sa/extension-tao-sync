@@ -625,6 +625,18 @@ class Updater extends \common_ext_ExtensionUpdater
             OntologyUpdater::syncModels();
             $this->setVersion('5.2.0');
         }
+
+        if ($this->isVersion('5.2.0')) {
+            AclProxy::applyRule(
+                new AccessRule(
+                    AccessRule::GRANT,
+                    TaoRoles::ANONYMOUS,
+                    RestSupportedVm::class
+                )
+            );
+
+            $this->setVersion('5.3.0');
+        }
     }
 
     /**
