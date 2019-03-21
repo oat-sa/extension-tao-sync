@@ -15,4 +15,32 @@
             <section id="sync-history" name="Synchronization History" url="/taoSync/SynchronizationHistory/index" />
         </sections>
     </structure>
+    <structure id="settings" name="Settings" level="12" group="invisible">
+        <sections>
+            <section id="manage_vm" name="VM Lists" url="/taoSync/SupportedVm/index" >
+                <trees>
+                    <tree name="VM Lists"
+                          className="VM Lists"
+                          dataUrl="/taoSync/SupportedVm/getOntologyData"
+                          rootNode="http://www.tao.lu/Ontologies/TAO.rdf#TaoVM"
+                          selectClass="vm-index"
+                          selectInstance="vm-edit"
+                          delete="vm-delete"
+                    />
+                </trees>
+                <actions>
+                    <action id="vm-index" name="Index" url="/taoSync/SupportedVm/index" context="class" group="none" />
+                    <action id="vm-edit" name="Properties" url="/taoSync/SupportedVm/editInstance" context="instance" group="none">
+                        <icon id="icon-edit"/>
+                    </action>
+                    <action id="vm-delete" name="Delete" binding="removeNode" url="/taoSync/SupportedVm/delete" context="instance" group="tree">
+                        <icon id="icon-bin"/>
+                    </action>
+                    <action id="vm-new" name="Add" url="/taoSync/SupportedVm/addInstanceForm" context="class" group="tree" >
+                        <icon id="icon-add"/>
+                    </action>
+                </actions>
+            </section>
+        </sections>
+    </structure>
 </structures>

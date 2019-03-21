@@ -621,6 +621,11 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         if ($this->isVersion('5.1.0')) {
+            OntologyUpdater::syncModels();
+            $this->setVersion('5.2.0');
+        }
+
+        if ($this->isVersion('5.2.0')) {
             /** @var EventManager $eventManager */
             $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
 
@@ -628,7 +633,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $eventManager->attach(SyncFailedEvent::class, [CentralSyncLogListener::SERVICE_ID, 'logSyncFailed']);
             $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
 
-            $this->setVersion('5.2.0');
+            $this->setVersion('5.3.0');
         }
     }
 
