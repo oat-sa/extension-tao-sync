@@ -18,11 +18,14 @@
  *
  */
 
+use oat\tao\model\user\TaoRoles;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\SyncService;
 use oat\taoSync\scripts\install\InstallEnhancedDeliveryLog;
 use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
 use oat\taoSync\controller\SynchronizationHistory;
 use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
+use oat\taoSync\controller\RestSupportedVm;
 
 return array(
     'name' => 'taoSync',
@@ -45,9 +48,10 @@ return array(
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', SynchronizationHistory::class],
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class],
+        ['grant', SyncService::TAO_SYNC_ROLE, ['ext'=>'taoSync']],
+        ['grant', SyncService::TAO_SYNC_ROLE, SynchronizationHistory::class],
+        ['grant', TaoRoles::ANONYMOUS, HandShake::class],
+        ['grant', TaoRoles::ANONYMOUS, RestSupportedVm::class],
     ],
     'install' => [
         'rdf' => [
@@ -74,6 +78,7 @@ return array(
     ),
     'update' => oat\taoSync\scripts\update\Updater::class,
     'routes' => array(
+        '/taoSync/api' => ['class' => \oat\taoSync\model\routing\ApiRoute::class],
         '/taoSync' => 'oat\\taoSync\\controller'
     ),
     'constants' => array(

@@ -28,6 +28,8 @@ class SupportedVmService extends \tao_models_classes_ClassService
 {
     const CLASS_URI = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoVM';
 
+    const PROPERTY_VM_VERSION = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoVMVersion';
+
     /**
      * return the group top level class
      *
@@ -36,6 +38,17 @@ class SupportedVmService extends \tao_models_classes_ClassService
      */
     public function getRootClass()
     {
-        return new \core_kernel_classes_Class(self::CLASS_URI);
+        return $this->getClass(self::CLASS_URI);
+    }
+
+    /**
+     * @return \core_kernel_classes_Resource[]
+     */
+    public function getSupportedVmVersions()
+    {
+        $class = $this->getRootClass();
+        $property = $this->getProperty(self::PROPERTY_VM_VERSION);
+
+        return $class->getInstancesPropertyValues($property);
     }
 }

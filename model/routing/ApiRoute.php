@@ -18,25 +18,20 @@
  *
  */
 
-namespace oat\taoSync\controller;
+namespace oat\taoSync\model\routing;
 
-use oat\taoSync\model\supportedVm\SupportedVmService;
+use oat\tao\model\routing\AbstractApiRoute;
 
-class SupportedVm extends \tao_actions_SaSModule
+class ApiRoute extends AbstractApiRoute
 {
-    public function __construct()
-    {
-        parent::__construct();
-        $this->service = $this->getClassService();
-    }
+    const REST_CONTROLLER_PREFIX = 'oat\\taoSync\\controller\\Rest';
 
     /**
-     * (non-PHPdoc)
-     *
-     * @see tao_actions_RdfController::getClassService()
+     * @inheritdoc
+     * @return string
      */
-    public function getClassService()
+    public static function getControllerPrefix()
     {
-        return SupportedVmService::singleton();
+        return self::REST_CONTROLLER_PREFIX;
     }
 }
