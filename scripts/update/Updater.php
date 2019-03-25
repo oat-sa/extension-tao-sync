@@ -56,7 +56,7 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
-use oat\taoSync\model\supportedVm\SupportedVmService;
+use oat\taoSync\model\virtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
@@ -648,9 +648,9 @@ class Updater extends \common_ext_ExtensionUpdater
                 )
             );
 
+            $serviceManager = $this->getServiceManager();
             $supportedVmService = new SupportedVmService();
-            $this->getServiceManager()
-                ->register(SupportedVmService::SERVICE_ID, $supportedVmService);
+            $serviceManager->register(SupportedVmService::SERVICE_ID, $supportedVmService);
 
             $this->setVersion('5.4.0');
         }

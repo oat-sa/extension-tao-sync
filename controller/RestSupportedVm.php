@@ -19,7 +19,7 @@
 
 namespace oat\taoSync\controller;
 
-use oat\taoSync\model\supportedVm\SupportedVmService;
+use oat\taoSync\model\virtualMachine\SupportedVmService;
 use oat\taoTestCenter\controller\AbstractRestController;
 
 /**
@@ -30,9 +30,6 @@ use oat\taoTestCenter\controller\AbstractRestController;
  */
 class RestSupportedVm extends AbstractRestController
 {
-    /** @var SupportedVmService */
-    protected $service;
-
     /**
      * @throws \common_exception_RestApi
      */
@@ -83,26 +80,16 @@ class RestSupportedVm extends AbstractRestController
     public function get()
     {
         try {
-            $result = $this->getClassService()->getSupportedVmVersions();
+            $result = $this->getServiceLocator()
+                ->get(SupportedVmService::SERVICE_ID)
+                ->getSupportedVmVersions();
 
             $this->returnJson([
                 'success' => true,
-                'data' => array_column($result, 'literal'),
+                'data' => $result
             ]);
         } catch (\Exception $e) {
             $this->returnFailure($e);
         }
-    }
-
-    /**
-     * @return SupportedVmService
-     */
-    protected function getClassService()
-    {
-        if ($this->service === null) {
-            $this->service = SupportedVmService::singleton();
-        }
-
-        return $this->service;
     }
 }

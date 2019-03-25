@@ -17,6 +17,6 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-use oat\taoSync\model\supportedVm\SupportedVmService;
+use oat\taoSync\model\virtualMachine\SupportedVmService;
 
 return new SupportedVmService();

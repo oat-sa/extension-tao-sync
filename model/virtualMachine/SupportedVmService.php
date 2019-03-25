@@ -17,17 +17,22 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA
  */
 
-namespace oat\taoSync\model\supportedVm;
+namespace oat\taoSync\model\virtualMachine;
 
-use oat\tao\model\OntologyClassService;
+use oat\oatbox\service\ConfigurableService;
+use oat\tao\model\ClassServiceTrait;
+use oat\tao\model\GenerisServiceTrait;
 
 /**
  * Service methods to manage the VMs
  *
  * @access public
  */
-class SupportedVmService extends OntologyClassService
+class SupportedVmService extends ConfigurableService
 {
+    use ClassServiceTrait;
+    use GenerisServiceTrait;
+
     const SERVICE_ID = 'taoSync/SupportedVmService';
 
     const CLASS_URI = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoVM';
@@ -46,13 +51,14 @@ class SupportedVmService extends OntologyClassService
     }
 
     /**
-     * @return \core_kernel_classes_Resource[]
+     * @return array
      */
     public function getSupportedVmVersions()
     {
         $class = $this->getRootClass();
         $property = $this->getProperty(self::PROPERTY_VM_VERSION);
+        $supportedVersions = $class->getInstancesPropertyValues($property);
 
-        return $class->getInstancesPropertyValues($property);
+        return array_column($supportedVersions, 'literal');
     }
 }
