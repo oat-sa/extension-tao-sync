@@ -19,13 +19,17 @@
 
 namespace oat\taoSync\model\supportedVm;
 
+use oat\tao\model\OntologyClassService;
+
 /**
  * Service methods to manage the VMs
  *
  * @access public
  */
-class SupportedVmService extends \tao_models_classes_ClassService
+class SupportedVmService extends OntologyClassService
 {
+    const SERVICE_ID = 'taoSync/SupportedVmService';
+
     const CLASS_URI = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoVM';
 
     const PROPERTY_VM_VERSION = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoVMVersion';
