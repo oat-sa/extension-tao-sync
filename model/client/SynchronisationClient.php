@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\model\client;
 
+
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
@@ -244,8 +245,7 @@ class SynchronisationClient extends ConfigurableService
     public function sendSyncFinishedConfirmation(array $syncParams)
     {
         $url = '/taoSync/SynchronisationApi/confirmSyncFinished';
-        $method = \Request::HTTP_POST;
-        $response = $this->call($url, $method, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
+        $response = $this->call($url, \Request::HTTP_POST, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
 
         return $this->decodeResponseBody($response);
     }
@@ -260,8 +260,7 @@ class SynchronisationClient extends ConfigurableService
     public function sendSyncFailedConfirmation(array $syncParams)
     {
         $url = '/taoSync/SynchronisationApi/confirmSyncFailed';
-        $method = \Request::HTTP_POST;
-        $response = $this->call($url, $method, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
+        $response = $this->call($url, \Request::HTTP_POST, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
 
         return $this->decodeResponseBody($response);
     }

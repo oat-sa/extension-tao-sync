@@ -207,7 +207,11 @@ class SynchronisationApi extends \tao_actions_RestController
             $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+
+            $this->returnFailure($e);
+        }
     }
 
     /**
@@ -228,7 +232,11 @@ class SynchronisationApi extends \tao_actions_RestController
             $eventManager->trigger(new SyncFailedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
-        } catch (\Exception $e) {}
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+
+            $this->returnFailure($e);
+        }
     }
 
     /**
