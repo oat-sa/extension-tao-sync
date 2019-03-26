@@ -70,11 +70,14 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
      * Create new record in storage implementation.
      *
      * @param SyncLogEntity $entity
-     * @return integer Created record ID
+     * @return SyncLogEntity
      */
     public function create(SyncLogEntity $entity)
     {
-        return $this->getStorage()->create($entity);
+        $entityId = $this->getStorage()->create($entity);
+        $this->setEntityId($entity, $entityId);
+
+        return $entity;
     }
 
     /**
@@ -146,5 +149,18 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     public function search(SyncLogFilter $filter)
     {
         return $this->getStorage()->search($filter);
+    }
+
+    /**
+     * @param SyncLogEntity $entity
+     * @param $entityId
+     * @throws \ReflectionException
+     */
+    private function setEntityId(SyncLogEntity $entity, $entityId)
+    {
+        $syncLogEntityReflection = new \ReflectionClass($entity);
+        $property = $syncLogEntityReflection->getProperty('id');
+        $property->setAccessible(true);
+        $property->setValue($entity, $entityId);
     }
 }

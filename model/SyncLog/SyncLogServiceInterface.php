@@ -39,7 +39,7 @@ interface SyncLogServiceInterface
      * Create new synchronization log record.
      *
      * @param SyncLogEntity $entity
-     * @return integer Created record ID
+     * @return SyncLogEntity
      */
     public function create(SyncLogEntity $entity);
 
