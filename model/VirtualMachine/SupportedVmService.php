@@ -17,7 +17,7 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA
  */
 
-namespace oat\taoSync\model\virtualMachine;
+namespace oat\taoSync\model\VirtualMachine;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\ClassServiceTrait;

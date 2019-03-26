@@ -20,13 +20,17 @@
 namespace oat\taoSync\model\Validator;
 
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\virtualMachine\SupportedVmService;
+use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\Exception\SyncRequestFailedException;
 
 class SyncParamsValidator extends ConfigurableService
 {
     const SERVICE_ID = 'taoSync/SyncParamsValidator';
 
+    /**
+     * @param array $parameters
+     * @throws SyncRequestFailedException
+     */
     public function validate(array $parameters)
     {
         if (!isset($parameters['tao_version'])) {
@@ -34,8 +38,7 @@ class SyncParamsValidator extends ConfigurableService
         }
 
         $supportedVmService = $this->getServiceLocator()->get(SupportedVmService::SERVICE_ID);
-        $supportedVmVersions = array_column($supportedVmService->getSupportedVmVersions(), 'literal');
-
+        $supportedVmVersions = $supportedVmService->getSupportedVmVersions();
 
         if (!in_array($parameters['tao_version'], $supportedVmVersions)) {
             throw new SyncRequestFailedException('Provided version of TAO VM is not supported by server: ' . $parameters['tao_version']);

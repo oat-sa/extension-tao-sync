@@ -56,7 +56,7 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
-use oat\taoSync\model\virtualMachine\SupportedVmService;
+use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;

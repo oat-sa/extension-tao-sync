@@ -19,7 +19,7 @@
 
 namespace oat\taoSync\controller;
 
-use oat\taoSync\model\virtualMachine\SupportedVmService;
+use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoTestCenter\controller\AbstractRestController;
 
 /**

@@ -20,7 +20,7 @@
 
 namespace oat\taoSync\controller;
 
-use oat\taoSync\model\virtualMachine\SupportedVmService;
+use oat\taoSync\model\VirtualMachine\SupportedVmService;
 
 class SupportedVm extends \tao_actions_SaSModule
 {
