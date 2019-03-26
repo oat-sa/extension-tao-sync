@@ -23,11 +23,13 @@ namespace oat\taoSync\controller;
 use common_report_Report as Report;
 use oat\oatbox\event\EventManager;
 use oat\taoSync\model\event\SyncRequestEvent;
+use oat\taoSync\model\Exception\SyncRequestFailedException;
 use oat\taoSync\model\synchronizer\ltiuser\SyncLtiUserServiceInterface;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogServiceInterface;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\TestSession\SyncTestSessionServiceInterface;
 use oat\taoSync\model\SyncServiceInterface;
+use oat\taoSync\model\Validator\SyncParamsValidator;
 
 /**
  * Class ResultApi
@@ -244,10 +246,15 @@ class ResultApi extends \tao_actions_RestController
      *
      * @param array $requestData
      * @return array
+     *
+     * @throws SyncRequestFailedException
      */
     private function getSyncParams(array $requestData)
     {
-        return isset($requestData[self::PARAM_SYNC_PARAMETERS]) ? $requestData[self::PARAM_SYNC_PARAMETERS] : [];
+        $params = isset($requestData[self::PARAM_SYNC_PARAMETERS]) ? $requestData[self::PARAM_SYNC_PARAMETERS] : [];
+        $this->getSyncParamsValidator()->validate($params);
+
+        return $params;
     }
 
     /**
@@ -256,5 +263,13 @@ class ResultApi extends \tao_actions_RestController
     private function getEventManager()
     {
         return $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+    }
+
+    /**
+     * @return SyncParamsValidator
+     */
+    private function getSyncParamsValidator()
+    {
+        return $this->getServiceLocator()->get(SyncParamsValidator::SERVICE_ID);
     }
 }

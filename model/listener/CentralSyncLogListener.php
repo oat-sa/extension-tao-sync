@@ -111,7 +111,7 @@ class CentralSyncLogListener extends ConfigurableService
         $report = Report::createInfo('Synchronization started...');
         $report->add($event->getReport());
         $syncLogEntity = new SyncLogEntity(
-            $params[SyncLogServiceInterface::PARAM_SYNC_ID],
+            (int) $params[SyncLogServiceInterface::PARAM_SYNC_ID],
             $params[SyncLogServiceInterface::PARAM_BOX_ID],
             $params[SyncLogServiceInterface::PARAM_ORGANIZATION_ID],
             $this->parseSyncData($report),
