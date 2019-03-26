@@ -97,7 +97,7 @@ class CentralSyncLogListener extends ConfigurableService
     /**
      * Create synchronization log record.
      *
-     * @param SyncRequestEvent $event
+     * @param AbstractSyncEvent $event
      * @return SyncLogEntity
      *
      * @throws common_exception_Error
@@ -147,6 +147,7 @@ class CentralSyncLogListener extends ConfigurableService
      * @return SyncLogEntity
      *
      * @throws SyncLogEntityNotFound
+     * @throws common_exception_Error
      */
     private function findSyncLogEntity($syncId, $boxId)
     {
