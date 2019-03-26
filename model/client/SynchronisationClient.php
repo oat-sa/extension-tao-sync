@@ -20,7 +20,6 @@
 
 namespace oat\taoSync\model\client;
 
-
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
