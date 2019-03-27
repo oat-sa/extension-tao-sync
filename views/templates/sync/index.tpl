@@ -68,7 +68,7 @@ $formFields = get_data('form-fields');
                         <span class="icon-result-ok"></span>
                         <div class="messages">
                             <p>
-                                <span><?= __('The synchronization process has been finished.') ?></span>
+                                <span><?= __('Success! The synchronization process has been finished.') ?></span>
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
                         </div>
@@ -106,6 +106,8 @@ $formFields = get_data('form-fields');
                     <span class="icon-loop"></span>
                     <?= __('Synchronize Data') ?>
                 </button>
+
+                <div id="dashboard-container"></div>
 
                 <button class="btn-info" data-control="close">
                     <span class="icon-end-attempt"></span>

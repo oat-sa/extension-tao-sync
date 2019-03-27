@@ -24,8 +24,9 @@ define([
     'util/url',
     'core/taskQueue/taskQueueModel',
     'layout/loading-bar',
-    'taoSync/component/terminateExecutions/terminateExecutions'
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory) {
+    'taoSync/component/terminateExecutions/terminateExecutions',
+    'taoSync/component/readinessDashboard/readinessDashboard'
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory) {
     'use strict';
 
     /**
@@ -104,6 +105,11 @@ define([
             };
 
             /**
+             * readiness dashboard component instance
+             */
+            var readinessDashboard;
+
+            /**
              * Dynamic messages in the feedback boxes. These are based on the `data-type` elements
              * and stored in the format msg.$foo to indicate that $foo is a jquery element.
              */
@@ -140,6 +146,7 @@ define([
                     setState('success');
                     updateTime(taskData);
                     setHistoryTime(taskData.updatedAt, '$completed');
+                    renderReadinessDashboard();
                 }
                 else if (taskData.status === 'failed') {
                     setState('error');
@@ -228,6 +235,13 @@ define([
                 $container.addClass('history');
             }
 
+
+            function renderReadinessDashboard() {
+                var $dashboardContainer = $container.find('#dashboard-container');
+
+                readinessDashboard = readinessDashboardFactory($dashboardContainer).render();
+            }
+
             // avoids unwanted flicker caused by the late loading of the CSS
             $container.find('.fb-container').removeClass('viewport-hidden');
             loadingBar.start();
@@ -245,6 +259,7 @@ define([
                 e.preventDefault();
                 setState('progress');
                 $container.removeClass('active');
+                readinessDashboard && readinessDashboard.destroy();
                 request(webservices.activeSessions)
                     .then(function (data) {
                          if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
@@ -267,7 +282,7 @@ define([
                                      $syncActionContainer.toggle();
                                  })
                                  .on('terminationFailed', function () {
-                                     
+
                                  })
                                  .on('terminationSucceeded', function () {
                                      $terminateActionContainer.toggle();
@@ -299,6 +314,7 @@ define([
                                 setState('form');
                                 updateTime(currentTask);
                                 setHistoryTime(currentTask.updatedAt, '$completed');
+                                renderReadinessDashboard();
                                 break;
                             default:
                                 setState('progress');
@@ -308,6 +324,7 @@ define([
                     }
                     else {
                         setState('form');
+                        renderReadinessDashboard();
                     }
                     loadingBar.stop();
                 })
