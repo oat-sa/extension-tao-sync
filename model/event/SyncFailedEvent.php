@@ -23,4 +23,26 @@ namespace oat\taoSync\model\event;
  * Class SyncFailedEvent
  * @package oat\taoSync\model\event
  */
-class SyncFailedEvent extends AbstractSyncEvent {}
+class SyncFailedEvent extends AbstractSyncEvent
+{
+    /**
+     * @var string Failure reason
+     */
+    private $reason = '';
+
+    /**
+     * @return string
+     */
+    public function getReason()
+    {
+        return $this->reason;
+    }
+
+    /**
+     * @param string $reason
+     */
+    public function setReason($reason)
+    {
+        $this->reason = $reason;
+    }
+}

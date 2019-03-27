@@ -45,6 +45,7 @@ class SynchronisationApi extends \tao_actions_RestController
     const PARAM_REQUESTED_CLASSES = 'requested-classes';
     const PARAM_ENTITY_IDS = 'entityIds';
     const PARAM_CLIENT_STATE = 'client-state';
+    const PARAM_FAILURE_REASON = 'failure-reason';
 
     /**
      * Fetch a set of entities based on 'params' parameter
@@ -232,16 +233,15 @@ class SynchronisationApi extends \tao_actions_RestController
      */
     public function confirmSyncFailed()
     {
-        $syncParams = [];
-        $report = \common_report_Report::createInfo('Synchronization failed.');
-        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
         try {
             $this->assertHttpMethod(\Request::HTTP_POST);
             $parameters = $this->getInputParameters();
 
-            if (isset($parameters[self::PARAM_PARAMETERS])) {
-                $syncParams = $parameters[self::PARAM_PARAMETERS];
-            }
+            $syncParams = isset($parameters[self::PARAM_PARAMETERS]) ? $parameters[self::PARAM_PARAMETERS] : [];
+            $reportMessage = isset($parameters[self::PARAM_FAILURE_REASON]) ? $parameters[self::PARAM_FAILURE_REASON] : 'Synchronization failed.';
+            $report = \common_report_Report::createFailure($reportMessage);
+
+            $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
             $eventManager->trigger(new SyncFailedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);

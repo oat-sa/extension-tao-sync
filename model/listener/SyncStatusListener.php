@@ -58,7 +58,7 @@ class SyncStatusListener extends ConfigurableService
             /** @var SynchronisationClient $syncClient */
             $syncClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
             $syncParams = $event->getSyncParameters();
-            $response = $syncClient->sendSyncFailedConfirmation($syncParams);
+            $response = $syncClient->sendSyncFailedConfirmation($syncParams, $event->getReason());
             $this->logInfo(json_encode($response));
         } catch (\Exception $e) {
             $this->logError($e->getMessage());
