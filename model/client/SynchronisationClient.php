@@ -25,6 +25,7 @@ use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\model\Exception\SyncRequestFailedException;
 use Psr\Http\Message\ResponseInterface;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\ResultApi;
@@ -262,6 +263,26 @@ class SynchronisationClient extends ConfigurableService
         $response = $this->call($url, \Request::HTTP_POST, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
 
         return $this->decodeResponseBody($response);
+    }
+
+    /**
+     * Get list of supported TAO VM versions.
+     *
+     * @return array
+     * @throws SyncRequestFailedException
+     * @throws \common_Exception
+     */
+    public function getSupportedVmVersions()
+    {
+        $url = '/taoSync/api/supportedVm';
+        $response = $this->call($url);
+        $response = $this->decodeResponseBody($response);
+
+        if (!isset($response['data']) || !is_array($response['data'])) {
+            throw new SyncRequestFailedException('Can not get list of supported TAO VM versions');
+        }
+
+        return $response['data'];
     }
 
     /**

@@ -77,6 +77,7 @@ use oat\taoSync\model\testCenter\TestCenterService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\model\Validator\SyncParamsValidator;
+use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
@@ -658,6 +659,9 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $centralSyncRequestValidator = new SyncParamsValidator();
             $serviceManager->register(SyncParamsValidator::SERVICE_ID, $centralSyncRequestValidator);
+
+            $vmVersionChecker = new VmVersionChecker();
+            $serviceManager->register(VmVersionChecker::SERVICE_ID, $vmVersionChecker);
 
             $this->setVersion('5.5.0');
         }
