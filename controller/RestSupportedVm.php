@@ -19,8 +19,8 @@
 
 namespace oat\taoSync\controller;
 
+use tao_actions_RestController;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
-use oat\taoTestCenter\controller\AbstractRestController;
 
 /**
  * Class RestSupportedVm
@@ -28,7 +28,7 @@ use oat\taoTestCenter\controller\AbstractRestController;
  *
  * @OA\Info(title="TAO Supported list of VM versions API", version="0.1")
  */
-class RestSupportedVm extends AbstractRestController
+class RestSupportedVm extends tao_actions_RestController
 {
     /**
      * @throws \common_exception_RestApi

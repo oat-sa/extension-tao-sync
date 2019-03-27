@@ -641,6 +641,7 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         if ($this->isVersion('5.3.0')) {
+            OntologyUpdater::syncModels();
             AclProxy::applyRule(
                 new AccessRule(
                     AccessRule::GRANT,
