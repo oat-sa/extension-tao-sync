@@ -640,7 +640,9 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('5.3.0');
         }
 
-        if ($this->isVersion('5.3.0')) {
+        $this->skip('5.3.0', '5.4.0');
+
+        if ($this->isVersion('5.4.0')) {
             OntologyUpdater::syncModels();
             AclProxy::applyRule(
                 new AccessRule(
@@ -657,7 +659,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $centralSyncRequestValidator = new SyncParamsValidator();
             $serviceManager->register(SyncParamsValidator::SERVICE_ID, $centralSyncRequestValidator);
 
-            $this->setVersion('5.4.0');
+            $this->setVersion('5.5.0');
         }
     }
 
