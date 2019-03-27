@@ -29,7 +29,9 @@ use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncStartedEvent;
+use oat\taoSync\model\Exception\NotSupportedVmVersionException;
 use oat\taoSync\model\history\DataSyncHistoryService;
+use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 
 class SynchronizeAll extends AbstractAction
 {
@@ -56,7 +58,10 @@ class SynchronizeAll extends AbstractAction
         );
 
         $success = false;
+        $failureReason = '';
         try {
+            $this->checkSyncPreconditions($params);
+
             foreach ($actionsToRun as $action){
                 if (is_subclass_of($action, Action::class)){
                     $report->add(call_user_func($this->propagate(new $action), $params));
@@ -65,17 +70,36 @@ class SynchronizeAll extends AbstractAction
             $success = true;
         } catch (\Exception $e) {
             $report->add(Report::createFailure('An error has occurred : ' . $e->getMessage()));
+            $failureReason = $e->getMessage();
         } finally {
             if ($success === true) {
                 $event = new SyncFinishedEvent($params, $report);
             } else {
                 $report->add(Report::createFailure('An unexpected PHP error has occurred.'));
                 $event = new SyncFailedEvent($params, $report);
+                $event->setReason($failureReason);
             }
             $eventManager->trigger($event);
         }
 
         return $report;
+    }
+
+    /**
+     * Check if all preconditions to perform synchronization are met.
+     *
+     * @param array $params
+     * @return bool
+     *
+     * @throws NotSupportedVmVersionException
+     */
+    private function checkSyncPreconditions(array $params)
+    {
+        $vmVersionChecker = $this->getServiceLocator()->get(VmVersionChecker::SERVICE_ID);
+
+        if (!$vmVersionChecker->isVmSupported($params['tao_version'])) {
+            throw new NotSupportedVmVersionException('Current version of TAO VM is not supported by the server.');
+        }
     }
 
     /**

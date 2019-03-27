@@ -19,9 +19,7 @@
 
 namespace oat\taoSync\model\Exception;
 
-use common_exception_ClientException;
-
-class SyncRequestFailedException extends common_exception_ClientException
+class NotSupportedVmVersionException extends \common_exception_ClientException
 {
     /**
      * @return string
