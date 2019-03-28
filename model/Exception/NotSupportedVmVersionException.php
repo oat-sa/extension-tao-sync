@@ -14,28 +14,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2019 (original work) Open Assessment Technologies SA
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\supportedVm;
+namespace oat\taoSync\model\Exception;
 
-/**
- * Service methods to manage the VMs
- *
- * @access public
- */
-class SupportedVmService extends \tao_models_classes_ClassService
+class NotSupportedVmVersionException extends \common_exception_ClientException
 {
-    const CLASS_URI = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoVM';
-
     /**
-     * return the group top level class
-     *
-     * @access public
-     * @return \core_kernel_classes_Class
+     * @return string
      */
-    public function getRootClass()
+    public function getUserMessage()
     {
-        return new \core_kernel_classes_Class(self::CLASS_URI);
+        return $this->message;
     }
 }

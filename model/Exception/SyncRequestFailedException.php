@@ -14,34 +14,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\controller;
+namespace oat\taoSync\model\Exception;
 
-use oat\taoSync\model\VirtualMachine\SupportedVmService;
+use common_exception_ClientException;
 
-class SupportedVm extends \tao_actions_SaSModule
+class SyncRequestFailedException extends common_exception_ClientException
 {
-    protected $service;
-
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     /**
-     * (non-PHPdoc)
-     *
-     * @see tao_actions_RdfController::getClassService()
+     * @return string
      */
-    public function getClassService()
+    public function getUserMessage()
     {
-        if ($this->service == null) {
-            $this->service = $this->getServiceLocator()->get(SupportedVmService::SERVICE_ID);
-        }
-
-        return $this->service;
+        return $this->message;
     }
 }

@@ -34,6 +34,7 @@ interface SyncLogServiceInterface
     const PARAM_BOX_ID = 'box_id';
     const PARAM_ORGANIZATION_ID = 'organisation_id';
     const PARAM_CLIENT_STATE = 'client_state';
+    const PARAM_VM_VERSION = 'tao_version';
 
     /**
      * Create new synchronization log record.

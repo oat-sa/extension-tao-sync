@@ -28,6 +28,7 @@ use oat\oatbox\filesystem\FileSystem;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\tao\model\TaoOntology;
 use oat\tao\model\user\import\UserCsvImporterFactory;
+use oat\tao\model\user\TaoRoles;
 use oat\tao\scripts\update\OntologyUpdater;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDeliveryRdf\model\ContainerRuntime;
@@ -35,6 +36,7 @@ use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoProctoring\model\deliveryLog\implementation\RdsDeliveryLogService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\controller\RestSupportedVm;
 use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
@@ -54,6 +56,7 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
@@ -73,6 +76,8 @@ use oat\taoSync\model\SyncService;
 use oat\taoSync\model\testCenter\TestCenterService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
+use oat\taoSync\model\Validator\SyncParamsValidator;
+use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
@@ -637,6 +642,29 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('5.3.0', '5.4.0');
+
+        if ($this->isVersion('5.4.0')) {
+            OntologyUpdater::syncModels();
+            AclProxy::applyRule(
+                new AccessRule(
+                    AccessRule::GRANT,
+                    TaoRoles::ANONYMOUS,
+                    RestSupportedVm::class
+                )
+            );
+
+            $serviceManager = $this->getServiceManager();
+            $supportedVmService = new SupportedVmService();
+            $serviceManager->register(SupportedVmService::SERVICE_ID, $supportedVmService);
+
+            $centralSyncRequestValidator = new SyncParamsValidator();
+            $serviceManager->register(SyncParamsValidator::SERVICE_ID, $centralSyncRequestValidator);
+
+            $vmVersionChecker = new VmVersionChecker();
+            $serviceManager->register(VmVersionChecker::SERVICE_ID, $vmVersionChecker);
+
+            $this->setVersion('5.5.0');
+        }
     }
 
     /**

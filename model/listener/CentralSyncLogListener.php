@@ -108,17 +108,18 @@ class CentralSyncLogListener extends ConfigurableService
         $this->validateParameters($params);
         $syncLogService = $this->getSyncLogService();
 
-        $report = Report::createInfo('Synchronization started...');
-        $report->add($event->getReport());
         $syncLogEntity = new SyncLogEntity(
-            $params[SyncLogServiceInterface::PARAM_SYNC_ID],
+            (int) $params[SyncLogServiceInterface::PARAM_SYNC_ID],
             $params[SyncLogServiceInterface::PARAM_BOX_ID],
             $params[SyncLogServiceInterface::PARAM_ORGANIZATION_ID],
-            $this->parseSyncData($report),
+            [],
             SyncLogEntity::STATUS_IN_PROGRESS,
-            $report,
+            Report::createInfo('Synchronization started...'),
             new DateTime()
         );
+        $syncLogEntity->setClientState([
+            SyncLogServiceInterface::PARAM_VM_VERSION => $params[SyncLogServiceInterface::PARAM_VM_VERSION]
+        ]);
 
         return $syncLogService->create($syncLogEntity);
     }
@@ -222,6 +223,9 @@ class CentralSyncLogListener extends ConfigurableService
         if (empty($params[SyncLogServiceInterface::PARAM_ORGANIZATION_ID])) {
             throw new \InvalidArgumentException('Required synchronization parameter is missing: ' . SyncLogServiceInterface::PARAM_ORGANIZATION_ID);
         }
+        if (empty($params[SyncLogServiceInterface::PARAM_VM_VERSION])) {
+            throw new \InvalidArgumentException('Required synchronization parameter is missing: ' . SyncLogServiceInterface::PARAM_VM_VERSION);
+        }
 
         return true;
     }
@@ -262,8 +266,8 @@ class CentralSyncLogListener extends ConfigurableService
     private function parseClientState(array $params, $clientStateReport)
     {
         $clientState = $this->getSyncLogClientStateParser()->parse($clientStateReport);
-        if (isset($params['tao_version'])) {
-            $clientState['tao_version'] = $params['tao_version'];
+        if (isset($params[SyncLogServiceInterface::PARAM_VM_VERSION])) {
+            $clientState[SyncLogServiceInterface::PARAM_VM_VERSION] = $params[SyncLogServiceInterface::PARAM_VM_VERSION];
         }
 
         return $clientState;

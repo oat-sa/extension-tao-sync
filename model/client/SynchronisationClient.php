@@ -25,6 +25,7 @@ use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\model\Exception\SyncRequestFailedException;
 use Psr\Http\Message\ResponseInterface;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\controller\ResultApi;
@@ -253,15 +254,40 @@ class SynchronisationClient extends ConfigurableService
      * Send confirmation to the central server about failed synchronization on the client.
      *
      * @param array $syncParams
+     * @param string $reason Failure reason
      * @return array
      * @throws \common_Exception
      */
-    public function sendSyncFailedConfirmation(array $syncParams)
+    public function sendSyncFailedConfirmation(array $syncParams, $reason)
     {
         $url = '/taoSync/SynchronisationApi/confirmSyncFailed';
-        $response = $this->call($url, \Request::HTTP_POST, json_encode([SynchronisationApi::PARAM_PARAMETERS => $syncParams]));
+        $requestData = [
+            SynchronisationApi::PARAM_PARAMETERS => $syncParams,
+            SynchronisationApi::PARAM_FAILURE_REASON => $reason,
+        ];
+        $response = $this->call($url, \Request::HTTP_POST, json_encode($requestData));
 
         return $this->decodeResponseBody($response);
+    }
+
+    /**
+     * Get list of supported TAO VM versions.
+     *
+     * @return array
+     * @throws SyncRequestFailedException
+     * @throws \common_Exception
+     */
+    public function getSupportedVmVersions()
+    {
+        $url = '/taoSync/api/supportedVm';
+        $response = $this->call($url);
+        $response = $this->decodeResponseBody($response);
+
+        if (!isset($response['data']) || !is_array($response['data'])) {
+            throw new SyncRequestFailedException('Can not get list of supported TAO VM versions');
+        }
+
+        return $response['data'];
     }
 
     /**

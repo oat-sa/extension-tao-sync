@@ -14,7 +14,7 @@
 
     <rdf:Description rdf:about="http://www.tao.lu/Ontologies/TAO.rdf#TaoVMVersion">
         <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
-        <rdfs:label xml:lang="en-US"><![CDATA[Minimum version]]></rdfs:label>
+        <rdfs:label xml:lang="en-US"><![CDATA[TAO VM version]]></rdfs:label>
         <rdfs:domain rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#TaoVM"/>
         <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
         <widget:widget rdf:resource="http://www.tao.lu/datatypes/WidgetDefinitions.rdf#TextBox"/>
