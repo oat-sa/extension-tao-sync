@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: TAO 3.3.0-sprint97\n"
-"PO-Revision-Date: 2019-03-06T14:01:48\n"
+"Project-Id-Version: TAO 3.3.0-sprint98\n"
+"PO-Revision-Date: 2019-03-29T11:18:35\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
 "Language: pt-PT\n"
@@ -13,6 +13,13 @@ msgstr ""
 "X-Poedit-KeywordsList: __\n"
 "X-Poedit-SearchPath-0: .\n"
 
+#, tao-public
+msgid "Add"
+msgstr ""
+
+msgid "Approved VMs"
+msgstr ""
+
 msgid "Assessments in progress:"
 msgstr ""
 
@@ -21,6 +28,10 @@ msgstr ""
 
 #, tao-public
 msgid "Data Synchronization"
+msgstr ""
+
+#, tao-public
+msgid "Delete"
 msgstr ""
 
 msgid "Depending on the workload this process may take a while."
@@ -41,10 +52,14 @@ msgstr ""
 msgid "Go to"
 msgstr ""
 
+#, tao-public
+msgid "Index"
+msgstr ""
+
 msgid "Last status check at %s"
 msgstr ""
 
-msgid "Last task has been completed at %s"
+msgid "Last synchronization has been completed at %s"
 msgstr ""
 
 msgid "Note that all time data refer to the server time."
@@ -53,7 +68,15 @@ msgstr ""
 msgid "please ensure that everyone has completed the assessment before proceeding."
 msgstr ""
 
+#, tao-public
+msgid "Properties"
+msgstr ""
+
 msgid "Required field"
+msgstr ""
+
+#, tao-public
+msgid "Settings"
 msgstr ""
 
 #, tao-public
@@ -98,5 +121,9 @@ msgid "Tools"
 msgstr ""
 
 msgid "View"
+msgstr ""
+
+#, tao-public
+msgid "VM Lists"
 msgstr ""
 
