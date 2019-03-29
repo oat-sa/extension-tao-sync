@@ -22,12 +22,13 @@ namespace oat\taoSync\controller;
 
 use oat\oatbox\event\EventManager;
 use oat\taoOauth\model\OauthController;
+use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
-use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\synchronizer\delivery\DeliverySynchronizerService;
 use oat\taoSync\model\SyncService;
+use oat\taoSync\model\Validator\SyncParamsValidator;
 
 /**
  * Class SynchronisationApi
@@ -43,6 +44,8 @@ class SynchronisationApi extends \tao_actions_RestController
     const PARAM_DELIVERY_URI = 'delivery-uri';
     const PARAM_REQUESTED_CLASSES = 'requested-classes';
     const PARAM_ENTITY_IDS = 'entityIds';
+    const PARAM_CLIENT_STATE = 'client-state';
+    const PARAM_FAILURE_REASON = 'failure-reason';
 
     /**
      * Fetch a set of entities based on 'params' parameter
@@ -56,6 +59,10 @@ class SynchronisationApi extends \tao_actions_RestController
      */
     public function fetchEntityChecksums()
     {
+        $report = \common_report_Report::createInfo('Fetch entities checksum request received.');
+        $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+        $params = [];
+
         try {
             $this->assertHttpMethod(\Request::HTTP_GET);
 
@@ -65,10 +72,18 @@ class SynchronisationApi extends \tao_actions_RestController
 
             $type = $this->getRequestParameter(self::PARAM_TYPE);
             $params = $this->hasRequestParameter(self::PARAM_PARAMETERS) ? $this->getRequestParameter(self::PARAM_PARAMETERS) : [];
+            $this->getSyncParamsValidator()->validate($params);
 
-            $this->returnJson($this->getSyncService()->fetch($type, $params));
+            $checksums = $this->getSyncService()->fetch($type, $params);
 
+            $report->add(\common_report_Report::createInfo(sprintf("%d checksums returned for entity type '%s'", count($checksums), $type)));
+            $eventManager->trigger(new SyncResponseEvent($params, $report));
+
+            $this->returnJson($checksums);
         } catch (\Exception $e) {
+            $report->add(\common_report_Report::createFailure('Synchronization request failed: ' . $e->getMessage()));
+            $eventManager->trigger(new SyncResponseEvent($params, $report));
+
             $this->returnFailure($e);
         }
     }
@@ -105,6 +120,7 @@ class SynchronisationApi extends \tao_actions_RestController
             if (isset($parameters[self::PARAM_PARAMETERS])) {
                 $params = $parameters[self::PARAM_PARAMETERS];
             }
+            $this->getSyncParamsValidator()->validate($params);
 
             $eventManager->trigger(new SyncRequestEvent($params, $report));
 
@@ -201,11 +217,37 @@ class SynchronisationApi extends \tao_actions_RestController
             if (isset($parameters[self::PARAM_PARAMETERS])) {
                 $syncParams = $parameters[self::PARAM_PARAMETERS];
             }
+
             $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
 
             $this->returnJson(['message' => 'Confirmation received.']);
         } catch (\Exception $e) {
-            $eventManager->trigger(new SyncFinishedEvent($syncParams, $report));
+            $this->logError($e->getMessage());
+
+            $this->returnFailure($e);
+        }
+    }
+
+    /**
+     * Receive confirmation message from client that synchronization failed on VM.
+     */
+    public function confirmSyncFailed()
+    {
+        try {
+            $this->assertHttpMethod(\Request::HTTP_POST);
+            $parameters = $this->getInputParameters();
+
+            $syncParams = isset($parameters[self::PARAM_PARAMETERS]) ? $parameters[self::PARAM_PARAMETERS] : [];
+            $reportMessage = isset($parameters[self::PARAM_FAILURE_REASON]) ? $parameters[self::PARAM_FAILURE_REASON] : 'Synchronization failed.';
+            $report = \common_report_Report::createFailure($reportMessage);
+
+            $eventManager = $this->getServiceLocator()->get(EventManager::SERVICE_ID);
+            $eventManager->trigger(new SyncFailedEvent($syncParams, $report));
+
+            $this->returnJson(['message' => 'Confirmation received.']);
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+
             $this->returnFailure($e);
         }
     }
@@ -254,4 +296,11 @@ class SynchronisationApi extends \tao_actions_RestController
         return $this->getServiceLocator()->get(SyncService::SERVICE_ID);
     }
 
+    /**
+     * @return SyncParamsValidator
+     */
+    private function getSyncParamsValidator()
+    {
+        return $this->getServiceLocator()->get(SyncParamsValidator::SERVICE_ID);
+    }
 }

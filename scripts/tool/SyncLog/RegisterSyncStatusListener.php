@@ -20,6 +20,7 @@
 namespace oat\taoSync\scripts\tool\SyncLog;
 
 use oat\oatbox\extension\InstallAction;
+use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\listener\SyncStatusListener;
 
@@ -35,6 +36,7 @@ class RegisterSyncStatusListener extends InstallAction
     public function __invoke($params)
     {
         $this->registerEvent(SyncFinishedEvent::class, [SyncStatusListener::SERVICE_ID, 'sendSyncFinishedConfirmation']);
+        $this->registerEvent(SyncFailedEvent::class, [SyncStatusListener::SERVICE_ID, 'sendSyncFailedConfirmation']);
 
         $syncStatusListener = new SyncStatusListener([]);
         $this->getServiceManager()->register(SyncStatusListener::SERVICE_ID, $syncStatusListener);

@@ -14,35 +14,34 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
+ *
  */
 
-namespace oat\taoSync\model\event;
+namespace oat\taoSync\controller;
 
-/**
- * Class SyncFailedEvent
- * @package oat\taoSync\model\event
- */
-class SyncFailedEvent extends AbstractSyncEvent
+use oat\taoSync\model\VirtualMachine\SupportedVmService;
+
+class SupportedVm extends \tao_actions_SaSModule
 {
-    /**
-     * @var string Failure reason
-     */
-    private $reason = '';
+    protected $service;
 
-    /**
-     * @return string
-     */
-    public function getReason()
+    public function __construct()
     {
-        return $this->reason;
+        parent::__construct();
     }
 
     /**
-     * @param string $reason
+     * (non-PHPdoc)
+     *
+     * @see tao_actions_RdfController::getClassService()
      */
-    public function setReason($reason)
+    public function getClassService()
     {
-        $this->reason = $reason;
+        if ($this->service == null) {
+            $this->service = $this->getServiceLocator()->get(SupportedVmService::SERVICE_ID);
+        }
+
+        return $this->service;
     }
 }

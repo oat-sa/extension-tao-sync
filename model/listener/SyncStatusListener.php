@@ -19,7 +19,11 @@
 namespace oat\taoSync\model\listener;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
+use oat\taoSync\model\OfflineMachineChecksService;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+
 /**
  * Class SyncStatusListener
  * @package oat\taoSync\model\listener
@@ -27,6 +31,7 @@ use oat\taoSync\model\event\SyncFinishedEvent;
 class SyncStatusListener extends ConfigurableService
 {
     const SERVICE_ID = 'taoSync/SyncStatusListener';
+
     /**
      * @param SyncFinishedEvent $event
      */
@@ -35,10 +40,36 @@ class SyncStatusListener extends ConfigurableService
         try {
             /** @var SynchronisationClient $syncClient */
             $syncClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
-            $response = $syncClient->sendSyncFinishedConfirmation($event->getSyncParameters());
+            $syncParams = $event->getSyncParameters();
+            $syncParams[SyncLogServiceInterface::PARAM_CLIENT_STATE] = $this->getOfflineMachineChecksService()->getReport()->toArray();
+            $response = $syncClient->sendSyncFinishedConfirmation($syncParams);
             $this->logInfo(json_encode($response));
         } catch (\Exception $e) {
             $this->logError($e->getMessage());
         }
+    }
+
+    /**
+     * @param SyncFailedEvent $event
+     */
+    public function sendSyncFailedConfirmation(SyncFailedEvent $event)
+    {
+        try {
+            /** @var SynchronisationClient $syncClient */
+            $syncClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+            $syncParams = $event->getSyncParameters();
+            $response = $syncClient->sendSyncFailedConfirmation($syncParams, $event->getReason());
+            $this->logInfo(json_encode($response));
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+        }
+    }
+
+    /**
+     * @return OfflineMachineChecksService
+     */
+    protected function getOfflineMachineChecksService()
+    {
+        return $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID);
     }
 }

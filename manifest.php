@@ -18,18 +18,21 @@
  *
  */
 
+use oat\tao\model\user\TaoRoles;
 use oat\taoSync\controller\HandShake;
+use oat\taoSync\model\SyncService;
 use oat\taoSync\scripts\install\InstallEnhancedDeliveryLog;
 use oat\taoSync\scripts\install\RegisterOfflineToOnlineResultMapper;
 use oat\taoSync\controller\SynchronizationHistory;
 use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
+use oat\taoSync\controller\RestSupportedVm;
 
 return array(
     'name' => 'taoSync',
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '5.0.2',
+    'version' => '5.5.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
@@ -45,14 +48,16 @@ return array(
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', ['ext'=>'taoSync']],
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager', SynchronizationHistory::class],
-        ['grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class],
+        ['grant', SyncService::TAO_SYNC_ROLE, ['ext'=>'taoSync']],
+        ['grant', SyncService::TAO_SYNC_ROLE, SynchronizationHistory::class],
+        ['grant', TaoRoles::ANONYMOUS, HandShake::class],
+        ['grant', TaoRoles::ANONYMOUS, RestSupportedVm::class],
     ],
     'install' => [
         'rdf' => [
-            dirname(__FILE__) . '/model/ontology/synchronisation.rdf',
-            dirname(__FILE__). '/model/ontology/taosync.rdf',
+            __DIR__ . '/model/ontology/synchronisation.rdf',
+            __DIR__ . '/model/ontology/taosync.rdf',
+            __DIR__ . '/model/ontology/VMList.rdf'
         ],
         'php' => [
             \oat\taoSync\scripts\install\RegisterSyncService::class,
@@ -73,16 +78,17 @@ return array(
     ),
     'update' => oat\taoSync\scripts\update\Updater::class,
     'routes' => array(
+        '/taoSync/api' => ['class' => \oat\taoSync\model\routing\ApiRoute::class],
         '/taoSync' => 'oat\\taoSync\\controller'
     ),
     'constants' => array(
         # views directory
-        "DIR_VIEWS" => dirname(__FILE__).DIRECTORY_SEPARATOR."views".DIRECTORY_SEPARATOR,
+        "DIR_VIEWS" => __DIR__ . DIRECTORY_SEPARATOR."views".DIRECTORY_SEPARATOR,
 
         #BASE URL (usually the domain root)
         'BASE_URL' => ROOT_URL.'taoSync/',
     ),
     'extra' => array(
-        'structures' => dirname(__FILE__).DIRECTORY_SEPARATOR.'controller'.DIRECTORY_SEPARATOR.'structures.xml',
+        'structures' => __DIR__ . DIRECTORY_SEPARATOR.'controller'.DIRECTORY_SEPARATOR.'structures.xml',
     ),
 );

@@ -14,35 +14,24 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
+ *
  */
 
-namespace oat\taoSync\model\event;
+namespace oat\taoSync\model\routing;
 
-/**
- * Class SyncFailedEvent
- * @package oat\taoSync\model\event
- */
-class SyncFailedEvent extends AbstractSyncEvent
+use oat\tao\model\routing\AbstractApiRoute;
+
+class ApiRoute extends AbstractApiRoute
 {
-    /**
-     * @var string Failure reason
-     */
-    private $reason = '';
+    const REST_CONTROLLER_PREFIX = 'oat\\taoSync\\controller\\Rest';
 
     /**
+     * @inheritdoc
      * @return string
      */
-    public function getReason()
+    public static function getControllerPrefix()
     {
-        return $this->reason;
-    }
-
-    /**
-     * @param string $reason
-     */
-    public function setReason($reason)
-    {
-        $this->reason = $reason;
+        return self::REST_CONTROLLER_PREFIX;
     }
 }

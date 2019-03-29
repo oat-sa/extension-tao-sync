@@ -86,6 +86,7 @@ class ClientSyncLogListener extends ConfigurableService
 
             $syncLogEntity->setData($newSyncData);
             $syncLogEntity->setFinishTime(new DateTime());
+            $syncLogEntity->setClientState($this->parseClientState($syncLogEntity->getClientState(), $parameters));
 
             $this->getSyncLogService()->update($syncLogEntity);
         } catch (\Exception $e) {
@@ -141,5 +142,14 @@ class ClientSyncLogListener extends ConfigurableService
     private function getSyncLogService()
     {
         return $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+    }
+
+    private function parseClientState(array $clientState, $params)
+    {
+        if (isset($params['tao_version'])) {
+            $clientState['tao_version'] = $params['tao_version'];
+        }
+
+        return $clientState;
     }
 }
