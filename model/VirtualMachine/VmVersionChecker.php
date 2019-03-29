@@ -25,7 +25,7 @@ use oat\taoSync\model\Exception\SyncRequestFailedException;
 
 class VmVersionChecker extends ConfigurableService
 {
-    const SERVICE_ID = 'taoSync/VmVersionReadinessChecker';
+    const SERVICE_ID = 'taoSync/VmVersionChecker';
 
     /**
      * Check if provided version of TAO VM is supported by the central server.
