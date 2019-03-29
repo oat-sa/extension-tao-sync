@@ -665,6 +665,13 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('5.5.0');
         }
+
+        if ($this->isVersion('5.5.0')) {
+            $vmVersionChecker = new VmVersionChecker();
+            $this->getServiceManager()->register(VmVersionChecker::SERVICE_ID, $vmVersionChecker);
+
+            $this->setVersion('5.5.1');
+        }
     }
 
     /**
