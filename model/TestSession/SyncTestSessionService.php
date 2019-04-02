@@ -276,22 +276,22 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
      */
     protected function reportImportCompleted(array $importAcknowledgments)
     {
-        $syncSuccess = $syncFailed = [];
+        $syncSuccess = $syncFailed = 0;
         foreach ($importAcknowledgments as $acknowledgementId => $acknowledgementData) {
-            if ((bool) $acknowledgementData['success'] == true) {
-                $syncSuccess[$acknowledgementId] = $acknowledgementData['deliveryId'];
+            if ((bool) $acknowledgementData['success'] === true) {
+                $syncSuccess++;
             } else {
-                $syncFailed[] = $acknowledgementId;
+                $syncFailed++;
             }
         }
 
         $syncReportData = [];
         if (!empty($syncSuccess)) {
-            $syncReportData[self::SYNC_ENTITY]['imported'] = count($syncSuccess);
+            $syncReportData[self::SYNC_ENTITY]['imported'] = $syncSuccess;
         }
 
         if (!empty($syncFailed)) {
-            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($syncFailed);
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = $syncFailed;
         }
         $this->report->setData($syncReportData);
         $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(
