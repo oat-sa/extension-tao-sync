@@ -162,13 +162,15 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             }
 
             try {
-                $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
-                foreach ($logsToBeInserted as $deliveryLog) {
-                    $this->postImportDeliverLogProcess($deliveryLog);
+                if (!empty($logsToBeInserted)) {
+                    $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
+                    foreach ($logsToBeInserted as $deliveryLog) {
+                        $this->postImportDeliverLogProcess($deliveryLog);
+                    }
+                    $boxId = isset($params[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
+                        $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
+                    $this->saveBoxId($logsToBeInserted, $boxId);
                 }
-                $boxId = isset($params[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
-                    $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
-                $this->saveBoxId($logsToBeInserted, $boxId);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'logsSynced' => $logsSynced
