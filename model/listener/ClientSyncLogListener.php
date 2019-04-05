@@ -21,6 +21,7 @@ namespace oat\taoSync\model\listener;
 
 use DateTime;
 use oat\oatbox\service\ConfigurableService;
+use oat\taoSync\model\event\RequestStatsEvent;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncStartedEvent;
@@ -76,6 +77,7 @@ class ClientSyncLogListener extends ConfigurableService
 
             $report = $syncLogEntity->getReport();
             $report->add($event->getReport());
+
             if ($report->containsError()) {
                 $syncLogEntity->setFailed();
             } else {
@@ -123,6 +125,20 @@ class ClientSyncLogListener extends ConfigurableService
         }
     }
 
+    private $downloadSpeed = [];
+    private $uploadSpeed = [];
+
+    public function syncRequestStats(RequestStatsEvent $event)
+    {
+        $handlerStats = $event->getTransferStats()->getHandlerStats();
+
+        if (!empty($handlerStats['speed_download'])) {
+            $this->downloadSpeed[] = $handlerStats['speed_download'];
+        }
+        if (!empty($handlerStats['speed_upload'])) {
+            $this->uploadSpeed[] = $handlerStats['speed_upload'];
+        }
+    }
 
     /**
      * @param \common_report_Report $report
