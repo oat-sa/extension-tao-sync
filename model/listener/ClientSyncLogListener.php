@@ -77,6 +77,7 @@ class ClientSyncLogListener extends ConfigurableService
 
             $report = $syncLogEntity->getReport();
             $report->add($event->getReport());
+            $report->add($this->getConnectionStatsReport());
 
             if ($report->containsError()) {
                 $syncLogEntity->setFailed();
@@ -111,6 +112,7 @@ class ClientSyncLogListener extends ConfigurableService
 
             $report = $syncLogEntity->getReport();
             $report->add($event->getReport());
+            $report->add($this->getConnectionStatsReport());
 
             $eventData = $this->parseSyncData($event->getReport());
             $newSyncData = SyncLogDataHelper::mergeSyncData($syncLogEntity->getData(), $eventData);
@@ -138,6 +140,29 @@ class ClientSyncLogListener extends ConfigurableService
         if (!empty($handlerStats['speed_upload'])) {
             $this->uploadSpeed[] = $handlerStats['speed_upload'];
         }
+    }
+
+    /**
+     * @return \common_report_Report
+     * @throws \common_exception_Error
+     */
+    public function getConnectionStatsReport()
+    {
+        $report = \common_report_Report::createInfo('Connection statistics');
+        $report->add(\common_report_Report::createInfo('Download speed: ' . $this->getDownloadSpeed()));
+        $report->add(\common_report_Report::createInfo('Upload speed: ' . $this->getUploadSpeed()));
+
+        return $report;
+    }
+
+    private function getDownloadSpeed()
+    {
+        return array_sum($this->downloadSpeed) / count($this->downloadSpeed);
+    }
+
+    private function getUploadSpeed()
+    {
+        return array_sum($this->uploadSpeed) / count($this->uploadSpeed);
     }
 
     /**
