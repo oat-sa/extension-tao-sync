@@ -36,15 +36,15 @@ return array(
     'author' => 'Open Assessment Technologies SA',
     'requires' => array(
         'generis'         => '>=7.9.5',
-        'tao'             => '>=22.0.0',
-        'taoOauth'        => '>=1.0.3',
+        'tao'             => '>=31.6.0',
+        'taoOauth'        => '>=2.0.0',
         'taoTestCenter'   => '>=4.6.0',
         'taoResultServer' => '>=7.0.0',
         'taoTaskQueue'    => '>=1.0.0',
         'taoDelivery'     => '>=12.5.0',
         'taoDeliveryRdf'  => '>=6.0.0',
         'taoProctoring'   => '>=12.7.0',
-        'taoPublishing'   => '>=1.3.0',
+        'taoPublishing'   => '>=2.0.0',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
