@@ -1,0 +1,52 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TAO Supported list of VM versions API",
+    "version": "0.1"
+  },
+  "paths": {
+    "/taoSync/api/supportedVm": {
+      "get": {
+        "tags": [
+          "supported VM version"
+        ],
+        "summary": "Get list of supported TAO VM versions",
+        "description": "Get list of supported TAO VM versions",
+        "operationId": "oat\\taoSync\\controller\\RestSupportedVm::get",
+        "responses": {
+          "200": {
+            "description": "Supported TAO VM versions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": true,
+                    "data": [
+                      "3.3.0-sprint97",
+                      "3.3.0-sprint98"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "success": false,
+                    "errorCode": 0,
+                    "errorMsg": "Can not return list of supported TAO VM versions",
+                    "version": "3.3.0-sprint99"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

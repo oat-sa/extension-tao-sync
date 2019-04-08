@@ -162,13 +162,15 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             }
 
             try {
-                $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
-                foreach ($logsToBeInserted as $deliveryLog) {
-                    $this->postImportDeliverLogProcess($deliveryLog);
+                if (!empty($logsToBeInserted)) {
+                    $this->getDeliveryLogService()->insertMultiple($logsToBeInserted);
+                    foreach ($logsToBeInserted as $deliveryLog) {
+                        $this->postImportDeliverLogProcess($deliveryLog);
+                    }
+                    $boxId = isset($params[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
+                        $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
+                    $this->saveBoxId($logsToBeInserted, $boxId);
                 }
-                $boxId = isset($params[SyncServiceInterface::IMPORT_OPTION_BOX_ID]) ?
-                    $params[SyncServiceInterface::IMPORT_OPTION_BOX_ID] : null;
-                $this->saveBoxId($logsToBeInserted, $boxId);
                 $importAcknowledgment[$resultId] = [
                     'success' => 1,
                     'logsSynced' => $logsSynced
@@ -368,22 +370,22 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
      */
     private function reportImportCompleted(array $importAcknowledgments)
     {
-        $syncSuccess = $syncFailed = [];
+        $syncSuccess = $syncFailed = 0;
         foreach ($importAcknowledgments as $acknowledgementId => $acknowledgementData) {
-            if ((bool) $acknowledgementData['success'] == true) {
-                $syncSuccess[$acknowledgementId] = $acknowledgementData['deliveryId'];
+            if ((bool) $acknowledgementData['success'] === true) {
+                $syncSuccess++;
             } else {
-                $syncFailed[] = $acknowledgementId;
+                $syncFailed++;
             }
         }
 
         $syncReportData = [];
-        if (!empty($syncSuccess)) {
-            $syncReportData[self::SYNC_ENTITY]['imported'] = count($syncSuccess);
+        if ($syncSuccess > 0) {
+            $syncReportData[self::SYNC_ENTITY]['imported'] = $syncSuccess;
         }
 
-        if (!empty($syncFailed)) {
-            $syncReportData[self::SYNC_ENTITY]['import failed'] = count($syncFailed);
+        if ($syncFailed > 0) {
+            $syncReportData[self::SYNC_ENTITY]['import failed'] = $syncFailed;
         }
         $this->report->setData($syncReportData);
         $this->getServiceLocator()->get(EventManager::SERVICE_ID)->trigger(

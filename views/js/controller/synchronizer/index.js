@@ -153,8 +153,18 @@ define([
                 }
             }).on('pollSingle', function (taskId, taskData) {
                 updateTime(taskData);
-            }).on('error', function () {
-                setState('error');
+            }).on('error', function (error) {
+                if (
+                    error.response
+                    && error.response.errorCode >= 400
+                    && error.response.errorCode < 500
+                ) {
+                    var message = error.response.errorMsg;
+
+                    setState('error', message)
+                } else {
+                    setState('error');
+                }
             });
 
             /**
@@ -194,7 +204,7 @@ define([
              *
              * @param {String} state
              */
-            function setState(state) {
+            function setState(state, message) {
                 $container.removeClass(function (index, className) {
                     return (className.match(/(^|\s)state-\S+/g) || []).join(' ');
                 });
@@ -202,6 +212,13 @@ define([
                 $spinner[state === 'progress' ? 'addClass' : 'removeClass']('spinner-icon');
                 $container.addClass('state-' + state);
                 msg.$all.hide();
+
+                if (message) {
+                    var statusClassName = '.status-' + state;
+                    var $messageContainer = $container.find(statusClassName + ' .messages p span:first-child');
+
+                    $messageContainer.text(message);
+                }
             }
 
             /**

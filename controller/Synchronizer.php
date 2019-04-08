@@ -21,11 +21,13 @@ namespace oat\taoSync\controller;
 
 use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\security\xsrf\TokenService;
+use oat\tao\model\service\ApplicationService;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
+use oat\taoSync\model\Exception\NotSupportedVmVersionException;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\OfflineMachineChecksService;
@@ -33,6 +35,7 @@ use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
+use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
@@ -72,22 +75,22 @@ class Synchronizer extends \tao_actions_CommonModule
     public function createTask()
     {
         try {
-            $lastTask = $this->getLastSyncTask();
-            if ($lastTask && !in_array($lastTask->getStatus(), ['completed', 'failed'])) {
-                throw new \common_exception_RestApi(__('The synchronisation is already running!'), 423);
-            }
-
             $data = $this->getRequestParameters();
-
             $label = $data['label'];
             unset($data['label']);
 
-            /** @var SynchronizeAllTaskBuilderService $syncAllRunnerService */
-            $syncAllRunnerService = $this->getServiceLocator()->get(SynchronizeAllTaskBuilderService::SERVICE_ID);
-            $task = $syncAllRunnerService->run($data, $label);
-            $this->setLastSyncTask($task);
+            $this->checkSyncPreconditions();
+            $task = $this->createSyncTask($data, $label);
 
             return $this->returnTaskJson($task);
+        } catch (NotSupportedVmVersionException $e) {
+            $this->createSyncTask($data, $label);
+
+            return $this->returnJson([
+                'success' => false,
+                'errorMsg' => $e->getMessage(),
+                'errorCode' => $e->getCode()
+            ]);
         } catch (\Exception $e) {
             return $this->returnJson([
                 'success' => false,
@@ -208,5 +211,40 @@ class Synchronizer extends \tao_actions_CommonModule
         $this->setData('extra', array_map(function (\common_report_Report $report) {
             return $report->getMessage();
         }, $report->getChildren()));
+    }
+
+    /**
+     * @throws \common_exception_RestApi
+     * @throws \core_kernel_persistence_Exception
+     * @throws NotSupportedVmVersionException
+     */
+    private function checkSyncPreconditions()
+    {
+        $lastTask = $this->getLastSyncTask();
+        if ($lastTask && !in_array($lastTask->getStatus(), ['completed', 'failed'])) {
+            throw new \common_exception_RestApi(__('The synchronisation is already running!'), 423);
+        }
+
+        $currentVmVersion = $this->getServiceLocator()->get(ApplicationService::SERVICE_ID)->getPlatformVersion();
+        $vmVersionChecker = $this->getServiceLocator()->get(VmVersionChecker::SERVICE_ID);
+
+        if (!$vmVersionChecker->isVmSupported($currentVmVersion)) {
+            throw new NotSupportedVmVersionException(__('Current version of Tao Local is not compatible with Tao Cloud.'), 409);
+        }
+    }
+
+    /**
+     * @param $data
+     * @param $label
+     * @return TaskInterface
+     * @throws \common_exception_Error
+     */
+    private function createSyncTask($data, $label)
+    {
+        /** @var SynchronizeAllTaskBuilderService $syncAllRunnerService */
+        $syncAllRunnerService = $this->getServiceLocator()->get(SynchronizeAllTaskBuilderService::SERVICE_ID);
+        $task = $syncAllRunnerService->run($data, $label);
+        $this->setLastSyncTask($task);
+        return $task;
     }
 }

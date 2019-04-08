@@ -78,7 +78,7 @@ $formFields = get_data('form-fields');
                         <span class="icon-error"></span>
                         <div class="messages">
                             <p>
-                                <span><?= __('The synchronization process has failed. Please contact the administrator.') ?></span>
+                                <span><?= __('The synchronization process has failed.') ?></span>
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
                         </div>

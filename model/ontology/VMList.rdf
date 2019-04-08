@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<rdf:RDF
+        xml:base="http://www.tao.lu/Ontologies/TaoVM.rdf#"
+        xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+        xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+        xmlns:widget="http://www.tao.lu/datatypes/WidgetDefinitions.rdf#"
+        xmlns:tao="http://www.tao.lu/Ontologies/TAO.rdf#"
+>
+
+    <rdf:Description rdf:about="http://www.tao.lu/Ontologies/TAO.rdf#TaoVM">
+        <rdfs:subClassOf rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#TAOObject"/>
+        <rdfs:label xml:lang="en-US"><![CDATA[Approved VM]]></rdfs:label>
+    </rdf:Description>
+
+    <rdf:Description rdf:about="http://www.tao.lu/Ontologies/TAO.rdf#TaoVMVersion">
+        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+        <rdfs:label xml:lang="en-US"><![CDATA[TAO VM version]]></rdfs:label>
+        <rdfs:domain rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#TaoVM"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <widget:widget rdf:resource="http://www.tao.lu/datatypes/WidgetDefinitions.rdf#TextBox"/>
+        <tao:TAOGUIOrder><![CDATA[50]]></tao:TAOGUIOrder>
+    </rdf:Description>
+
+    <rdf:Description rdf:about="http://www.tao.lu/Ontologies/TAO.rdf#TaoVMNotes">
+        <rdf:type rdf:resource="http://www.w3.org/1999/02/22-rdf-syntax-ns#Property"/>
+        <rdfs:label xml:lang="en-US"><![CDATA[Notes]]></rdfs:label>
+        <rdfs:domain rdf:resource="http://www.tao.lu/Ontologies/TAO.rdf#TaoVM"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2000/01/rdf-schema#Literal"/>
+        <widget:widget rdf:resource="http://www.tao.lu/datatypes/WidgetDefinitions.rdf#TextArea"/>
+        <tao:TAOGUIOrder><![CDATA[51]]></tao:TAOGUIOrder>
+    </rdf:Description>
+</rdf:RDF>
