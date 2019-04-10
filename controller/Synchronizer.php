@@ -61,7 +61,7 @@ class Synchronizer extends \tao_actions_CommonModule
         $dashboardUrl = _url('index', 'Main', 'tao', [
             'structure' => 'tools',
             'ext' => 'taoSync',
-            'section' => 'sync-history',
+            'section' => 'sync-history'
         ]);
 
         $this->setData('dashboard-url', $dashboardUrl);
@@ -120,6 +120,21 @@ class Synchronizer extends \tao_actions_CommonModule
         ]);
     }
 
+    public function getMachineChecks()
+    {
+        $this->setData('includeExtension', self::EXTENSION_ID);
+
+
+        return $this->returnJson([
+            'success' => true,
+            'data' => [
+                $this->getVersionInfo(),
+                $this->getDiskSpaceStatistics(),
+                $this->getConnectivityStatistics(),
+            ]
+        ]);
+    }
+
     /**
      * Get count of active sessions
      * @return mixed
@@ -151,6 +166,63 @@ class Synchronizer extends \tao_actions_CommonModule
             'success' => true,
             'data' => $data
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    private function getVersionInfo()
+    {
+        $currentVmVersion = $this->getServiceLocator()->get(ApplicationService::SERVICE_ID)->getPlatformVersion();
+        $vmVersionChecker = $this->getServiceLocator()->get(VmVersionChecker::SERVICE_ID);
+
+        return [
+            'title' => __('Virtual machine version'),
+            'score' => $vmVersionChecker->isVmSupported($currentVmVersion) ? 100 : 0,
+            'info'  => [
+                [
+                    'text' => __('Version')  .': ' . $currentVmVersion,
+                ],
+            ]
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getDiskSpaceStatistics()
+    {
+        /** @var \common_report_Report $report */
+        $reports = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
+        $freePercent = [];
+        $info = [];
+        foreach ($reports as $report) {
+            $diskSpaceValue = current($report->getData());
+            $total = $diskSpaceValue['used'] + $diskSpaceValue['free'];
+            $freePercent[] = $diskSpaceValue['free'] / ($total / 100);
+            $info[] = ['text' => $report->getMessage()];
+        }
+        $result = [
+            'title' => __('Disk & DB space:'),
+            'score' => floor(min($freePercent)),
+            'info'  => $info
+        ];
+        return $result;
+    }
+
+    /**
+     * @return array
+     */
+    private function getConnectivityStatistics()
+    {
+        return [
+            'title' => __('Connectivity'),
+            'score' => 32,
+            'info'  => [
+                ['text' => __('Download') .' : 80 MBit/s'],
+                ['text' => __('Upload') .' : 72 MBit/s'],
+            ]
+        ];
     }
 
     /**
@@ -205,12 +277,13 @@ class Synchronizer extends \tao_actions_CommonModule
     protected function injectExtraInfo()
     {
         $this->setData('includeExtension', self::EXTENSION_ID);
-        $this->setData('extra', []);
         /** @var \common_report_Report $report */
         $report = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
-        $this->setData('extra', array_map(function (\common_report_Report $report) {
-            return $report->getMessage();
-        }, $report->getChildren()));
+        $data = array_map(function (\common_report_Report $report) {
+            return $report->getData();
+        }, $report->getChildren());
+
+        $this->setData('offline-checks', array_merge(...$data));
     }
 
     /**

@@ -24,8 +24,10 @@ define([
     'lodash',
     'core/eventifier',
     'core/promise',
-    'ui/dashboard'
-], function (__, _, eventifier, Promise, dashboard) {
+    'ui/dashboard',
+    'core/dataProvider/request',
+    'util/url',
+], function (__, _, eventifier, Promise, dashboard, request, urlHelper) {
     'use strict';
 
     /**
@@ -43,34 +45,11 @@ define([
                 var self = this;
 
                 var checksPromise = new Promise(function (resolve) {
-                    return setTimeout(function () {
-                        resolve([
-                            {
-                                title: 'Virtual machine version:',
-                                score: 100,
-                                info: [
-                                    { text: 'Version: XXXXXX' },
-                                ]
-                            },
-                            {
-                                title: 'Disk & DB space:',
-                                score: 65,
-                                info: [
-                                    { text: 'Disk: X of X used' },
-                                    { text: 'DB: X of X used' },
-                                ],
-                            },
-                            {
-                                title: 'Connectivity:',
-                                score: 32,
-                                info: [
-                                    { text: 'Download: 80 MBit/s' },
-                                    { text: 'Upload: 72 MBit/s' },
-                                    { text: 'Synchronization would take 03m30s' },
-                                ]
-                            },
-                        ]);
-                    }, 2000);
+                    request(urlHelper.route('getMachineChecks', 'Synchronizer', 'taoSync')).then(
+                        function(data) {
+                            resolve(data);
+                        }
+                    );
                 });
 
                 checksPromise.then(function (data) {
@@ -81,7 +60,10 @@ define([
             render: function render() {
                 this.dashboard = dashboard({
                     renderTo: $container,
-                    loading: true
+                    loading: true,
+                    headerText: false,
+                    warningText: false,
+                    layoutType: 'list'
                 });
 
                 this.performChecks();

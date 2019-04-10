@@ -33,8 +33,6 @@ $formFields = get_data('form-fields');
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
 
-                            <?php Template::inc(get_data('includeTemplate'), get_data('includeExtension')); ?>
-
                         </div>
                     </div>
 
@@ -83,6 +81,7 @@ $formFields = get_data('form-fields');
                             </p>
                         </div>
                     </div>
+                    <div id="dashboard-container"></div>
                 </section>
 
                 <?php if($formFields): ?>
@@ -106,8 +105,6 @@ $formFields = get_data('form-fields');
                     <span class="icon-loop"></span>
                     <?= __('Synchronize Data') ?>
                 </button>
-
-                <div id="dashboard-container"></div>
 
                 <button class="btn-info" data-control="close">
                     <span class="icon-end-attempt"></span>

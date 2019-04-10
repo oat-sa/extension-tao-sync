@@ -146,7 +146,6 @@ define([
                     setState('success');
                     updateTime(taskData);
                     setHistoryTime(taskData.updatedAt, '$completed');
-                    renderReadinessDashboard();
                 }
                 else if (taskData.status === 'failed') {
                     setState('error');
@@ -200,7 +199,7 @@ define([
             }
 
             /**
-             * Set the state to progress|success|error
+             * Set the state to progress|success|error|form
              *
              * @param {String} state
              */
@@ -218,6 +217,11 @@ define([
                     var $messageContainer = $container.find(statusClassName + ' .messages p span:first-child');
 
                     $messageContainer.text(message);
+                }
+                if (state === 'success' || state === 'error') {
+                    renderReadinessDashboard();
+                } else {
+                    readinessDashboard && readinessDashboard.destroy();
                 }
             }
 
@@ -276,7 +280,6 @@ define([
                 e.preventDefault();
                 setState('progress');
                 $container.removeClass('active');
-                readinessDashboard && readinessDashboard.destroy();
                 request(webservices.activeSessions)
                     .then(function (data) {
                          if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
@@ -331,7 +334,6 @@ define([
                                 setState('form');
                                 updateTime(currentTask);
                                 setHistoryTime(currentTask.updatedAt, '$completed');
-                                renderReadinessDashboard();
                                 break;
                             default:
                                 setState('progress');
@@ -341,7 +343,6 @@ define([
                     }
                     else {
                         setState('form');
-                        renderReadinessDashboard();
                     }
                     loadingBar.stop();
                 })
