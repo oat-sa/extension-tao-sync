@@ -148,9 +148,9 @@ class ClientSyncLogListener extends ConfigurableService
      */
     public function getConnectionStatsReport()
     {
-        $report = \common_report_Report::createInfo('Connection statistics');
-        $report->add(\common_report_Report::createInfo('Download speed: ' . $this->getDownloadSpeed()));
-        $report->add(\common_report_Report::createInfo('Upload speed: ' . $this->getUploadSpeed()));
+        $report = \common_report_Report::createInfo(__('Connection statistics'));
+        $report->add(\common_report_Report::createInfo(__('Download speed: %s', $this->getDownloadSpeed())));
+        $report->add(\common_report_Report::createInfo(__('Upload speed: %s', $this->getUploadSpeed())));
 
         return $report;
     }
