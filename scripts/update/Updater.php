@@ -20,6 +20,7 @@
 
 namespace oat\taoSync\scripts\update;
 
+use Doctrine\DBAL\Types\Type;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
@@ -674,6 +675,30 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('5.5.1', '5.5.4');
+
+        if ($this->isVersion('5.5.4')) {
+            if ($this->getServiceManager()->has(DataSyncHistoryService::SERVICE_ID)) {
+                /** @var DataSyncHistoryService $service */
+                $service = $this->getServiceManager()->get(DataSyncHistoryService::SERVICE_ID);
+                $persistence = $service->getPersistence();
+                $schemaManager = $persistence->getSchemaManager();
+                $fromSchema = $schemaManager->createSchema();
+                $toSchema = clone $fromSchema;
+                $table = $toSchema->getTable(DataSyncHistoryService::SYNC_TABLE);
+                if ($table->hasColumn(DataSyncHistoryByOrgIdService::SYNC_ORG_ID)) {
+                    $table->changeColumn(
+                        DataSyncHistoryByOrgIdService::SYNC_ORG_ID,
+                        ['type' => Type::getType('string'), 'length' => 255, 'notnull' => true, 'default' => '']
+                    );
+                    $queries = $persistence->getPlatForm()->getMigrateSchemaSql($fromSchema, $toSchema);
+                    foreach ($queries as $query) {
+                        $persistence->exec($query);
+                    }
+                }
+            }
+
+            $this->setVersion('5.5.5');
+        }
     }
 
     /**
