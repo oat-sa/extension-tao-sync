@@ -56,8 +56,6 @@ class Synchronizer extends \tao_actions_CommonModule
         $this->setData('form-action', _url('createTask'));
         $this->setData('includeTemplate', 'sync/extra.tpl');
 
-        $this->injectExtraInfo();
-
         $dashboardUrl = _url('index', 'Main', 'tao', [
             'structure' => 'tools',
             'ext' => 'taoSync',
@@ -272,18 +270,6 @@ class Synchronizer extends \tao_actions_CommonModule
             ]
         ]);
         return $deliveryExecutionsData;
-    }
-
-    protected function injectExtraInfo()
-    {
-        $this->setData('includeExtension', self::EXTENSION_ID);
-        /** @var \common_report_Report $report */
-        $report = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
-        $data = array_map(function (\common_report_Report $report) {
-            return $report->getData();
-        }, $report->getChildren());
-
-        $this->setData('offline-checks', array_merge(...$data));
     }
 
     /**
