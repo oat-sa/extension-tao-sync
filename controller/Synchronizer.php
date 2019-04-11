@@ -122,14 +122,15 @@ class Synchronizer extends \tao_actions_CommonModule
     {
         $this->setData('includeExtension', self::EXTENSION_ID);
 
+        $data = [
+            $this->getVersionInfo(),
+            $this->getDiskSpaceStatistics(),
+            $this->getConnectivityStatistics(),
+        ];
 
         return $this->returnJson([
             'success' => true,
-            'data' => [
-                $this->getVersionInfo(),
-                $this->getDiskSpaceStatistics(),
-                $this->getConnectivityStatistics(),
-            ]
+            'data' => array_values(array_filter($data)),
         ]);
     }
 
@@ -186,25 +187,32 @@ class Synchronizer extends \tao_actions_CommonModule
     }
 
     /**
-     * @return array
+     * @return array|null
      */
     private function getDiskSpaceStatistics()
     {
-        /** @var \common_report_Report $report */
+        /** @var \common_report_Report $reports */
         $reports = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
         $freePercent = [];
         $info = [];
+
         foreach ($reports as $report) {
             $diskSpaceValue = current($report->getData());
             $total = $diskSpaceValue['used'] + $diskSpaceValue['free'];
             $freePercent[] = $diskSpaceValue['free'] / ($total / 100);
             $info[] = ['text' => $report->getMessage()];
         }
+
+        if (empty($reports->getChildren())) {
+            return null;
+        }
+
         $result = [
             'title' => __('Disk & DB space:'),
             'score' => floor(min($freePercent)),
             'info'  => $info
         ];
+
         return $result;
     }
 
