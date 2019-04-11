@@ -23,6 +23,7 @@ namespace oat\taoSync\model\client;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use function GuzzleHttp\Psr7\stream_for;
+use GuzzleHttp\RequestOptions;
 use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\SyncRequestFailedException;
@@ -45,6 +46,8 @@ class SynchronisationClient extends ConfigurableService
     use OntologyAwareTrait;
 
     const SERVICE_ID = 'taoSync/client';
+
+    const OPTION_STATS_HANDLER = 'stats_handler';
 
     /**
      * Get list of remote entities associated to the given type
@@ -336,11 +339,26 @@ class SynchronisationClient extends ConfigurableService
         $request = $request->withHeader('Accept', 'application/json');
         $request = $request->withHeader('Content-type', 'application/json');
 
+        $clientOptions = $this->getRequestClientOptions();
         try {
-            return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->callEnvironment(SynchronizeData::class, $request);
+            return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->callEnvironment(SynchronizeData::class, $request, $clientOptions);
         } catch (\Exception $e) {
             throw new \common_Exception($e->getMessage(), 0, $e);
         }
     }
 
+    /**
+     * @return array
+     * @throws \oat\oatbox\service\exception\InvalidService
+     * @throws \oat\oatbox\service\exception\InvalidServiceManagerException
+     */
+    private function getRequestClientOptions()
+    {
+        $options = [];
+        if ($this->hasOption(self::OPTION_STATS_HANDLER) && is_callable($this->getOption(self::OPTION_STATS_HANDLER))) {
+            $options[RequestOptions::ON_STATS] = $this->getSubService(self::OPTION_STATS_HANDLER);
+        }
+
+        return $options;
+    }
 }
