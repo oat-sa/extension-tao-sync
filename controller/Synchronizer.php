@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\controller;
 
+use common_report_Report;
 use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\security\xsrf\TokenService;
 use oat\tao\model\service\ApplicationService;
@@ -30,6 +31,7 @@ use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\Exception\NotSupportedVmVersionException;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\history\DataSyncHistoryService;
+use oat\taoSync\model\listener\ClientSyncLogListener;
 use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
@@ -221,13 +223,19 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     private function getConnectivityStatistics()
     {
+        /** @var common_report_Report $reports */
+        $reports = $this->getServiceLocator()->get(ClientSyncLogListener::SERVICE_ID)->getConnectionStatsReport();
+
+        $info = [];
+        foreach ($reports as $report) {
+            // $data = current($report->getData());
+            $info[] = ['text' => $report->getMessage()];
+        }
+
         return [
             'title' => __('Connectivity'),
             'score' => 32,
-            'info'  => [
-                ['text' => __('Download') .' : 80 MBit/s'],
-                ['text' => __('Upload') .' : 72 MBit/s'],
-            ]
+            'info'  => $info,
         ];
     }
 

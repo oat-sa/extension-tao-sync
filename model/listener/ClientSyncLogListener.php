@@ -157,12 +157,12 @@ class ClientSyncLogListener extends ConfigurableService
 
     private function getDownloadSpeed()
     {
-        return array_sum($this->downloadSpeed) / count($this->downloadSpeed);
+        return count($this->downloadSpeed) ? array_sum($this->downloadSpeed) / count($this->downloadSpeed) : 0;
     }
 
     private function getUploadSpeed()
     {
-        return array_sum($this->uploadSpeed) / count($this->uploadSpeed);
+        return count($this->uploadSpeed) ? array_sum($this->uploadSpeed) / count($this->uploadSpeed) : 0;
     }
 
     /**
