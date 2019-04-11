@@ -677,14 +677,14 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('5.5.1', '5.5.4');
 
         if ($this->isVersion('5.5.4')) {
-            if ($this->getServiceManager()->has(DataSyncHistoryService::SERVICE_ID)) {
-                /** @var DataSyncHistoryService $service */
-                $service = $this->getServiceManager()->get(DataSyncHistoryService::SERVICE_ID);
+            if ($this->getServiceManager()->has(DataSyncHistoryByOrgIdService::SERVICE_ID)) {
+                /** @var DataSyncHistoryByOrgIdService $service */
+                $service = $this->getServiceManager()->get(DataSyncHistoryByOrgIdService::SERVICE_ID);
                 $persistence = $service->getPersistence();
                 $schemaManager = $persistence->getSchemaManager();
                 $fromSchema = $schemaManager->createSchema();
                 $toSchema = clone $fromSchema;
-                $table = $toSchema->getTable(DataSyncHistoryService::SYNC_TABLE);
+                $table = $toSchema->getTable(DataSyncHistoryByOrgIdService::SYNC_TABLE);
                 if ($table->hasColumn(DataSyncHistoryByOrgIdService::SYNC_ORG_ID)) {
                     $table->changeColumn(
                         DataSyncHistoryByOrgIdService::SYNC_ORG_ID,
