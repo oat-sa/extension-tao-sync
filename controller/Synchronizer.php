@@ -229,7 +229,7 @@ class Synchronizer extends \tao_actions_CommonModule
         $vmVersionChecker = $this->getServiceLocator()->get(VmVersionChecker::SERVICE_ID);
 
         if (!$vmVersionChecker->isVmSupported($currentVmVersion)) {
-            throw new NotSupportedVmVersionException('The data synchronization cannot be completed because the Virtual Machine is not on the approved list. Please contact the administrator.', 409);
+            throw new NotSupportedVmVersionException(__('Current version of Tao Local is not compatible with Tao Cloud.'), 409);
         }
     }
 
