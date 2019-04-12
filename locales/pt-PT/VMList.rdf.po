@@ -4,19 +4,24 @@ msgstr ""
 "PO-Revision-Date: 2019-04-12T11:22:30\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
-"Language: en-US\n"
+"Language: pt-PT\n"
 "sourceLanguage: en-US\n"
-"targetLanguage: en-US\n"
+"targetLanguage: pt-PT\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-# http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager
+# http://www.tao.lu/Ontologies/TAO.rdf#TaoVM
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
-msgid "Sync Manager"
+msgid "Approved VM"
 msgstr ""
 
-# http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager
-msgctxt "http://www.w3.org/2000/01/rdf-schema#comment"
-msgid "The Sync Manager Role"
+# http://www.tao.lu/Ontologies/TAO.rdf#TaoVMVersion
+msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
+msgid "TAO VM version"
+msgstr ""
+
+# http://www.tao.lu/Ontologies/TAO.rdf#TaoVMNotes
+msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
+msgid "Notes"
 msgstr ""
 
