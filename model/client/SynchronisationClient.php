@@ -48,6 +48,8 @@ class SynchronisationClient extends ConfigurableService
     const SERVICE_ID = 'taoSync/client';
 
     const OPTION_STATS_HANDLER = 'stats_handler';
+    const OPTION_EXPECTED_UPLOAD_SPEED = 'expected_upload_speed';
+    const OPTION_EXPECTED_DOWNLOAD_SPEED = 'expected_download_speed';
 
     /**
      * Get list of remote entities associated to the given type
@@ -291,6 +293,16 @@ class SynchronisationClient extends ConfigurableService
         }
 
         return $response['data'];
+    }
+
+    public function getExpectedUploadSpeed()
+    {
+        return $this->getOption(self::OPTION_EXPECTED_UPLOAD_SPEED);
+    }
+
+    public function getExpectedDownloadSpeed()
+    {
+        return $this->getOption(self::OPTION_EXPECTED_DOWNLOAD_SPEED);
     }
 
     /**

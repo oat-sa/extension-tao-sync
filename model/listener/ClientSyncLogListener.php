@@ -134,10 +134,10 @@ class ClientSyncLogListener extends ConfigurableService
     {
         $handlerStats = $event->getTransferStats()->getHandlerStats();
 
-        if (!empty($handlerStats['speed_download'])) {
+        if (!empty($handlerStats['speed_download']) && $handlerStats['speed_download'] > 0) {
             $this->downloadSpeed[] = $handlerStats['speed_download'];
         }
-        if (!empty($handlerStats['speed_upload'])) {
+        if (!empty($handlerStats['speed_upload']) && $handlerStats['speed_upload'] > 0) {
             $this->uploadSpeed[] = $handlerStats['speed_upload'];
         }
     }
@@ -149,20 +149,34 @@ class ClientSyncLogListener extends ConfigurableService
     public function getConnectionStatsReport()
     {
         $report = \common_report_Report::createInfo(__('Connection statistics'));
-        $report->add(\common_report_Report::createInfo(__('Download speed: %s', $this->getDownloadSpeed())));
-        $report->add(\common_report_Report::createInfo(__('Upload speed: %s', $this->getUploadSpeed())));
+        $report->add(
+            \common_report_Report::createInfo(
+                'Download speed',
+                $this->getDownloadSpeed()
+            )
+        );
+        $report->add(
+            \common_report_Report::createInfo(
+                'Upload speed',
+                $this->getUploadSpeed()
+            )
+        );
 
         return $report;
     }
 
     private function getDownloadSpeed()
     {
-        return count($this->downloadSpeed) ? array_sum($this->downloadSpeed) / count($this->downloadSpeed) : 0;
+        $bytes = count($this->downloadSpeed) ? array_sum($this->downloadSpeed) / count($this->downloadSpeed) : 0;
+        $result = $this->formatMbit($bytes);
+        return $result;
     }
 
     private function getUploadSpeed()
     {
-        return count($this->uploadSpeed) ? array_sum($this->uploadSpeed) / count($this->uploadSpeed) : 0;
+        $bytes = count($this->uploadSpeed) ? array_sum($this->uploadSpeed) / count($this->uploadSpeed) : 0;
+        $result = $this->formatMbit($bytes);
+        return $result;
     }
 
     /**
@@ -192,5 +206,14 @@ class ClientSyncLogListener extends ConfigurableService
         }
 
         return $clientState;
+    }
+
+    /**
+     * @param $bytes
+     * @return string
+     */
+    private function formatMbit($bytes) {
+
+        return round($bytes * 8 / 1024 / 1024, 4);
     }
 }

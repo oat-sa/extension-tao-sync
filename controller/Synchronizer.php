@@ -31,13 +31,16 @@ use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\Exception\NotSupportedVmVersionException;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\history\DataSyncHistoryService;
-use oat\taoSync\model\listener\ClientSyncLogListener;
 use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
+use oat\taoSync\model\client\SynchronisationClient;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
@@ -220,21 +223,48 @@ class Synchronizer extends \tao_actions_CommonModule
 
     /**
      * @return array
+     * @throws \common_exception_Error
      */
     private function getConnectivityStatistics()
     {
-        /** @var common_report_Report $reports */
-        $reports = $this->getServiceLocator()->get(ClientSyncLogListener::SERVICE_ID)->getConnectionStatsReport();
-
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $filter = new SyncLogFilter();
+        $filter->setLimit(1);
+        $filter->setSortBy(SyncLogStorageInterface::COLUMN_ID);
+        $filter->setSortOrder('desc');
+        $report = $syncLogService->search($filter);
         $info = [];
-        foreach ($reports as $report) {
-            // $data = current($report->getData());
-            $info[] = ['text' => $report->getMessage()];
+        $data = [];
+
+        if (isset($report[0]['report'])) {
+            /** @var common_report_Report[] $reports */
+            $reports = common_report_Report::jsonUnserialize($report[0]['report']);
+            foreach ($reports as $report) {
+                if ($report->getMessage() === 'Connection statistics') {
+                    foreach ($report->getChildren() as $statsReport) {
+                        $data[$statsReport->getMessage()] = $statsReport->getData();
+                        $info[] = ['text' => $statsReport->getMessage().': '.$statsReport->getData().' Mbit/s'];
+                    }
+                }
+            }
+        }
+
+        /** @var SynchronisationClient $synchronisationClient */
+        $synchronisationClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+
+        foreach ($data as $type => $speed) {
+            if ($type === 'Download speed') {
+                $score[] = $speed/$synchronisationClient->getExpectedDownloadSpeed()*100;
+            }
+            if ($type === 'Upload speed') {
+                $score[] = $speed/$synchronisationClient->getExpectedUploadSpeed()*100;
+            }
         }
 
         return [
             'title' => __('Connectivity'),
-            'score' => 32,
+            'score' => min(min($score), 100),
             'info'  => $info,
         ];
     }
