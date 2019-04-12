@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\controller;
 
+use common_report_Report;
 use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\security\xsrf\TokenService;
 use oat\tao\model\service\ApplicationService;
@@ -36,6 +37,10 @@ use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
+use oat\taoSync\model\client\SynchronisationClient;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
@@ -218,16 +223,49 @@ class Synchronizer extends \tao_actions_CommonModule
 
     /**
      * @return array
+     * @throws \common_exception_Error
      */
     private function getConnectivityStatistics()
     {
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $filter = new SyncLogFilter();
+        $filter->setLimit(1);
+        $filter->setSortBy(SyncLogStorageInterface::COLUMN_ID);
+        $filter->setSortOrder('desc');
+        $report = $syncLogService->search($filter);
+        $info = [];
+        $data = [];
+
+        if (isset($report[0]['report'])) {
+            /** @var common_report_Report[] $reports */
+            $reports = common_report_Report::jsonUnserialize($report[0]['report']);
+            foreach ($reports as $report) {
+                if ($report->getMessage() === 'Connection statistics') {
+                    foreach ($report->getChildren() as $statsReport) {
+                        $data[$statsReport->getMessage()] = $statsReport->getData();
+                        $info[] = ['text' => $statsReport->getMessage().': '.$statsReport->getData().' Mbit/s'];
+                    }
+                }
+            }
+        }
+
+        /** @var SynchronisationClient $synchronisationClient */
+        $synchronisationClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+
+        foreach ($data as $type => $speed) {
+            if ($type === 'Download speed') {
+                $score[] = $speed/$synchronisationClient->getExpectedDownloadSpeed()*100;
+            }
+            if ($type === 'Upload speed') {
+                $score[] = $speed/$synchronisationClient->getExpectedUploadSpeed()*100;
+            }
+        }
+
         return [
             'title' => __('Connectivity'),
-            'score' => 32,
-            'info'  => [
-                ['text' => __('Download') .' : 80 MBit/s'],
-                ['text' => __('Upload') .' : 72 MBit/s'],
-            ]
+            'score' => min(min($score), 100),
+            'info'  => $info,
         ];
     }
 
