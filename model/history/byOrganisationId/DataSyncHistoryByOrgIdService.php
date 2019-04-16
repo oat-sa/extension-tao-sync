@@ -20,7 +20,6 @@
 
 namespace oat\taoSync\model\history\byOrganisationId;
 
-use Doctrine\DBAL\Query\QueryBuilder;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
@@ -131,9 +130,9 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
             $orgId = $this->getResource(self::SYNCHRO_URI)
                 ->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
             if (is_null($orgId)) {
-                $this->organisationId = 0;
+                $this->organisationId = '';
             } else {
-                $this->organisationId = (int) $orgId->literal;
+                $this->organisationId = $orgId->literal;
             }
         }
         return $this->organisationId;

@@ -54,7 +54,12 @@ class SetupMultiSynchronisation extends InstallAction
 
         try {
             $syncTable = $schema->getTable(DataSyncHistoryByOrgIdService::SYNC_TABLE);
-            $syncTable->addColumn(DataSyncHistoryByOrgIdService::SYNC_ORG_ID, 'integer', ['length' => 11]);
+            $syncTable->addColumn(
+                DataSyncHistoryByOrgIdService::SYNC_ORG_ID,
+                'string',
+                ['length' => 255, 'notnull' => true, 'default' => '']
+            );
+
             $queries = $persistence->getPlatform()->getMigrateSchemaSql($fromSchema, $schema);
             foreach ($queries as $query) {
                 $persistence->exec($query);
