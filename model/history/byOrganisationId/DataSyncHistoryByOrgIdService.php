@@ -20,7 +20,6 @@
 
 namespace oat\taoSync\model\history\byOrganisationId;
 
-use Doctrine\DBAL\Query\QueryBuilder;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\OrganisationIdTrait;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;

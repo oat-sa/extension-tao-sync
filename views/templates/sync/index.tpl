@@ -33,8 +33,6 @@ $formFields = get_data('form-fields');
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
 
-                            <?php Template::inc(get_data('includeTemplate'), get_data('includeExtension')); ?>
-
                         </div>
                     </div>
 
@@ -68,7 +66,7 @@ $formFields = get_data('form-fields');
                         <span class="icon-result-ok"></span>
                         <div class="messages">
                             <p>
-                                <span><?= __('The synchronization process has been finished.') ?></span>
+                                <span><?= __('Success! The synchronization process has been finished.') ?></span>
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
                         </div>
@@ -83,6 +81,7 @@ $formFields = get_data('form-fields');
                             </p>
                         </div>
                     </div>
+                    <div id="dashboard-container"></div>
                 </section>
 
                 <?php if($formFields): ?>

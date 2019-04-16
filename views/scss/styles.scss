@@ -36,7 +36,7 @@
     [class^="feedback-"], [class*=" feedback-"] {
         display:none;
         padding-left: 60px;
-        max-width: 600px;
+        max-width: 710px;
         margin: 10px auto;
         [class^="icon-"], [class*=" icon-"]  {
             @include font-size(25);
@@ -200,6 +200,10 @@
             padding-top: 10px;
             padding-bottom: 11px;
         }
+    }
+
+    #dashboard-container {
+        margin: 40px 60px 0;
     }
 }
 
