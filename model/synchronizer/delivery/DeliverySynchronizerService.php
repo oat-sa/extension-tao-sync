@@ -157,8 +157,9 @@ class DeliverySynchronizerService extends ConfigurableService
                 ),
                 $exportDir
             );
-            $this->logInfo('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
-            $source = fopen($report->getData(), 'r');
+            $path = $report->getData()['path'];
+            $this->logInfo('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $path);
+            $source = fopen($path, 'r');
 
             /** @var File $file */
             $file = $this->getServiceLocator()
