@@ -24,8 +24,9 @@ define([
     'util/url',
     'core/taskQueue/taskQueueModel',
     'layout/loading-bar',
-    'taoSync/component/terminateExecutions/terminateExecutions'
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory) {
+    'taoSync/component/terminateExecutions/terminateExecutions',
+    'taoSync/component/readinessDashboard/readinessDashboard'
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory) {
     'use strict';
 
     /**
@@ -102,6 +103,11 @@ define([
                 $updated: $syncForm.find('.update-time'),
                 $completed: $syncForm.find('.complete-time')
             };
+
+            /**
+             * readiness dashboard component instance
+             */
+            var readinessDashboard;
 
             /**
              * Dynamic messages in the feedback boxes. These are based on the `data-type` elements
@@ -193,7 +199,7 @@ define([
             }
 
             /**
-             * Set the state to progress|success|error
+             * Set the state to progress|success|error|form
              *
              * @param {String} state
              */
@@ -211,6 +217,11 @@ define([
                     var $messageContainer = $container.find(statusClassName + ' .messages p span:first-child');
 
                     $messageContainer.text(message);
+                }
+                if (state === 'success' || state === 'error') {
+                    renderReadinessDashboard();
+                } else {
+                    readinessDashboard && readinessDashboard.destroy();
                 }
             }
 
@@ -243,6 +254,13 @@ define([
             function setHistoryTime(timestamp, type) {
                 setTime(timestamp, type);
                 $container.addClass('history');
+            }
+
+
+            function renderReadinessDashboard() {
+                var $dashboardContainer = $container.find('#dashboard-container');
+
+                readinessDashboard = readinessDashboardFactory($dashboardContainer).render();
             }
 
             // avoids unwanted flicker caused by the late loading of the CSS

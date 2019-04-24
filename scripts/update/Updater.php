@@ -87,6 +87,10 @@ use oat\taoSync\scripts\tool\synchronisation\SynchronizeTestSession;
 use oat\taoSync\scripts\tool\RenameColumnOrgId;
 use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 use oat\taoTestCenter\model\ProctorManagementService;
+use oat\taoSync\model\event\RequestStatsEvent;
+use oat\taoSync\model\listener\ClientSyncLogListener;
+use oat\taoSync\model\client\SynchronisationClient;
+use oat\taoSync\model\client\ConnectionStatsHandler;
 
 /**
  * Class Updater
@@ -699,6 +703,23 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('5.5.5');
         }
+
+        if ($this->isVersion('5.5.5')) {
+            /** @var EventManager $eventManager */
+            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
+            $eventManager->attach(RequestStatsEvent::class, [ClientSyncLogListener::SERVICE_ID, 'syncRequestStats']);
+            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
+
+            $syncClient = $this->getServiceManager()->get(SynchronisationClient::SERVICE_ID);
+            $syncClient->setOption(SynchronisationClient::OPTION_STATS_HANDLER, new ConnectionStatsHandler());
+            $syncClient->setOption(SynchronisationClient::OPTION_EXPECTED_UPLOAD_SPEED, 1);
+            $syncClient->setOption(SynchronisationClient::OPTION_EXPECTED_DOWNLOAD_SPEED, 1);
+            $this->getServiceManager()->register(SynchronisationClient::SERVICE_ID, $syncClient);
+
+            $this->setVersion('5.6.0');
+        }
+
+        $this->skip('5.6.0', '5.6.2');
     }
 
     /**

@@ -59,6 +59,13 @@ class SupportedVmService extends ConfigurableService
         $property = $this->getProperty(self::PROPERTY_VM_VERSION);
         $supportedVersions = $class->getInstancesPropertyValues($property);
 
-        return array_column($supportedVersions, 'literal');
+        $result = [];
+        foreach ($supportedVersions as $version) {
+            if ($version instanceof \core_kernel_classes_Literal) {
+                $result[] = $version->literal;
+            }
+        }
+
+        return $result;
     }
 }

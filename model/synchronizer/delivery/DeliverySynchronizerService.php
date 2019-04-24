@@ -157,8 +157,13 @@ class DeliverySynchronizerService extends ConfigurableService
                 ),
                 $exportDir
             );
-            $this->logInfo('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $report->getData());
-            $source = fopen($report->getData(), 'r');
+            $reportData = $report->getData();
+            if (!isset($reportData['path'])) {
+                throw new \common_Exception('Exported test path is not set in the export report for delivery ' . $delivery->getUri());
+            }
+            $path = $reportData['path'];
+            $this->logInfo('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $path);
+            $source = fopen($path, 'r');
 
             /** @var File $file */
             $file = $this->getServiceLocator()

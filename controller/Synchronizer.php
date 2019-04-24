@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\controller;
 
+use common_report_Report;
 use oat\generis\model\OntologyAwareTrait;
 use oat\tao\model\security\xsrf\TokenService;
 use oat\tao\model\service\ApplicationService;
@@ -36,6 +37,10 @@ use oat\taoSync\model\SynchronizeAllTaskBuilderService;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
+use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\taoSync\model\SyncLog\SyncLogFilter;
+use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
+use oat\taoSync\model\client\SynchronisationClient;
 
 class Synchronizer extends \tao_actions_CommonModule
 {
@@ -56,12 +61,10 @@ class Synchronizer extends \tao_actions_CommonModule
         $this->setData('form-action', _url('createTask'));
         $this->setData('includeTemplate', 'sync/extra.tpl');
 
-        $this->injectExtraInfo();
-
         $dashboardUrl = _url('index', 'Main', 'tao', [
             'structure' => 'tools',
             'ext' => 'taoSync',
-            'section' => 'sync-history',
+            'section' => 'sync-history'
         ]);
 
         $this->setData('dashboard-url', $dashboardUrl);
@@ -120,6 +123,22 @@ class Synchronizer extends \tao_actions_CommonModule
         ]);
     }
 
+    public function getMachineChecks()
+    {
+        $this->setData('includeExtension', self::EXTENSION_ID);
+
+        $data = [
+            $this->getVersionInfo(),
+            $this->getDiskSpaceStatistics(),
+            $this->getConnectivityStatistics(),
+        ];
+
+        return $this->returnJson([
+            'success' => true,
+            'data' => array_values(array_filter($data)),
+        ]);
+    }
+
     /**
      * Get count of active sessions
      * @return mixed
@@ -151,6 +170,103 @@ class Synchronizer extends \tao_actions_CommonModule
             'success' => true,
             'data' => $data
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    private function getVersionInfo()
+    {
+        $currentVmVersion = $this->getServiceLocator()->get(ApplicationService::SERVICE_ID)->getPlatformVersion();
+        $vmVersionChecker = $this->getServiceLocator()->get(VmVersionChecker::SERVICE_ID);
+
+        return [
+            'title' => __('Virtual machine version'),
+            'score' => $vmVersionChecker->isVmSupported($currentVmVersion) ? 100 : 0,
+            'info'  => [
+                [
+                    'text' => __('Version')  .': ' . $currentVmVersion,
+                ],
+            ]
+        ];
+    }
+
+    /**
+     * @return array|null
+     */
+    private function getDiskSpaceStatistics()
+    {
+        /** @var \common_report_Report $reports */
+        $reports = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
+        $freePercent = [];
+        $info = [];
+
+        foreach ($reports as $report) {
+            $diskSpaceValue = current($report->getData());
+            $total = $diskSpaceValue['used'] + $diskSpaceValue['free'];
+            $freePercent[] = $diskSpaceValue['free'] / ($total / 100);
+            $info[] = ['text' => $report->getMessage()];
+        }
+
+        if (empty($reports->getChildren())) {
+            return null;
+        }
+
+        $result = [
+            'title' => __('Disk & DB space:'),
+            'score' => floor(min($freePercent)),
+            'info'  => $info
+        ];
+
+        return $result;
+    }
+
+    /**
+     * @return array
+     * @throws \common_exception_Error
+     */
+    private function getConnectivityStatistics()
+    {
+        /** @var SyncLogServiceInterface $syncLogService */
+        $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
+        $filter = new SyncLogFilter();
+        $filter->setLimit(1);
+        $filter->setSortBy(SyncLogStorageInterface::COLUMN_ID);
+        $filter->setSortOrder('desc');
+        $report = $syncLogService->search($filter);
+        $info = [];
+        $data = [];
+
+        if (isset($report[0]['report'])) {
+            /** @var common_report_Report[] $reports */
+            $reports = common_report_Report::jsonUnserialize($report[0]['report']);
+            foreach ($reports as $report) {
+                if ($report->getMessage() === 'Connection statistics') {
+                    foreach ($report->getChildren() as $statsReport) {
+                        $data[$statsReport->getMessage()] = $statsReport->getData();
+                        $info[] = ['text' => $statsReport->getMessage().': '.$statsReport->getData().' Mbit/s'];
+                    }
+                }
+            }
+        }
+
+        /** @var SynchronisationClient $synchronisationClient */
+        $synchronisationClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
+
+        foreach ($data as $type => $speed) {
+            if ($type === 'Download speed') {
+                $score[] = $speed/$synchronisationClient->getExpectedDownloadSpeed()*100;
+            }
+            if ($type === 'Upload speed') {
+                $score[] = $speed/$synchronisationClient->getExpectedUploadSpeed()*100;
+            }
+        }
+
+        return [
+            'title' => __('Connectivity'),
+            'score' => min(min($score), 100),
+            'info'  => $info,
+        ];
     }
 
     /**
@@ -200,17 +316,6 @@ class Synchronizer extends \tao_actions_CommonModule
             ]
         ]);
         return $deliveryExecutionsData;
-    }
-
-    protected function injectExtraInfo()
-    {
-        $this->setData('includeExtension', self::EXTENSION_ID);
-        $this->setData('extra', []);
-        /** @var \common_report_Report $report */
-        $report = $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID)->getReport();
-        $this->setData('extra', array_map(function (\common_report_Report $report) {
-            return $report->getMessage();
-        }, $report->getChildren()));
     }
 
     /**
