@@ -45,6 +45,7 @@ return array(
         'taoDeliveryRdf'  => '>=6.0.0',
         'taoProctoring'   => '>=12.7.0',
         'taoPublishing'   => '>=2.0.0',
+        'taoClientDiagnostic' => '>=5.0.1',
     ),
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
