@@ -19,16 +19,23 @@
 
 namespace oat\taoSync\scripts\tool\ConnectionStats;
 
+use common_report_Report as Report;
 use oat\oatbox\extension\AbstractAction;
 
 class ConnectionSpeedChecker extends AbstractAction
 {
     public function __invoke($params)
     {
-        $this->getServiceLocator()
-            ->get(\oat\taoSync\model\Connection\ConnectionSpeedChecker::SERVICE_ID)
-            ->run();
+        try {
+            $this->getServiceLocator()
+                ->get(\oat\taoSync\model\Connection\ConnectionSpeedChecker::SERVICE_ID)
+                ->run();
 
-        return \common_report_Report::createInfo('Connection check completed.');
+            return Report::createInfo('Connection check completed.');
+        } catch (\Exception $e) {
+            $this->logAlert($e->getMessage());
+
+            return Report::createInfo('Connection speed check failed.');
+        }
     }
 }
