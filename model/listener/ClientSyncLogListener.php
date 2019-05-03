@@ -214,6 +214,6 @@ class ClientSyncLogListener extends ConfigurableService
      */
     private function formatMbit($bytes) {
 
-        return round($bytes * 8 / 1024 / 1024, 4);
+        return round($bytes * 8 / 1024 / 1024, 2);
     }
 }
