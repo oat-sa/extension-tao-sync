@@ -160,7 +160,7 @@ class Synchronizer extends \tao_actions_CommonModule
             $tokenService = $serviceLocator->get(TokenService::SERVICE_ID);
             $data['token'] = [
                 'name' => $tokenService->getTokenName(),
-                'token' => $tokenService->createToken(),
+                'token' => $tokenService->createToken()->getValue(),
             ];
         }
 
