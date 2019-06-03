@@ -23,6 +23,7 @@ use oat\oatbox\session\SessionService;
 use oat\tao\model\datatable\implementation\DatatableRequest;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
 use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryServiceInterface;
+use oat\taoSync\model\VirtualMachine\VmIdentifierService;
 use tao_actions_CommonModule;
 
 /**
@@ -39,6 +40,10 @@ class SynchronizationHistory extends tao_actions_CommonModule
         $this->setData('config', [
             'dataModel' => $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID)->getDataModel()
         ]);
+
+        if ($this->getServiceLocator()->has(VmIdentifierService::SERVICE_ID)) {
+            $this->setData('boxId', $this->getServiceLocator()->get(VmIdentifierService::SERVICE_ID)->getBoxId());
+        }
 
         $this->setView('sync/history.tpl', 'taoSync');
     }
