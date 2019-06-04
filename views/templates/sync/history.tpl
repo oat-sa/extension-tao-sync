@@ -8,6 +8,9 @@ use oat\tao\helpers\Template;
         <header>
             <h2><?= __('Synchronization History') ?></h2>
         </header>
+        <?php if(!empty($boxId)): ?>
+            <p><?= __('Box ID') ?>: <?= $boxId ?></p>
+        <?php endif; ?>
     </div>
     <div class="grid-row">
         <div class="col-12">

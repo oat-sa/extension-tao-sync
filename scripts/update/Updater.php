@@ -78,6 +78,7 @@ use oat\taoSync\model\testCenter\TestCenterService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\model\Validator\SyncParamsValidator;
+use oat\taoSync\model\VirtualMachine\VmIdentifierService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -720,6 +721,13 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('5.6.0', '6.1.0');
+
+        if ($this->isVersion('6.1.0')) {
+            $vmIdentifierService = new VmIdentifierService([]);
+            $this->getServiceManager()->register(VmIdentifierService::SERVICE_ID, $vmIdentifierService);
+
+            $this->setVersion('6.2.0');
+        }
     }
 
     /**
