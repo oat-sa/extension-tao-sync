@@ -14,19 +14,20 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
  *
  */
 
 namespace oat\taoSync\test\server;
 
+use oat\generis\test\TestCase;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\model\testCenter\Domain\TestCenter;
 use oat\taoSync\model\testCenter\SyncManagerTreeService;
 use oat\taoSync\model\testCenter\TestCenterService;
 
-class SyncManagerTreeServiceTest extends \PHPUnit_Framework_TestCase
+class SyncManagerTreeServiceTest extends TestCase
 {
     public function testCreateTestCenterDomain()
     {
@@ -41,12 +42,7 @@ class SyncManagerTreeServiceTest extends \PHPUnit_Framework_TestCase
             ->with($testCenterMock)
             ->willReturn('orgId');
 
-        $serviceLocatorMock = $this->getServiceLocatorMock();
-
-        $serviceLocatorMock
-            ->method('get')
-            ->with(TestCenterService::SERVICE_ID)
-            ->willReturn($testCenterServiceMock);
+        $serviceLocatorMock = $this->getServiceLocatorMock([TestCenterService::SERVICE_ID => $testCenterServiceMock]);
 
         $serviceMock = $this->getMockBuilder(SyncManagerTreeService::class)
             ->setMethods(['getResource', 'getOnePropertyValue', 'getServiceLocator'])
@@ -93,14 +89,11 @@ class SyncManagerTreeServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testGetAssignedSyncManagers()
     {
-        $serviceLocatorMock = $this->getServiceLocatorMock();
-
         $userServiceMock = $this->getMock(\tao_models_classes_UserService::class);
 
-        $serviceLocatorMock
-            ->method('get')
-            ->with(\tao_models_classes_UserService::SERVICE_ID)
-            ->willReturn($userServiceMock);
+        $serviceLocatorMock = $this->getServiceLocatorMock(
+            [\tao_models_classes_UserService::SERVICE_ID => $userServiceMock]
+        );
 
         $serviceMock = $this->getMockBuilder(SyncManagerTreeService::class)
             ->setMethods(['getServiceLocator'])
@@ -283,13 +276,6 @@ class SyncManagerTreeServiceTest extends \PHPUnit_Framework_TestCase
     {
         return $this->getMockBuilder(\core_kernel_classes_Property::class)
             ->disableOriginalConstructor()
-            ->getMock();
-    }
-
-    private function getServiceLocatorMock()
-    {
-        return $this->getMockBuilder(\tao_actions_CommonModule::class)
-            ->setMethods(['get'])
             ->getMock();
     }
 }
