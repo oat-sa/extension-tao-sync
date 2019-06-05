@@ -57,6 +57,7 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\testCenter\SyncManagerTreeService;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
@@ -727,6 +728,14 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(VmIdentifierService::SERVICE_ID, $vmIdentifierService);
 
             $this->setVersion('6.2.0');
+        }
+
+        if ($this->isVersion('6.2.0')) {
+            $this->getServiceManager()->register(
+                SyncManagerTreeService::SERVICE_ID,
+                new SyncManagerTreeService([])
+            );
+            $this->setVersion('6.3.0');
         }
     }
 

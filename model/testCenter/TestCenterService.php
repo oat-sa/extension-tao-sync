@@ -92,7 +92,7 @@ class TestCenterService extends BaseTestCenterService
      * @throws \common_Exception
      * @throws \core_kernel_persistence_Exception
      */
-    protected function getTestCenterOrganisationId(\core_kernel_classes_Resource $testCenter)
+    public function getTestCenterOrganisationId(\core_kernel_classes_Resource $testCenter)
     {
         $property = $testCenter->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
         if (is_null($property)) {
