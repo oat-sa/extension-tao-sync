@@ -19,17 +19,19 @@
 
 namespace oat\taoSync\controller;
 
-
 use oat\generis\model\OntologyAwareTrait;
-use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
-use oat\taoSync\model\SyncService;
+use oat\taoSync\model\testCenter\SyncManagerTreeService;
 
 class SyncManagerTree extends \tao_actions_CommonModule
 {
     use OntologyAwareTrait;
 
+    const RESOURCE_URI_REQUEST_PARAM_KEY = 'resourceUri';
+
+    const IS_FORCED_REQUEST_PARAM_KEY = 'isForced';
+
     /**
-     * Entrypoint to save the value sent form the form
+     * Entry point to save the value sent form the form
      *
      * @throws \common_Exception
      * @throws \common_exception_IsAjaxAction
@@ -41,84 +43,59 @@ class SyncManagerTree extends \tao_actions_CommonModule
             throw new \common_exception_IsAjaxAction(__FUNCTION__);
         }
 
+        /** @var SyncManagerTreeService  $service */
+        $service = $this->getServiceLocator()->get(SyncManagerTreeService::SERVICE_ID);
+        $testCenterDomain = $service->createTestCenterDomain(
+            $this->getPostParameter(self::RESOURCE_URI_REQUEST_PARAM_KEY)
+        );
+        $userUri = $this->getUserUriFromRequest();
+
+        if (!$userUri) {
+            return $this->returnJson(['saved' => $service->unassignAllUsersFromTestCenter($testCenterDomain)]);
+        }
+        $user = $this->getResource($userUri);
+        $existTestCenters = $service->getUserTestCenters($user);
+
+        if (
+            count($existTestCenters) === 1
+            && current($existTestCenters) === $testCenterDomain->getTestCenter()->getUri()
+        ) {
+            return $this->returnJson(
+                ['saved' => $service->unassignOthersUsersFromTestCenter($testCenterDomain, $user)]
+            );
+        }
+
+        if (count($existTestCenters) && !$this->getPostParameter(self::IS_FORCED_REQUEST_PARAM_KEY)) {
+            return $this->returnJson(
+                [
+                    'saved' => false,
+                    'needApprove' => true,
+                    'testCenters' => implode(
+                        ', ',
+                        array_map(
+                            function ($testCenterUri) {
+                                return $this->getResource($testCenterUri)->getLabel();
+                            },
+                            array_diff($existTestCenters, [$testCenterDomain->getTestCenter()->getUri()])
+                        )
+                    )
+                ]
+            );
+        }
+        return $this->returnJson(['saved' => $service->saveReversedValues($testCenterDomain, $user)]);
+    }
+
+    /**
+     * @return string|bool
+     * @throws \common_Exception
+     */
+    private function getUserUriFromRequest()
+    {
         $values = \tao_helpers_form_GenerisTreeForm::getSelectedInstancesFromPost();
-        $resource = $this->getResource($this->getRequestParameter('resourceUri'));
 
-        $success = $this->saveReversedValues($resource, $values);
-
-        echo json_encode(array('saved' => $success));
-    }
-
-    /**
-     * Save the values sent from the SyncUser form
-     *
-     * @param \core_kernel_classes_Resource $testCenter
-     * @param array $values
-     * @return bool
-     * @throws \common_Exception
-     * @throws \core_kernel_persistence_Exception
-     */
-    protected function saveReversedValues(\core_kernel_classes_Resource $testCenter, array $values)
-    {
-        $id = $this->getTestCenterOrganisationId($testCenter);
-        $assignedSyncUserProperty = $this->getProperty(SyncService::PROPERTY_ASSIGNED_SYNC_USER);
-        $organisationIdProperty = $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
-
-        $currentValues = $this->getAssignedSyncManagers($id);
-
-        $toAdd = array_diff($values, $currentValues);
-        $toRemove = array_diff($currentValues, $values);
-
-        $success = true;
-        foreach ($toAdd as $uri) {
-            $syncUser = $this->getResource($uri);
-            $success = $success && $syncUser->setPropertyValue($assignedSyncUserProperty, $testCenter);
-            $success = $success && $syncUser->setPropertyValue($organisationIdProperty, $id);
+        if (count($values) > 1) {
+            throw new \common_Exception(__('TestCenter must have only ony Sync Manager'));
         }
-
-        foreach ($toRemove as $uri) {
-            $syncUser = $this->getResource($uri);
-            $success = $success && $syncUser->removePropertyValue($assignedSyncUserProperty, $testCenter);
-            $success = $success && $syncUser->removePropertyValue($organisationIdProperty, $id);
-        }
-
-        return $success;
-    }
-
-    /**
-     * Get the organisation id property of a test center
-     *
-     * @param \core_kernel_classes_Resource $testCenter
-     * @return string
-     * @throws \common_Exception
-     * @throws \core_kernel_persistence_Exception
-     */
-    protected function getTestCenterOrganisationId(\core_kernel_classes_Resource $testCenter)
-    {
-        $property = $testCenter->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
-        if (is_null($property)) {
-            throw new \common_Exception(__('TestCenter must have an organisation id property to associate it to sync manager(s).'));
-        }
-        return $property->literal;
-    }
-
-    /**
-     * Get all assigned to testCenter syncManagers
-     *
-     * @param int $organisationId
-     * @return array
-     */
-    private function getAssignedSyncManagers($organisationId)
-    {
-        /** @var \tao_models_classes_UserService $userService */
-        $userService = $this->getServiceLocator()->get(\tao_models_classes_UserService::SERVICE_ID);
-        $userResources = $userService->getAllUsers([], [TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY => $organisationId]);
-
-        $userUris = [];
-        foreach ($userResources as $userResource) {
-            $userUris[] = $userResource->getUri();
-        }
-
-        return $userUris;
+        return current($values);
     }
 }

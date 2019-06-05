@@ -21,6 +21,8 @@
 namespace oat\taoSync\model\ui;
 
 use oat\generis\model\user\UserRdf;
+use oat\tao\helpers\Template;
+use oat\taoSync\controller\SyncManagerTree;
 use oat\taoSync\model\SyncService;
 use oat\taoTestCenter\model\gui\form\formFactory\FormFactory;
 
@@ -41,15 +43,23 @@ class SyncUserFormFactory extends FormFactory
      */
     public function __invoke(\core_kernel_classes_Resource $testCenter)
     {
+        /** @var tao_helpers_form_GenerisTreeForm $form */
         $form = parent::__invoke($testCenter);
+        $form->setTemplate(
+            Template::getTemplate('form' . DIRECTORY_SEPARATOR . 'generis_tree_form.tpl', 'taoSync')
+        );
         $form->setData('saveUrl', _url('setReverseValues', 'SyncManagerTree', 'taoSync'));
-        $form->setData('dataUrl', _url(
-            'getData', 'GenerisTree', 'tao',
-            http_build_query(['filterProperties' => [
-                UserRdf::PROPERTY_ROLES => [SyncService::TAO_SYNC_ROLE]
-            ]])
-        ));
+        $form->setData('saveForcedParam', SyncManagerTree::IS_FORCED_REQUEST_PARAM_KEY);
+        $form->setData(
+            'dataUrl',
+            _url(
+                'getData',
+                'GenerisTree',
+                'tao',
+                http_build_query(['filterProperties' => [
+                    UserRdf::PROPERTY_ROLES => [SyncService::TAO_SYNC_ROLE]
+                ]])
+            ));
         return $form;
     }
-
 }
