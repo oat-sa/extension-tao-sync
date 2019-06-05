@@ -30,10 +30,12 @@
             saveErrorCallback: function(respopnse, instance) {
                 if (respopnse.needApprove) {
                     dialog({
-                        message: __("This user already assign to another test center"),
-                        content: __("This user already assign to next test centers: <strong>"
+                        message: __("Please confirm reassignment"),
+                        content: __("This user is already assigned to test centers: <strong>"
                             +  respopnse.testCenters
-                            + "</strong>. <p>Do you wont reassign him ? </p>"),
+                            + "</strong>. <p>If continued, he will be removed from test centers: "
+                            +  respopnse.testCenters
+                            + " and assigned to current test center. Continue? </p>"),
                         buttons: "yes,no",
                         autoRender: true,
                         autoDestroy: true,
