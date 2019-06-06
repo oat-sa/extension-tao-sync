@@ -735,7 +735,7 @@ class Updater extends \common_ext_ExtensionUpdater
                 SyncManagerTreeService::SERVICE_ID,
                 new SyncManagerTreeService([])
             );
-            $this->setVersion('6.3.0');
+            $this->setVersion('6.4.0');
         }
     }
 

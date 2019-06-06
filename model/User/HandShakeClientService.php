@@ -35,6 +35,7 @@ use oat\taoOauth\model\OAuthClient;
 use oat\taoOauth\model\storage\ConsumerStorage;
 use oat\taoPublishing\model\PlatformService;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 
 class HandShakeClientService extends ConfigurableService
 {
@@ -197,8 +198,15 @@ class HandShakeClientService extends ConfigurableService
 
         if (isset($syncUser['id'])){
             $resource = $this->getResource($syncUser['id']);
-            $resource->setType($class);
-            $resource->setPropertiesValues($properties);
+            if ($resource->exists() && isset($properties[TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY])) {
+                $resource->editPropertyValues(
+                    $this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY),
+                    $properties[TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY]
+                );
+            } else {
+                $resource->setType($class);
+                $resource->setPropertiesValues($properties);
+            }
             return true;
         }
 

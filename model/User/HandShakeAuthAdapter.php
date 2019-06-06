@@ -20,12 +20,15 @@
 
 namespace oat\taoSync\model\User;
 
+use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\user\AuthAdapter;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\oatbox\service\ServiceManager;
+use oat\taoSync\model\SyncService;
 
 class HandShakeAuthAdapter extends AuthAdapter
 {
+    use OntologyAwareTrait;
     use LoggerAwareTrait;
 
     /**
@@ -35,7 +38,13 @@ class HandShakeAuthAdapter extends AuthAdapter
     public function authenticate()
     {
         try {
-            return $this->callParentAuthenticate();
+            $user = $this->callParentAuthenticate();
+            $userResource = $this->getResource($user->getIdentifier());
+            $syncUser = $userResource->getOnePropertyValue($this->getProperty(SyncService::PROPERTY_CONSUMER_USER));
+            if ($syncUser) {
+                $this->handShakeWithServer();
+            }
+            return $user;
         } catch (\core_kernel_users_InvalidLoginException $exception) {
             try {
                 if ($this->handShakeWithServer()) {
