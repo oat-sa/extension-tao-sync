@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: TAO 3.3.0-sprint101\n"
-"PO-Revision-Date: 2019-05-03T14:54:33\n"
+"Project-Id-Version: TAO 3.3.0-sprint104\n"
+"PO-Revision-Date: 2019-06-07T11:54:41\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
 "Language: pt-PT\n"
@@ -21,6 +21,9 @@ msgid "Approved VMs"
 msgstr ""
 
 msgid "Assessments in progress:"
+msgstr ""
+
+msgid "Box ID"
 msgstr ""
 
 msgid "Cancel"
@@ -77,6 +80,9 @@ msgstr ""
 msgid "Note that all time data refer to the server time."
 msgstr ""
 
+msgid "Please confirm reassignment"
+msgstr ""
+
 msgid "please ensure that everyone has completed the assessment before proceeding."
 msgstr ""
 
@@ -85,6 +91,9 @@ msgid "Properties"
 msgstr ""
 
 msgid "Required field"
+msgstr ""
+
+msgid "Save"
 msgstr ""
 
 #, tao-public
@@ -113,6 +122,9 @@ msgstr ""
 msgid "TestCenter must have an organisation id property to associate it to sync manager(s)."
 msgstr ""
 
+msgid "TestCenter must have only ony Sync Manager"
+msgstr ""
+
 msgid "The data synchronization cannot be completed because there are active assessments in progress."
 msgstr ""
 
@@ -126,6 +138,9 @@ msgid "There are %s assessments in progress"
 msgstr ""
 
 msgid "There is one assessment in progress"
+msgstr ""
+
+msgid "This user is already assigned to test centers: <strong>"
 msgstr ""
 
 #, tao-public
