@@ -22,7 +22,7 @@ define([
     'moment',
     'core/dataProvider/request',
     'util/url',
-    'core/taskQueue/taskQueueModel',
+    'ui/taskQueue/taskQueueModel',
     'layout/loading-bar',
     'taoSync/component/terminateExecutions/terminateExecutions',
     'taoSync/component/readinessDashboard/readinessDashboard'

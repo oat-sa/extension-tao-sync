@@ -57,6 +57,7 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\testCenter\SyncManagerTreeService;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatterInterface;
@@ -78,6 +79,7 @@ use oat\taoSync\model\testCenter\TestCenterService;
 use oat\taoSync\model\TestSession\SyncTestSessionService;
 use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\model\Validator\SyncParamsValidator;
+use oat\taoSync\model\VirtualMachine\VmIdentifierService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
@@ -719,7 +721,22 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('5.6.0');
         }
 
-        $this->skip('5.6.0', '6.0.1');
+        $this->skip('5.6.0', '6.1.0');
+
+        if ($this->isVersion('6.1.0')) {
+            $vmIdentifierService = new VmIdentifierService([]);
+            $this->getServiceManager()->register(VmIdentifierService::SERVICE_ID, $vmIdentifierService);
+
+            $this->setVersion('6.2.0');
+        }
+
+        if ($this->isVersion('6.2.0')) {
+            $this->getServiceManager()->register(
+                SyncManagerTreeService::SERVICE_ID,
+                new SyncManagerTreeService([])
+            );
+            $this->setVersion('6.4.0');
+        }
     }
 
     /**
