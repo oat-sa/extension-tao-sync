@@ -82,16 +82,32 @@ class HandShakeAuthAdapterTest extends \PHPUnit_Framework_TestCase
     {
         /** @var HandShakeAuthAdapter $handShakeAdapter */
         $handShakeAdapter = $this->getMockBuilder(HandShakeAuthAdapter::class)->setMethods([
-            'callParentAuthenticate','handShakeWithServer'
+            'callParentAuthenticate','handShakeWithServer', 'getResource', 'getProperty'
         ])->getMockForAbstractClass();
+
+        $userMock = $this->getMockBuilder(\common_user_User::class)->setMethods([
+            'getIdentifier'
+        ])->getMockForAbstractClass();
+
+        $resourceMock = $this->getMockBuilder(\core_kernel_classes_Resource::class)->setMethods([
+            'getOnePropertyValue'
+        ])->disableOriginalConstructor()->getMock();
+
+        $propertyMock = $this->getMockBuilder(\core_kernel_classes_Property::class)
+            ->disableOriginalConstructor()->getMock();
+
+        $resourceMock->method('getOnePropertyValue')->willReturn(1);
+        $userMock->method('getIdentifier')->willReturn('userId');
+        $handShakeAdapter->method('getResource')->willReturn($resourceMock);
+        $handShakeAdapter->method('getProperty')->willReturn($propertyMock);
 
         $handShakeAdapter
             ->method('callParentAuthenticate')
-            ->will($this->onConsecutiveCalls(
-                true
-            ));
+            ->will($this->onConsecutiveCalls($userMock));
 
-        $this->assertTrue($handShakeAdapter->authenticate()) ;
+        $handShakeAdapter->expects($this->once())->method('handShakeWithServer');
+
+        $this->assertSame($userMock, $handShakeAdapter->authenticate()) ;
     }
 
     /**
