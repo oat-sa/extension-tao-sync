@@ -77,7 +77,11 @@ class OfflineMachineChecksService extends ConfigurableService
         $dataUsageReport->setMessage(self::REPORT_USAGE_TITLE);
 
         foreach ($this->getCheckServices() as $check) {
-            $dataUsageReport->add($check->getReport());
+            try {
+                $dataUsageReport->add($check->getReport());
+            } catch (Exception $e) {
+                $this->logError($e->getMessage());
+            }
         }
 
         return $dataUsageReport;
