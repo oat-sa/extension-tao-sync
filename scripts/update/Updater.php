@@ -53,6 +53,9 @@ use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\monitoring\database\Mysql;
+use oat\taoSync\model\monitoring\database\Postgresql;
+use oat\taoSync\model\monitoring\DataSpaceUsageService;
 use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
@@ -737,7 +740,6 @@ class Updater extends \common_ext_ExtensionUpdater
             );
             $this->setVersion('6.4.0');
         }
-
         $this->skip('6.4.0', '6.4.1');
     }
 
