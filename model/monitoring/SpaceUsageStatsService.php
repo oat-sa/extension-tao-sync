@@ -57,7 +57,7 @@ abstract class SpaceUsageStatsService extends ConfigurableService implements Mac
             return 0;
         }
         $base = log($size, 1024);
-        $suffixes = ['',    'Kb', 'Mb', 'Gb', 'Tb'];
+        $suffixes = ['', 'Kb', 'Mb', 'Gb', 'Tb'];
 
         return round(1024 ** ($base - floor($base)), $precision) . ' ' . $suffixes[intval($base)];
     }
