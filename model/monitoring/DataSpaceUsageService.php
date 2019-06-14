@@ -48,9 +48,7 @@ class DataSpaceUsageService extends SpaceUsageStatsService
      */
     protected function getTargetVolume()
     {
-        /** @var FileSystemService $fs */
-        $fs = $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
-        $path = $fs->getOption(FileSystemService::OPTION_FILE_PATH);
-        return $path;
+        return $this->getServiceLocator()->get(FileSystemService::SERVICE_ID)
+            ->getOption(FileSystemService::OPTION_FILE_PATH);
     }
 }
