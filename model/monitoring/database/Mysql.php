@@ -30,7 +30,10 @@ class Mysql extends DatabaseSpaceUsageService
      */
     protected function getTargetVolume()
     {
-        $data = $this->getPersistence()->query('SHOW VARIABLES WHERE Variable_Name = \'datadir\';')->fetch();
+        $data = $this->getPersistence()->query(
+            'SHOW VARIABLES WHERE Variable_Name = :Variable_Name',
+            ['Variable_Name' => 'datadir']
+        )->fetch();
         return $data['Value'];
     }
 
