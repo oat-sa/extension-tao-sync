@@ -94,15 +94,17 @@ class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements De
 
         foreach ($entities as $entity) {
             $resource = $this->getResource($entity['id']);
+            $triples = $resource->getRdfTriples();
             $properties = isset($entity['properties']) ? $entity['properties'] : [];
-            foreach ($properties as $property => $value) {
+
+            foreach ($triples as $triple) {
                 if (!empty($fields)) {
-                    if (in_array($property, $fields)) {
-                        $resource->removePropertyValues($this->getProperty($property));
+                    if (in_array($triple->predicate, $fields)) {
+                        $resource->removePropertyValues($this->getProperty($triple->predicate));
                     }
                 } else {
-                    if (!in_array($property, $excludedFields)) {
-                        $resource->removePropertyValues($this->getProperty($property));
+                    if (!in_array($triple->predicate, $excludedFields)) {
+                        $resource->removePropertyValues($this->getProperty($triple->predicate));
                     }
                 }
             }
