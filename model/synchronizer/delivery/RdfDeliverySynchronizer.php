@@ -21,6 +21,7 @@
 namespace oat\taoSync\model\synchronizer\delivery;
 
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
+use oat\taoEncryption\Rdf\EncryptedDeliveryRdf;
 use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 
 class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements DeliverySynchronizer
@@ -108,7 +109,7 @@ class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements De
                     }
                 }
             }
-
+            unset($properties[EncryptedDeliveryRdf::PROPERTY_APPLICATION_KEY]);
             $resource->setPropertiesValues($properties);
         }
     }
