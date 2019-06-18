@@ -741,32 +741,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.4.0');
         }
 
-        $this->skip('6.3.0', '6.4.1');
-
-        if ($this->isVersion('6.4.1')) {
-            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
-            $eventManager->detach(SyncFinishedEvent::class, [OfflineMachineChecksService::SERVICE_ID, 'listen']);
-            $eventManager->detach(SyncFailedEvent::class, [OfflineMachineChecksService::SERVICE_ID, 'listen']);
-            $this->getServiceManager()->unregister(OfflineMachineChecksService::SERVICE_ID);
-
-            $service = new OfflineMachineChecksService([
-                OfflineMachineChecksService::OPTION_CHECKS => [
-                    new DataSpaceUsageService(),
-                    $this->getServiceManager()->get(\common_persistence_Manager::SERVICE_ID)
-                        ->getPersistenceById('default')
-                        ->getPlatform()->getName() === 'postgresql'
-                        ? new Postgresql()
-                        : new Mysql()
-                ]
-            ]);
-
-            $this->getServiceManager()->register(OfflineMachineChecksService::SERVICE_ID, $service);
-            $eventManager->attach(SyncFinishedEvent::class, [OfflineMachineChecksService::SERVICE_ID, 'listen']);
-            $eventManager->attach(SyncFailedEvent::class, [OfflineMachineChecksService::SERVICE_ID, 'listen']);
-            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
-            $this->setVersion('6.5.0');
-        }
-        $this->skip('6.5.0', '6.5.1');
+        $this->skip('6.3.0', '6.5.1');
     }
 
     /**

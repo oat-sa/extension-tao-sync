@@ -72,8 +72,7 @@ return array(
             RegisterOfflineToOnlineResultMapper::class,
             InstallEnhancedDeliveryLog::class,
             RegisterRdsSyncLogStorage::class,
-            \oat\taoSync\scripts\install\RegisterTestCenterService::class,
-            \oat\taoSync\scripts\install\SetupUsageMonitoringService::class,
+            \oat\taoSync\scripts\install\RegisterTestCenterService::class
         ]
     ],
     'uninstall' => array(
