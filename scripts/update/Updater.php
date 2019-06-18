@@ -740,6 +740,7 @@ class Updater extends \common_ext_ExtensionUpdater
             );
             $this->setVersion('6.4.0');
         }
+
         $this->skip('6.3.0', '6.4.1');
 
         if ($this->isVersion('6.4.1')) {
@@ -765,6 +766,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
             $this->setVersion('6.5.0');
         }
+        $this->skip('6.5.0', '6.5.1');
     }
 
     /**
