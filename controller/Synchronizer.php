@@ -202,9 +202,11 @@ class Synchronizer extends \tao_actions_CommonModule
         $info = [];
 
         foreach ($reports as $report) {
-            $diskSpaceValue = current($report->getData());
-            $total = $diskSpaceValue['used'] + $diskSpaceValue['free'];
-            $freePercent[] = $diskSpaceValue['free'] / ($total / 100);
+            if ($report->getData()) {
+                $diskSpaceValue = current($report->getData());
+                $total = $diskSpaceValue['used'] + $diskSpaceValue['free'];
+                $freePercent[] = $diskSpaceValue['free'] / ($total / 100);
+            }
             $info[] = ['text' => $report->getMessage()];
         }
 
@@ -214,7 +216,7 @@ class Synchronizer extends \tao_actions_CommonModule
 
         $result = [
             'title' => __('Disk & DB space:'),
-            'score' => floor(min($freePercent)),
+            'score' => $freePercent ? floor(min($freePercent)) : 1,
             'info'  => $info
         ];
 
