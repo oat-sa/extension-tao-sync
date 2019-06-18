@@ -20,6 +20,7 @@ namespace oat\taoSync\model\monitoring;
 
 use common_exception_FileSystemError;
 use common_report_Report as Report;
+use Exception;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\MachineUsageStatsInterface;
 
@@ -27,22 +28,43 @@ abstract class SpaceUsageStatsService extends ConfigurableService implements Mac
 {
     const KEYWORD = 'space_utilization';
     const TITLE = '';
+    const ERROR_MESSAGE = 'Cannot be evaluated';
 
     /** @var array */
     protected $cache = [];
 
     /**
      * @return Report
-     * @throws common_exception_FileSystemError
      */
     public function getReport()
     {
-        $values = $this->getUsage();
+        try {
+            return $this->getReportForValues($this->getUsage());
+        } catch (Exception $e) {
+            $this->logError($e->getMessage());
+            return $this->getErrorReport();
+        }
+    }
 
+    /**
+     * @param array $values
+     * @return Report
+     */
+    private function getReportForValues(array $values)
+    {
         $report = new Report(Report::TYPE_INFO);
         $report->setData($values);
         $report->setMessage($this->getUserReadableMessage($values));
+        return $report;
+    }
 
+    /**
+     * @return Report
+     */
+    private function getErrorReport()
+    {
+        $report = new Report(Report::TYPE_INFO);
+        $report->setMessage($this->getErrorMessage());
         return $report;
     }
 
@@ -60,6 +82,14 @@ abstract class SpaceUsageStatsService extends ConfigurableService implements Mac
         $suffixes = ['', 'Kb', 'Mb', 'Gb', 'Tb'];
 
         return round(1024 ** ($base - floor($base)), $precision) . ' ' . $suffixes[intval($base)];
+    }
+
+    /**
+     * @return string
+     */
+    protected function getErrorMessage()
+    {
+        return __(sprintf('%s: %s.', static::TITLE, static::ERROR_MESSAGE));
     }
 
     /**
