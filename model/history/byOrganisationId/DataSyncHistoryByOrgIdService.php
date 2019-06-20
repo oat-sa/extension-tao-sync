@@ -38,8 +38,6 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
 
     const SYNC_ORG_ID = 'organisation_id';
 
-    protected $organisationId;
-
     /**
      * Get the entities not updated by the current synchro (scoped to organisation id).
      * It means that there are not in remote server anymore
@@ -126,16 +124,14 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
      */
     protected function getCurrentOrganisationId()
     {
-        if (!$this->organisationId) {
-            $orgId = $this->getResource(self::SYNCHRO_URI)
-                ->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
-            if (is_null($orgId)) {
-                $this->organisationId = '';
-            } else {
-                $this->organisationId = $orgId->literal;
-            }
+        $orgId = $this->getResource(self::SYNCHRO_URI)
+            ->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
+
+        if (is_null($orgId)) {
+            return '';
         }
-        return $this->organisationId;
+
+        return $orgId->literal;
     }
 
     /**
@@ -238,7 +234,6 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
         }
     }
 
-
     /**
      * @param string $entity
      * @return mixed
@@ -259,5 +254,4 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
 
         return $results[self::SYNC_ORG_ID];
     }
-
 }
