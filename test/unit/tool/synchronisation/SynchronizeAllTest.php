@@ -17,7 +17,7 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\test\unit\SynchronizationHistory;
+namespace oat\taoSync\test\unit\synchronisation;
 
 use common_Exception;
 use common_report_Report as Report;
@@ -33,31 +33,32 @@ use oat\taoSync\model\event\SyncStartedEvent;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
+use PHPUnit_Framework_MockObject_MockObject;
 
 class SynchronizeAllTest extends TestCase implements Action
 {
     /**
-     * @var EventManager|\PHPUnit_Framework_MockObject_MockObject
+     * @var EventManager|PHPUnit_Framework_MockObject_MockObject
      */
     private $eventManagerMock;
 
     /**
-     * @var ApplicationService|\PHPUnit_Framework_MockObject_MockObject
+     * @var ApplicationService|PHPUnit_Framework_MockObject_MockObject
      */
     private $applicationServiceMock;
 
     /**
-     * @var DataSyncHistoryService|\PHPUnit_Framework_MockObject_MockObject
+     * @var DataSyncHistoryService|PHPUnit_Framework_MockObject_MockObject
      */
     private $dataSyncHistoryServiceMock;
 
     /**
-     * @var PublishingService|\PHPUnit_Framework_MockObject_MockObject
+     * @var PublishingService|PHPUnit_Framework_MockObject_MockObject
      */
     private $publishingServiceMock;
 
     /**
-     * @var VmVersionChecker|\PHPUnit_Framework_MockObject_MockObject
+     * @var VmVersionChecker|PHPUnit_Framework_MockObject_MockObject
      */
     private $vmVersionCheckerMock;
 
