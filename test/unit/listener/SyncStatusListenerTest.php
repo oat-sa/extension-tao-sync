@@ -69,7 +69,8 @@ class SyncStatusListenerTest extends TestCase
             ->willThrowException(new \common_Exception('Confirmation sending failed'));
 
         $this->loggerMock->expects($this->once())
-            ->method('error');
+            ->method('error')
+            ->with('Confirmation sending failed',[]);
 
         $this->object->sendSyncFailedConfirmation($event);
     }
