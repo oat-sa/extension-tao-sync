@@ -108,6 +108,10 @@ class SynchronizeAllTest extends TestCase implements Action
         );
     }
 
+    /**
+     * @param array $params
+     * @return common_report_Report
+     */
     public function __invoke($params)
     {
         return self::$report;
@@ -141,7 +145,6 @@ class SynchronizeAllTest extends TestCase implements Action
             ->method('isVmSupported')
             ->with('platformVersion')
             ->willReturn(true);
-
 
         self::$report = $report;
 
