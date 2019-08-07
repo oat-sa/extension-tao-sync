@@ -57,6 +57,8 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\Result\SyncResultDataProvider;
+use oat\taoSync\model\Result\SyncResultDataFormatter;
 use oat\taoSync\model\testCenter\SyncManagerTreeService;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
@@ -738,6 +740,25 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.4.0');
         }
         $this->skip('6.4.0', '6.5.4');
+
+        if ($this->isVersion('6.5.4')) {
+
+            $resultService = $this->getServiceManager()->get(ResultService::SERVICE_ID);
+            $currentOptionValue = $resultService->getOption(SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC);
+            $resultService->setOptions([
+                ResultService::OPTION_CHUNK_SIZE => $resultService->getOption(ResultService::OPTION_CHUNK_SIZE),
+                ResultService::OPTION_DELETE_AFTER_SEND => $resultService->getOption(ResultService::OPTION_DELETE_AFTER_SEND),
+            ]);
+            $this->getServiceManager()->register(ResultService::SERVICE_ID, $resultService);
+
+            $syncResultDataProvider = new SyncResultDataProvider([SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC => $currentOptionValue]);
+            $this->getServiceManager()->register(SyncResultDataProvider::SERVICE_ID, $syncResultDataProvider);
+
+            $syncResultsDataFormatter = new SyncResultDataFormatter([]);
+            $this->getServiceManager()->register(SyncResultDataFormatter::SERVICE_ID, $syncResultsDataFormatter);
+
+            $this->setVersion('6.6.0');
+        }
     }
 
     /**
