@@ -49,10 +49,10 @@ class SyncResultDataProvider extends ConfigurableService
 
         /** @var \core_kernel_classes_Resource $delivery */
         foreach ($this->getDeliveryAssemblyService()->getAllAssemblies() as $delivery) {
+            $statesToSync = $this->getExecutionsStatesAvailableForSync();
             /** @var DeliveryExecution $deliveryExecution */
             foreach ($this->getDeliveryExecutionByDelivery($delivery) as $deliveryExecution) {
                 $deliveryExecutionId = $deliveryExecution->getIdentifier();
-                $statesToSync = $this->getExecutionsStatesAvailableForSync();
                 $currentState = $deliveryExecution->getState()->getUri();
 
                 // Skip non white listed states of delivery executions.
