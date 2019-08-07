@@ -81,7 +81,6 @@ $formFields = get_data('form-fields');
                             </p>
                         </div>
                     </div>
-                    <div id="dashboard-container"></div>
                 </section>
 
                 <?php if($formFields): ?>
@@ -105,6 +104,8 @@ $formFields = get_data('form-fields');
                     <span class="icon-loop"></span>
                     <?= __('Synchronize Data') ?>
                 </button>
+
+                <div id="dashboard-container"></div>
 
                 <button class="btn-info" data-control="close">
                     <span class="icon-end-attempt"></span>
