@@ -33,7 +33,7 @@ class SyncResultDataFormatter extends ConfigurableService
 
     /**
      * @param DeliveryExecution $deliveryExecution
-     * @return array
+     * @return null|array
      * @throws \common_exception_NotFound
      * @throws \core_kernel_persistence_Exception
      */
@@ -45,7 +45,7 @@ class SyncResultDataFormatter extends ConfigurableService
         // Do no send delivery execution with no variables (deleted)
         $variables = $this->getDeliveryExecutionVariables($deliveryId, $deliveryExecutionId);
         if (empty($variables)) {
-            null;
+            return null;
         }
 
         return [
