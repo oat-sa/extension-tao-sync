@@ -29,7 +29,7 @@ use oat\taoResultServer\models\classes\ResultServerService;
 
 class SyncResultDataFormatter extends ConfigurableService
 {
-    const SERVICE_ID = 'taoSync/SyncResultsDataFormatter';
+    const SERVICE_ID = 'taoSync/SyncResultDataFormatter';
 
     /**
      * @param DeliveryExecution $deliveryExecution
