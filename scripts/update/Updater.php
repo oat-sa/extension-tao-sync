@@ -757,7 +757,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $syncResultsDataFormatter = new SyncResultDataFormatter([]);
             $this->getServiceManager()->register(SyncResultDataFormatter::SERVICE_ID, $syncResultsDataFormatter);
 
-            $this->setVersion('6.6.0');
+            $this->setVersion('6.6.1');
         }
     }
 
