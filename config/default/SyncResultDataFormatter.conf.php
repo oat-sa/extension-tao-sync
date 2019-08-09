@@ -1,5 +1,5 @@
 <?php
 
-use oat\taoSync\model\SyncResultDataFormatter;
+use \oat\taoSync\model\Result\SyncResultDataFormatter;
 
 return new SyncResultDataFormatter();

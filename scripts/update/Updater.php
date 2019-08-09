@@ -759,6 +759,16 @@ class Updater extends \common_ext_ExtensionUpdater
 
             $this->setVersion('6.6.0');
         }
+
+        if ($this->isVersion('6.6.0')) {
+            if ($this->getServiceManager()->has('taoSync/SyncResultsDataFormatter')) {
+                $syncResultDataFormatter = $this->getServiceManager()->get('taoSync/SyncResultsDataFormatter');
+                $this->getServiceManager()->unregister('taoSync/SyncResultsDataFormatter');
+                $this->getServiceManager()->register(SyncResultDataFormatter::SERVICE_ID, $syncResultDataFormatter);
+            }
+
+            $this->setVersion('6.6.1');
+        }
     }
 
     /**
