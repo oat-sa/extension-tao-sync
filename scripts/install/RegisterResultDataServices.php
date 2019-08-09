@@ -38,7 +38,7 @@ class RegisterResultDataServices extends InstallAction
     public function __invoke($params)
     {
         $syncResultDataProvider = new SyncResultDataProvider(
-            [SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC => [DeliveryExecution::STATE_FINISHIED]]
+            [SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC => [DeliveryExecution::STATE_FINISHED]]
         );
         $this->registerService(SyncResultDataProvider::SERVICE_ID, $syncResultDataProvider);
         $syncResultsDataFormatter = new SyncResultDataFormatter([]);
