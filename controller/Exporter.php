@@ -21,8 +21,10 @@ namespace oat\taoSync\controller;
 
 use oat\tao\model\service\ApplicationService;
 use oat\tao\model\taskQueue\QueueDispatcherInterface;
+use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
 use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\tao\model\taskQueue\Task\TaskInterface;
+use oat\tao\model\taskQueue\TaskLogInterface;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\scripts\tool\Export\ExportSynchronizationPackage;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
@@ -33,12 +35,15 @@ class Exporter extends \tao_actions_CommonModule
 
     const TASK_LABEL = 'Export Synchronization Package';
 
+    const EXPORT_TASK_CACHE_KEY = 'export_task_id';
+
     /**
      * Create a task
      */
     public function createTask()
     {
         try {
+            $this->checkExportPreconditions();
             $parameters = $this->prepareTaskParameters();
             $task = $this->createExportTask($parameters);
 
@@ -65,7 +70,10 @@ class Exporter extends \tao_actions_CommonModule
         /** @var QueueDispatcherInterface $queueService */
         $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
 
-        return $queueService->createTask($callable, $parameters, self::TASK_LABEL);
+        $task = $queueService->createTask($callable, $parameters, self::TASK_LABEL);
+        $this->setLastExportTask($task);
+
+        return $task;
     }
 
     private function prepareTaskParameters()
@@ -101,5 +109,53 @@ class Exporter extends \tao_actions_CommonModule
     private function getApplicationService()
     {
         return $this->getServiceLocator()->get(ApplicationService::SERVICE_ID);
+    }
+
+    /**
+     * @throws \common_exception_RestApi
+     */
+    private function checkExportPreconditions()
+    {
+        $processedTaskStatusList = [
+            TaskLogInterface::STATUS_COMPLETED,
+            TaskLogInterface::STATUS_FAILED,
+            TaskLogInterface::STATUS_ARCHIVED,
+            TaskLogInterface::STATUS_CANCELLED
+        ];
+        $lastTask = $this->getLastExportTask();
+        if ($lastTask && !in_array($lastTask->getStatus(), $processedTaskStatusList)) {
+            throw new \common_exception_RestApi(__('The export is already running!'), 423);
+        }
+    }
+
+    /**
+     * @return EntityInterface|null
+     */
+    private function getLastExportTask()
+    {
+        try {
+            $taskId = $this->getCacheService()->get(self::EXPORT_TASK_CACHE_KEY);
+            return $this->getTaskLogEntity($taskId);
+        } catch (\common_cache_NotFoundException $e) {
+        } catch (\common_exception_NotFound $e) {
+        }
+
+        return null;
+    }
+
+    /**
+     * @param TaskInterface $task
+     */
+    private function setLastExportTask($task)
+    {
+        $this->getCacheService()->put($task->getId(),self::EXPORT_TASK_CACHE_KEY);
+    }
+
+    /**
+     * @return \common_cache_Cache
+     */
+    private function getCacheService()
+    {
+        return $this->getServiceLocator()->get(\common_cache_Cache::SERVICE_ID);
     }
 }
