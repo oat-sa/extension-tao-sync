@@ -784,6 +784,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->getServiceManager()->register(ExportPackagerInterface::SERVICE_ID, $exportPackager);
 
             $exportService = new ExportService([
+                ExportService::OPTION_IS_ENABLED => false,
                 ExportService::OPTION_TYPES_TO_EXPORT => [ResultsExporter::TYPE],
                 ExportService::OPTION_EXPORTERS => [
                     ResultsExporter::TYPE => $resultsExporter

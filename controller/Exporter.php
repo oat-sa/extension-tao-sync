@@ -26,6 +26,8 @@ use oat\tao\model\taskQueue\TaskLogActionTrait;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLogInterface;
 use oat\taoPublishing\model\publishing\PublishingService;
+use oat\taoSync\model\Exception\SyncExportException;
+use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\scripts\tool\Export\ExportSynchronizationPackage;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 
@@ -113,9 +115,15 @@ class Exporter extends \tao_actions_CommonModule
 
     /**
      * @throws \common_exception_RestApi
+     * @throws SyncExportException
      */
     private function checkExportPreconditions()
     {
+        /** @var ExportService $exportService */
+        $exportService = $this->getServiceLocator()->get(ExportService::SERVICE_ID);
+        if (!$exportService->getOption(ExportService::OPTION_IS_ENABLED)) {
+            throw new SyncExportException(__('Synchronization export feature is not enabled.'));
+        }
         $processedTaskStatusList = [
             TaskLogInterface::STATUS_COMPLETED,
             TaskLogInterface::STATUS_FAILED,

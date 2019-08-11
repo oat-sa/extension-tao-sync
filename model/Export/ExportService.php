@@ -28,6 +28,8 @@ class ExportService extends ConfigurableService
 {
     const SERVICE_ID = 'taoSync/ExportService';
 
+    const OPTION_IS_ENABLED = 'isEnabled';
+
     const OPTION_TYPES_TO_EXPORT = 'typesToExport';
 
     const OPTION_EXPORTERS = 'exporters';
