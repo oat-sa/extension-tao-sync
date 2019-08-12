@@ -85,6 +85,18 @@
             display:none;
         }
     }
+
+    .export-link {
+        display: none;
+        font-size: 2rem;
+    }
+
+    .launch-container {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+    }
+
     &.state {
         &-form {
             .custom-fields, button[data-control="launch"] {
@@ -121,10 +133,18 @@
             }
         }
         &-error {
-            .custom-fields, button[data-control="launch"] {
+            .custom-fields {
                 display: block;
             }
+            button[data-control="launch"] {
+                display: block;
+                margin: 0 !important;
+                margin-right: 40px !important;
+            }
             .status-error {
+                display: block;
+            }
+            .export-link {
                 display: block;
             }
         }
