@@ -121,7 +121,7 @@
             }
         }
         &-error {
-            button[data-control="close"] {
+            .custom-fields, button[data-control="launch"] {
                 display: block;
             }
             .status-error {

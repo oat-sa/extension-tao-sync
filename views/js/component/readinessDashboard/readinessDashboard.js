@@ -61,7 +61,6 @@ define([
                 this.dashboard = dashboard({
                     renderTo: $container,
                     loading: true,
-                    headerText: false,
                     warningText: false,
                     layoutType: 'list'
                 });
