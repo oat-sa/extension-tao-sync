@@ -30,6 +30,7 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\Exception\NotSupportedVmVersionException;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
+use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
@@ -68,6 +69,9 @@ class Synchronizer extends \tao_actions_CommonModule
         ]);
 
         $this->setData('dashboard-url', $dashboardUrl);
+
+        $exportService = $this->getServiceLocator()->get(ExportService::SERVICE_ID);
+        $this->setData('isExportEnabled', $exportService->getOption(ExportService::OPTION_IS_ENABLED));
 
         $this->setView('sync/index.tpl', self::EXTENSION_ID);
     }
