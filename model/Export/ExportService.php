@@ -30,12 +30,7 @@ class ExportService extends ConfigurableService
 
     const OPTION_IS_ENABLED = 'isEnabled';
 
-    const OPTION_TYPES_TO_EXPORT = 'typesToExport';
-
     const OPTION_EXPORTERS = 'exporters';
-
-    /** @var array */
-    private $exporters = [];
 
     /**
      * @param string $params
@@ -46,8 +41,7 @@ class ExportService extends ConfigurableService
     {
         $packager = $this->getPackagerService();
         $packager->initialize($params);
-        foreach ($this->getOption(self::OPTION_TYPES_TO_EXPORT) as $type) {
-            $exporter = $this->getExporterByType($type);
+        foreach ($this->getConfiguredExporters() as $exporter) {
             $exporter->export($packager);
         }
 
@@ -62,23 +56,23 @@ class ExportService extends ConfigurableService
         return $this->serviceLocator->get(ExportPackagerInterface::SERVICE_ID);
     }
 
-    private function getExporterByType($type)
+    /**
+     * @return EntityExporterInterface[]
+     * @throws SyncExportException
+     */
+    private function getConfiguredExporters()
     {
-        if (!array_key_exists($type, $this->exporters)) {
-
-            if (!$this->hasOption(self::OPTION_EXPORTERS)) {
-                throw new SyncExportException('Data exporters not configured');
-            }
-
-            if (!array_key_exists($type, $this->getOption(self::OPTION_EXPORTERS))) {
-                throw new SyncExportException('Data exporter ' . $type . ' is not defined');
-            }
-            $exporter = $this->getOption(self::OPTION_EXPORTERS)[$type];
-            if (!$exporter instanceof EntityExporterInterface) {
-                throw new SyncExportException('Type ' . $type . ' has to implement interface ' . EntityExporterInterface::class);
-            }
-            $this->exporters[$type] = $this->propagate($exporter);
+        if (!$this->hasOption(self::OPTION_EXPORTERS)) {
+            throw new SyncExportException('Synchronization data exporters not configured');
         }
-        return $this->exporters[$type];
+        $exporters = [];
+        foreach ($this->getOption(self::OPTION_EXPORTERS) as $type => $exporter) {
+            if (!$exporter instanceof EntityExporterInterface) {
+                throw new SyncExportException('Exporter type ' . $type . ' has to implement interface ' . EntityExporterInterface::class);
+            }
+            $exporters[$type] = $this->propagate($exporter);
+        }
+
+        return $exporters;
     }
 }

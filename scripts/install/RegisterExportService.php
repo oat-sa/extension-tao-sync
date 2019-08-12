@@ -49,7 +49,6 @@ class RegisterExportService extends InstallAction
 
         $exportService = new ExportService([
             ExportService::OPTION_IS_ENABLED => false,
-            ExportService::OPTION_TYPES_TO_EXPORT => [ResultsExporter::TYPE],
             ExportService::OPTION_EXPORTERS => [
                 ResultsExporter::TYPE => $resultsExporter
             ],
