@@ -20,33 +20,18 @@
 namespace oat\taoSync\model\Export\Packager;
 
 
-interface ExportPackagerInterface
+class SimpleSignatureGenerator implements SignatureGeneratorInterface
 {
-    const SERVICE_ID = 'taoSync/ExportPackager';
-
-    const OPTION_SIGNATURE_GENERATOR = 'signatureGenerator';
+    CONST SALT = 'iS6UWx89VDgZvpfaNLxiAUKYoySp3DEw';
 
     /**
-     * Initialize the packager
-     *
-     * @param $params
-     * @return mixed
-     */
-    public function initialize($params);
-
-    /**
-     * Store synchronization data in the package
-     *
-     * @param $type
      * @param $data
-     * @return mixed
-     */
-    public function store($type, $data);
-
-    /**
-     * Finalize the package and return the location
-     *
      * @return string
      */
-    public function finalize();
+    public function generate($data)
+    {
+        $dataToHash = json_encode($data);
+
+        return hash('crc32', self::SALT . $dataToHash);
+    }
 }

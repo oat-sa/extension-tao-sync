@@ -24,6 +24,7 @@ use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
 use oat\taoSync\model\Export\Packager\ExportZipPackager;
+use oat\taoSync\model\Export\Packager\SimpleSignatureGenerator;
 
 /**
  * Class RegisterExportService
@@ -41,7 +42,9 @@ class RegisterExportService extends InstallAction
         ]);
         $this->registerService(ResultsExporter::SERVICE_ID, $resultsExporter);
 
-        $exportPackager = new ExportZipPackager();
+        $exportPackager = new ExportZipPackager([
+            ExportPackagerInterface::OPTION_SIGNATURE_GENERATOR => new SimpleSignatureGenerator(),
+        ]);
         $this->registerService(ExportPackagerInterface::SERVICE_ID, $exportPackager);
 
         $exportService = new ExportService([

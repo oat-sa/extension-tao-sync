@@ -97,8 +97,8 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
             'box_id' => $params['box_id'],
             'tao_version' => $params['tao_version'],
         ];
-        // @FIXME missing proper salt for signature
-        $manifest['signature'] = hash('crc32', json_encode($manifest) . 'salt');
+        $manifest['signature'] = $this->getSignatureGenerator()->generate($manifest);
+
         $contents = json_encode($manifest, JSON_PRETTY_PRINT);
 
         $this->createFileInPackage(self::MANIFEST_FILENAME, $contents);
@@ -114,8 +114,23 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
         try {
             fwrite($fileHandle, $contents);
         } catch (\Exception $e) {
-            @fclose($fileHandle);
             throw $e;
+        } finally {
+            @fclose($fileHandle);
         }
+    }
+
+    /**
+     * @return SignatureGeneratorInterface
+     * @throws SyncExportException
+     */
+    private function getSignatureGenerator()
+    {
+        $generator = $this->getOption(self::OPTION_SIGNATURE_GENERATOR);
+        if (empty($generator)) {
+            throw new SyncExportException('Manifest signature generator is not configured.');
+        }
+
+        return $this->propagate($generator);
     }
 }
