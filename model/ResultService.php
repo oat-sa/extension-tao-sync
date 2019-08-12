@@ -122,6 +122,10 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      */
     public function sendResults($results, array $params = [])
     {
+        if (empty($results)) {
+            $this->report('No results to be synchronized.', LogLevel::INFO);
+            return;
+        }
         $importAcknowledgment = $this->getSyncClient()->sendResults($results, $params);
         if (empty($importAcknowledgment)) {
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
