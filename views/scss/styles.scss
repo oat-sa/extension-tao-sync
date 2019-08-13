@@ -97,9 +97,35 @@
         justify-content: center;
     }
 
+    .import-file-input {
+        opacity: 0;
+        position: absolute;
+        z-index: -1;
+    }
+
+    .import-label {
+        color: $uiClickableHoverBg;
+        cursor: pointer;
+        display: none;
+        font-size: 2rem;
+
+        &:hover {
+            color: $info;
+            text-decoration: underline;
+        }
+    }
+
     &.state {
         &-form {
-            .custom-fields, button[data-control="launch"] {
+            .custom-fields {
+                display: block;
+            }
+            button[data-control="launch"] {
+                display: block;
+                margin: 0 !important;
+                margin-right: 40px !important;
+            }
+            .import-label {
                 display: block;
             }
             &.history {
