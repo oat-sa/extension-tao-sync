@@ -778,18 +778,15 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('6.6.1', '6.7.0');
 
         if ($this->isVersion('6.7.0')) {
-            $resultsExporter = new ResultsExporter([
-                ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
-            ]);
-            $this->getServiceManager()->register(ResultsExporter::SERVICE_ID, $resultsExporter);
-
             $packager = new ZipPackager();
             $this->getServiceManager()->register(PackagerInterface::SERVICE_ID, $packager);
 
             $exportService = new ExportService([
                 ExportService::OPTION_IS_ENABLED => false,
                 ExportService::OPTION_EXPORTERS => [
-                    ResultsExporter::TYPE => $resultsExporter
+                    ResultsExporter::TYPE => new ResultsExporter([
+                        ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
+                    ])
                 ],
             ]);
             $this->getServiceManager()->register(ExportService::SERVICE_ID, $exportService);
