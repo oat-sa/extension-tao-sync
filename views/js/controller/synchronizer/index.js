@@ -102,7 +102,7 @@ define([
              * Note that `:input` would include the button which is not wanted.
              * Configured in config/taoSync/syncFormFields.conf.php
              */
-            var $syncFormFields = $syncForm.find('input, select');
+            var $syncFormFields = $syncForm.find('input:not([type="file"]), select');
 
             /**
              * Launch button
@@ -400,6 +400,10 @@ define([
                     .catch(function () {
                         setState('error');
                     });
+            });
+
+            $syncForm.find('input[data-control="import"]').on('change', function (e) {
+                console.log(e);
             });
 
             request(webservices.lastTask)

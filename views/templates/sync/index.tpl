@@ -110,6 +110,9 @@ $formFields = get_data('form-fields');
                       <a class="export-link" data-control="export">
                           <?= __('Export Results') ?>
                       </a>
+
+                      <label class="import-label" for="import-data"><?= __('Import Results') ?></label>
+                      <input class="import-file-input" type="file" name="import-data" id="import-data" data-control="import" accept=".zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" />
                   <?php endif; ?>
                 </div>
 
