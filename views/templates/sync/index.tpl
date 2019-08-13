@@ -106,9 +106,11 @@ $formFields = get_data('form-fields');
                       <?= __('Synchronize Data') ?>
                   </button>
 
-                  <a class="export-link" data-control="export">
-                      <?= __('Export Results') ?>
-                  </a>
+                  <?php if($isExportEnabled): ?>
+                      <a class="export-link" data-control="export">
+                          <?= __('Export Results') ?>
+                      </a>
+                  <?php endif; ?>
                 </div>
 
                 <div id="dashboard-container"></div>
