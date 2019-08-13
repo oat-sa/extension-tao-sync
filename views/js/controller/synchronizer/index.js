@@ -25,8 +25,9 @@ define([
     'ui/taskQueue/taskQueueModel',
     'layout/loading-bar',
     'taoSync/component/terminateExecutions/terminateExecutions',
-    'taoSync/component/readinessDashboard/readinessDashboard'
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory) {
+    'taoSync/component/readinessDashboard/readinessDashboard',
+    'core/promise',
+], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory, Promise) {
     'use strict';
 
     /**
@@ -109,6 +110,8 @@ define([
              */
             var readinessDashboard;
 
+            var terminateExecutionsDialog;
+
             /**
              * Dynamic messages in the feedback boxes. These are based on the `data-type` elements
              * and stored in the format msg.$foo to indicate that $foo is a jquery element.
@@ -135,11 +138,11 @@ define([
                     download: webservices.download
                 },
                 pollSingleIntervals: [
-                    {iteration: Number.MAX_SAFE_INTEGER, interval: 2000}
+                    { iteration: Number.MAX_SAFE_INTEGER, interval: 2000 }
                 ],
                 pollAllIntervals: [
-                    {iteration: 1, interval: 8000},
-                    {iteration: 0, interval: 5000}
+                    { iteration: 1, interval: 8000 },
+                    { iteration: 0, interval: 5000 }
                 ]
             }).on('pollSingleFinished', function (taskId, taskData) {
                 if (taskData.status === 'completed') {
@@ -220,8 +223,9 @@ define([
                 }
                 if (state === 'success' || state === 'error') {
                     renderReadinessDashboard();
-                } else {
+                } else if (state === 'progress') {
                     readinessDashboard && readinessDashboard.destroy();
+                    readinessDashboard = null;
                 }
             }
 
@@ -263,6 +267,66 @@ define([
                 readinessDashboard = readinessDashboardFactory($dashboardContainer).render();
             }
 
+            /**
+             * Render terminateExecutionsDialog execution dialog to allow user to terminate active sessions
+             *
+             * @param {Object} data
+             *
+             * @returns {Promise}
+             */
+            function handleActiveSession(data) {
+                var $terminateActionContainer = $container.find('.terminate-action');
+                var $syncActionContainer = $container.find('.sync-action');
+                var dialogConfig = {
+                    data: data.activeSessionsData,
+                    csrfToken: data.token,
+                    terminateUrl: webservices.terminateExecutions
+                };
+
+                return new Promise(function terminateExecutions(resolve, reject) {
+                    terminateExecutionsDialog = terminateExecutionsDialogFactory($terminateActionContainer, dialogConfig)
+                        .on('dialogRendered', function () {
+                            $syncActionContainer.toggle();
+                            $terminateActionContainer.toggle();
+                        })
+                        .on('terminationCanceled', function () {
+                            $terminateActionContainer.toggle();
+                            $syncActionContainer.toggle();
+                            resolve(false);
+                        })
+                        .on('terminationFailed', function () {
+                            reject();
+                        })
+                        .on('terminationSucceeded', function () {
+                            $terminateActionContainer.toggle();
+                            $syncActionContainer.toggle();
+                            resolve(true);
+                        })
+                        .render($terminateActionContainer);
+                });
+            }
+
+            /**
+             * Request active session and handle them if there is any
+             *
+             * @returns {Promise}
+             */
+            function checkActiveSessions() {
+                return request(webservices.activeSessions)
+                    .then(function (data) {
+                        if (terminateExecutionsDialog) {
+                            terminateExecutionsDialog.destroy();
+                            terminateExecutionsDialog = null;
+                        }
+
+                        if (Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
+                            return handleActiveSession(data);
+                        } else {
+                            return true;
+                        }
+                    });
+            }
+
             // avoids unwanted flicker caused by the late loading of the CSS
             $container.find('.fb-container').removeClass('viewport-hidden');
             loadingBar.start();
@@ -277,42 +341,20 @@ define([
             // set form actions
             $syncForm.on('submit', function (e) {
                 var action = this.action;
+
                 e.preventDefault();
+
                 setState('progress');
+
                 $container.removeClass('active');
-                request(webservices.activeSessions)
-                    .then(function (data) {
-                         if(Array.isArray(data.activeSessionsData) && data.activeSessionsData.length > 0) {
-                             var $terminateActionContainer = $container.find('.terminate-action');
-                             var $syncActionContainer = $container.find('.sync-action');
-                             var dialogConfig = {
-                                 data: data.activeSessionsData,
-                                 csrfToken: data.token,
-                                 terminateUrl: webservices.terminateExecutions
-                             };
 
-                             terminateExecutionsDialogFactory($terminateActionContainer, dialogConfig)
-                                 .on('dialogRendered', function () {
-                                     $syncActionContainer.toggle();
-                                     $terminateActionContainer.toggle();
-                                 })
-                                 .on('terminationCanceled', function () {
-                                     $terminateActionContainer.toggle();
-                                     setState('form');
-                                     $syncActionContainer.toggle();
-                                 })
-                                 .on('terminationFailed', function () {
-
-                                 })
-                                 .on('terminationSucceeded', function () {
-                                     $terminateActionContainer.toggle();
-                                     $syncActionContainer.toggle();
-                                     taskQueue.create(action, getData());
-                                 })
-                                 .render($terminateActionContainer);
-                         } else {
-                             taskQueue.create(action, getData());
-                         }
+                checkActiveSessions()
+                    .then(function (canStartSynchronization) {
+                        if (canStartSynchronization) {
+                            taskQueue.create(action, getData());
+                        } else {
+                            setState('form');
+                        }
                     })
                     .catch(function () {
                         setState('error');

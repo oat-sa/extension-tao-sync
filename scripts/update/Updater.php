@@ -743,6 +743,7 @@ class Updater extends \common_ext_ExtensionUpdater
             );
             $this->setVersion('6.4.0');
         }
+
         $this->skip('6.4.0', '6.5.4');
 
         if ($this->isVersion('6.5.4')) {
@@ -774,7 +775,9 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.6.1');
         }
 
-        if ($this->isVersion('6.6.1')) {
+        $this->skip('6.6.1', '6.7.0');
+
+        if ($this->isVersion('6.7.0')) {
             $resultsExporter = new ResultsExporter([
                 ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
             ]);
@@ -791,7 +794,7 @@ class Updater extends \common_ext_ExtensionUpdater
             ]);
             $this->getServiceManager()->register(ExportService::SERVICE_ID, $exportService);
 
-            $this->setVersion('6.7.0');
+            $this->setVersion('6.8.0');
         }
     }
 
