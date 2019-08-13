@@ -17,42 +17,38 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\scripts\install;
+namespace oat\taoSync\scripts\tool\Export;
+
 
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
-use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
-use oat\taoSync\model\Export\Packager\ExportZipPackager;
 use oat\taoSync\model\Export\Packager\SignatureGenerator;
 
 /**
- * Class RegisterExportService
+ * Enables synchronization package export
  *
- * Register the sync export service
- *
- * @package oat\taoSync\scripts\install
+ * sudo -u www-data php index.php '\oat\taoSync\scripts\tool\Export\EnableSynchronizationExport'
  */
-class RegisterExportService extends InstallAction
+class EnableSynchronizationExport extends InstallAction
 {
     public function __invoke($params)
     {
-        $resultsExporter = new ResultsExporter([
-            ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
-        ]);
-        $this->registerService(ResultsExporter::SERVICE_ID, $resultsExporter);
-
-        $exportPackager = new ExportZipPackager();
-        $this->registerService(ExportPackagerInterface::SERVICE_ID, $exportPackager);
-
-        $exportService = new ExportService([
-            ExportService::OPTION_IS_ENABLED => false,
-            ExportService::OPTION_EXPORTERS => [
-                ResultsExporter::TYPE => $resultsExporter
-            ],
-        ]);
+        $report = \common_report_Report::createInfo('EnableSynchronizationExport script started.');
+        $exportService = $this->getExportService();
+        $exportService->setOption(ExportService::OPTION_IS_ENABLED, true);
         $this->registerService(ExportService::SERVICE_ID, $exportService);
+        if (!$this->getServiceLocator()->has(SignatureGenerator::SERVICE_ID)) {
+            $report->add(\common_report_Report::createFailure('Please remember to register a manifest signature generator.'));
+        }
+        $report->add(\common_report_Report::createSuccess('Synchronization package export enabled.'));
+        return $report;
+    }
 
-        return \common_report_Report::createSuccess('ExportService successfully registered.');
+    /**
+     * @return ExportService
+     */
+    protected function getExportService()
+    {
+        return $this->getServiceLocator()->get(ExportService::SERVICE_ID);
     }
 }

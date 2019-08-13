@@ -24,8 +24,6 @@ interface ExportPackagerInterface
 {
     const SERVICE_ID = 'taoSync/ExportPackager';
 
-    const OPTION_SIGNATURE_GENERATOR = 'signatureGenerator';
-
     /**
      * Initialize the packager
      *

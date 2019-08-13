@@ -51,7 +51,6 @@ use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
 use oat\taoSync\model\Export\Packager\ExportZipPackager;
 use oat\taoSync\model\Export\ExportService;
-use oat\taoSync\model\Export\Packager\SimpleSignatureGenerator;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -781,9 +780,7 @@ class Updater extends \common_ext_ExtensionUpdater
             ]);
             $this->getServiceManager()->register(ResultsExporter::SERVICE_ID, $resultsExporter);
 
-            $exportPackager = new ExportZipPackager([
-                ExportPackagerInterface::OPTION_SIGNATURE_GENERATOR => new SimpleSignatureGenerator(),
-            ]);
+            $exportPackager = new ExportZipPackager();
             $this->getServiceManager()->register(ExportPackagerInterface::SERVICE_ID, $exportPackager);
 
             $exportService = new ExportService([

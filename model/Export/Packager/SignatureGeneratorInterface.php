@@ -22,6 +22,8 @@ namespace oat\taoSync\model\Export\Packager;
 
 interface SignatureGeneratorInterface
 {
+    const SERVICE_ID = 'taoSync/SignatureGenerator';
+
     /**
      * @param $data
      * @return string

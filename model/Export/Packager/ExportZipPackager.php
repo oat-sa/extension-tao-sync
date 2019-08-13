@@ -113,8 +113,6 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
 
         try {
             fwrite($fileHandle, $contents);
-        } catch (\Exception $e) {
-            throw $e;
         } finally {
             @fclose($fileHandle);
         }
@@ -122,15 +120,9 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
 
     /**
      * @return SignatureGeneratorInterface
-     * @throws SyncExportException
      */
     private function getSignatureGenerator()
     {
-        $generator = $this->getOption(self::OPTION_SIGNATURE_GENERATOR);
-        if (empty($generator)) {
-            throw new SyncExportException('Manifest signature generator is not configured.');
-        }
-
-        return $this->propagate($generator);
+        return $this->getServiceLocator()->get(SignatureGeneratorInterface::SERVICE_ID);
     }
 }
