@@ -53,7 +53,7 @@ class ExportService extends ConfigurableService
      */
     private function getPackagerService()
     {
-        return $this->serviceLocator->get(PackagerInterface::SERVICE_ID);
+        return $this->getServiceLocator()->get(PackagerInterface::SERVICE_ID);
     }
 
     /**

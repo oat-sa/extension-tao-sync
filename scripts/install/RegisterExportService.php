@@ -24,7 +24,6 @@ use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\Packager\PackagerInterface;
 use oat\taoSync\model\Packager\ZipPackager;
-use oat\taoSync\model\Packager\SignatureGenerator;
 
 /**
  * Class RegisterExportService

@@ -17,7 +17,7 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\test\unit\Export;
+namespace oat\taoSync\test\unit\Packager;
 
 use oat\generis\test\TestCase;
 use oat\taoSync\model\Packager\SignatureGenerator;
