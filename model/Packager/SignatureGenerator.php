@@ -14,22 +14,28 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Exporter;
+namespace oat\taoSync\model\Packager;
 
 
-use oat\taoSync\model\Packager\PackagerInterface;
+use oat\oatbox\service\ConfigurableService;
 
-interface EntityExporterInterface
+class SignatureGenerator extends ConfigurableService implements SignatureGeneratorInterface
 {
+    CONST OPTION_SALT = 'salt';
+
     /**
-     * Collects data for export and forwards it to provided packager
-     *
-     * @param PackagerInterface $packager
-     * @return void
+     * @param $data
+     * @return string
      */
-    public function export($packager);
+    public function generate($data)
+    {
+        $salt = $this->getOption(self::OPTION_SALT);
+
+        $dataToHash = json_encode($data);
+
+        return hash('crc32', $salt . $dataToHash);
+    }
 }
