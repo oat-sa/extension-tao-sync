@@ -17,34 +17,8 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Exception;
 
-
-interface ExportPackagerInterface
+class PackagerException extends \common_Exception
 {
-    const SERVICE_ID = 'taoSync/ExportPackager';
-
-    /**
-     * Initialize the packager
-     *
-     * @param $params
-     * @return mixed
-     */
-    public function initialize($params);
-
-    /**
-     * Store synchronization data in the package
-     *
-     * @param $type
-     * @param $data
-     * @return mixed
-     */
-    public function store($type, $data);
-
-    /**
-     * Finalize the package and return the location
-     *
-     * @return string
-     */
-    public function finalize();
 }

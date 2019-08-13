@@ -22,8 +22,8 @@ namespace oat\taoSync\scripts\tool\Export;
 
 use common_report_Report;
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\Export\Packager\SignatureGenerator;
-use oat\taoSync\model\Export\Packager\SignatureGeneratorInterface;
+use oat\taoSync\model\Packager\SignatureGenerator;
+use oat\taoSync\model\Packager\SignatureGeneratorInterface;
 
 /**
  * Registers manifest signature generator and configures salt value

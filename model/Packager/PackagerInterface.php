@@ -17,25 +17,34 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Packager;
 
 
-use oat\oatbox\service\ConfigurableService;
-
-class SignatureGenerator extends ConfigurableService implements SignatureGeneratorInterface
+interface PackagerInterface
 {
-    CONST OPTION_SALT = 'salt';
+    const SERVICE_ID = 'taoSync/Packager';
 
     /**
+     * Initialize the packager
+     *
+     * @param $params
+     * @return mixed
+     */
+    public function initialize($params);
+
+    /**
+     * Store synchronization data in the package
+     *
+     * @param $type
      * @param $data
+     * @return mixed
+     */
+    public function store($type, $data);
+
+    /**
+     * Finalize the package and return the location
+     *
      * @return string
      */
-    public function generate($data)
-    {
-        $salt = $this->getOption(self::OPTION_SALT);
-
-        $dataToHash = json_encode($data);
-
-        return hash('crc32', $salt . $dataToHash);
-    }
+    public function finalize();
 }

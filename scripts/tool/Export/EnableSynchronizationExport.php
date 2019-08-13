@@ -22,7 +22,7 @@ namespace oat\taoSync\scripts\tool\Export;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\Export\ExportService;
-use oat\taoSync\model\Export\Packager\SignatureGenerator;
+use oat\taoSync\model\Packager\SignatureGenerator;
 
 /**
  * Enables synchronization package export

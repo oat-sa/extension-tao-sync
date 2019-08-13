@@ -48,8 +48,8 @@ use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\Export\Exporter\ResultsExporter;
-use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
-use oat\taoSync\model\Export\Packager\ExportZipPackager;
+use oat\taoSync\model\Packager\PackagerInterface;
+use oat\taoSync\model\Packager\ZipPackager;
 use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
@@ -780,8 +780,8 @@ class Updater extends \common_ext_ExtensionUpdater
             ]);
             $this->getServiceManager()->register(ResultsExporter::SERVICE_ID, $resultsExporter);
 
-            $exportPackager = new ExportZipPackager();
-            $this->getServiceManager()->register(ExportPackagerInterface::SERVICE_ID, $exportPackager);
+            $packager = new ZipPackager();
+            $this->getServiceManager()->register(PackagerInterface::SERVICE_ID, $packager);
 
             $exportService = new ExportService([
                 ExportService::OPTION_IS_ENABLED => false,

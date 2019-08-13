@@ -20,8 +20,8 @@
 namespace oat\taoSync\test\unit\Export;
 
 use oat\generis\test\TestCase;
-use oat\taoSync\model\Export\Packager\SignatureGenerator;
-use oat\taoSync\model\Export\Packager\SignatureGeneratorInterface;
+use oat\taoSync\model\Packager\SignatureGenerator;
+use oat\taoSync\model\Packager\SignatureGeneratorInterface;
 
 class SignatureGeneratorTest extends TestCase
 {

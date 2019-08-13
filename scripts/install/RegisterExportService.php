@@ -22,9 +22,9 @@ namespace oat\taoSync\scripts\install;
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
-use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
-use oat\taoSync\model\Export\Packager\ExportZipPackager;
-use oat\taoSync\model\Export\Packager\SignatureGenerator;
+use oat\taoSync\model\Packager\PackagerInterface;
+use oat\taoSync\model\Packager\ZipPackager;
+use oat\taoSync\model\Packager\SignatureGenerator;
 
 /**
  * Class RegisterExportService
@@ -42,8 +42,8 @@ class RegisterExportService extends InstallAction
         ]);
         $this->registerService(ResultsExporter::SERVICE_ID, $resultsExporter);
 
-        $exportPackager = new ExportZipPackager();
-        $this->registerService(ExportPackagerInterface::SERVICE_ID, $exportPackager);
+        $packager = new ZipPackager();
+        $this->registerService(PackagerInterface::SERVICE_ID, $packager);
 
         $exportService = new ExportService([
             ExportService::OPTION_IS_ENABLED => false,
