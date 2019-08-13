@@ -800,7 +800,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.8.0');
         }
 
-        if ($this->isVersion('6.7.0')) {
+        if ($this->isVersion('6.8.0')) {
             $this->getServiceManager()->register(
                 ImportService::SERVICE_ID,
                 new ImportService([
@@ -813,7 +813,7 @@ class Updater extends \common_ext_ExtensionUpdater
                 ])
             );
 
-            $this->setVersion('6.8.0');
+            $this->setVersion('6.9.0');
         }
     }
 

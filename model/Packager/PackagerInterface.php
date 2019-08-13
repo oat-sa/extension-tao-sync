@@ -19,6 +19,7 @@
 
 namespace oat\taoSync\model\Packager;
 
+use oat\oatbox\filesystem\File;
 
 interface PackagerInterface
 {
@@ -47,4 +48,11 @@ interface PackagerInterface
      * @return string
      */
     public function finalize();
+
+    /**
+     * Unpack package
+     * @param File $file
+     * @return array
+     */
+    public function unpack(File $file);
 }

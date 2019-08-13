@@ -25,6 +25,7 @@ use oat\tao\model\taskQueue\Task\FilesystemAwareTrait;
 use GuzzleHttp\Psr7\UploadedFile;
 use common_report_Report as Report;
 use oat\taoSync\model\import\ImportService;
+use oat\taoSync\model\Packager\PackagerInterface;
 
 /**
  * Class ImportSynchronizationPackage
@@ -41,40 +42,24 @@ class ImportSynchronizationPackage extends AbstractAction
     /**
      * @param $params
      * @return Report
+     * @throws \oat\taoSync\model\Exception\SyncImportException
      */
     public function __invoke($params)
     {
         $file = $this->getQueueStorageFile($params[static::PARAM_FILE]);
-        try {
-            $dir = \tao_helpers_File::extractArchive($file);
-        } catch (\common_Exception $e) {
-            $this->logError('Cannot extract archive with synchronization data. ' . $e->getMessage());
-            return Report::createFailure('Cannot extract archive with synchronization data.');
-        }
-        $directoryIterator = new \DirectoryIterator($dir);
-        $manifest = null;
-        $data = [];
-        foreach ($directoryIterator as $fileInfo) {
-            if ($fileInfo->isDot()) {
-                continue;
-            }
-            if ($fileInfo->getBasename() === 'manifest.json') {
-                $file = fopen($fileInfo->getRealPath(), 'r');
-                $json = fread($file, $fileInfo->getSize());
-                $manifest = json_decode($json, true);
-                continue;
-            }
-            $file = fopen($fileInfo->getRealPath(), 'r');
-            $json = fread($file, $fileInfo->getSize());
-            $data[] = json_decode($json, true);
-        }
-        $data = call_user_func_array('array_merge', $data);
+        $syncData = $this->getPackagerService()->unpack($file);
         $importService = $this->getImportService();
-        $result = $importService->import($data, $manifest);
-        
+        $result = $importService->import($syncData['data'], $syncData['manifest']);
         return Report::createSuccess('Synchronization package successfully imported.', $result);
     }
 
+    /**
+     * @return PackagerInterface
+     */
+    private function getPackagerService()
+    {
+        return $this->serviceLocator->get(PackagerInterface::SERVICE_ID);
+    }
 
     /**
      * @param UploadedFile $file
