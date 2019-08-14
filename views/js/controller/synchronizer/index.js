@@ -415,8 +415,8 @@ define([
 
                 $syncForm.sendfile({
                     url: webservices.importSyncData,
-                    loaded: function (r) {
-                        console.log(r);
+                    loaded: function (response) {
+                        taskQueue.pollSingle(response.data.task.id);
                     },
                     failed: function () {
                         setState('error');
