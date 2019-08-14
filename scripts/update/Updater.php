@@ -47,6 +47,10 @@ use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
+use oat\taoSync\model\Export\Exporter\ResultsExporter;
+use oat\taoSync\model\Packager\PackagerInterface;
+use oat\taoSync\model\Packager\ZipPackager;
+use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -773,6 +777,22 @@ class Updater extends \common_ext_ExtensionUpdater
 
         $this->skip('6.6.1', '6.7.0');
 
+        if ($this->isVersion('6.7.0')) {
+            $packager = new ZipPackager();
+            $this->getServiceManager()->register(PackagerInterface::SERVICE_ID, $packager);
+
+            $exportService = new ExportService([
+                ExportService::OPTION_IS_ENABLED => false,
+                ExportService::OPTION_EXPORTERS => [
+                    ResultsExporter::TYPE => new ResultsExporter([
+                        ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
+                    ])
+                ],
+            ]);
+            $this->getServiceManager()->register(ExportService::SERVICE_ID, $exportService);
+
+            $this->setVersion('6.8.0');
+        }
     }
 
     /**
