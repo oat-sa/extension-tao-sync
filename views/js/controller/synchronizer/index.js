@@ -28,6 +28,7 @@ define([
     'taoSync/component/terminateExecutions/terminateExecutions',
     'taoSync/component/readinessDashboard/readinessDashboard',
     'core/promise',
+    'ui/filesender'
 ], function (__, $, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory, Promise) {
     'use strict';
 
@@ -53,6 +54,7 @@ define([
         activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync'),
         terminateExecutions: urlHelper.route('terminateExecutions', 'TerminateExecution', 'taoSync'),
         exportSyncData: urlHelper.route('createTask', 'Exporter', 'taoSync'),
+        importSyncData: urlHelper.route('createTask', 'Importer', 'taoSync'),
     };
 
     /**
@@ -403,7 +405,23 @@ define([
             });
 
             $syncForm.find('input[data-control="import"]').on('change', function (e) {
-                console.log(e);
+                var importFile = e.target.files[0];
+
+                if (!importFile) {
+                    return;
+                }
+
+                setState('progress');
+
+                $syncForm.sendfile({
+                    url: webservices.importSyncData,
+                    loaded: function (r) {
+                        console.log(r);
+                    },
+                    failed: function () {
+                        setState('error');
+                    }
+                });
             });
 
             request(webservices.lastTask)
