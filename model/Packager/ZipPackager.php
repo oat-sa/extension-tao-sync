@@ -17,13 +17,13 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Packager;
 
 
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\Exception\SyncExportException;
+use oat\taoSync\model\Exception\PackagerException;
 
-class ExportZipPackager extends ConfigurableService implements ExportPackagerInterface
+class ZipPackager extends ConfigurableService implements PackagerInterface
 {
     const MANIFEST_FILENAME = 'manifest.json';
 
@@ -35,7 +35,7 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
      *
      * @param $params
      * @return mixed|void
-     * @throws SyncExportException
+     * @throws PackagerException
      */
     public function initialize($params)
     {
@@ -51,7 +51,7 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
      * @param $type
      * @param $data
      * @return mixed|void
-     * @throws SyncExportException
+     * @throws PackagerException
      */
     public function store($type, $data)
     {
@@ -85,7 +85,7 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
         $requiredParameters = ['organisation_id', 'tao_version', 'box_id'];
         foreach ($requiredParameters as $parameter) {
             if (!isset($params[$parameter])) {
-                throw new SyncExportException(sprintf('Missing parameter "%s"', $parameter));
+                throw new PackagerException(sprintf('Missing parameter "%s"', $parameter));
             }
         }
     }
@@ -97,7 +97,6 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
             'box_id' => $params['box_id'],
             'tao_version' => $params['tao_version'],
         ];
-        $manifest['signature'] = $this->getSignatureGenerator()->generate($manifest);
 
         $contents = json_encode($manifest, JSON_PRETTY_PRINT);
 
@@ -108,29 +107,13 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . $filename;
         if (($fileHandle = @fopen($filePath, 'w')) === false) {
-            throw new SyncExportException(sprintf('Could not create file at "%s"', $filePath));
+            throw new PackagerException(sprintf('Could not create file at "%s"', $filePath));
         }
 
         try {
             fwrite($fileHandle, $contents);
-        } catch (\Exception $e) {
-            throw $e;
         } finally {
             @fclose($fileHandle);
         }
-    }
-
-    /**
-     * @return SignatureGeneratorInterface
-     * @throws SyncExportException
-     */
-    private function getSignatureGenerator()
-    {
-        $generator = $this->getOption(self::OPTION_SIGNATURE_GENERATOR);
-        if (empty($generator)) {
-            throw new SyncExportException('Manifest signature generator is not configured.');
-        }
-
-        return $this->propagate($generator);
     }
 }

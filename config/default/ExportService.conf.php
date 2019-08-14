@@ -17,36 +17,13 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+use oat\taoSync\model\Export\Exporter\ResultsExporter;
+use oat\taoSync\model\Export\ExportService;
 
-
-interface ExportPackagerInterface
-{
-    const SERVICE_ID = 'taoSync/ExportPackager';
-
-    const OPTION_SIGNATURE_GENERATOR = 'signatureGenerator';
-
-    /**
-     * Initialize the packager
-     *
-     * @param $params
-     * @return mixed
-     */
-    public function initialize($params);
-
-    /**
-     * Store synchronization data in the package
-     *
-     * @param $type
-     * @param $data
-     * @return mixed
-     */
-    public function store($type, $data);
-
-    /**
-     * Finalize the package and return the location
-     *
-     * @return string
-     */
-    public function finalize();
-}
+return new ExportService(array(
+    ExportService::OPTION_EXPORTERS => [
+        ResultsExporter::TYPE => new ResultsExporter([
+            ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE
+        ])
+    ]
+));

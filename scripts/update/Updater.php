@@ -48,10 +48,9 @@ use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use oat\taoSync\model\Export\Exporter\ResultsExporter;
-use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
-use oat\taoSync\model\Export\Packager\ExportZipPackager;
+use oat\taoSync\model\Packager\PackagerInterface;
+use oat\taoSync\model\Packager\ZipPackager;
 use oat\taoSync\model\Export\ExportService;
-use oat\taoSync\model\Export\Packager\SimpleSignatureGenerator;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
@@ -776,26 +775,23 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.6.1');
         }
 
-        if ($this->isVersion('6.6.1')) {
-            $resultsExporter = new ResultsExporter([
-                ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
-            ]);
-            $this->getServiceManager()->register(ResultsExporter::SERVICE_ID, $resultsExporter);
+        $this->skip('6.6.1', '6.7.0');
 
-            $exportPackager = new ExportZipPackager([
-                ExportPackagerInterface::OPTION_SIGNATURE_GENERATOR => new SimpleSignatureGenerator(),
-            ]);
-            $this->getServiceManager()->register(ExportPackagerInterface::SERVICE_ID, $exportPackager);
+        if ($this->isVersion('6.7.0')) {
+            $packager = new ZipPackager();
+            $this->getServiceManager()->register(PackagerInterface::SERVICE_ID, $packager);
 
             $exportService = new ExportService([
                 ExportService::OPTION_IS_ENABLED => false,
                 ExportService::OPTION_EXPORTERS => [
-                    ResultsExporter::TYPE => $resultsExporter
+                    ResultsExporter::TYPE => new ResultsExporter([
+                        ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
+                    ])
                 ],
             ]);
             $this->getServiceManager()->register(ExportService::SERVICE_ID, $exportService);
 
-            $this->setVersion('6.7.0');
+            $this->setVersion('6.8.0');
         }
     }
 

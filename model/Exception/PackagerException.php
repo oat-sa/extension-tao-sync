@@ -17,21 +17,8 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Exception;
 
-
-class SimpleSignatureGenerator implements SignatureGeneratorInterface
+class PackagerException extends \common_Exception
 {
-    CONST SALT = 'iS6UWx89VDgZvpfaNLxiAUKYoySp3DEw';
-
-    /**
-     * @param $data
-     * @return string
-     */
-    public function generate($data)
-    {
-        $dataToHash = json_encode($data);
-
-        return hash('crc32', self::SALT . $dataToHash);
-    }
 }

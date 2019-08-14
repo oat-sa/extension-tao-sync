@@ -17,14 +17,34 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Packager;
 
 
-interface SignatureGeneratorInterface
+interface PackagerInterface
 {
+    const SERVICE_ID = 'taoSync/Packager';
+
     /**
+     * Initialize the packager
+     *
+     * @param $params
+     * @return mixed
+     */
+    public function initialize($params);
+
+    /**
+     * Store synchronization data in the package
+     *
+     * @param $type
      * @param $data
+     * @return mixed
+     */
+    public function store($type, $data);
+
+    /**
+     * Finalize the package and return the location
+     *
      * @return string
      */
-    public function generate($data);
+    public function finalize();
 }

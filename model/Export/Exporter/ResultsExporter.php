@@ -26,10 +26,7 @@ use oat\taoSync\model\Result\SyncResultDataProvider;
 
 class ResultsExporter extends ConfigurableService implements EntityExporterInterface
 {
-    const SERVICE_ID = 'taoSync/ResultsExporter';
-
     const TYPE = 'results';
-
     const OPTION_BATCH_SIZE = 'batchSize';
     const DEFAULT_BATCH_SIZE = 10;
 
@@ -43,12 +40,12 @@ class ResultsExporter extends ConfigurableService implements EntityExporterInter
      */
     public function export($packager)
     {
-        $results = [];
         $dataProvider = $this->getDataProviderService();
         foreach ($dataProvider->getDeliveryExecutions($this->getBatchSize()) as $deliveryExecutionBatch) {
             if (empty($deliveryExecutionBatch)) {
                 continue;
             }
+            $results = [];
             /** @var DeliveryExecution $deliveryExecution */
             foreach ($deliveryExecutionBatch as $deliveryExecution) {
                 $deliveryExecutionId = $deliveryExecution->getIdentifier();
@@ -59,7 +56,9 @@ class ResultsExporter extends ConfigurableService implements EntityExporterInter
                 $results[$deliveryExecutionId] = $formattedDeliveryExecution;
             }
 
-            $packager->store(self::TYPE, $results);
+            if (!empty($results)) {
+                $packager->store(self::TYPE, $results);
+            }
         }
     }
 

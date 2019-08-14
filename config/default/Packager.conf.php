@@ -14,22 +14,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
- *
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Exporter;
+use oat\taoSync\model\Packager\ZipPackager;
 
-
-use oat\taoSync\model\Packager\PackagerInterface;
-
-interface EntityExporterInterface
-{
-    /**
-     * Collects data for export and forwards it to provided packager
-     *
-     * @param PackagerInterface $packager
-     * @return void
-     */
-    public function export($packager);
-}
+return new ZipPackager();
