@@ -392,7 +392,7 @@ define([
                 checkActiveSessions()
                     .then(function (canStartSynchronization) {
                         if (canStartSynchronization) {
-                            taskQueue.create(webservices.exportSyncData, getData());
+                            taskQueue.create(urlHelper.build(webservices.exportSyncData, getData()));
                         } else {
                             setState('form');
                         }
