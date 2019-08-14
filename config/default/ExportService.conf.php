@@ -17,16 +17,13 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Packager;
+use oat\taoSync\model\Export\Exporter\ResultsExporter;
+use oat\taoSync\model\Export\ExportService;
 
-
-interface SignatureGeneratorInterface
-{
-    const SERVICE_ID = 'taoSync/SignatureGenerator';
-
-    /**
-     * @param $data
-     * @return string
-     */
-    public function generate($data);
-}
+return new ExportService(array(
+    ExportService::OPTION_EXPORTERS => [
+        ResultsExporter::TYPE => new ResultsExporter([
+            ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE
+        ])
+    ]
+));

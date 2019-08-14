@@ -17,25 +17,6 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Packager;
+use oat\taoSync\model\Packager\ZipPackager;
 
-
-use oat\oatbox\service\ConfigurableService;
-
-class SignatureGenerator extends ConfigurableService implements SignatureGeneratorInterface
-{
-    CONST OPTION_SALT = 'salt';
-
-    /**
-     * @param $data
-     * @return string
-     */
-    public function generate($data)
-    {
-        $salt = $this->getOption(self::OPTION_SALT);
-
-        $dataToHash = json_encode($data);
-
-        return hash('crc32', $salt . $dataToHash);
-    }
-}
+return new ZipPackager();

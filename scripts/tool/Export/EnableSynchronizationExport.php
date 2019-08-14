@@ -22,7 +22,6 @@ namespace oat\taoSync\scripts\tool\Export;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\Export\ExportService;
-use oat\taoSync\model\Packager\SignatureGenerator;
 
 /**
  * Enables synchronization package export
@@ -33,15 +32,11 @@ class EnableSynchronizationExport extends InstallAction
 {
     public function __invoke($params)
     {
-        $report = \common_report_Report::createInfo('EnableSynchronizationExport script started.');
         $exportService = $this->getExportService();
         $exportService->setOption(ExportService::OPTION_IS_ENABLED, true);
         $this->registerService(ExportService::SERVICE_ID, $exportService);
-        if (!$this->getServiceLocator()->has(SignatureGenerator::SERVICE_ID)) {
-            $report->add(\common_report_Report::createFailure('Please remember to register a manifest signature generator.'));
-        }
-        $report->add(\common_report_Report::createSuccess('Synchronization package export enabled.'));
-        return $report;
+
+        return \common_report_Report::createSuccess('Synchronization package export enabled.');
     }
 
     /**

@@ -139,7 +139,6 @@ class ZipPackager extends ConfigurableService implements PackagerInterface
             'box_id' => $params['box_id'],
             'tao_version' => $params['tao_version'],
         ];
-        $manifest['signature'] = $this->getSignatureGenerator()->generate($manifest);
 
         $contents = json_encode($manifest, JSON_PRETTY_PRINT);
 
@@ -158,13 +157,5 @@ class ZipPackager extends ConfigurableService implements PackagerInterface
         } finally {
             @fclose($fileHandle);
         }
-    }
-
-    /**
-     * @return SignatureGeneratorInterface
-     */
-    private function getSignatureGenerator()
-    {
-        return $this->getServiceLocator()->get(SignatureGeneratorInterface::SERVICE_ID);
     }
 }
