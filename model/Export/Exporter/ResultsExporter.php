@@ -43,12 +43,12 @@ class ResultsExporter extends ConfigurableService implements EntityExporterInter
      */
     public function export($packager)
     {
-        $results = [];
         $dataProvider = $this->getDataProviderService();
         foreach ($dataProvider->getDeliveryExecutions($this->getBatchSize()) as $deliveryExecutionBatch) {
             if (empty($deliveryExecutionBatch)) {
                 continue;
             }
+            $results = [];
             /** @var DeliveryExecution $deliveryExecution */
             foreach ($deliveryExecutionBatch as $deliveryExecution) {
                 $deliveryExecutionId = $deliveryExecution->getIdentifier();
@@ -59,7 +59,9 @@ class ResultsExporter extends ConfigurableService implements EntityExporterInter
                 $results[$deliveryExecutionId] = $formattedDeliveryExecution;
             }
 
-            $packager->store(self::TYPE, $results);
+            if (!empty($results)) {
+                $packager->store(self::TYPE, $results);
+            }
         }
     }
 
