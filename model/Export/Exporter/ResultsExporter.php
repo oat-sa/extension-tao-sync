@@ -26,10 +26,7 @@ use oat\taoSync\model\Result\SyncResultDataProvider;
 
 class ResultsExporter extends ConfigurableService implements EntityExporterInterface
 {
-    const SERVICE_ID = 'taoSync/ResultsExporter';
-
     const TYPE = 'results';
-
     const OPTION_BATCH_SIZE = 'batchSize';
     const DEFAULT_BATCH_SIZE = 10;
 

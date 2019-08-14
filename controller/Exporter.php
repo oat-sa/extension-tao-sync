@@ -45,8 +45,8 @@ class Exporter extends \tao_actions_CommonModule
     public function createTask()
     {
         try {
-            $this->checkExportPreconditions();
             $parameters = $this->prepareTaskParameters();
+            $this->checkExportPreconditions($parameters['organisation_id']);
             $task = $this->createExportTask($parameters);
 
             return $this->returnTaskJson($task);
@@ -73,14 +73,15 @@ class Exporter extends \tao_actions_CommonModule
         $queueService = $this->getServiceLocator()->get(QueueDispatcherInterface::SERVICE_ID);
 
         $task = $queueService->createTask($callable, $parameters, self::TASK_LABEL);
-        $this->setLastExportTask($task);
+        $this->setLastExportTask($task, $parameters['organisation_id']);
 
         return $task;
     }
 
     private function prepareTaskParameters()
     {
-        $requestData = $this->getRequestParameters();
+        $request = $this->getPsrRequest();
+        $requestData = $request->getQueryParams();
         $this->validateRequestParameters($requestData);
 
         return [
@@ -117,7 +118,7 @@ class Exporter extends \tao_actions_CommonModule
      * @throws \common_exception_RestApi
      * @throws SyncExportException
      */
-    private function checkExportPreconditions()
+    private function checkExportPreconditions($orgId)
     {
         /** @var ExportService $exportService */
         $exportService = $this->getServiceLocator()->get(ExportService::SERVICE_ID);
@@ -130,19 +131,20 @@ class Exporter extends \tao_actions_CommonModule
             TaskLogInterface::STATUS_ARCHIVED,
             TaskLogInterface::STATUS_CANCELLED
         ];
-        $lastTask = $this->getLastExportTask();
+        $lastTask = $this->getLastExportTask($orgId);
         if ($lastTask && !in_array($lastTask->getStatus(), $processedTaskStatusList)) {
             throw new \common_exception_RestApi(__('The export is already running!'), 423);
         }
     }
 
     /**
-     * @return EntityInterface|null
+     * @param $orgId
+     * @return null|EntityInterface
      */
-    private function getLastExportTask()
+    private function getLastExportTask($orgId)
     {
         try {
-            $taskId = $this->getCacheService()->get(self::EXPORT_TASK_CACHE_KEY);
+            $taskId = $this->getCacheService()->get(self::EXPORT_TASK_CACHE_KEY.$orgId);
             return $this->getTaskLogEntity($taskId);
         } catch (\common_cache_NotFoundException $e) {
         } catch (\common_exception_NotFound $e) {
@@ -152,11 +154,12 @@ class Exporter extends \tao_actions_CommonModule
     }
 
     /**
-     * @param TaskInterface $task
+     * @param $task
+     * @param $orgId
      */
-    private function setLastExportTask($task)
+    private function setLastExportTask($task, $orgId)
     {
-        $this->getCacheService()->put($task->getId(),self::EXPORT_TASK_CACHE_KEY);
+        $this->getCacheService()->put($task->getId(), self::EXPORT_TASK_CACHE_KEY.$orgId);
     }
 
     /**
