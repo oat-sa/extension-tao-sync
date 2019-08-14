@@ -17,14 +17,8 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Exception;
 
-
-interface SignatureGeneratorInterface
+class PackagerException extends \common_Exception
 {
-    /**
-     * @param $data
-     * @return string
-     */
-    public function generate($data);
 }

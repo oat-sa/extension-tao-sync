@@ -17,13 +17,15 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Packager;
 
 
+use oat\oatbox\filesystem\File;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\Exception\SyncExportException;
+use oat\taoSync\model\Exception\PackagerException;
+use oat\taoSync\model\Exception\SyncImportException;
 
-class ExportZipPackager extends ConfigurableService implements ExportPackagerInterface
+class ZipPackager extends ConfigurableService implements PackagerInterface
 {
     const MANIFEST_FILENAME = 'manifest.json';
 
@@ -35,7 +37,7 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
      *
      * @param $params
      * @return mixed|void
-     * @throws SyncExportException
+     * @throws PackagerException
      */
     public function initialize($params)
     {
@@ -51,7 +53,7 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
      * @param $type
      * @param $data
      * @return mixed|void
-     * @throws SyncExportException
+     * @throws PackagerException
      */
     public function store($type, $data)
     {
@@ -80,12 +82,52 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
         return $zipPath;
     }
 
+    /**
+     * @param File $file
+     * @return array
+     * @throws SyncImportException
+     */
+    public function unpack(File $file)
+    {
+        try {
+            $dir = \tao_helpers_File::extractArchive($file);
+        } catch (\common_Exception $e) {
+            $this->logError('Cannot extract archive with synchronization data. ' . $e->getMessage());
+            throw new SyncImportException('Cannot extract archive with synchronization data.');
+        }
+
+        $directoryIterator = new \DirectoryIterator($dir);
+        $manifest = null;
+        $data = [];
+
+        foreach ($directoryIterator as $fileInfo) {
+            if ($fileInfo->isDot()) {
+                continue;
+            }
+            if ($fileInfo->getBasename() === self::MANIFEST_FILENAME) {
+                $file = fopen($fileInfo->getRealPath(), 'r');
+                $json = fread($file, $fileInfo->getSize());
+                $manifest = json_decode($json, true);
+                continue;
+            }
+            $file = fopen($fileInfo->getRealPath(), 'r');
+            $json = fread($file, $fileInfo->getSize());
+            $data[] = json_decode($json, true);
+        }
+        $data = call_user_func_array('array_merge', $data);
+
+        return [
+            'manifest' => $manifest,
+            'data' => $data
+        ];
+    }
+
     private function validateParams($params)
     {
         $requiredParameters = ['organisation_id', 'tao_version', 'box_id'];
         foreach ($requiredParameters as $parameter) {
             if (!isset($params[$parameter])) {
-                throw new SyncExportException(sprintf('Missing parameter "%s"', $parameter));
+                throw new PackagerException(sprintf('Missing parameter "%s"', $parameter));
             }
         }
     }
@@ -108,13 +150,11 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
     {
         $filePath = $this->directory . DIRECTORY_SEPARATOR . $filename;
         if (($fileHandle = @fopen($filePath, 'w')) === false) {
-            throw new SyncExportException(sprintf('Could not create file at "%s"', $filePath));
+            throw new PackagerException(sprintf('Could not create file at "%s"', $filePath));
         }
 
         try {
             fwrite($fileHandle, $contents);
-        } catch (\Exception $e) {
-            throw $e;
         } finally {
             @fclose($fileHandle);
         }
@@ -122,15 +162,9 @@ class ExportZipPackager extends ConfigurableService implements ExportPackagerInt
 
     /**
      * @return SignatureGeneratorInterface
-     * @throws SyncExportException
      */
     private function getSignatureGenerator()
     {
-        $generator = $this->getOption(self::OPTION_SIGNATURE_GENERATOR);
-        if (empty($generator)) {
-            throw new SyncExportException('Manifest signature generator is not configured.');
-        }
-
-        return $this->propagate($generator);
+        return $this->getServiceLocator()->get(SignatureGeneratorInterface::SERVICE_ID);
     }
 }

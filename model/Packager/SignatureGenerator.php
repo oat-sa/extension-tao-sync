@@ -17,12 +17,14 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Export\Packager;
+namespace oat\taoSync\model\Packager;
 
 
-class SimpleSignatureGenerator implements SignatureGeneratorInterface
+use oat\oatbox\service\ConfigurableService;
+
+class SignatureGenerator extends ConfigurableService implements SignatureGeneratorInterface
 {
-    CONST SALT = 'iS6UWx89VDgZvpfaNLxiAUKYoySp3DEw';
+    CONST OPTION_SALT = 'salt';
 
     /**
      * @param $data
@@ -30,8 +32,10 @@ class SimpleSignatureGenerator implements SignatureGeneratorInterface
      */
     public function generate($data)
     {
+        $salt = $this->getOption(self::OPTION_SALT);
+
         $dataToHash = json_encode($data);
 
-        return hash('crc32', self::SALT . $dataToHash);
+        return hash('crc32', $salt . $dataToHash);
     }
 }

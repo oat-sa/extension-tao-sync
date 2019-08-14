@@ -22,7 +22,7 @@ namespace oat\taoSync\model\Export;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\SyncExportException;
 use oat\taoSync\model\Export\Exporter\EntityExporterInterface;
-use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
+use oat\taoSync\model\Packager\PackagerInterface;
 
 class ExportService extends ConfigurableService
 {
@@ -49,11 +49,11 @@ class ExportService extends ConfigurableService
     }
 
     /**
-     * @return ExportPackagerInterface
+     * @return PackagerInterface
      */
     private function getPackagerService()
     {
-        return $this->serviceLocator->get(ExportPackagerInterface::SERVICE_ID);
+        return $this->serviceLocator->get(PackagerInterface::SERVICE_ID);
     }
 
     /**

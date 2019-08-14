@@ -21,14 +21,14 @@
 namespace oat\taoSync\model\Export\Exporter;
 
 
-use oat\taoSync\model\Export\Packager\ExportPackagerInterface;
+use oat\taoSync\model\Packager\PackagerInterface;
 
 interface EntityExporterInterface
 {
     /**
      * Collects data for export and forwards it to provided packager
      *
-     * @param ExportPackagerInterface $packager
+     * @param PackagerInterface $packager
      * @return void
      */
     public function export($packager);
