@@ -114,7 +114,9 @@ class ZipPackager extends ConfigurableService implements PackagerInterface
             $json = fread($file, $fileInfo->getSize());
             $data[] = json_decode($json, true);
         }
-        $data = call_user_func_array('array_merge', $data);
+        if (!empty($data)) {
+            $data = call_user_func_array('array_merge', $data);
+        }
 
         return [
             'manifest' => $manifest,
