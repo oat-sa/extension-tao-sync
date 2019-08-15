@@ -20,8 +20,10 @@
 namespace oat\taoSync\model\Packager;
 
 
+use oat\oatbox\filesystem\File;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\PackagerException;
+use oat\taoSync\model\Exception\SyncImportException;
 
 class ZipPackager extends ConfigurableService implements PackagerInterface
 {
@@ -78,6 +80,46 @@ class ZipPackager extends ConfigurableService implements PackagerInterface
         \helpers_File::remove($this->directory);
 
         return $zipPath;
+    }
+
+    /**
+     * @param File $file
+     * @return array
+     * @throws SyncImportException
+     */
+    public function unpack(File $file)
+    {
+        try {
+            $dir = \tao_helpers_File::extractArchive($file);
+        } catch (\common_Exception $e) {
+            $this->logError('Cannot extract archive with synchronization data. ' . $e->getMessage());
+            throw new SyncImportException('Cannot extract archive with synchronization data.');
+        }
+
+        $directoryIterator = new \DirectoryIterator($dir);
+        $manifest = null;
+        $data = [];
+
+        foreach ($directoryIterator as $fileInfo) {
+            if ($fileInfo->isDot()) {
+                continue;
+            }
+
+            if ($fileInfo->getBasename() === self::MANIFEST_FILENAME) {
+                $manifest = json_decode(file_get_contents($fileInfo->getRealPath()), true);
+            } else {
+                $data[] = json_decode(file_get_contents($fileInfo->getRealPath()), true);
+            }
+        }
+
+        if (!empty($data)) {
+            $data = call_user_func_array('array_merge', $data);
+        }
+
+        return [
+            'manifest' => $manifest,
+            'data' => $data
+        ];
     }
 
     private function validateParams($params)

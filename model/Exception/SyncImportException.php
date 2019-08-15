@@ -17,42 +17,9 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\model\Packager;
 
-use oat\oatbox\filesystem\File;
+namespace oat\taoSync\model\Exception;
 
-interface PackagerInterface
+class SyncImportException extends \common_Exception
 {
-    const SERVICE_ID = 'taoSync/Packager';
-
-    /**
-     * Initialize the packager
-     *
-     * @param $params
-     * @return mixed
-     */
-    public function initialize($params);
-
-    /**
-     * Store synchronization data in the package
-     *
-     * @param $type
-     * @param $data
-     * @return mixed
-     */
-    public function store($type, $data);
-
-    /**
-     * Finalize the package and return the location
-     *
-     * @return string
-     */
-    public function finalize();
-
-    /**
-     * Unpack package
-     * @param File $file
-     * @return array
-     */
-    public function unpack(File $file);
 }
