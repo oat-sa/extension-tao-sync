@@ -104,16 +104,14 @@ class ZipPackager extends ConfigurableService implements PackagerInterface
             if ($fileInfo->isDot()) {
                 continue;
             }
+
             if ($fileInfo->getBasename() === self::MANIFEST_FILENAME) {
-                $file = fopen($fileInfo->getRealPath(), 'r');
-                $json = fread($file, $fileInfo->getSize());
-                $manifest = json_decode($json, true);
-                continue;
+                $manifest = json_decode(file_get_contents($fileInfo->getRealPath()), true);
+            } else {
+                $data[] = json_decode(file_get_contents($fileInfo->getRealPath()), true);
             }
-            $file = fopen($fileInfo->getRealPath(), 'r');
-            $json = fread($file, $fileInfo->getSize());
-            $data[] = json_decode($json, true);
         }
+
         if (!empty($data)) {
             $data = call_user_func_array('array_merge', $data);
         }
