@@ -28,6 +28,7 @@ define([
     'taoSync/component/terminateExecutions/terminateExecutions',
     'taoSync/component/readinessDashboard/readinessDashboard',
     'core/promise',
+    'ui/filesender'
 ], function (__, $, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory, Promise) {
     'use strict';
 
@@ -53,6 +54,7 @@ define([
         activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync'),
         terminateExecutions: urlHelper.route('terminateExecutions', 'TerminateExecution', 'taoSync'),
         exportSyncData: urlHelper.route('createTask', 'Exporter', 'taoSync'),
+        importSyncData: urlHelper.route('createTask', 'Importer', 'taoSync'),
     };
 
     /**
@@ -102,7 +104,7 @@ define([
              * Note that `:input` would include the button which is not wanted.
              * Configured in config/taoSync/syncFormFields.conf.php
              */
-            var $syncFormFields = $syncForm.find('input, select');
+            var $syncFormFields = $syncForm.find('input:not([type="file"]), select');
 
             /**
              * Launch button
@@ -401,7 +403,53 @@ define([
                         setState('error');
                     });
             });
-            setState('error');
+
+            $syncForm.find('input[data-control="import"]').on('change', function (e) {
+                var importFile = e.target.files[0];
+
+                if (!importFile) {
+                    return;
+                }
+
+                setState('progress');
+
+                $syncForm.sendfile({
+                    url: webservices.importSyncData,
+                    loaded: function (response) {
+                        taskQueue.pollSingle(response.data.task.id);
+                    },
+                    failed: function () {
+                        setState('error');
+                    }
+                });
+            });
+
+            request(webservices.lastTask)
+                .then(function (currentTask) {
+                    if (currentTask && currentTask.status) {
+                        switch (currentTask.status) {
+                            case 'failed':
+                                setState('error');
+                                break;
+                            case 'completed':
+                                setState('form');
+                                updateTime(currentTask);
+                                setHistoryTime(currentTask.updatedAt, '$completed');
+                                break;
+                            default:
+                                setState('progress');
+                                updateTime(currentTask);
+                                taskQueue.pollSingle(currentTask.id);
+                        }
+                    }
+                    else {
+                        setState('form');
+                    }
+                    loadingBar.stop();
+                })
+                .catch(function () {
+                    setState('error');
+                });
         }
     };
 });

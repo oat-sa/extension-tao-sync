@@ -813,7 +813,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.9.0');
         }
 
-        $this->skip('6.9.0', '6.10.0');
+        $this->skip('6.9.0', '6.11.0');
     }
 
     /**
