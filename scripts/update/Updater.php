@@ -54,6 +54,9 @@ use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
+use oat\taoSync\model\import\Importer\EntityImporterInterface;
+use oat\taoSync\model\import\Importer\ResultsImporter;
+use oat\taoSync\model\import\ImportService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -794,7 +797,23 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.8.0');
         }
 
-        $this->skip('6.8.0', '6.10.0');
+        if ($this->isVersion('6.8.0')) {
+            $this->getServiceManager()->register(
+                ImportService::SERVICE_ID,
+                new ImportService([
+                    ImportService::OPTION_IMPORTERS => [
+                        ResultsImporter::TYPE => [
+                            EntityImporterInterface::OPTION_CLASS => ResultsImporter::class,
+                            EntityImporterInterface::OPTION_PARAMETERS => []
+                        ]
+                    ]
+                ])
+            );
+
+            $this->setVersion('6.9.0');
+        }
+
+        $this->skip('6.9.0', '6.10.0');
     }
 
     /**

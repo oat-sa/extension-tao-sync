@@ -14,45 +14,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
- * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
+ * Copyright (c) 2019 (original work) Open Assessment Technologies SA;
+ *
  */
 
-namespace oat\taoSync\model\Packager;
+namespace oat\taoSync\model\import\Importer;
 
-use oat\oatbox\filesystem\File;
-
-interface PackagerInterface
+/**
+ * Interface EntityImporterInterface
+ * @package oat\taoSync\model\import\Importer
+ */
+interface EntityImporterInterface
 {
-    const SERVICE_ID = 'taoSync/Packager';
+    const OPTION_CLASS = 'class';
+    const OPTION_PARAMETERS = 'parameters';
 
     /**
-     * Initialize the packager
-     *
-     * @param $params
+     * @param array $data
+     * @param array $manifest
      * @return mixed
      */
-    public function initialize($params);
-
-    /**
-     * Store synchronization data in the package
-     *
-     * @param $type
-     * @param $data
-     * @return mixed
-     */
-    public function store($type, $data);
-
-    /**
-     * Finalize the package and return the location
-     *
-     * @return string
-     */
-    public function finalize();
-
-    /**
-     * Unpack package
-     * @param File $file
-     * @return array
-     */
-    public function unpack(File $file);
+    public function import(array $data, array $manifest);
 }
