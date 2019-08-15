@@ -401,33 +401,7 @@ define([
                         setState('error');
                     });
             });
-
-            request(webservices.lastTask)
-                .then(function (currentTask) {
-                    if (currentTask && currentTask.status) {
-                        switch (currentTask.status) {
-                            case 'failed':
-                                setState('error');
-                                break;
-                            case 'completed':
-                                setState('form');
-                                updateTime(currentTask);
-                                setHistoryTime(currentTask.updatedAt, '$completed');
-                                break;
-                            default:
-                                setState('progress');
-                                updateTime(currentTask);
-                                taskQueue.pollSingle(currentTask.id);
-                        }
-                    }
-                    else {
-                        setState('form');
-                    }
-                    loadingBar.stop();
-                })
-                .catch(function () {
-                    setState('error');
-                });
+            setState('error');
         }
     };
 });
