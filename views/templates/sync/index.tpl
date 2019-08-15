@@ -49,7 +49,7 @@ $formFields = get_data('form-fields');
                         <span class="icon-loop"></span>
                         <div class="messages">
                             <p>
-                                <?= __('Synchronization in progress.') ?>
+                                <span></span>
                                 <br/>
                                 <em><?= __('Note that all time data refer to the server time.') ?></em>
                             </p>
@@ -66,7 +66,7 @@ $formFields = get_data('form-fields');
                         <span class="icon-result-ok"></span>
                         <div class="messages">
                             <p>
-                                <span><?= __('Success! The synchronization process has been finished.') ?></span>
+                                <span></span>
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
                         </div>
@@ -76,7 +76,7 @@ $formFields = get_data('form-fields');
                         <span class="icon-error"></span>
                         <div class="messages">
                             <p>
-                                <span><?= __('The synchronization process has failed.') ?></span>
+                                <span></span>
                                 <span> <?= __('Go to') ?> <a href="<?= get_data('dashboard-url'); ?>"><?= __('Synchronization History') ?></a>.</span>
                             </p>
                         </div>
@@ -100,10 +100,18 @@ $formFields = get_data('form-fields');
                 </fieldset>
                 <?php endif; ?>
 
-                <button type="submit" class="btn-info" data-control="launch" disabled>
-                    <span class="icon-loop"></span>
-                    <?= __('Synchronize Data') ?>
-                </button>
+                <div class="launch-container">
+                  <button type="submit" class="btn-info" data-control="launch">
+                      <span class="icon-loop"></span>
+                      <?= __('Synchronize Data') ?>
+                  </button>
+
+                  <?php if($isExportEnabled): ?>
+                      <a class="export-link" data-control="export">
+                          <?= __('Export Results') ?>
+                      </a>
+                  <?php endif; ?>
+                </div>
 
                 <div id="dashboard-container"></div>
 

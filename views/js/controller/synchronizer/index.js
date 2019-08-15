@@ -17,6 +17,7 @@
  */
 
 define([
+    'i18n',
     'jquery',
     'lodash',
     'moment',
@@ -27,7 +28,7 @@ define([
     'taoSync/component/terminateExecutions/terminateExecutions',
     'taoSync/component/readinessDashboard/readinessDashboard',
     'core/promise',
-], function ($, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory, Promise) {
+], function (__, $, _, moment, request, urlHelper, taskQueueModelFactory, loadingBar, terminateExecutionsDialogFactory, readinessDashboardFactory, Promise) {
     'use strict';
 
     /**
@@ -51,6 +52,7 @@ define([
         lastTask: urlHelper.route('lastTask', 'Synchronizer', 'taoSync'),
         activeSessions: urlHelper.route('activeSessions', 'Synchronizer', 'taoSync'),
         terminateExecutions: urlHelper.route('terminateExecutions', 'TerminateExecution', 'taoSync'),
+        exportSyncData: urlHelper.route('createTask', 'Exporter', 'taoSync'),
     };
 
     /**
@@ -58,6 +60,22 @@ define([
      * @type {String}
      */
     var taskLabel = 'Data Synchronization';
+
+    /**
+     * Export task name
+     * @type {String}
+     */
+    var exportTaskName = 'oat\\taoSync\\scripts\\tool\\Export\\ExportSynchronizationPackage';
+
+    /**
+     * Default notification messages
+     * @type {Object}
+     */
+    var defaultSyncMessages = {
+        error: __('The synchronization process has failed.'),
+        progress: __('Synchronization in progress.'),
+        success: __('Success! The synchronization process has been finished.'),
+    };
 
     /**
      * Initialize the application
@@ -146,9 +164,14 @@ define([
                 ]
             }).on('pollSingleFinished', function (taskId, taskData) {
                 if (taskData.status === 'completed') {
-                    setState('success');
-                    updateTime(taskData);
-                    setHistoryTime(taskData.updatedAt, '$completed');
+                    if (taskData.taskName === exportTaskName) {
+                        setState('form');
+                        taskQueue.download(taskId);
+                    } else {
+                        setState('success');
+                        updateTime(taskData);
+                        setHistoryTime(taskData.updatedAt, '$completed');
+                    }
                 }
                 else if (taskData.status === 'failed') {
                     setState('error');
@@ -207,6 +230,10 @@ define([
              * @param {String} state
              */
             function setState(state, message) {
+                var statusClassName = '.status-' + state;
+                var $messageContainer = $container.find(statusClassName + ' .messages p span:first-child');
+                $messageContainer.text(message || defaultSyncMessages[state]);
+
                 $container.removeClass(function (index, className) {
                     return (className.match(/(^|\s)state-\S+/g) || []).join(' ');
                 });
@@ -215,12 +242,6 @@ define([
                 $container.addClass('state-' + state);
                 msg.$all.hide();
 
-                if (message) {
-                    var statusClassName = '.status-' + state;
-                    var $messageContainer = $container.find(statusClassName + ' .messages p span:first-child');
-
-                    $messageContainer.text(message);
-                }
                 if (state === 'success' || state === 'error') {
                     renderReadinessDashboard();
                 } else if (state === 'progress') {
@@ -365,32 +386,22 @@ define([
                 setState('form');
             });
 
-            request(webservices.lastTask)
-                .then(function (currentTask) {
-                    if (currentTask && currentTask.status) {
-                        switch (currentTask.status) {
-                            case 'failed':
-                                setState('error');
-                                break;
-                            case 'completed':
-                                setState('form');
-                                updateTime(currentTask);
-                                setHistoryTime(currentTask.updatedAt, '$completed');
-                                break;
-                            default:
-                                setState('progress');
-                                updateTime(currentTask);
-                                taskQueue.pollSingle(currentTask.id);
+            $syncForm.find('a[data-control="export"]').on('click', function (e) {
+                setState('progress', __('Preparation of synchronization data is in progress.'));
+
+                checkActiveSessions()
+                    .then(function (canStartSynchronization) {
+                        if (canStartSynchronization) {
+                            taskQueue.create(urlHelper.build(webservices.exportSyncData, getData()));
+                        } else {
+                            setState('form');
                         }
-                    }
-                    else {
-                        setState('form');
-                    }
-                    loadingBar.stop();
-                })
-                .catch(function () {
-                    setState('error');
-                });
+                    })
+                    .catch(function () {
+                        setState('error');
+                    });
+            });
+            setState('error');
         }
     };
 });
