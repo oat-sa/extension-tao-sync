@@ -57,7 +57,6 @@ class SynchronizeAll extends AbstractAction
             new SyncStartedEvent($params, $report)
         );
 
-        $success = false;
         $failureReason = '';
         try {
             $this->checkSyncPreconditions($params);
@@ -67,17 +66,16 @@ class SynchronizeAll extends AbstractAction
                     $report->add(call_user_func($this->propagate(new $action), $params));
                 }
             }
-            $success = true;
         } catch (\Exception $e) {
-            $report->add(Report::createFailure('An error has occurred : ' . $e->getMessage()));
+            $report->add(Report::createFailure('An error has occurred: ' . $e->getMessage()));
             $failureReason = $e->getMessage();
         } finally {
-            if ($success === true) {
-                $event = new SyncFinishedEvent($params, $report);
-            } else {
+            if ($report->containsError()) {
                 $report->add(Report::createFailure('An unexpected PHP error has occurred.'));
                 $event = new SyncFailedEvent($params, $report);
                 $event->setReason($failureReason);
+            } else {
+                $event = new SyncFinishedEvent($params, $report);
             }
             $eventManager->trigger($event);
         }

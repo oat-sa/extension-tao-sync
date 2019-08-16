@@ -58,7 +58,7 @@ class SyncStatusListener extends ConfigurableService
             /** @var SynchronisationClient $syncClient */
             $syncClient = $this->getServiceLocator()->get(SynchronisationClient::SERVICE_ID);
             $syncParams = $event->getSyncParameters();
-            $response = $syncClient->sendSyncFailedConfirmation($syncParams, $event->getReason());
+            $response = $syncClient->sendSyncFailedConfirmation($syncParams, $this->getFailingReason($event));
             $this->logInfo(json_encode($response));
         } catch (\Exception $e) {
             $this->logError($e->getMessage());
@@ -71,5 +71,18 @@ class SyncStatusListener extends ConfigurableService
     protected function getOfflineMachineChecksService()
     {
         return $this->getServiceLocator()->get(OfflineMachineChecksService::SERVICE_ID);
+    }
+
+    /**
+     * @param SyncFailedEvent $event
+     * @return string|array
+     */
+    private function getFailingReason(SyncFailedEvent $event)
+    {
+        if ($event->getReason()) {
+            return $event->getReason();
+        }
+
+        return $event->getReport()->getErrors(true);
     }
 }

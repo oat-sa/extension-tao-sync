@@ -47,9 +47,16 @@ use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
+use oat\taoSync\model\Export\Exporter\ResultsExporter;
+use oat\taoSync\model\Packager\PackagerInterface;
+use oat\taoSync\model\Packager\ZipPackager;
+use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\history\byOrganisationId\DataSyncHistoryByOrgIdService;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\history\ResultSyncHistoryService;
+use oat\taoSync\model\import\Importer\EntityImporterInterface;
+use oat\taoSync\model\import\Importer\ResultsImporter;
+use oat\taoSync\model\import\ImportService;
 use oat\taoSync\model\import\SyncUserCsvImporter;
 use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
@@ -57,6 +64,8 @@ use oat\taoSync\model\OfflineMachineChecksService;
 use oat\taoSync\model\Parser\DeliveryExecutionContextParser;
 use oat\taoSync\model\ResultService;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\Result\SyncResultDataProvider;
+use oat\taoSync\model\Result\SyncResultDataFormatter;
 use oat\taoSync\model\testCenter\SyncManagerTreeService;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
 use oat\taoSync\model\SynchronizationHistory\HistoryPayloadFormatter;
@@ -737,7 +746,74 @@ class Updater extends \common_ext_ExtensionUpdater
             );
             $this->setVersion('6.4.0');
         }
-        $this->skip('6.4.0', '6.5.3');
+
+        $this->skip('6.4.0', '6.5.4');
+
+        if ($this->isVersion('6.5.4')) {
+
+            $resultService = $this->getServiceManager()->get(ResultService::SERVICE_ID);
+            $currentOptionValue = $resultService->getOption(SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC);
+            $resultService->setOptions([
+                ResultService::OPTION_CHUNK_SIZE => $resultService->getOption(ResultService::OPTION_CHUNK_SIZE),
+                ResultService::OPTION_DELETE_AFTER_SEND => $resultService->getOption(ResultService::OPTION_DELETE_AFTER_SEND),
+            ]);
+            $this->getServiceManager()->register(ResultService::SERVICE_ID, $resultService);
+
+            $syncResultDataProvider = new SyncResultDataProvider([SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC => $currentOptionValue]);
+            $this->getServiceManager()->register(SyncResultDataProvider::SERVICE_ID, $syncResultDataProvider);
+
+            $syncResultsDataFormatter = new SyncResultDataFormatter([]);
+            $this->getServiceManager()->register(SyncResultDataFormatter::SERVICE_ID, $syncResultsDataFormatter);
+
+            $this->setVersion('6.6.0');
+        }
+
+        if ($this->isVersion('6.6.0')) {
+            if ($this->getServiceManager()->has('taoSync/SyncResultsDataFormatter')) {
+                $syncResultDataFormatter = $this->getServiceManager()->get('taoSync/SyncResultsDataFormatter');
+                $this->getServiceManager()->unregister('taoSync/SyncResultsDataFormatter');
+                $this->getServiceManager()->register(SyncResultDataFormatter::SERVICE_ID, $syncResultDataFormatter);
+            }
+
+            $this->setVersion('6.6.1');
+        }
+
+        $this->skip('6.6.1', '6.7.0');
+
+        if ($this->isVersion('6.7.0')) {
+            $packager = new ZipPackager();
+            $this->getServiceManager()->register(PackagerInterface::SERVICE_ID, $packager);
+
+            $exportService = new ExportService([
+                ExportService::OPTION_IS_ENABLED => false,
+                ExportService::OPTION_EXPORTERS => [
+                    ResultsExporter::TYPE => new ResultsExporter([
+                        ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE,
+                    ])
+                ],
+            ]);
+            $this->getServiceManager()->register(ExportService::SERVICE_ID, $exportService);
+
+            $this->setVersion('6.8.0');
+        }
+
+        if ($this->isVersion('6.8.0')) {
+            $this->getServiceManager()->register(
+                ImportService::SERVICE_ID,
+                new ImportService([
+                    ImportService::OPTION_IMPORTERS => [
+                        ResultsImporter::TYPE => [
+                            EntityImporterInterface::OPTION_CLASS => ResultsImporter::class,
+                            EntityImporterInterface::OPTION_PARAMETERS => []
+                        ]
+                    ]
+                ])
+            );
+
+            $this->setVersion('6.9.0');
+        }
+
+        $this->skip('6.9.0', '6.11.0');
     }
 
     /**

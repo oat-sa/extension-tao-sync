@@ -25,16 +25,15 @@ use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
-use oat\taoDelivery\model\execution\Monitoring;
 use oat\taoDelivery\model\execution\ServiceProxy;
-use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
-use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\history\ResultSyncHistoryService;
 use oat\taoSync\model\Mapper\OfflineResultToOnlineResultMapper;
+use oat\taoSync\model\Result\SyncResultDataFormatter;
+use oat\taoSync\model\Result\SyncResultDataProvider;
 use oat\taoSync\model\SyncLog\SyncLogDataHelper;
 use Psr\Log\LogLevel;
 
@@ -50,7 +49,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
 
     const OPTION_CHUNK_SIZE = 'chunkSize';
     const OPTION_DELETE_AFTER_SEND = 'deleteAfterSend';
-    const OPTION_STATUS_EXECUTIONS_TO_SYNC = 'statusExecutionsToSync';
 
     const DEFAULT_CHUNK_SIZE = 10;
 
@@ -79,60 +77,37 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         $results = [];
         $counter = 0;
 
-        /** @var \core_kernel_classes_Resource $delivery */
-        foreach ($this->getDeliveryAssemblyService()->getAllAssemblies() as $delivery) {
-            $deliveryId = $delivery->getUri();
-            /** @var DeliveryExecution $deliveryExecution */
-            foreach ($this->getDeliveryExecutionByDelivery($delivery) as $deliveryExecution) {
-                $deliveryExecutionId = $deliveryExecution->getIdentifier();
-                $statesToSync        = $this->getExecutionsStatesAvailableForSync();
-                $currentState        = $deliveryExecution->getState()->getUri();
-                // Skip non white listed states of delivery executions.
-                if (!in_array($currentState, $statesToSync)){
-                    continue;
-                }
-
-                // Do not resend delivery execution already exported
-                if ($this->getResultSyncHistory()->isAlreadyExported($deliveryExecutionId)) {
-                    continue;
-                }
-
-                // Do no send delivery execution with no variables (deleted)
-                $variables = $this->getDeliveryExecutionVariables($deliveryId, $deliveryExecutionId);
-                if (empty($variables)) {
-                    continue;
-                }
-
-                $this->report('Formatting delivery execution ' . $deliveryExecution->getIdentifier() . '...');
-                $results[$deliveryExecutionId] = [
-                    'deliveryId' => $deliveryId,
-                    'deliveryExecutionId' => $deliveryExecutionId,
-                    'details' => $this->getDeliveryExecutionDetails($deliveryExecutionId),
-                    'variables' => $variables,
-                ];
-
-                $this->report(count($variables) . ' delivery execution variables found.');
-
-                $counter++;
-
-                if ($counter % $this->getChunkSize() === 0) {
-                    $this->report($counter . ' delivery executions to send to remote server. Sending...', LogLevel::INFO);
-                    $this->sendResults($results, $params);
-                    $results = [];
-                }
+        /** @var SyncResultDataProvider $dataProvider */
+        $dataProvider = $this->getServiceLocator()->get(SyncResultDataProvider::SERVICE_ID);
+        foreach ($dataProvider->getDeliveryExecutions($this->getChunkSize()) as $chunkOfDeliveryExecutions) {
+            if (empty($chunkOfDeliveryExecutions)) {
+                continue;
             }
+            /** @var DeliveryExecution $deliveryExecution */
+            foreach ($chunkOfDeliveryExecutions as $deliveryExecution) {
+                $deliveryExecutionId = $deliveryExecution->getIdentifier();
+                $this->report('Formatting delivery execution ' . $deliveryExecutionId . '...');
+
+                $formattedDeliveryExecution = $this->getSyncResultsFormatterService()->format($deliveryExecution);
+                if (empty($formattedDeliveryExecution)) {
+                    continue;
+                }
+                $this->report(count($formattedDeliveryExecution['variables']) . ' delivery execution variables found.');
+
+                $results[$deliveryExecutionId] = $formattedDeliveryExecution;
+                $counter++;
+            }
+
+            $this->report($counter . ' delivery executions to send to remote server. Sending...', LogLevel::INFO);
+            $this->sendResults($results, $params);
+            $results = [];
         }
 
         if ($counter === 0) {
             $this->report('No result to synchronize', LogLevel::INFO);
         }
 
-        if (!empty($results)) {
-            $this->sendResults($results, $params);
-        }
-
         return $this->report;
-
     }
 
     /**
@@ -147,6 +122,10 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
      */
     public function sendResults($results, array $params = [])
     {
+        if (empty($results)) {
+            $this->report('No results to be synchronized.', LogLevel::INFO);
+            return;
+        }
         $importAcknowledgment = $this->getSyncClient()->sendResults($results, $params);
         if (empty($importAcknowledgment)) {
             throw new \common_Exception('Error during result synchronisation. No acknowledgment was provided by remote server.');
@@ -283,30 +262,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     }
 
     /**
-     * Get details of a delivery execution
-     *
-     * @param $deliveryExecutionId
-     * @return array
-     */
-    protected function getDeliveryExecutionDetails($deliveryExecutionId)
-    {
-        /** @var DeliveryExecution $deliveryExecution */
-        $deliveryExecution = $this->getDeliveryExecutionService()->getDeliveryExecution($deliveryExecutionId);
-        try {
-            return [
-                'identifier' => $deliveryExecution->getIdentifier(),
-                'label' => $deliveryExecution->getLabel(),
-                'test-taker' => $deliveryExecution->getUserIdentifier(),
-                'starttime' => $deliveryExecution->getStartTime(),
-                'finishtime' => $deliveryExecution->getFinishTime(),
-                'state' => $deliveryExecution->getState()->getUri(),
-            ];
-        } catch (\common_exception_NotFound $e) {
-            return [];
-        }
-    }
-
-    /**
      * Check if $result has the correct keys to be processed
      *
      * @param array $data
@@ -327,47 +282,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         if (!empty(array_diff_key(array_flip($details), $data['details']))) {
             throw new \InvalidArgumentException('Result details are not correctly formatted, should contains : ' . implode(', ', $details));
         }
-    }
-
-    /**
-     * Get variables of a delivery execution
-     *
-     * @param $deliveryId
-     * @param $deliveryExecutionId
-     * @return array
-     * @throws \core_kernel_persistence_Exception
-     */
-    protected function getDeliveryExecutionVariables($deliveryId, $deliveryExecutionId)
-    {
-        $variables = $this->getResultStorage($deliveryId)->getDeliveryVariables($deliveryExecutionId);
-        $deliveryExecutionVariables = [];
-        foreach ($variables as $variable) {
-            $variable = (array) $variable[0];
-            list($testIdentifier,$itemIdentifier) = $this->detectTestAndItemIdentifiers($deliveryId, $variable);
-            $deliveryExecutionVariables[] = [
-                'type' => $variable['class'],
-                'callIdTest' => isset($variable['callIdTest'])? $variable['callIdTest'] : null,
-                'callIdItem' => isset($variable['callIdItem']) ? $variable['callIdItem'] : null,
-                'test' => $testIdentifier,
-                'item' => $itemIdentifier,
-                'data' => $variable['variable'],
-            ];
-        }
-
-        return $deliveryExecutionVariables;
-    }
-
-    /**
-     * @param $deliveryId
-     * @param $variable
-     * @return array
-     * @throws \core_kernel_persistence_Exception
-     */
-    protected function detectTestAndItemIdentifiers($deliveryId, $variable)
-    {
-        $test = isset($variable['test']) ? $variable['test'] : null;
-        $item = isset($variable['item']) ? $variable['item'] : null;
-        return (new DetectTestAndItemIdentifiersHelper())->detect($deliveryId, $test, $item);
     }
 
     /**
@@ -433,28 +347,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
         }
 
         $this->report(count($successfullyExportedResults) . ' deleted.', LogLevel::INFO);
-    }
-
-    /**
-     * Get delivery executions by delivery
-     *
-     * @param \core_kernel_classes_Resource $delivery
-     * @return array|DeliveryExecution[]
-     */
-    protected function getDeliveryExecutionByDelivery(\core_kernel_classes_Resource $delivery)
-    {
-        $serviceProxy = $this->getDeliveryExecutionService();
-        if (!$serviceProxy instanceof Monitoring) {
-            $resultStorage = $this->getResultStorage($delivery->getUri());
-            $results = $resultStorage->getResultByDelivery([$delivery->getUri()]);
-            $executions = [];
-            foreach ($results as $result) {
-                $executions[] = $serviceProxy->getDeliveryExecution($result['deliveryResultIdentifier']);
-            }
-        } else{
-            $executions = $serviceProxy->getExecutionsByDelivery($delivery);
-        }
-        return $executions;
     }
 
     /**
@@ -557,6 +449,14 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     }
 
     /**
+     * @return SyncResultDataFormatter
+     */
+    protected function getSyncResultsFormatterService()
+    {
+        return $this->getServiceLocator()->get(SyncResultDataFormatter::SERVICE_ID);
+    }
+
+    /**
      * @return SynchronisationClient
      */
     protected function getSyncClient()
@@ -570,27 +470,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
     protected function getDeliveryExecutionService()
     {
         return $this->getServiceLocator()->get(ServiceProxy::SERVICE_ID);
-    }
-
-    /**
-     * @return DeliveryAssemblyService
-     */
-    protected function getDeliveryAssemblyService()
-    {
-        return DeliveryAssemblyService::singleton();
-    }
-
-    /**
-     * @return array
-     */
-    protected function getExecutionsStatesAvailableForSync()
-    {
-        $statuses = $this->getOption(static::OPTION_STATUS_EXECUTIONS_TO_SYNC);
-        if ($statuses == null){
-            return [DeliveryExecution::STATE_FINISHIED];
-        }
-
-        return $statuses;
     }
 
     /**
