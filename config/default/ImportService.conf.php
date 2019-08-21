@@ -13,5 +13,6 @@ return new ImportService([
             EntityImporterInterface::OPTION_CLASS => ResultsImporter::class,
             EntityImporterInterface::OPTION_PARAMETERS => []
         ]
-    ]
+    ],
+    ImportService::OPTION_IS_ENABLED => false
 ]);

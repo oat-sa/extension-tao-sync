@@ -110,7 +110,9 @@ $formFields = get_data('form-fields');
                       <a class="export-link" data-control="export">
                           <?= __('Export Results') ?>
                       </a>
+                  <?php endif; ?>
 
+                  <?php if($isImportEnabled): ?>
                       <label class="import-label" for="syncPackage"><?= __('Import Results') ?></label>
                       <input class="import-file-input" type="file" name="syncPackage" id="syncPackage" data-control="import" accept=".zip,application/octet-stream,application/zip,application/x-zip,application/x-zip-compressed" />
                   <?php endif; ?>

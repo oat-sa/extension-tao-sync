@@ -814,6 +814,17 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('6.9.0', '6.11.0');
+
+        if ($this->isVersion('6.11.0')) {
+            $importService = $this->getServiceManager()->get(ImportService::SERVICE_ID);
+            $options = $importService->getOptions();
+            $options[ImportService::OPTION_IS_ENABLED] = false;
+            $this->getServiceManager()->register(ImportService::SERVICE_ID, $importService);
+
+            $this->setVersion('6.12.0');
+        }
+
+        $this->skip('6.12.0', '6.13.0');
     }
 
     /**
