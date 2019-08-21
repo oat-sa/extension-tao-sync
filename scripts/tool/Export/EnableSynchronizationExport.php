@@ -26,7 +26,7 @@ use oat\taoSync\model\Export\ExportService;
 /**
  * Enables synchronization package export
  *
- * sudo -u www-data php index.php '\oat\taoSync\scripts\tool\Export\EnableSynchronizationExport'
+ * php index.php '\oat\taoSync\scripts\tool\Export\EnableSynchronizationExport'
  */
 class EnableSynchronizationExport extends InstallAction
 {

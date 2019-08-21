@@ -25,5 +25,6 @@ return new ExportService(array(
         ResultsExporter::TYPE => new ResultsExporter([
             ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE
         ])
-    ]
+    ],
+    ExportService::OPTION_IS_ENABLED => false
 ));

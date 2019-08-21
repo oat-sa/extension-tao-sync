@@ -26,7 +26,7 @@ use oat\taoSync\model\import\ImportService;
 /**
  * Enables synchronization package import
  *
- * sudo -u www-data php index.php '\oat\taoSync\scripts\tool\Import\EnableSynchronizationImport'
+ * php index.php '\oat\taoSync\scripts\tool\Import\EnableSynchronizationImport'
  */
 class EnableSynchronizationImport extends InstallAction
 {
