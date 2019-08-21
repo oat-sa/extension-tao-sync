@@ -17,33 +17,33 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-namespace oat\taoSync\scripts\tool\Export;
+namespace oat\taoSync\scripts\tool\Import;
 
 
 use oat\oatbox\extension\InstallAction;
-use oat\taoSync\model\Export\ExportService;
+use oat\taoSync\model\import\ImportService;
 
 /**
- * Enables synchronization package export
+ * Enables synchronization package import
  *
- * php index.php '\oat\taoSync\scripts\tool\Export\EnableSynchronizationExport'
+ * php index.php '\oat\taoSync\scripts\tool\Import\EnableSynchronizationImport'
  */
-class EnableSynchronizationExport extends InstallAction
+class EnableSynchronizationImport extends InstallAction
 {
     public function __invoke($params)
     {
-        $exportService = $this->getExportService();
-        $exportService->setOption(ExportService::OPTION_IS_ENABLED, true);
-        $this->registerService(ExportService::SERVICE_ID, $exportService);
+        $importService = $this->getImportService();
+        $importService->setOption(ImportService::OPTION_IS_ENABLED, true);
+        $this->registerService(ImportService::SERVICE_ID, $importService);
 
-        return \common_report_Report::createSuccess('Synchronization package export enabled.');
+        return \common_report_Report::createSuccess('Synchronization package import enabled.');
     }
 
     /**
-     * @return ExportService
+     * @return ImportService
      */
-    protected function getExportService()
+    protected function getImportService()
     {
-        return $this->getServiceLocator()->get(ExportService::SERVICE_ID);
+        return $this->getServiceLocator()->get(ImportService::SERVICE_ID);
     }
 }

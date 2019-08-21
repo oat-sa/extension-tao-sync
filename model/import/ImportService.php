@@ -33,6 +33,7 @@ class ImportService extends ConfigurableService
 {
     const SERVICE_ID = 'taoSync/ImportService';
     const OPTION_IMPORTERS = 'importers';
+    const OPTION_IS_ENABLED = 'isEnabled';
 
     /** @var EntityImporterInterface[] */
     private $importers = [];
