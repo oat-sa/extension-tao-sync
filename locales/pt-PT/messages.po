@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: TAO 3.3.0-sprint104\n"
-"PO-Revision-Date: 2019-06-21T08:40:47\n"
+"Project-Id-Version: TAO 3.3.0-sprint109\n"
+"PO-Revision-Date: 2019-08-21T12:51:13\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
 "Language: pt-PT\n"
@@ -61,10 +61,19 @@ msgstr ""
 msgid "Executions were successfully terminated."
 msgstr ""
 
+msgid "Export Results"
+msgstr ""
+
 msgid "Force end and synchronize"
 msgstr ""
 
 msgid "Go to"
+msgstr ""
+
+msgid "Import of synchronization data is in progress."
+msgstr ""
+
+msgid "Import Results"
 msgstr ""
 
 #, tao-public
@@ -77,6 +86,9 @@ msgstr ""
 msgid "Last synchronization has been completed at %s"
 msgstr ""
 
+msgid "Missed package file"
+msgstr ""
+
 msgid "Note that all time data refer to the server time."
 msgstr ""
 
@@ -84,6 +96,9 @@ msgid "Please confirm reassignment"
 msgstr ""
 
 msgid "please ensure that everyone has completed the assessment before proceeding."
+msgstr ""
+
+msgid "Preparation of synchronization data is in progress."
 msgstr ""
 
 #, tao-public
@@ -101,6 +116,15 @@ msgid "Settings"
 msgstr ""
 
 msgid "Success! The synchronization process has been finished."
+msgstr ""
+
+msgid "Synchronization data has been imported."
+msgstr ""
+
+msgid "Synchronization data is ready to be downloaded. Downloading process will start in the background."
+msgstr ""
+
+msgid "Synchronization export feature is not enabled."
 msgstr ""
 
 #, tao-public
@@ -126,6 +150,9 @@ msgid "TestCenter must have only ony Sync Manager"
 msgstr ""
 
 msgid "The data synchronization cannot be completed because there are active assessments in progress."
+msgstr ""
+
+msgid "The export is already running!"
 msgstr ""
 
 msgid "The synchronisation is already running!"
