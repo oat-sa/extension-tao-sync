@@ -69,6 +69,8 @@ define([
      */
     var exportTaskName = 'oat\\taoSync\\scripts\\tool\\Export\\ExportSynchronizationPackage';
 
+    var importTaskName = 'oat\\taoSync\\scripts\\tool\\Import\\ImportSynchronizationPackage';
+
     /**
      * Default notification messages
      * @type {Object}
@@ -167,8 +169,10 @@ define([
             }).on('pollSingleFinished', function (taskId, taskData) {
                 if (taskData.status === 'completed') {
                     if (taskData.taskName === exportTaskName) {
-                        setState('form');
+                        setState('success', __('Synchronization data is ready to be downloaded. Downloading process will start in the background.'));
                         taskQueue.download(taskId);
+                    } else if (taskData.taskName === importTaskName) {
+                        setState('success', __('Synchronization data has been imported.'), true);
                     } else {
                         setState('success');
                         updateTime(taskData);
@@ -231,7 +235,7 @@ define([
              *
              * @param {String} state
              */
-            function setState(state, message) {
+            function setState(state, message, hideDashboard) {
                 var statusClassName = '.status-' + state;
                 var $messageContainer = $container.find(statusClassName + ' .messages p span:first-child');
                 $messageContainer.text(message || defaultSyncMessages[state]);
@@ -244,7 +248,7 @@ define([
                 $container.addClass('state-' + state);
                 msg.$all.hide();
 
-                if (state === 'success' || state === 'error') {
+                if ((state === 'success' || state === 'error') && !hideDashboard) {
                     renderReadinessDashboard();
                 } else if (state === 'progress') {
                     readinessDashboard && readinessDashboard.destroy();
@@ -411,7 +415,7 @@ define([
                     return;
                 }
 
-                setState('progress');
+                setState('progress', __('Import of synchronization data is in progress.'));
 
                 $syncForm.sendfile({
                     url: webservices.importSyncData,
