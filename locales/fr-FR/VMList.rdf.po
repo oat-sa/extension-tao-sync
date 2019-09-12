@@ -13,15 +13,15 @@ msgstr ""
 # http://www.tao.lu/Ontologies/TAO.rdf#TaoVM
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Approved VM"
-msgstr ""
+msgstr "MV approuvée"
 
 # http://www.tao.lu/Ontologies/TAO.rdf#TaoVMVersion
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "TAO VM version"
-msgstr ""
+msgstr "Version de la VM TAO"
 
 # http://www.tao.lu/Ontologies/TAO.rdf#TaoVMNotes
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Notes"
-msgstr ""
+msgstr "Notes"
 
