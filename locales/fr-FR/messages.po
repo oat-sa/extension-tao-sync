@@ -1,0 +1,189 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: TAO 3.3.0-sprint109\n"
+"PO-Revision-Date: 2019-08-21T12:51:13\n"
+"Last-Translator: TAO Translation Team <translation@tao.lu>\n"
+"MIME-Version: 1.0\n"
+"Language: fr-FR\n"
+"sourceLanguage: en-US\n"
+"targetLanguage: fr-FR\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Basepath: ../../\n"
+"X-Poedit-KeywordsList: __\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#, tao-public
+msgid "Add"
+msgstr ""
+
+msgid "Approved VMs"
+msgstr ""
+
+msgid "Assessments in progress:"
+msgstr ""
+
+msgid "Box ID"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Connection statistics"
+msgstr ""
+
+msgid "Connectivity"
+msgstr ""
+
+msgid "Current version of Tao Local is not compatible with Tao Cloud."
+msgstr ""
+
+#, tao-public
+msgid "Data Synchronization"
+msgstr ""
+
+#, tao-public
+msgid "Delete"
+msgstr ""
+
+msgid "Depending on the workload this process may take a while."
+msgstr ""
+
+msgid "Detail view"
+msgstr ""
+
+msgid "Disk & DB space:"
+msgstr ""
+
+msgid "Done"
+msgstr ""
+
+msgid "Executions were successfully terminated."
+msgstr ""
+
+msgid "Export Results"
+msgstr ""
+
+msgid "Force end and synchronize"
+msgstr ""
+
+msgid "Go to"
+msgstr ""
+
+msgid "Import of synchronization data is in progress."
+msgstr ""
+
+msgid "Import Results"
+msgstr ""
+
+#, tao-public
+msgid "Index"
+msgstr ""
+
+msgid "Last status check at %s"
+msgstr ""
+
+msgid "Last synchronization has been completed at %s"
+msgstr ""
+
+msgid "Missed package file"
+msgstr ""
+
+msgid "Note that all time data refer to the server time."
+msgstr ""
+
+msgid "Please confirm reassignment"
+msgstr ""
+
+msgid "please ensure that everyone has completed the assessment before proceeding."
+msgstr ""
+
+msgid "Preparation of synchronization data is in progress."
+msgstr ""
+
+#, tao-public
+msgid "Properties"
+msgstr ""
+
+msgid "Required field"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+#, tao-public
+msgid "Settings"
+msgstr ""
+
+msgid "Success! The synchronization process has been finished."
+msgstr ""
+
+msgid "Synchronization data has been imported."
+msgstr ""
+
+msgid "Synchronization data is ready to be downloaded. Downloading process will start in the background."
+msgstr ""
+
+msgid "Synchronization export feature is not enabled."
+msgstr ""
+
+#, tao-public
+msgid "Synchronization History"
+msgstr ""
+
+msgid "Synchronization in progress."
+msgstr ""
+
+msgid "Synchronization report data"
+msgstr ""
+
+msgid "Synchronize Data"
+msgstr ""
+
+msgid "Task has been enqueued at %s"
+msgstr ""
+
+msgid "TestCenter must have an organisation id property to associate it to sync manager(s)."
+msgstr ""
+
+msgid "TestCenter must have only ony Sync Manager"
+msgstr ""
+
+msgid "The data synchronization cannot be completed because there are active assessments in progress."
+msgstr ""
+
+msgid "The export is already running!"
+msgstr ""
+
+msgid "The synchronisation is already running!"
+msgstr ""
+
+msgid "The synchronization process has failed."
+msgstr ""
+
+msgid "There are %s assessments in progress"
+msgstr ""
+
+msgid "There is one assessment in progress"
+msgstr ""
+
+msgid "This user is already assigned to test centers: <strong>"
+msgstr ""
+
+#, tao-public
+msgid "Tools"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "Virtual machine version"
+msgstr ""
+
+#, tao-public
+msgid "VM Lists"
+msgstr ""
+
