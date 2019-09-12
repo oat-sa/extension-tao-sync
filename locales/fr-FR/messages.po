@@ -1,12 +1,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: TAO 3.3.0-sprint110\n"
-"PO-Revision-Date: 2019-09-12T15:43:03\n"
+"PO-Revision-Date: 2019-09-12T15:43:04\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
-"Language: en-US\n"
+"Language: fr-FR\n"
 "sourceLanguage: en-US\n"
-"targetLanguage: en-US\n"
+"targetLanguage: fr-FR\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-Basepath: ../../\n"
@@ -15,175 +15,175 @@ msgstr ""
 
 #, tao-public
 msgid "Add"
-msgstr ""
+msgstr "Ajoutez"
 
 msgid "Approved VMs"
-msgstr ""
+msgstr "VM approuvée"
 
 msgid "Assessments in progress:"
-msgstr ""
+msgstr "Évaluations en cours :"
 
 msgid "Box ID"
-msgstr ""
+msgstr "ID de la bo"
 
 msgid "Cancel"
-msgstr ""
+msgstr "Annuler"
 
 msgid "Connection statistics"
-msgstr ""
+msgstr "Statistiques de connexion"
 
 msgid "Connectivity"
-msgstr ""
+msgstr "Connectivité"
 
 msgid "Current version of Tao Local is not compatible with Tao Cloud."
-msgstr ""
+msgstr "La version actuelle de Tao Local n'est pas compatible avec Tao Cloud."
 
 #, tao-public
 msgid "Data Synchronization"
-msgstr ""
+msgstr "Synchronisation des données"
 
 #, tao-public
 msgid "Delete"
-msgstr ""
+msgstr "Supprimer"
 
 msgid "Depending on the workload this process may take a while."
-msgstr ""
+msgstr "Selon la charge de travail, ce processus peut prendre un certain temps."
 
 msgid "Detail view"
-msgstr ""
+msgstr "Vue détaillée"
 
 msgid "Disk & DB space:"
-msgstr ""
+msgstr "Espace disque et BDD :"
 
 msgid "Done"
-msgstr ""
+msgstr "Fait"
 
 msgid "Executions were successfully terminated."
-msgstr ""
+msgstr "Les exécutions ont pris fin avec succès."
 
 msgid "Export Results"
-msgstr ""
+msgstr "Résultats à l'exportation"
 
 msgid "Force end and synchronize"
-msgstr ""
+msgstr "Fin de force et synchronisation"
 
 msgid "Go to"
-msgstr ""
+msgstr "Aller à"
 
 msgid "Import of synchronization data is in progress."
-msgstr ""
+msgstr "L'importation des données de synchronisation est en cours."
 
 msgid "Import Results"
-msgstr ""
+msgstr "Importer les résultats"
 
 #, tao-public
 msgid "Index"
-msgstr ""
+msgstr "Index"
 
 msgid "Last status check at %s"
-msgstr ""
+msgstr "Dernier contrôle d'état à %s"
 
 msgid "Last synchronization has been completed at %s"
-msgstr ""
+msgstr "La dernière synchronisation est terminée en %s"
 
 msgid "Missed package file"
-msgstr ""
+msgstr "Fichier paquet manquant"
 
 msgid "Note that all time data refer to the server time."
-msgstr ""
+msgstr "Notez que toutes les données de temps se réfèrent à l'heure du serveur."
 
 msgid "Please confirm reassignment"
-msgstr ""
+msgstr "Veuillez confirmer la réaffectation"
 
 msgid "please ensure that everyone has completed the assessment before proceeding."
-msgstr ""
+msgstr "veuillez vous assurer que tout le monde a terminé l'évaluation avant de procéder."
 
 msgid "Preparation of synchronization data is in progress."
-msgstr ""
+msgstr "La préparation des données de synchronisation est en cours."
 
 #, tao-public
 msgid "Properties"
-msgstr ""
+msgstr "Propriétés"
 
 msgid "Required field"
-msgstr ""
+msgstr "Champ obligatoire"
 
 msgid "Save"
-msgstr ""
+msgstr "Sauvegarder"
 
 #, tao-public
 msgid "Settings"
-msgstr ""
+msgstr "Réglages"
 
 msgid "Success! The synchronization process has been finished."
-msgstr ""
+msgstr "Succès ! Le processus de synchronisation est terminé"
 
 msgid "Synchronization data has been imported."
-msgstr ""
+msgstr "Les données de synchronisation ont été importées."
 
 msgid "Synchronization data is ready to be downloaded. Downloading process will start in the background."
-msgstr ""
+msgstr "Les données de synchronisation sont prêtes à être téléchargées. Le processus de téléchargement commencera en arrière-plan."
 
 msgid "Synchronization export feature is not enabled."
-msgstr ""
+msgstr "La fonction d'exportation de synchronisation n'est pas activée."
 
 #, tao-public
 msgid "Synchronization History"
-msgstr ""
+msgstr "Historique de synchronisation"
 
 msgid "Synchronization in progress."
-msgstr ""
+msgstr "Synchronisation en cours."
 
 msgid "Synchronization report data"
-msgstr ""
+msgstr "Données du rapport de synchronisation"
 
 msgid "Synchronize Data"
-msgstr ""
+msgstr "Synchroniser les données"
 
 msgid "Task has been enqueued at %s"
-msgstr ""
+msgstr "La tâche a été demandée en %s"
 
 msgid "TestCenter must have an organisation id property to associate it to sync manager(s)."
-msgstr ""
+msgstr "TestCenter doit avoir une propriété d'identifiant d'organisation pour l'associer au(x) gestionnaire(s) de synchronisation."
 
 msgid "TestCenter must have only ony Sync Manager"
-msgstr ""
+msgstr "TestCenter ne doit avoir qu'un seul gestionnaire Sync"
 
 msgid "The data synchronization cannot be completed because there are active assessments in progress."
-msgstr ""
+msgstr "La synchronisation des données ne peut pas être achevée car des évaluations actives sont en cours."
 
 msgid "The export is already running!"
-msgstr ""
+msgstr "L'exportation est déjà en cours !"
 
 msgid "The synchronisation is already running!"
-msgstr ""
+msgstr "La synchronisation est déjà en cours !"
 
 msgid "The synchronization process has failed."
-msgstr ""
+msgstr "Le processus de synchronisation a échoué."
 
 msgid "There are %s assessments in progress"
-msgstr ""
+msgstr "Il y a des %s évaluations en cours."
 
 msgid "There is one assessment in progress"
-msgstr ""
+msgstr "Une évaluation est en cours"
 
 msgid "This user is already assigned to test centers: <strong>"
-msgstr ""
+msgstr "Cet utilisateur est déjà affecté aux centres de test : <strong>"
 
 #, tao-public
 msgid "Tools"
-msgstr ""
+msgstr "Outils"
 
 msgid "Version"
-msgstr ""
+msgstr "Version"
 
 msgid "View"
-msgstr ""
+msgstr "Afficher"
 
 msgid "Virtual machine version"
-msgstr ""
+msgstr "Version de la machine virtuelle"
 
 #, tao-public
 msgid "VM Lists"
-msgstr ""
+msgstr "VM Lists"
 

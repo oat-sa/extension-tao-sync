@@ -1,62 +1,62 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: TAO 3.3.0-sprint110\n"
-"PO-Revision-Date: 2019-09-12T15:43:05\n"
+"PO-Revision-Date: 2019-09-12T15:43:04\n"
 "Last-Translator: TAO Translation Team <translation@tao.lu>\n"
 "MIME-Version: 1.0\n"
-"Language: pt-PT\n"
+"Language: fr-FR\n"
 "sourceLanguage: en-US\n"
-"targetLanguage: pt-PT\n"
+"targetLanguage: fr-FR\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 # http://www.taotesting.com/Ontologies/TAO.rdf#CreatedAt
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Created"
-msgstr ""
+msgstr "Créé"
 
 # http://www.taotesting.com/Ontologies/TAO.rdf#CreatedAt
 msgctxt "http://www.w3.org/2000/01/rdf-schema#comment"
 msgid "Creation data (in milliseconds)"
-msgstr ""
+msgstr "Données de création (en millisecondes)"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#OriginTestPackage
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Origin test resource id"
-msgstr ""
+msgstr "Identifiant de la ressource de test d'origine"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#OriginTestPackage
 msgctxt "http://www.w3.org/2000/01/rdf-schema#comment"
 msgid "Origin test of compiled delivery"
-msgstr ""
+msgstr "Test d'origine de la livraison compilée"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#synchro
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Synchronisation"
-msgstr ""
+msgstr "Synchronisation"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#synchro
 msgctxt "http://www.w3.org/2000/01/rdf-schema#comment"
 msgid "Synchronisation object"
-msgstr ""
+msgstr "Objet de synchronisation"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#identifier
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Identifier"
-msgstr ""
+msgstr "Identificateur"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#identifier
 msgctxt "http://www.w3.org/2000/01/rdf-schema#comment"
 msgid "A synchronisation identifier"
-msgstr ""
+msgstr "Identificateur de synchronisation"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#task
 msgctxt "http://www.w3.org/2000/01/rdf-schema#label"
 msgid "Synchronisation task"
-msgstr ""
+msgstr "Tâche de synchronisation"
 
 # http://www.taotesting.com/ontologies/synchro.rdf#task
 msgctxt "http://www.w3.org/2000/01/rdf-schema#comment"
 msgid "Synchronisation task"
-msgstr ""
+msgstr "Tâche de synchronisation"
 
