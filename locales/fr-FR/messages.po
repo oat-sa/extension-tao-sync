@@ -15,16 +15,16 @@ msgstr ""
 
 #, tao-public
 msgid "Add"
-msgstr ""
+msgstr "Ajoutez"
 
 msgid "Approved VMs"
-msgstr ""
+msgstr "VM approuvée"
 
 msgid "Assessments in progress:"
 msgstr ""
 
 msgid "Box ID"
-msgstr ""
+msgstr "ID de la bo"
 
 msgid "Cancel"
 msgstr ""
