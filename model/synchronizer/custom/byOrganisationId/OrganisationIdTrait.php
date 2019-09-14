@@ -137,34 +137,13 @@ trait OrganisationIdTrait
         $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
         /** @var \core_kernel_classes_Resource $resource */
         foreach ($resources as $resource) {
-            if (!$resource->exists()) {
-                continue;
-            }
-            $createdAt = $resource->getUniquePropertyValue($this->getProperty(Entity::CREATED_AT))->literal;
-            $sortedInstances[$createdAt] = $this->format($resource, $withProperties, $params);
+            $sortedInstances[] = $this->format($resource, $withProperties, $params);
         }
 
         ksort($sortedInstances);
 
-        $startCreatedAt = isset($params['startCreatedAt']) ? $params['startCreatedAt'] : false;
-        $limit = isset($params['limit']) ? $params['limit'] : false;
-        $offset = isset($params['offset']) ? $params['offset'] : 0;
-
-        $current = 1;
         foreach ($sortedInstances as $createdAt => $instance) {
-            if ($startCreatedAt !== false && $createdAt < $startCreatedAt) {
-                continue;
-            }
-            if ($current < $offset) {
-                continue;
-            }
-
             $values[$instance['id']] = $instance;
-
-            if ($limit !== false && ($current - $offset) == $limit) {
-                break;
-            }
-            $current++;
         }
 
         return $values;
