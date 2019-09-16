@@ -61,11 +61,11 @@ class HandShakeServerServiceTest extends TestCase
     protected function getService($roles = [])
     {
         $service = $this->getMockBuilder(HandShakeServerService::class)
-            ->setMethods(['getUsersService', 'getGeneratorOauth', 'getProperty'])->getMockForAbstractClass();
+            ->setMethods(['getResource', 'getGeneratorOauth', 'getProperty'])->getMockForAbstractClass();
 
         $service
-            ->method('getUsersService')
-            ->willReturn($this->mockUsersService($this->mockResource($roles)));
+            ->method('getResource')
+            ->willReturn($this->mockResource($roles));
 
         $service
             ->method('getGeneratorOauth')
