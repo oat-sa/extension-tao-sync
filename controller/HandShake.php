@@ -21,6 +21,7 @@
 
 namespace oat\taoSync\controller;
 
+use common_user_User;
 use oat\oatbox\user\LoginService;
 use oat\oatbox\user\LoginFailedException;
 use oat\taoSync\model\server\HandShakeServerService;
@@ -93,7 +94,8 @@ class HandShake extends \tao_actions_CommonModule
             }
 
             //check identity
-            if (!$this->isAllowedUser($userIdentifier, $userPassword)) {
+            $user = $this->isAllowedUser($userIdentifier, $userPassword);
+            if($user === false) {
                 return $this->returnJson([
                     'success'   => false,
                     'errorCode' => '401',
@@ -105,7 +107,7 @@ class HandShake extends \tao_actions_CommonModule
 
             /** @var HandShakeServerService $handShakeServer */
             $handShakeServer = $this->getServiceLocator()->get(HandShakeServerService::SERVICE_ID);
-            $response = $handShakeServer->execute($userIdentifier);
+            $response = $handShakeServer->execute($user->getIdentifier());
 
             $this->returnJson($response->asArray());
         } catch (\Exception $e) {
@@ -117,7 +119,7 @@ class HandShake extends \tao_actions_CommonModule
      * Check whether the given credentials match an authorized user
      * @param string $userIdentifier the login of the user
      * @param string $userPassword   the password of the user
-     * @return boolean true if allowed
+     * @return boolean|common_user_User true if allowed
      */
     protected function isAllowedUser($userIdentifier, $userPassword)
     {
