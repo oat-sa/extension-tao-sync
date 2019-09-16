@@ -35,14 +35,14 @@ class HandShakeServerService extends ConfigurableService
     const SERVICE_ID = 'taoSync/handShakeServer';
 
     /**
-     * @param $userIdentifier
+     * @param $userIdentifier User's Uri
      * @return HandShakeServerResponse
      * @throws InvalidRoleForSync
      * @throws \common_exception_BadRequest
      */
     public function execute($userIdentifier)
     {
-        $user = $this->getUsersService()->getOneUser($userIdentifier);
+        $user = $this->getResource($userIdentifier);
         if (!in_array(SyncService::TAO_SYNC_ROLE, $user->getPropertyValues($this->getProperty(GenerisRdf::PROPERTY_USER_ROLES)))) {
             throw new InvalidRoleForSync('User does not have the '. SyncService::TAO_SYNC_ROLE . ' role.');
         }

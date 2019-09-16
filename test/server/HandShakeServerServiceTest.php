@@ -22,6 +22,7 @@ namespace oat\taoSync\test\server;
 
 use core_kernel_classes_Resource;
 use core_kernel_users_Service;
+use oat\generis\test\TestCase;
 use oat\oatbox\event\EventManager;
 use oat\taoSync\model\formatter\SynchronizerFormatter;
 use oat\taoSync\model\server\HandShakeServerResponse;
@@ -31,7 +32,7 @@ use oat\taoSync\model\SyncService;
 use oat\taoSync\scripts\tool\oauth\GenerateOauthCredentials;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
+class HandShakeServerServiceTest extends TestCase
 {
     public function testHandShakeReceive()
     {
@@ -59,11 +60,11 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     protected function getService($roles = [])
     {
         $service = $this->getMockBuilder(HandShakeServerService::class)
-            ->setMethods(['getUsersService', 'getGeneratorOauth', 'getProperty'])->getMockForAbstractClass();
+            ->setMethods(['getResource', 'getGeneratorOauth', 'getProperty'])->getMockForAbstractClass();
 
         $service
-            ->method('getUsersService')
-            ->willReturn($this->mockUsersService($this->mockResource($roles)));
+            ->method('getResource')
+            ->willReturn($this->mockResource($roles));
 
         $service
             ->method('getGeneratorOauth')
