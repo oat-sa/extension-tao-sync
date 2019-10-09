@@ -21,8 +21,9 @@
 namespace oat\taoSync\test\User;
 
 use oat\taoSync\model\User\HandShakeClientRequest;
+use oat\generis\test\TestCase;
 
-class HandShakeClientRequestTest extends \PHPUnit_Framework_TestCase
+class HandShakeClientRequestTest extends TestCase
 {
     public function testBuilding()
     {

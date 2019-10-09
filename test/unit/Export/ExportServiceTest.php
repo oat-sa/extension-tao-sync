@@ -25,19 +25,20 @@ use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\Packager\PackagerInterface;
 use oat\taoSync\model\Packager\ZipPackager;
+use oat\generis\test\MockObject;
 
 class ExportServiceTest extends TestCase
 {
     /** @var ExportService */
     private $service;
 
-    /** @var \PHPUnit_Framework_MockObject_MockObject */
+    /** @var MockObject */
     private $resultsExporterMock;
 
-    /** @var \PHPUnit_Framework_MockObject_MockObject */
+    /** @var MockObject */
     private $packagerMock;
 
-    /** @var \PHPUnit_Framework_MockObject_MockObject */
+    /** @var MockObject */
     private $loggerMock;
 
     public function setUp()

@@ -20,6 +20,7 @@
 namespace oat\taoSync\test\unit\formatter;
 
 use oat\taoSync\model\formatter\FormatterService;
+use oat\generis\test\MockObject;
 
 class FormatterServiceTest extends \oat\generis\test\TestCase
 {
@@ -113,7 +114,7 @@ class FormatterServiceTest extends \oat\generis\test\TestCase
     /**
      * @param string $uri
      * @param \core_kernel_classes_ContainerCollection $collectionOfTriples
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     private function mockResource($uri, $collectionOfTriples)
     {

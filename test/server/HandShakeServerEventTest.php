@@ -22,8 +22,10 @@ namespace oat\taoSync\test\server;
 
 use core_kernel_classes_Resource;
 use oat\taoSync\model\server\HandShakeServerEvent;
+use oat\generis\test\TestCase;
+use oat\generis\test\MockObject;
 
-class HandShakeServerEventTest extends \PHPUnit_Framework_TestCase
+class HandShakeServerEventTest extends TestCase
 {
     public function testEvent()
     {
@@ -35,7 +37,7 @@ class HandShakeServerEventTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockResource()
     {
