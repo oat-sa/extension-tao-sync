@@ -25,6 +25,7 @@ use oat\taoSync\model\SyncLog\Storage\SyncLogStorageInterface;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\generis\test\MockObject;
 
 class SyncLogServiceTest extends TestCase
 {
@@ -36,7 +37,7 @@ class SyncLogServiceTest extends TestCase
     private $object;
 
     /**
-     * @var SyncLogStorageInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SyncLogStorageInterface|MockObject
      */
     private $storageMock;
 

@@ -25,6 +25,7 @@ use core_kernel_classes_Property;
 use oat\generis\model\data\Ontology;
 use oat\generis\test\TestCase;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
+use oat\generis\test\MockObject;
 
 class SupportedVmServiceTest extends TestCase
 {
@@ -34,12 +35,12 @@ class SupportedVmServiceTest extends TestCase
     private $object;
 
     /**
-     * @var Ontology|\PHPUnit_Framework_MockObject_MockObject
+     * @var Ontology|MockObject
      */
     private $modelMock;
 
     /**
-     * @var core_kernel_classes_Class|\PHPUnit_Framework_MockObject_MockObject
+     * @var core_kernel_classes_Class|MockObject
      */
     private $rootClassMock;
 

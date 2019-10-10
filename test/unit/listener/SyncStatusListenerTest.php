@@ -26,6 +26,7 @@ use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\listener\SyncStatusListener;
 use Psr\Log\LoggerInterface;
+use oat\generis\test\MockObject;
 
 class SyncStatusListenerTest extends TestCase
 {
@@ -35,12 +36,12 @@ class SyncStatusListenerTest extends TestCase
     private $object;
 
     /**
-     * @var SynchronisationClient|\PHPUnit_Framework_MockObject_MockObject
+     * @var SynchronisationClient|MockObject
      */
     private $syncClientMock;
 
     /**
-     * @var LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var LoggerInterface|MockObject
      */
     private $loggerMock;
 

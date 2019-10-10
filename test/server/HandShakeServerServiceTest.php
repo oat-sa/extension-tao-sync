@@ -30,8 +30,10 @@ use oat\taoSync\model\synchronizer\Synchronizer;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\scripts\tool\oauth\GenerateOauthCredentials;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use oat\generis\test\TestCase;
+use oat\generis\test\MockObject;
 
-class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
+class HandShakeServerServiceTest extends TestCase
 {
     public function testHandShakeReceive()
     {
@@ -88,7 +90,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockGenerator()
     {
@@ -102,7 +104,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockProperty()
     {
@@ -110,7 +112,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockSyncService()
     {
@@ -138,7 +140,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockResource($roles = [])
     {
@@ -152,7 +154,7 @@ class HandShakeServerServiceTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockEventManager()
     {

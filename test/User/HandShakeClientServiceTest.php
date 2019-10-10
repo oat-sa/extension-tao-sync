@@ -34,16 +34,17 @@ use oat\taoSync\model\User\HandShakeClientService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use oat\generis\test\MockObject;
 
 class HandShakeClientServiceTest extends TestCase
 {
     /**
-     * @var PublishingService|\PHPUnit_Framework_MockObject_MockObject
+     * @var PublishingService|MockObject
      */
     private $publishingServiceMock;
 
     /**
-     * @var PlatformService|\PHPUnit_Framework_MockObject_MockObject
+     * @var PlatformService|MockObject
      */
     private $platformServiceMock;
 
@@ -220,7 +221,7 @@ class HandShakeClientServiceTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockResource()
     {
@@ -237,7 +238,7 @@ class HandShakeClientServiceTest extends TestCase
 
     /**
      * @param $resource
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockPlatformService($resource)
     {
@@ -251,7 +252,7 @@ class HandShakeClientServiceTest extends TestCase
 
     /**
      * @param $returnValue
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockPublishingService($returnValue)
     {
@@ -264,7 +265,7 @@ class HandShakeClientServiceTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockFileSystem($handShakeDone = 0, $alwaysRemoteLogin = null)
     {
@@ -298,7 +299,7 @@ class HandShakeClientServiceTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockProperty()
     {
@@ -306,7 +307,7 @@ class HandShakeClientServiceTest extends TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function getRequest()
     {

@@ -33,32 +33,32 @@ use oat\taoSync\model\event\SyncStartedEvent;
 use oat\taoSync\model\history\DataSyncHistoryService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeAll;
-use PHPUnit_Framework_MockObject_MockObject;
+use oat\generis\test\MockObject;
 
 class SynchronizeAllTest extends TestCase implements Action
 {
     /**
-     * @var EventManager|PHPUnit_Framework_MockObject_MockObject
+     * @var EventManager|MockObject
      */
     private $eventManagerMock;
 
     /**
-     * @var ApplicationService|PHPUnit_Framework_MockObject_MockObject
+     * @var ApplicationService|MockObject
      */
     private $applicationServiceMock;
 
     /**
-     * @var DataSyncHistoryService|PHPUnit_Framework_MockObject_MockObject
+     * @var DataSyncHistoryService|MockObject
      */
     private $dataSyncHistoryServiceMock;
 
     /**
-     * @var PublishingService|PHPUnit_Framework_MockObject_MockObject
+     * @var PublishingService|MockObject
      */
     private $publishingServiceMock;
 
     /**
-     * @var VmVersionChecker|PHPUnit_Framework_MockObject_MockObject
+     * @var VmVersionChecker|MockObject
      */
     private $vmVersionCheckerMock;
 
