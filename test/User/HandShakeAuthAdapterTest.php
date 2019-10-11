@@ -22,8 +22,9 @@ namespace oat\taoSync\test\User;
 
 use core_kernel_users_InvalidLoginException;
 use oat\taoSync\model\User\HandShakeAuthAdapter;
+use oat\generis\test\TestCase;
 
-class HandShakeAuthAdapterTest extends \PHPUnit_Framework_TestCase
+class HandShakeAuthAdapterTest extends TestCase
 {
     /**
      * @throws \Exception

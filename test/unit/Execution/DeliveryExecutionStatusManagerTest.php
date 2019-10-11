@@ -29,26 +29,27 @@ use oat\taoProctoring\model\monitorCache\DeliveryMonitoringData;
 use oat\taoProctoring\model\monitorCache\DeliveryMonitoringService;
 use oat\taoSync\model\Execution\DeliveryExecutionStatusManager;
 use Zend\ServiceManager\ServiceLocatorInterface;
+use oat\generis\test\MockObject;
 
 class DeliveryExecutionStatusManagerTest extends TestCase
 {
     /**
-     * @var ServiceLocatorInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var ServiceLocatorInterface|MockObject
      */
     private $serviceLocatorMock;
 
     /**
-     * @var DeliveryMonitoringService|\PHPUnit_Framework_MockObject_MockObject
+     * @var DeliveryMonitoringService|MockObject
      */
     private $deliveryMonitoringMock;
 
     /**
-     * @var ServiceProxy|\PHPUnit_Framework_MockObject_MockObject
+     * @var ServiceProxy|MockObject
      */
     private $serviceProxyMock;
 
     /**
-     * @var DeliveryExecutionStateService|\PHPUnit_Framework_MockObject_MockObject
+     * @var DeliveryExecutionStateService|MockObject
      */
     private $deliveryExecutionStateMock;
 

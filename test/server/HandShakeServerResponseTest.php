@@ -25,8 +25,10 @@ use core_kernel_classes_Resource;
 use oat\generis\model\data\Ontology;
 use oat\taoSync\model\formatter\SynchronizerFormatter;
 use oat\taoSync\model\server\HandShakeServerResponse;
+use oat\generis\test\TestCase;
+use oat\generis\test\MockObject;
 
-class HandShakeServerResponseTest extends \PHPUnit_Framework_TestCase
+class HandShakeServerResponseTest extends TestCase
 {
     public function testAsArray()
     {
@@ -46,7 +48,7 @@ class HandShakeServerResponseTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockResource()
     {
@@ -89,7 +91,7 @@ class HandShakeServerResponseTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @return \PHPUnit_Framework_MockObject_MockObject
+     * @return MockObject
      */
     protected function mockModel()
     {

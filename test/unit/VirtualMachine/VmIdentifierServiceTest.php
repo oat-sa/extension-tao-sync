@@ -22,6 +22,7 @@ namespace oat\taoSync\test\unit\VirtualMachine;
 use oat\generis\test\TestCase;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\model\VirtualMachine\VmIdentifierService;
+use oat\generis\test\MockObject;
 
 class VmIdentifierServiceTest extends TestCase
 {
@@ -31,7 +32,7 @@ class VmIdentifierServiceTest extends TestCase
     private $object;
 
     /**
-     * @var PublishingService|\PHPUnit_Framework_MockObject_MockObject
+     * @var PublishingService|MockObject
      */
     private $publishingServiceMock;
 

@@ -30,6 +30,7 @@ use oat\taoSync\model\SynchronizationHistory\SynchronizationHistoryService;
 use oat\generis\test\TestCase;
 use oat\taoSync\model\SyncLog\SyncLogEntity;
 use oat\taoSync\model\SyncLog\SyncLogServiceInterface;
+use oat\generis\test\MockObject;
 
 class SynchronizationHistoryServiceTest extends TestCase
 {
@@ -39,12 +40,12 @@ class SynchronizationHistoryServiceTest extends TestCase
     private $object;
 
     /**
-     * @var HistoryPayloadFormatter|\PHPUnit_Framework_MockObject_MockObject
+     * @var HistoryPayloadFormatter|MockObject
      */
     private $formatterMock;
 
     /**
-     * @var SyncLogServiceInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SyncLogServiceInterface|MockObject
      */
     private $syncLogServiceMock;
 

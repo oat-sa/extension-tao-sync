@@ -23,6 +23,7 @@ use oat\generis\test\TestCase;
 use oat\taoSync\model\Exception\SyncRequestFailedException;
 use oat\taoSync\model\Validator\SyncParamsValidator;
 use oat\taoSync\model\VirtualMachine\SupportedVmService;
+use oat\generis\test\MockObject;
 
 class SyncParamsValidatorTest extends TestCase
 {
@@ -32,7 +33,7 @@ class SyncParamsValidatorTest extends TestCase
     private $object;
 
     /**
-     * @var SupportedVmService|\PHPUnit_Framework_MockObject_MockObject
+     * @var SupportedVmService|MockObject
      */
     private $supportedVmServiceMock;
 
