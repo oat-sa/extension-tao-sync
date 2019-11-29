@@ -20,8 +20,8 @@
 namespace oat\taoSync\model\dataProvider;
 
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSyncServer\exception\DataProviderException;
-use oat\taoSyncServer\export\dataProvider\dataFormatter\AbstractDataFormatter;
+use oat\taoSync\model\Exception\DataProviderException;
+use oat\taoSync\export\dataProvider\dataFormatter\AbstractDataFormatter;
 
 abstract class AbstractDataProvider extends ConfigurableService
 {
@@ -33,7 +33,7 @@ abstract class AbstractDataProvider extends ConfigurableService
      * @param array $params
      * @return array
      */
-    abstract public function getData($params);
+    abstract public function getResources(array $params);
 
     /**
      * @return string
@@ -64,5 +64,20 @@ abstract class AbstractDataProvider extends ConfigurableService
             return $this->propagate($formatter);
         }
         return false;
+    }
+
+    /**
+     * @param array $params
+     * @return array
+     * @throws DataProviderException
+     */
+    public function getData($params)
+    {
+        $data = $this->getResources($params);
+
+        if ($this->getDataFormatter()) {
+            $data = $this->getDataFormatter()->formatAll($data);
+        }
+        return $data;
     }
 }

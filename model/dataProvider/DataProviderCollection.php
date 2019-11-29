@@ -23,17 +23,27 @@ namespace oat\taoSync\model\dataProvider;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\DataProviderException;
+use Zend\ServiceManager\ServiceLocatorInterface;
 
 class DataProviderCollection extends ConfigurableService
 {
     const SERVICE_ID = 'taoSync/DataProviderCollection';
 
-    const OPTION_DATA_PROVIDERS = 'taoSyncServer/DataProviders';
+    const OPTION_DATA_PROVIDERS = 'taoSync/dataProviders';
 
     private $dataProviders;
 
     private $rootDataProviders = [];
     private $childDataProviders = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function setServiceLocator(ServiceLocatorInterface $serviceLocator = null)
+    {
+        parent::setServiceLocator($serviceLocator);
+        $this->initDataProviders();
+    }
 
     /**
      * @param array $params
@@ -42,7 +52,6 @@ class DataProviderCollection extends ConfigurableService
      */
     public function getData($params)
     {
-        $this->initDataProviders();
         return $this->getProvidersData($this->rootDataProviders, $params);
     }
 
@@ -70,10 +79,14 @@ class DataProviderCollection extends ConfigurableService
     /**
      * @param string $type
      * @return AbstractDataProvider|bool
+     * @throws DataProviderException
      */
-    private function getProvider($type)
+    public function getProvider($type)
     {
-        return $this->dataProviders[$type] ?? false;
+        if (!array_key_exists($type, $this->dataProviders)) {
+            throw new DataProviderException(sprintf('data provider %s not found', $type));
+        }
+        return $this->dataProviders[$type];
     }
 
     /**

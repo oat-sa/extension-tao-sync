@@ -830,7 +830,12 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('7.0.0')) {
             $packageStorage = new FileSystemStorageService();
-            $this->getServiceManager($packageStorage)->propagate($packageStorage);
+            $this->getServiceManager()->propagate($packageStorage);
+
+            $service = $this->getServiceManager()->get(FileSystemService::SERVICE_ID);
+            $service->createFileSystem($packageStorage->getStorageName());
+            $this->getServiceManager()->register(FileSystemService::SERVICE_ID, $service);
+
             $packageStorage->createStorage();
 
             $this->getServiceManager()->register(

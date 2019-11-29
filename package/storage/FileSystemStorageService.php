@@ -24,13 +24,14 @@ namespace oat\taoSync\package\storage;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSyncServer\exception\PackageException;
+use oat\taoSync\model\Exception\PackageException;
+use oat\taoSync\model\Exception\PackagerException;
 
 class FileSystemStorageService extends ConfigurableService implements StorageInterface
 {
-    const SERVICE_ID = 'taoSyncServer/FileSystemStorageService';
+    const SERVICE_ID = 'taoSync/FileSystemStorageService';
 
-    const FILESYSTEM_ID = 'taoSyncServer';
+    const FILESYSTEM_ID = 'taoSync';
     const STORAGE_NAME = 'packages';
 
     /**
@@ -45,7 +46,7 @@ class FileSystemStorageService extends ConfigurableService implements StorageInt
      * @param array $data
      * @param int $packageName
      * @return bool
-     * @throws PackageException
+     * @throws PackagerException
      */
     public function createPackage(array $data, $packageName)
     {
