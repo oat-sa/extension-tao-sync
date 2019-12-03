@@ -17,9 +17,8 @@
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
 
-
 namespace oat\taoSync\model\Exception;
 
-class SyncImportException extends \common_Exception
+class SyncImportException extends SyncBaseException
 {
 }

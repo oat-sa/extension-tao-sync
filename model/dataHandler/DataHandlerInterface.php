@@ -15,42 +15,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
- *
- * @author Yuri Filippovich
  */
 
-namespace oat\taoSync\package\storage;
+namespace oat\taoSync\model\dataHandler;
 
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-
-interface StorageInterface extends ServiceLocatorAwareInterface
+interface DataHandlerInterface
 {
-    /**
-     * checks that storage can be used
-     * @return bool
-     */
-    public function isValid();
-
-    /**
-     * @param array $data
-     * @param string $packageName
-     * @return string|bool package name or false if file can't be created
-     */
-    public function createPackage(array $data, $packageName);
-
-    /**
-     * @param string $packageName
-     * @return string|bool package name or false if file can't be created
-     */
-    public function getPackageData($packageName);
-
-    /**
-     * @return void
-     */
-    public function createStorage();
-
     /**
      * @return string
      */
-    public function getStorageName();
+    public function getType();
+
+    /**
+     * @param array $data
+     */
+    public function handleData(array $data);
 }

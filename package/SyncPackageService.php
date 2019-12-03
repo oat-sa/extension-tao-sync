@@ -36,13 +36,23 @@ class SyncPackageService extends ConfigurableService
 
     /**
      * @param array $data
-     * @param int $packageName
+     * @param string $packageName
      * @return bool
      */
     public function createPackage(array $data, $packageName)
     {
       return $this->getStorage()->createPackage($data, $packageName);
     }
+
+    /**
+     * @param string $packageName
+     * @return bool
+     */
+    public function getPackageData($packageName)
+    {
+        return $this->getStorage()->getPackageData($packageName);
+    }
+
 
     /**
      * @return StorageInterface

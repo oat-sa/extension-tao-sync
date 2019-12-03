@@ -67,6 +67,41 @@ class SyncFileSystem extends ConfigurableService implements StorageInterface
     }
 
     /**
+     * @inheritDoc
+     * @throws SyncPackageException
+     */
+    public function getPackageData($packageName)
+    {
+        if (!$this->isValid()) {
+            throw new SyncPackageException('Invalid package storage');
+        }
+
+        $file = $this->getStorageDir()->getFile($packageName);
+
+        if ($file->exists()) {
+            throw new SyncPackageException(sprintf('Package with name  %s already exist', $packageName));
+        }
+
+        try {
+            $content = $file->read();
+        } catch (\Exception $e) {
+            throw new SyncPackageException($e->getMessage());
+        }
+
+        $data = json_decode($content);
+
+        if (json_last_error() > 0) {
+            throw new SyncPackageException('Invalid Package format: ' . (json_last_error_msg()));
+        }
+
+        if (!is_array($data)) {
+            throw new SyncPackageException('Invalid Package format');
+        }
+
+        return $data;
+    }
+
+    /**
      * @return FileSystemService|array
      */
     private function getFileSystemService()
