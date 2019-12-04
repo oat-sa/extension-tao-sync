@@ -16,7 +16,7 @@
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
  *
- * @author Oleksandr Zagovorychev <zagovorichev@1pt.com>
+ * @author Yuri Filippovich
  */
 
 namespace oat\taoSync\package;
@@ -24,9 +24,9 @@ namespace oat\taoSync\package;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\package\storage\StorageInterface;
 
-class PackageService extends ConfigurableService
+class SyncPackageService extends ConfigurableService
 {
-    const SERVICE_ID = 'taoSync/PackageService';
+    const SERVICE_ID = 'taoSync/SyncPackageService';
     const OPTION_STORAGE = 'storage';
 
     /**

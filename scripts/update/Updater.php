@@ -90,8 +90,8 @@ use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\model\Validator\SyncParamsValidator;
 use oat\taoSync\model\VirtualMachine\VmIdentifierService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
-use oat\taoSync\package\PackageService;
-use oat\taoSync\package\storage\FileSystemStorageService;
+use oat\taoSync\package\SyncPackageService;
+use oat\taoSync\package\storage\SyncFileSystem;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
@@ -829,7 +829,7 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('6.12.0', '7.0.0');
 
         if ($this->isVersion('7.0.0')) {
-            $packageStorage = new FileSystemStorageService();
+            $packageStorage = new SyncFileSystem();
             $this->getServiceManager()->propagate($packageStorage);
 
             $service = $this->getServiceManager()->get(FileSystemService::SERVICE_ID);
@@ -839,8 +839,8 @@ class Updater extends \common_ext_ExtensionUpdater
             $packageStorage->createStorage();
 
             $this->getServiceManager()->register(
-                PackageService::SERVICE_ID,
-                new PackageService([PackageService::OPTION_STORAGE => $packageStorage])
+                SyncPackageService::SERVICE_ID,
+                new SyncPackageService([SyncPackageService::OPTION_STORAGE => $packageStorage])
             );
             $this->setVersion('7.1.0');
         }

@@ -16,7 +16,7 @@
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
  *
- * @author Oleksandr Zagovorychev <zagovorichev@1pt.com>
+ * @author Yuri Filippovich
  */
 
 namespace oat\taoSync\export\dataProvider\dataFormatter;
@@ -28,10 +28,10 @@ abstract class AbstractDataFormatter extends ConfigurableService
 {
 
     /**
-     * @param core_kernel_classes_Resource $resource
+     * @param mixed $resource
      * @return array
      */
-    abstract public function format(core_kernel_classes_Resource $resource);
+    abstract public function format($resource);
 
     /**
      * @param core_kernel_classes_Resource[] $resources

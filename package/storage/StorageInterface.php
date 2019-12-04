@@ -16,7 +16,7 @@
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
  *
- * @author Oleksandr Zagovorychev <zagovorichev@1pt.com>
+ * @author Yuri Filippovich
  */
 
 namespace oat\taoSync\package\storage;

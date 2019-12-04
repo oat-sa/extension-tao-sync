@@ -19,6 +19,6 @@
 
 namespace oat\taoSync\model\Exception;
 
-class DataProviderException extends SyncBaseException
+class SyncPackageException extends SyncBaseException
 {
 }

@@ -20,7 +20,7 @@
 namespace oat\taoSync\model\dataProvider;
 
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\Exception\DataProviderException;
+use oat\taoSync\model\Exception\SyncDataProviderException;
 use oat\taoSync\export\dataProvider\dataFormatter\AbstractDataFormatter;
 
 abstract class AbstractDataProvider extends ConfigurableService
@@ -50,7 +50,7 @@ abstract class AbstractDataProvider extends ConfigurableService
 
     /**
      * @return AbstractDataFormatter|bool
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     protected function getDataFormatter()
     {
@@ -58,7 +58,7 @@ abstract class AbstractDataProvider extends ConfigurableService
             $formatter = $this->getOption(self::OPTION_FORMATTER);
 
             if (!$formatter instanceof AbstractDataFormatter) {
-                throw new DataProviderException('Invalid data formatter for ' . __CLASS__);
+                throw new SyncDataProviderException('Invalid data formatter for ' . __CLASS__);
             }
 
             return $this->propagate($formatter);
@@ -69,7 +69,7 @@ abstract class AbstractDataProvider extends ConfigurableService
     /**
      * @param array $params
      * @return array
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     public function getData($params)
     {

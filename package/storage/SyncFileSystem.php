@@ -16,7 +16,7 @@
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
  *
- * @author Oleksandr Zagovorychev <zagovorichev@1pt.com>
+ * @author Yuri Filippovich
  */
 
 namespace oat\taoSync\package\storage;
@@ -24,12 +24,11 @@ namespace oat\taoSync\package\storage;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\Exception\PackageException;
-use oat\taoSync\model\Exception\PackagerException;
+use oat\taoSync\model\Exception\SyncPackageException;
 
-class FileSystemStorageService extends ConfigurableService implements StorageInterface
+class SyncFileSystem extends ConfigurableService implements StorageInterface
 {
-    const SERVICE_ID = 'taoSync/FileSystemStorageService';
+    const SERVICE_ID = 'taoSync/SyncFileSystem';
 
     const FILESYSTEM_ID = 'taoSync';
     const STORAGE_NAME = 'packages';
@@ -46,24 +45,24 @@ class FileSystemStorageService extends ConfigurableService implements StorageInt
      * @param array $data
      * @param int $packageName
      * @return bool
-     * @throws PackagerException
+     * @throws SyncPackageException
      */
     public function createPackage(array $data, $packageName)
     {
         if (!$this->isValid()) {
-            throw new PackageException('Invalid package storage');
+            throw new SyncPackageException('Invalid package storage');
         }
 
         $file = $this->getStorageDir()->getFile($packageName);
 
         if ($file->exists()) {
-            throw new PackageException(sprintf('Package with name  %s already exist', $packageName));
+            throw new SyncPackageException(sprintf('Package with name  %s already exist', $packageName));
         }
 
         try {
             return $file->write(json_encode($data));
         } catch (\Exception $e) {
-            throw new PackageException($e->getMessage());
+            throw new SyncPackageException($e->getMessage());
         }
     }
 

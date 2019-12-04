@@ -16,18 +16,18 @@
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
  *
- * @author Oleksandr Zagovorychev <zagovorichev@1pt.com>
+ * @author Yuri Filippovich
  */
 
 namespace oat\taoSync\model\dataProvider;
 
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\Exception\DataProviderException;
+use oat\taoSync\model\Exception\SyncDataProviderException;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class DataProviderCollection extends ConfigurableService
+class SyncDataProviderCollection extends ConfigurableService
 {
-    const SERVICE_ID = 'taoSync/DataProviderCollection';
+    const SERVICE_ID = 'taoSync/SyncDataProviderCollection';
 
     const OPTION_DATA_PROVIDERS = 'taoSync/dataProviders';
 
@@ -48,7 +48,7 @@ class DataProviderCollection extends ConfigurableService
     /**
      * @param array $params
      * @return array
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     public function getData($params)
     {
@@ -59,7 +59,7 @@ class DataProviderCollection extends ConfigurableService
      * @param array $types
      * @param array $params
      * @return array
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     private function getProvidersData(array $types, array $params)
     {
@@ -79,18 +79,18 @@ class DataProviderCollection extends ConfigurableService
     /**
      * @param string $type
      * @return AbstractDataProvider|bool
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     public function getProvider($type)
     {
         if (!array_key_exists($type, $this->dataProviders)) {
-            throw new DataProviderException(sprintf('data provider %s not found', $type));
+            throw new SyncDataProviderException(sprintf('data provider %s not found', $type));
         }
         return $this->dataProviders[$type];
     }
 
     /**
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     private function initDataProviders()
     {
@@ -98,7 +98,7 @@ class DataProviderCollection extends ConfigurableService
             $dataProviders = $this->getOption(self::OPTION_DATA_PROVIDERS);
 
             if (!is_array($dataProviders)) {
-                throw new DataProviderException('Data providers not set');
+                throw new SyncDataProviderException('Data providers not set');
             }
             $this->dataProviders = [];
 
@@ -113,7 +113,7 @@ class DataProviderCollection extends ConfigurableService
     }
 
     /**
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     private function buildDataProvidersTree()
     {
@@ -123,7 +123,7 @@ class DataProviderCollection extends ConfigurableService
                 $this->rootDataProviders[] = $type;
             } else {
                 if (!array_key_exists($parent, $this->dataProviders)) {
-                    throw new DataProviderException(sprintf('Invalid parent provider %s', $parent));
+                    throw new SyncDataProviderException(sprintf('Invalid parent provider %s', $parent));
                 }
                 if (!array_key_exists($parent, $this->childDataProviders)) {
                     $this->childDataProviders[$parent] = [];
@@ -132,13 +132,15 @@ class DataProviderCollection extends ConfigurableService
             }
         }
         if (!count($this->rootDataProviders)) {
-            throw new DataProviderException(sprintf('Invalid data providers config: no root data providers'));
+            throw new SyncDataProviderException(
+                sprintf('Invalid data providers config: no root data providers')
+            );
         }
 
         $processed = $this->checkProcessed($this->rootDataProviders, []);
 
         if(count($processed) !== count($this->dataProviders)) {
-            throw new DataProviderException(sprintf('Invalid data providers config: recursion detected'));
+            throw new SyncDataProviderException(sprintf('Invalid data providers config: recursion detected'));
         }
     }
 
@@ -146,13 +148,13 @@ class DataProviderCollection extends ConfigurableService
      * @param array $types
      * @param array $processed
      * @return array
-     * @throws DataProviderException
+     * @throws SyncDataProviderException
      */
     private function checkProcessed(array $types, array $processed)
     {
         foreach ($types as $type) {
             if (in_array($type, $processed)) {
-                throw new DataProviderException(sprintf('Invalid data providers config: recursion detected'));
+                throw new SyncDataProviderException(sprintf('Invalid data providers config: recursion detected'));
             }
             $processed[] = $type;
             if (array_key_exists($type, $this->childDataProviders)) {

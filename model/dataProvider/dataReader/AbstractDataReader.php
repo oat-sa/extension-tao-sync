@@ -16,7 +16,7 @@
  *
  * Copyright (c) 2019  (original work) Open Assessment Technologies SA;
  *
- * @author Oleksandr Zagovorychev <zagovorichev@1pt.com>
+ * @author Yuri Filippovich
  */
 
 namespace oat\taoSync\export\dataProvider\dataReader;
@@ -29,7 +29,7 @@ use oat\oatbox\service\ConfigurableService;
 
 abstract class AbstractDataReader extends ConfigurableService
 {
-    const TYPE = '';
+    const TYPE = 'default';
 
     /**
      * @param string $id
