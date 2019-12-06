@@ -19,7 +19,7 @@
  * @author Yuri Filippovich
  */
 
-namespace oat\taoSync\export\dataProvider\dataReader;
+namespace oat\taoSync\model\export\dataProvider\dataReader;
 
 use core_kernel_classes_Class;
 use core_kernel_classes_Property;

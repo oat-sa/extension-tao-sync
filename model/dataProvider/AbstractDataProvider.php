@@ -21,7 +21,7 @@ namespace oat\taoSync\model\dataProvider;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\SyncDataProviderException;
-use oat\taoSync\export\dataProvider\dataFormatter\AbstractDataFormatter;
+use oat\taoSync\model\export\dataProvider\dataFormatter\AbstractDataFormatter;
 
 abstract class AbstractDataProvider extends ConfigurableService
 {

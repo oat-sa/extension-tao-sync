@@ -19,14 +19,13 @@
  * @author Yuri Filippovich
  */
 
-namespace oat\taoSync\export\dataProvider\dataFormatter;
+namespace oat\taoSync\model\export\dataProvider\dataFormatter;
 
 use core_kernel_classes_Resource;
 use oat\oatbox\service\ConfigurableService;
 
 abstract class AbstractDataFormatter extends ConfigurableService
 {
-
     /**
      * @param mixed $resource
      * @return array
