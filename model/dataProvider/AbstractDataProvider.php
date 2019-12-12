@@ -30,6 +30,22 @@ abstract class AbstractDataProvider extends ConfigurableService
     const OPTION_CHILD_PROVIDERS = 'childProviders';
 
     /**
+     * @param array $options
+     * @throws SyncDataProviderException
+     */
+    public function __construct ($options = array())
+    {
+        parent::__construct($options);
+        if ($this->hasOption(self::OPTION_FORMATTER)) {
+            $formatter = $this->getOption(self::OPTION_FORMATTER);
+
+            if (!$formatter instanceof AbstractDataFormatter) {
+                throw new SyncDataProviderException('Invalid data formatter for ' . __CLASS__);
+            }
+        }
+    }
+
+    /**
      * Returns required data
      *
      * @param array $params
@@ -64,18 +80,11 @@ abstract class AbstractDataProvider extends ConfigurableService
 
     /**
      * @return AbstractDataFormatter|bool
-     * @throws SyncDataProviderException
      */
     protected function getDataFormatter()
     {
         if ($this->hasOption(self::OPTION_FORMATTER)) {
-            $formatter = $this->getOption(self::OPTION_FORMATTER);
-
-            if (!$formatter instanceof AbstractDataFormatter) {
-                throw new SyncDataProviderException('Invalid data formatter for ' . __CLASS__);
-            }
-
-            return $this->propagate($formatter);
+            return $this->propagate($this->getOption(self::OPTION_FORMATTER));
         }
         return false;
     }
