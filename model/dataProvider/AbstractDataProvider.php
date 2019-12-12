@@ -51,13 +51,14 @@ abstract class AbstractDataProvider extends ConfigurableService
 
         if (is_array($this->getOption(self::OPTION_CHILD_PROVIDERS))) {
             $providers = $this->getOption(self::OPTION_CHILD_PROVIDERS);
-
             foreach ($providers as $provider) {
-                if ($providers instanceof AbstractDataProvider) {
-                    $childProviders[$provider->getType] = $this->propagate($provider);
+                if ($provider instanceof AbstractDataProvider) {
+                    $this->propagate($provider);
+                    $childProviders[$provider->getType()] = $provider;
                 }
             }
         }
+
         return $childProviders;
     }
 
