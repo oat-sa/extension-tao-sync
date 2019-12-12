@@ -21,37 +21,83 @@
 
 namespace oat\taoSync\package;
 
+use oat\oatbox\filesystem\Directory;
+use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\package\storage\StorageInterface;
+use oat\taoSync\model\Exception\SyncPackageException;
 
 class SyncPackageService extends ConfigurableService
 {
     const SERVICE_ID = 'taoSync/SyncPackageService';
     const OPTION_STORAGE = 'storage';
-
-    /**
-     * @var $params
-     */
-    private $storage;
+    const FILESYSTEM_ID = 'synchronisation';
+    const STORAGE_NAME = 'packages';
 
     /**
      * @param array $data
      * @param int $packageName
+     * @param int $orgId
      * @return bool
+     * @throws SyncPackageException
      */
-    public function createPackage(array $data, $packageName)
+    public function createPackage(array $data, $packageName, $orgId)
     {
-      return $this->getStorage()->createPackage($data, $packageName);
+        $file = $this->getStorageDir($orgId)->getFile($packageName);
+
+        if ($file->exists()) {
+            throw new SyncPackageException(sprintf('Package with name %s already exist', $packageName));
+        }
+
+        try {
+            return $file->write(json_encode($data));
+        } catch (\Exception $e) {
+            throw new SyncPackageException($e->getMessage());
+        }
     }
 
     /**
-     * @return StorageInterface
+     * @return FileSystemService|array
      */
-    private function getStorage()
+    private function getFileSystemService()
     {
-        if (!$this->storage) {
-            $this->storage = $this->propagate($this->getOption(self::OPTION_STORAGE));
+        return $this->getServiceLocator()->get(FileSystemService::SERVICE_ID);
+    }
+
+    /**
+     * @param int $orgId
+     * @return Directory
+     * @throws SyncPackageException
+     */
+    private function getStorageDir($orgId)
+    {
+        try {
+            $directory = $this->getFileSystemService()
+                ->getDirectory(self::FILESYSTEM_ID)
+                ->getDirectory(self::STORAGE_NAME)
+                ->getDirectory($orgId);
+
+            if (!$directory->exists()) {
+                $this->getFileSystemService()
+                    ->getFileSystem(self::FILESYSTEM_ID)
+                    ->createDir(self::STORAGE_NAME . DIRECTORY_SEPARATOR . $orgId);
+            }
+            return $directory;
+        } catch (\Exception $e) {
+            throw new SyncPackageException($e->getMessage());
         }
-        return $this->storage;
+    }
+
+    /**
+     * @throws SyncPackageException
+     */
+    public function createStorage()
+    {
+        try {
+            $this->getFileSystemService()
+                ->getFileSystem(self::FILESYSTEM_ID)
+                ->createDir(self::STORAGE_NAME);
+        } catch (\Exception $e) {
+            throw new SyncPackageException($e->getMessage());
+        }
     }
 }

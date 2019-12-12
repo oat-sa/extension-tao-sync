@@ -23,9 +23,7 @@ namespace oat\taoSync\scripts\install;
 use common_Exception;
 use common_report_Report;
 use oat\oatbox\extension\InstallAction;
-use oat\oatbox\filesystem\FileSystemService;
 use oat\taoSync\package\SyncPackageService;
-use oat\taoSync\package\storage\SyncFileSystem;
 
 /**
  * php index.php 'oat\taoSync\scripts\install\CreateFileSystemStorage'
@@ -39,19 +37,10 @@ class CreateFileSystemStorage extends InstallAction
      */
     public function __invoke($params)
     {
-        $packageStorage = new SyncFileSystem();
-        $this->getServiceManager()->propagate($packageStorage);
+        $syncPackageService = $this->getServiceManager()->propagate(new SyncPackageService());
+        $syncPackageService->createStorage();
 
-        $service = $this->getServiceManager()->get(FileSystemService::SERVICE_ID);
-        $service->createFileSystem($packageStorage->getStorageName());
-        $this->getServiceManager()->register(FileSystemService::SERVICE_ID, $service);
-
-        $packageStorage->createStorage();
-
-        $this->getServiceManager()->register(
-            SyncPackageService::SERVICE_ID,
-            new SyncPackageService([SyncPackageService::OPTION_STORAGE => $packageStorage])
-        );
+        $this->getServiceManager()->register(SyncPackageService::SERVICE_ID, $syncPackageService);
 
         return \common_report_Report::createSuccess('FileSystemStorageService successfully created.');
     }

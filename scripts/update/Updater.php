@@ -829,19 +829,10 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('6.12.0', '7.0.0');
 
         if ($this->isVersion('7.0.0')) {
-            $packageStorage = new SyncFileSystem();
-            $this->getServiceManager()->propagate($packageStorage);
+            $syncPackageService = $this->getServiceManager()->propagate(new SyncPackageService());
+            $syncPackageService->createStorage();
 
-            $service = $this->getServiceManager()->get(FileSystemService::SERVICE_ID);
-            $service->createFileSystem($packageStorage->getStorageName());
-            $this->getServiceManager()->register(FileSystemService::SERVICE_ID, $service);
-
-            $packageStorage->createStorage();
-
-            $this->getServiceManager()->register(
-                SyncPackageService::SERVICE_ID,
-                new SyncPackageService([SyncPackageService::OPTION_STORAGE => $packageStorage])
-            );
+            $this->getServiceManager()->register(SyncPackageService::SERVICE_ID, $syncPackageService);
             $this->setVersion('7.1.0');
         }
     }
