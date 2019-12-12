@@ -27,6 +27,8 @@ abstract class AbstractDataProvider extends ConfigurableService
 {
     const OPTION_FORMATTER = 'formatter';
 
+    const OPTION_CHILD_PROVIDERS = 'childProviders';
+
     /**
      * Returns required data
      *
@@ -41,11 +43,22 @@ abstract class AbstractDataProvider extends ConfigurableService
     abstract public function getType();
 
     /**
-     * @return string|bool
+     * @return AbstractDataProvider[]
      */
-    public function getParent()
+    public function getChildProviders()
     {
-        return false;
+        $childProviders = [];
+
+        if (is_array($this->getOption(self::OPTION_CHILD_PROVIDERS))) {
+            $providers = $this->getOption(self::OPTION_CHILD_PROVIDERS);
+
+            foreach ($providers as $provider) {
+                if ($providers instanceof AbstractDataProvider) {
+                    $childProviders[$provider->getType] = $this->propagate($provider);
+                }
+            }
+        }
+        return $childProviders;
     }
 
     /**

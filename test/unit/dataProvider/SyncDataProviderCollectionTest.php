@@ -20,9 +20,11 @@
 namespace oat\taoSync\test\unit\dataProvider;
 
 use oat\generis\test\TestCase;
+use oat\oatbox\log\LoggerService;
 use oat\taoSync\model\dataProvider\AbstractDataProvider;
 use oat\taoSync\model\dataProvider\SyncDataProviderCollection;
 use oat\taoSync\model\Exception\SyncDataProviderException;
+use PHPUnit_Framework_MockObject_MockObject;
 
 class SyncDataProviderCollectionTest extends TestCase
 {
@@ -35,7 +37,9 @@ class SyncDataProviderCollectionTest extends TestCase
                 SyncDataProviderCollection::OPTION_DATA_PROVIDERS => ['test' => $dataProvider]
             ]
         );
-        $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock());
+        $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
+            ['generis/log' => $this->getMock(LoggerService::class)])
+        );
 
         $this->assertEquals($dataProvider, $syncDataProviderCollection->getProvider('test'));
     }
@@ -43,11 +47,7 @@ class SyncDataProviderCollectionTest extends TestCase
     public function testGetInvalidProvider()
     {
         $syncDataProviderCollection = new SyncDataProviderCollection(
-            [
-                SyncDataProviderCollection::OPTION_DATA_PROVIDERS => [
-                    'dp' => $this->createMock(AbstractDataProvider::class)
-                ]
-            ]
+            [SyncDataProviderCollection::OPTION_DATA_PROVIDERS => []]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock());
         $this->expectException(SyncDataProviderException::class);
@@ -56,28 +56,17 @@ class SyncDataProviderCollectionTest extends TestCase
 
     public function testGetDataTest()
     {
-        $dataProvider1 = $this->getMockBuilder(AbstractDataProvider::class)
-            ->setConstructorArgs(['key' => ['value1']])->getMock();
+        $dataProvider1 = $this->getDataProviderMock('dp1');
+        $dataProvider2 = $this->getDataProviderMock('dp2');
+        $dataProvider3 = $this->getDataProviderMock('dp3');
+        $dataProvider4 = $this->getDataProviderMock('dp4');
+        $dataProvider5 = $this->getDataProviderMock('dp5');
+        $dataProvider6 = $this->getDataProviderMock('dp6');
 
-        $dataProvider1->method('getType')->willReturn('dp1');
-        $dataProvider2 = $this->getMockBuilder(AbstractDataProvider::class)
-            ->setConstructorArgs(['key' => ['value2']])->getMock();
-        $dataProvider2->method('getType')->willReturn('dp2');
-        $dataProvider3 = $this->getMockBuilder(AbstractDataProvider::class)
-            ->setConstructorArgs(['key' => ['value3']])->getMock();
-        $dataProvider3->method('getType')->willReturn('dp3');
-        $dataProvider4 = $this->getMockBuilder(AbstractDataProvider::class)
-            ->setConstructorArgs(['key' => ['value4']])->getMock();
-        $dataProvider4->method('getType')->willReturn('dp4');
-        $dataProvider4->method('getParent')->willReturn('dp3');
-        $dataProvider5 = $this->getMockBuilder(AbstractDataProvider::class)
-            ->setConstructorArgs(['key' => ['value5']])->getMock();
-        $dataProvider5->method('getType')->willReturn('dp5');
-        $dataProvider5->method('getParent')->willReturn('dp3');
-        $dataProvider6 = $this->getMockBuilder(AbstractDataProvider::class)
-            ->setConstructorArgs(['key' => ['value6']])->getMock();
-        $dataProvider6->method('getType')->willReturn('dp6');
-        $dataProvider6->method('getParent')->willReturn('dp5');
+        $dataProvider5->method('getChildProviders')->willReturn(['dp6' => $dataProvider6]);
+        $dataProvider3->method('getChildProviders')->willReturn(
+            ['dp4' => $dataProvider4, 'dp5' => $dataProvider5]
+        );
 
         $params = ['key' => 'value'];
 
@@ -118,14 +107,13 @@ class SyncDataProviderCollectionTest extends TestCase
                     [
                         'dp1' => $dataProvider1,
                         'dp2' => $dataProvider2,
-                        'dp3' => $dataProvider3,
-                        'dp4' => $dataProvider4,
-                        'dp5' => $dataProvider5,
-                        'dp6' => $dataProvider6
+                        'dp3' => $dataProvider3
                     ]
             ]
         );
-        $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock());
+        $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
+            ['generis/log' => $this->getMock(LoggerService::class)])
+        );
 
         $this->assertEquals(
             [
@@ -138,5 +126,42 @@ class SyncDataProviderCollectionTest extends TestCase
             ],
             $syncDataProviderCollection->getData($params)
         );
+    }
+
+    public function testGetDataWithInvalidConfig()
+    {
+        $dataProvider1 = $this->getDataProviderMock('dp1');
+        $dataProvider2 = $this->getDataProviderMock('dp2');
+        $dataProvider3 = $this->getDataProviderMock('dp3');
+
+        $dataProvider1->method('getChildProviders')->willReturn(['dp2' => $dataProvider2]);
+        $dataProvider2->method('getChildProviders')->willReturn(['dp3' => $dataProvider3]);
+        $dataProvider3->method('getChildProviders')->willReturn(['dp1' => $dataProvider1]);
+
+
+        $syncDataProviderCollection = new SyncDataProviderCollection(
+            [
+                SyncDataProviderCollection::OPTION_DATA_PROVIDERS => ['dp1' => $dataProvider1]
+            ]
+        );
+        $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
+            ['generis/log' => $this->getMock(LoggerService::class)])
+        );
+        $this->expectException(SyncDataProviderException::class);
+        $syncDataProviderCollection->getData(['key' => 'value']);
+    }
+
+    /**
+     * @param string $type;
+     * @return AbstractDataProvider|PHPUnit_Framework_MockObject_MockObject
+     */
+    private function getDataProviderMock($type)
+    {
+        $dataProviderMock = $this->getMockBuilder(AbstractDataProvider::class)
+            ->setConstructorArgs(['key' => [$type]])->getMock();
+
+        $dataProviderMock->method('getType')->willReturn($type);
+
+        return $dataProviderMock;
     }
 }
