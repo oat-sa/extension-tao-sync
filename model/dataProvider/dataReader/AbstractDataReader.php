@@ -21,42 +21,14 @@
 
 namespace oat\taoSync\model\dataProvider\dataReader;
 
-use core_kernel_classes_Class;
-use core_kernel_classes_Property;
-use core_kernel_classes_Resource;
-use oat\generis\model\data\Ontology;
+use oat\generis\model\OntologyAwareTrait;
 use oat\oatbox\service\ConfigurableService;
 
 abstract class AbstractDataReader extends ConfigurableService
 {
+    use OntologyAwareTrait;
+
     const TYPE = 'default';
-
-    /**
-     * @param string $id
-     * @return core_kernel_classes_Resource
-     */
-    protected function getResource($id)
-    {
-        return $this->getServiceLocator()->get(Ontology::SERVICE_ID)->getResource($id);
-    }
-
-    /**
-     * @param string $uri
-     * @return core_kernel_classes_Class
-     */
-    protected function getClass($uri)
-    {
-        return $this->getServiceLocator()->get(Ontology::SERVICE_ID)->getClass($uri);
-    }
-
-    /**
-     * @param string $uri
-     * @return core_kernel_classes_Property
-     */
-    protected function getProperty($uri)
-    {
-        return $this->getServiceLocator()->get(Ontology::SERVICE_ID)->getProperty($uri);
-    }
 
     /**
      * @return string
