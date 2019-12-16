@@ -21,7 +21,7 @@ namespace oat\taoSync\model\dataProvider;
 
 use oat\oatbox\service\ConfigurableService;
 use oat\taoSync\model\Exception\SyncDataProviderException;
-use oat\taoSync\model\export\dataProvider\dataFormatter\AbstractDataFormatter;
+use oat\taoSync\model\dataProvider\dataFormatter\AbstractDataFormatter;
 
 abstract class AbstractDataProvider extends ConfigurableService
 {
@@ -33,7 +33,7 @@ abstract class AbstractDataProvider extends ConfigurableService
      * @param array $options
      * @throws SyncDataProviderException
      */
-    public function __construct ($options = array())
+    public function __construct($options = array())
     {
         parent::__construct($options);
         if ($this->hasOption(self::OPTION_FORMATTER)) {

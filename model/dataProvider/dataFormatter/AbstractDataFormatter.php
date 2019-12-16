@@ -19,7 +19,7 @@
  * @author Yuri Filippovich
  */
 
-namespace oat\taoSync\model\export\dataProvider\dataFormatter;
+namespace oat\taoSync\model\dataProvider\dataFormatter;
 
 use core_kernel_classes_Resource;
 use oat\oatbox\service\ConfigurableService;
