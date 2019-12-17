@@ -28,8 +28,6 @@ abstract class AbstractDataReader extends ConfigurableService
 {
     use OntologyAwareTrait;
 
-    const TYPE = 'default';
-
     /**
      * @return string
      */
