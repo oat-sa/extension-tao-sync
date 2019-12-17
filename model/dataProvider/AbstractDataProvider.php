@@ -92,7 +92,6 @@ abstract class AbstractDataProvider extends ConfigurableService
     /**
      * @param array $params
      * @return array
-     * @throws SyncDataProviderException
      */
     public function getData($params)
     {
