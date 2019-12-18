@@ -30,6 +30,11 @@ abstract class AbstractDataProvider extends ConfigurableService
     const OPTION_CHILD_PROVIDERS = 'childProviders';
 
     /**
+     * @var AbstractDataFormatter
+     */
+    private $formatter;
+
+    /**
      * @param array $options
      * @throws SyncDataProviderException
      */
@@ -83,8 +88,13 @@ abstract class AbstractDataProvider extends ConfigurableService
      */
     protected function getDataFormatter()
     {
+        if ($this->formatter) {
+            return $this->formatter;
+        }
+
         if ($this->hasOption(self::OPTION_FORMATTER)) {
-            return $this->propagate($this->getOption(self::OPTION_FORMATTER));
+            $this->formatter = $this->propagate($this->getOption(self::OPTION_FORMATTER));
+            return $this->formatter;
         }
         return false;
     }
