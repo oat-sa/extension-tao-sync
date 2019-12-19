@@ -19,12 +19,13 @@
 
 namespace oat\taoSync\test\unit\dataProvider;
 
+use oat\generis\test\MockObject;
 use oat\generis\test\TestCase;
 use oat\oatbox\log\LoggerService;
 use oat\taoSync\model\dataProvider\AbstractDataProvider;
 use oat\taoSync\model\dataProvider\SyncDataProviderCollection;
 use oat\taoSync\model\Exception\SyncDataProviderException;
-use PHPUnit_Framework_MockObject_MockObject;
+
 
 class SyncDataProviderCollectionTest extends TestCase
 {
@@ -153,7 +154,7 @@ class SyncDataProviderCollectionTest extends TestCase
 
     /**
      * @param string $type;
-     * @return AbstractDataProvider|PHPUnit_Framework_MockObject_MockObject
+     * @return AbstractDataProvider|MockObject
      */
     private function getDataProviderMock($type)
     {
