@@ -37,7 +37,7 @@ class SyncPackageService extends ConfigurableService
      * @param array $data
      * @param int $packageName
      * @param int $orgId
-     * @return bool
+     * @return string|null
      * @throws SyncPackageException
      */
     public function createPackage(array $data, $packageName, $orgId)
@@ -49,7 +49,9 @@ class SyncPackageService extends ConfigurableService
         }
 
         try {
-            return $file->write(json_encode($data));
+             if ($file->write(json_encode($data))) {
+                 return self::FILESYSTEM_ID . DIRECTORY_SEPARATOR . $file->getPrefix();
+             }
         } catch (\Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
