@@ -72,16 +72,21 @@ class SyncPackageService extends ConfigurableService
      */
     private function getStorageDir($orgId)
     {
+        $fileSystemService = $this->getFileSystemService();
         try {
-            $directory = $this->getFileSystemService()
+            $directory = $fileSystemService
                 ->getDirectory(self::FILESYSTEM_ID)
                 ->getDirectory(self::STORAGE_NAME)
                 ->getDirectory($orgId);
 
             if (!$directory->exists()) {
-                $this->getFileSystemService()
+                $newDirCreated = $fileSystemService
                     ->getFileSystem(self::FILESYSTEM_ID)
                     ->createDir(self::STORAGE_NAME . DIRECTORY_SEPARATOR . $orgId);
+
+                if (!$newDirCreated) {
+                    throw new SyncPackageException('Cant create package directory');
+                }
             }
             return $directory;
         } catch (\Exception $e) {
