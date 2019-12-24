@@ -90,6 +90,8 @@ use oat\taoSync\model\User\HandShakeClientService;
 use oat\taoSync\model\Validator\SyncParamsValidator;
 use oat\taoSync\model\VirtualMachine\VmIdentifierService;
 use oat\taoSync\model\VirtualMachine\VmVersionChecker;
+use oat\taoSync\package\SyncPackageService;
+use oat\taoSync\package\storage\SyncFileSystem;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
 use oat\taoSync\model\ui\FormFieldsService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeDeliveryLog;
@@ -825,6 +827,14 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('6.12.0', '7.0.0');
+
+        if ($this->isVersion('7.0.0')) {
+            $syncPackageService = $this->getServiceManager()->propagate(new SyncPackageService());
+            $syncPackageService->createStorage();
+
+            $this->getServiceManager()->register(SyncPackageService::SERVICE_ID, $syncPackageService);
+            $this->setVersion('7.1.0');
+        }
     }
 
     /**
