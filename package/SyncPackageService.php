@@ -21,6 +21,7 @@
 
 namespace oat\taoSync\package;
 
+use Exception;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
@@ -52,9 +53,30 @@ class SyncPackageService extends ConfigurableService
              if ($file->write(json_encode($data))) {
                  return self::FILESYSTEM_ID . DIRECTORY_SEPARATOR . $file->getPrefix();
              }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
+    }
+
+    /**
+     * @param string $path
+     * @param string $orgId
+     * @return bool
+     * @throws Exception
+     */
+    public function moveLocalFile($path, $orgId)
+    {
+        $file = $this->getStorageDir($orgId)->getFile(basename($path));
+
+        if ($file->exists()) {
+            $file->delete();
+        }
+
+        if ($file->write(file_get_contents($path))) {
+             unlink($path);
+             return true;
+        }
+        return false;
     }
 
     /**
