@@ -66,6 +66,10 @@ class SyncPackageService extends ConfigurableService
      */
     public function moveLocalFile($path, $orgId)
     {
+        if (!file_exists($path)) {
+            return false;
+        }
+
         $file = $this->getStorageDir($orgId)->getFile(basename($path));
 
         if ($file->exists()) {
