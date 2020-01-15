@@ -59,31 +59,6 @@ class SyncPackageService extends ConfigurableService
     }
 
     /**
-     * @param string $path
-     * @param string $orgId
-     * @return bool
-     * @throws Exception
-     */
-    public function moveLocalFile($path, $orgId)
-    {
-        if (!file_exists($path)) {
-            return false;
-        }
-
-        $file = $this->getStorageDir($orgId)->getFile(basename($path));
-
-        if ($file->exists()) {
-            $file->delete();
-        }
-
-        if ($file->write(file_get_contents($path))) {
-             unlink($path);
-             return true;
-        }
-        return false;
-    }
-
-    /**
      * @return FileSystemService|array
      */
     private function getFileSystemService()
@@ -98,23 +73,9 @@ class SyncPackageService extends ConfigurableService
      */
     private function getStorageDir($orgId)
     {
-        $fileSystemService = $this->getFileSystemService();
+
         try {
-            $directory = $fileSystemService
-                ->getDirectory(self::FILESYSTEM_ID)
-                ->getDirectory(self::STORAGE_NAME)
-                ->getDirectory($orgId);
-
-            if (!$directory->exists()) {
-                $newDirCreated = $fileSystemService
-                    ->getFileSystem(self::FILESYSTEM_ID)
-                    ->createDir(self::STORAGE_NAME . DIRECTORY_SEPARATOR . $orgId);
-
-                if (!$newDirCreated) {
-                    throw new SyncPackageException('Cant create package directory');
-                }
-            }
-            return $directory;
+            return $this->getSyncDirectory()->getDirectory(self::STORAGE_NAME)->getDirectory($orgId);
         } catch (\Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
@@ -130,6 +91,19 @@ class SyncPackageService extends ConfigurableService
                 ->getFileSystem(self::FILESYSTEM_ID)
                 ->createDir(self::STORAGE_NAME);
         } catch (\Exception $e) {
+            throw new SyncPackageException($e->getMessage());
+        }
+    }
+
+    /**
+     * @return Directory
+     * @throws SyncPackageException
+     */
+    public function getSyncDirectory()
+    {
+        try {
+           return $this->getFileSystemService()->getDirectory(self::FILESYSTEM_ID);
+        } catch (Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
     }
