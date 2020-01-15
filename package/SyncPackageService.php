@@ -73,7 +73,6 @@ class SyncPackageService extends ConfigurableService
      */
     private function getStorageDir($orgId)
     {
-
         try {
             return $this->getSyncDirectory()->getDirectory(self::STORAGE_NAME)->getDirectory($orgId);
         } catch (\Exception $e) {
