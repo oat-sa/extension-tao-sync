@@ -82,10 +82,6 @@ class SyncPackageServiceTest extends TestCase
         $fileMock = $this->getFileMock();
 
         $fileMock->expects($this->once())
-            ->method('exists')
-            ->willReturn(false);
-
-        $fileMock->expects($this->once())
             ->method('write')
             ->with('{"key":"val","key2":"val2"}')
             ->willReturn(true);
@@ -125,10 +121,6 @@ class SyncPackageServiceTest extends TestCase
     {
         $directoryOrg = $this->getOrgDirectory();
 
-        $directoryOrg->expects($this->once())
-            ->method('exists')
-            ->willReturn(true);
-
         $fileMock = $this->createMock(File::class);
 
         $directoryOrg->expects($this->once())
@@ -137,61 +129,6 @@ class SyncPackageServiceTest extends TestCase
             ->willReturn($fileMock);
 
         return $fileMock;
-    }
-
-    public function testCreatePackageWithDir()
-    {
-        $directoryOrg = $this->getOrgDirectory();
-
-        $directoryOrg->expects($this->once())
-            ->method('exists')
-            ->willReturn(false);
-
-        $this->fileSystemServiceMock->expects($this->once())
-            ->method('getFileSystem')
-            ->with('synchronisation')
-            ->willReturn($this->filesystemInterfaceMock);
-
-        $this->filesystemInterfaceMock->expects($this->once())
-            ->method('createDir')
-            ->with('packages/orgId')
-            ->willReturn(true);
-
-        $fileMock = $this->createMock(File::class);
-
-        $directoryOrg->expects($this->once())
-            ->method('getFile')
-            ->with('packageName')
-            ->willReturn($fileMock);
-
-        $fileMock->expects($this->once())
-            ->method('exists')
-            ->willReturn(false);
-
-        $this->service->createPackage(['key' => 'val', 'key2' => 'val2'], 'packageName', 'orgId');
-    }
-
-    public function testCreatePackageWithInvalidDir()
-    {
-        $directoryOrg = $this->getOrgDirectory();
-
-        $directoryOrg->expects($this->once())
-            ->method('exists')
-            ->willReturn(false);
-
-        $this->fileSystemServiceMock->expects($this->once())
-            ->method('getFileSystem')
-            ->with('synchronisation')
-            ->willReturn($this->filesystemInterfaceMock);
-
-        $this->filesystemInterfaceMock->expects($this->once())
-            ->method('createDir')
-            ->with('packages/orgId')
-            ->willReturn(false);
-
-        $this->expectException(SyncPackageException::class);
-
-        $this->service->createPackage(['key' => 'val', 'key2' => 'val2'], 'packageName', 'orgId');
     }
 
     public function testCreatePackageWithExistFile()
@@ -235,5 +172,18 @@ class SyncPackageServiceTest extends TestCase
             ->willReturn($directoryOrg);
 
         return $directoryOrg;
+    }
+
+    public function testGetSyncDirectory()
+    {
+        $directory = $this->createMock(Directory::class);
+
+        $this->fileSystemServiceMock
+            ->expects($this->once())
+            ->method('getDirectory')
+            ->with('synchronisation')
+            ->willReturn($directory);
+
+        $this->assertSame($directory, $this->service->getSyncDirectory());
     }
 }
