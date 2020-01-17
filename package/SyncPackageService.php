@@ -21,6 +21,7 @@
 
 namespace oat\taoSync\package;
 
+use Exception;
 use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
@@ -52,7 +53,7 @@ class SyncPackageService extends ConfigurableService
              if ($file->write(json_encode($data))) {
                  return self::FILESYSTEM_ID . DIRECTORY_SEPARATOR . $file->getPrefix();
              }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
     }
@@ -72,23 +73,8 @@ class SyncPackageService extends ConfigurableService
      */
     private function getStorageDir($orgId)
     {
-        $fileSystemService = $this->getFileSystemService();
         try {
-            $directory = $fileSystemService
-                ->getDirectory(self::FILESYSTEM_ID)
-                ->getDirectory(self::STORAGE_NAME)
-                ->getDirectory($orgId);
-
-            if (!$directory->exists()) {
-                $newDirCreated = $fileSystemService
-                    ->getFileSystem(self::FILESYSTEM_ID)
-                    ->createDir(self::STORAGE_NAME . DIRECTORY_SEPARATOR . $orgId);
-
-                if (!$newDirCreated) {
-                    throw new SyncPackageException('Cant create package directory');
-                }
-            }
-            return $directory;
+            return $this->getSyncDirectory()->getDirectory(self::STORAGE_NAME)->getDirectory($orgId);
         } catch (\Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
@@ -104,6 +90,19 @@ class SyncPackageService extends ConfigurableService
                 ->getFileSystem(self::FILESYSTEM_ID)
                 ->createDir(self::STORAGE_NAME);
         } catch (\Exception $e) {
+            throw new SyncPackageException($e->getMessage());
+        }
+    }
+
+    /**
+     * @return Directory
+     * @throws SyncPackageException
+     */
+    public function getSyncDirectory()
+    {
+        try {
+           return $this->getFileSystemService()->getDirectory(self::FILESYSTEM_ID);
+        } catch (Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
     }
