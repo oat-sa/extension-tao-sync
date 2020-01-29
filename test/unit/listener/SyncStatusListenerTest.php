@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -71,7 +72,7 @@ class SyncStatusListenerTest extends TestCase
 
         $this->loggerMock->expects($this->once())
             ->method('error')
-            ->with('Confirmation sending failed',[]);
+            ->with('Confirmation sending failed', []);
 
         $this->object->sendSyncFailedConfirmation($event);
     }
@@ -127,4 +128,3 @@ class SyncStatusListenerTest extends TestCase
         $this->object->sendSyncFailedConfirmation($event);
     }
 }
-

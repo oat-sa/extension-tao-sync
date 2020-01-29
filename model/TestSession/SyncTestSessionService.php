@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -67,7 +68,7 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
 
         foreach ($sessionsToSync as $resultId) {
             if ($this->getDeliveryLogService()->hasAllDeliveryLogsSynced($resultId)) {
-                $this->report->add(Report::createInfo('The Test session ('.$resultId.') to send to remote server. Sending...'));
+                $this->report->add(Report::createInfo('The Test session (' . $resultId . ') to send to remote server. Sending...'));
                 $sessions[] = $resultId;
                 $counter++;
             }
@@ -152,7 +153,6 @@ class SyncTestSessionService extends ConfigurableService implements SyncTestSess
                 ];
                 $this->report->add(Report::createFailure("Import of test sessions for delivery execution {$resultId} failed."));
             }
-
         }
         $this->reportImportCompleted($importAcknowledgment);
 

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -41,5 +42,4 @@ class RegisterTestCenterService extends InstallAction
         $this->registerService(TestCenterService::SERVICE_ID, new TestCenterService());
         return \common_report_Report::createSuccess('TestCenterService successfully registered.');
     }
-
 }

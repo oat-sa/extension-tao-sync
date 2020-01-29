@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -212,7 +213,8 @@ class ClientSyncLogListener extends ConfigurableService
      * @param $bytes
      * @return string
      */
-    private function formatMbit($bytes) {
+    private function formatMbit($bytes)
+    {
 
         return round($bytes * 8 / 1024 / 1024, 2);
     }

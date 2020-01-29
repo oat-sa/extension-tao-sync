@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,5 +22,3 @@ use oat\taoSync\model\SyncLog\SyncLogService;
 use oat\taoSync\model\SyncLog\Storage\RdsSyncLogStorage;
 
 return new SyncLogService([SyncLogService::OPTION_STORAGE => RdsSyncLogStorage::SERVICE_ID]);
-
-

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  *
  * Copyright (c) 2019. (original work) Open Assessment Technologies SA;
  */
+
 namespace oat\taoSync\model\monitoring;
 
 use common_exception_FileSystemError;
@@ -133,10 +135,10 @@ abstract class SpaceUsageStatsService extends ConfigurableService implements Mac
     /**
      * @return string
      */
-    protected abstract function getTargetVolume();
+    abstract protected function getTargetVolume();
 
     /**
      * @return int
      */
-    protected abstract function getSpaceUsage();
+    abstract protected function getSpaceUsage();
 }

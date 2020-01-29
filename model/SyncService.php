@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -57,7 +58,7 @@ class SyncService extends ConfigurableService
     const DEFAULT_CHUNK_SIZE = 100;
 
     /** @var Synchronizer[]  */
-    protected $synchronizers = array();
+    protected $synchronizers = [];
 
     /** @var \common_report_Report */
     protected $report;
@@ -169,7 +170,8 @@ class SyncService extends ConfigurableService
         foreach ($entityIds as $id) {
             try {
                 $entities[$id] = $this->getSynchronizer($type)->fetchOne($id, $options);
-            } catch (\common_exception_NotFound $e) {}
+            } catch (\common_exception_NotFound $e) {
+            }
         }
         return $entities;
     }
@@ -208,7 +210,7 @@ class SyncService extends ConfigurableService
      */
     protected function synchronizeType($type, array $params = [])
     {
-        $this->report('Synchronizing "' . $type .'"', LogLevel::INFO);
+        $this->report('Synchronizing "' . $type . '"', LogLevel::INFO);
 
         $response = $this->getSynchronisationClient()->fetchEntityChecksums($type, $params);
 
@@ -252,11 +254,11 @@ class SyncService extends ConfigurableService
      */
     protected function synchronizeEntities(Synchronizer $synchronizer, array $remoteEntities, $params = [])
     {
-        $entities = array(
+        $entities = [
             'create' => [],
             'update' => [],
             'existing' => [],
-        );
+        ];
 
         if (empty($remoteEntities)) {
             $this->report('(' . $synchronizer->getId() . ') No entity to synchronize.');
@@ -513,8 +515,7 @@ class SyncService extends ConfigurableService
      */
     private function getSyncId(array $params)
     {
-        if (empty($params[DataSyncHistoryService::SYNC_NUMBER]))
-        {
+        if (empty($params[DataSyncHistoryService::SYNC_NUMBER])) {
             $params[DataSyncHistoryService::SYNC_NUMBER] = $this->getSyncHistoryService()->createSynchronisation($params);
         }
 

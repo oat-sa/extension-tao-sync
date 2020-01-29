@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,7 +45,7 @@ class HandShakeServerService extends ConfigurableService
     {
         $user = $this->getUsersService()->getOneUser($userIdentifier);
         if (!in_array(SyncService::TAO_SYNC_ROLE, $user->getPropertyValues($this->getProperty(GenerisRdf::PROPERTY_USER_ROLES)))) {
-            throw new InvalidRoleForSync('User does not have the '. SyncService::TAO_SYNC_ROLE . ' role.');
+            throw new InvalidRoleForSync('User does not have the ' . SyncService::TAO_SYNC_ROLE . ' role.');
         }
 
         $generator = $this->getGeneratorOauth();

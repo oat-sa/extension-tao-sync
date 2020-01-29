@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -141,7 +142,7 @@ class DataSyncHistoryService extends ConfigurableService
             ->where(self::SYNC_NUMBER . ' <> :sync_number ')
             ->andWhere(self::SYNC_ENTITY_TYPE . ' = :type')
             ->andWhere(self::SYNC_ACTION . ' <> :action')
-            ->setParameter('sync_number',  $this->getCurrentSynchroId())
+            ->setParameter('sync_number', $this->getCurrentSynchroId())
             ->setParameter('type', $type)
             ->setParameter('action', self::ACTION_DELETED)
         ;

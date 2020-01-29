@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -86,7 +87,6 @@ class RenameColumnOrgId extends ScriptAction
                     $result->add(common_report_Report::createFailure('New column must exist! Please run --migrate first'));
                 }
             }
-
         } catch (\Exception $e) {
             $result = common_report_Report::createFailure($e->getMessage());
         }
@@ -119,8 +119,6 @@ class RenameColumnOrgId extends ScriptAction
             ->set(DataSyncHistoryByOrgIdService::SYNC_ORG_ID, self::COLUMN_OLD);
         $result = $q->execute();
         return common_report_Report::createSuccess(__('%s rows has been migrated', $result));
-
-
     }
 
     protected function provideOptions()
@@ -177,5 +175,4 @@ class RenameColumnOrgId extends ScriptAction
             throw new \InvalidArgumentException('Run ' . __CLASS__ . ' --help to learn how to use tool');
         }
     }
-
 }

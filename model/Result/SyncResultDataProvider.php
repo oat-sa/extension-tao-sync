@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -56,7 +57,7 @@ class SyncResultDataProvider extends ConfigurableService
                 $currentState = $deliveryExecution->getState()->getUri();
 
                 // Skip non white listed states of delivery executions.
-                if (!in_array($currentState, $statesToSync)){
+                if (!in_array($currentState, $statesToSync)) {
                     continue;
                 }
 
@@ -132,7 +133,7 @@ class SyncResultDataProvider extends ConfigurableService
             foreach ($results as $result) {
                 $executions[] = $serviceProxy->getDeliveryExecution($result['deliveryResultIdentifier']);
             }
-        } else{
+        } else {
             $executions = $serviceProxy->getExecutionsByDelivery($delivery);
         }
         return $executions;
@@ -144,7 +145,7 @@ class SyncResultDataProvider extends ConfigurableService
     protected function getExecutionsStatesAvailableForSync()
     {
         $statuses = $this->getOption(static::OPTION_STATUS_EXECUTIONS_TO_SYNC);
-        if ($statuses == null){
+        if ($statuses == null) {
             return [DeliveryExecution::STATE_FINISHED];
         }
 

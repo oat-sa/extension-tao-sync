@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -80,7 +81,7 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
         $queryBuilder = $search->query();
 
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri(), true);
         $query->add(self::ORGANISATION_ID_PROPERTY)->equals($id);
 
         if (isset($params['startCreatedAt'])) {
@@ -101,9 +102,9 @@ class TestCenterByOrganisationId extends RdfTestCenterSynchronizer
                     $values[$instance['id']] = $instance;
                 }
             }
-        } catch (SearchGateWayExeption $e) {}
+        } catch (SearchGateWayExeption $e) {
+        }
 
         return $values;
     }
-
 }

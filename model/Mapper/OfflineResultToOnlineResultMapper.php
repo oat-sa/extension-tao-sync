@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +41,7 @@ class OfflineResultToOnlineResultMapper extends ConfigurableService
      */
     protected function getPersistence()
     {
-        if (is_null($this->persistence)){
+        if (is_null($this->persistence)) {
             $persistenceId = $this->getOption(self::OPTION_PERSISTENCE);
             $persistence = $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
 

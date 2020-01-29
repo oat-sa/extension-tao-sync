@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -67,7 +68,6 @@ class ListenerService extends ConfigurableService
             return $listenerService->$listener($event);
         }
         return \common_report_Report::createInfo(__CLASS__ . ' does not handle the event "' . $event->getName() . '".');
-
     }
 
     /**
@@ -145,7 +145,8 @@ class ListenerService extends ConfigurableService
                     );
                 }
             }
-        } catch (SearchGateWayExeption $e) {}
+        } catch (SearchGateWayExeption $e) {
+        }
         return;
     }
 
@@ -168,5 +169,4 @@ class ListenerService extends ConfigurableService
     {
         return $this->getServiceLocator()->get(DeliverySynchronizerService::SERVICE_ID);
     }
-
 }

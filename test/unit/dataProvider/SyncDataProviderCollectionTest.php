@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +27,6 @@ use oat\taoSync\model\dataProvider\AbstractDataProvider;
 use oat\taoSync\model\dataProvider\SyncDataProviderCollection;
 use oat\taoSync\model\Exception\SyncDataProviderException;
 
-
 class SyncDataProviderCollectionTest extends TestCase
 {
     public function testGetProvider()
@@ -39,8 +39,8 @@ class SyncDataProviderCollectionTest extends TestCase
             ]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
-            ['generis/log' => $this->getMock(LoggerService::class)])
-        );
+            ['generis/log' => $this->getMock(LoggerService::class)]
+        ));
 
         $this->assertEquals($dataProvider, $syncDataProviderCollection->getProvider('test'));
     }
@@ -74,32 +74,32 @@ class SyncDataProviderCollectionTest extends TestCase
         $dataProvider1->expects($this->once())
             ->method('getData')
             ->with($params)
-            ->willReturn(['result1'=> 'data1']);
+            ->willReturn(['result1' => 'data1']);
 
         $dataProvider2->expects($this->once())
             ->method('getData')
             ->with($params)
-            ->willReturn(['result2'=> 'data2']);
+            ->willReturn(['result2' => 'data2']);
 
         $dataProvider3->expects($this->once())
             ->method('getData')
             ->with($params)
-            ->willReturn(['result3'=> 'data3']);
+            ->willReturn(['result3' => 'data3']);
 
         $dataProvider4->expects($this->once())
             ->method('getData')
-            ->with(['dp3' => ['result3'=> 'data3'], 'key' => 'value'])
-            ->willReturn(['result4'=> 'data4']);
+            ->with(['dp3' => ['result3' => 'data3'], 'key' => 'value'])
+            ->willReturn(['result4' => 'data4']);
 
         $dataProvider5->expects($this->once())
             ->method('getData')
-            ->with(['dp3' => ['result3'=> 'data3'], 'key' => 'value'])
-            ->willReturn(['result5'=> 'data5']);
+            ->with(['dp3' => ['result3' => 'data3'], 'key' => 'value'])
+            ->willReturn(['result5' => 'data5']);
 
         $dataProvider6->expects($this->once())
             ->method('getData')
-            ->with(['dp3' => ['result3'=> 'data3'], 'key' => 'value', 'dp5' => ['result5'=> 'data5']])
-            ->willReturn(['result6'=> 'data6']);
+            ->with(['dp3' => ['result3' => 'data3'], 'key' => 'value', 'dp5' => ['result5' => 'data5']])
+            ->willReturn(['result6' => 'data6']);
 
 
         $syncDataProviderCollection = new SyncDataProviderCollection(
@@ -113,17 +113,17 @@ class SyncDataProviderCollectionTest extends TestCase
             ]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
-            ['generis/log' => $this->getMock(LoggerService::class)])
-        );
+            ['generis/log' => $this->getMock(LoggerService::class)]
+        ));
 
         $this->assertEquals(
             [
-                'dp1' => ['result1'=> 'data1'],
-                'dp2' => ['result2'=> 'data2'],
-                'dp3' => ['result3'=> 'data3'],
-                'dp4' => ['result4'=> 'data4'],
-                'dp5' => ['result5'=> 'data5'],
-                'dp6' => ['result6'=> 'data6']
+                'dp1' => ['result1' => 'data1'],
+                'dp2' => ['result2' => 'data2'],
+                'dp3' => ['result3' => 'data3'],
+                'dp4' => ['result4' => 'data4'],
+                'dp5' => ['result5' => 'data5'],
+                'dp6' => ['result6' => 'data6']
             ],
             $syncDataProviderCollection->getData($params)
         );
@@ -146,8 +146,8 @@ class SyncDataProviderCollectionTest extends TestCase
             ]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
-            ['generis/log' => $this->getMock(LoggerService::class)])
-        );
+            ['generis/log' => $this->getMock(LoggerService::class)]
+        ));
         $this->expectException(SyncDataProviderException::class);
         $syncDataProviderCollection->getData(['key' => 'value']);
     }

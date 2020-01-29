@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -63,7 +64,7 @@ class ImportOauthCredentials extends ImportConsumer
         $secret = $this->getOption('secret');
         $tokenUrl = $this->getOption('tokenUrl');
 
-        return PlatformService::singleton()->getRootClass()->createInstanceWithProperties(array(
+        return PlatformService::singleton()->getRootClass()->createInstanceWithProperties([
             OntologyRdfs::RDFS_LABEL => 'Synchronization client',
             PlatformService::PROPERTY_AUTH_TYPE => (new OAuth2Type())->getAuthClass()->getUri(),
             PublishingService::PUBLISH_ACTIONS => 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData',
@@ -73,7 +74,7 @@ class ImportOauthCredentials extends ImportConsumer
             ConsumerStorage::CONSUMER_TOKEN_URL => $tokenUrl,
             ConsumerStorage::CONSUMER_TOKEN_TYPE => OAuthClient::DEFAULT_TOKEN_TYPE,
             ConsumerStorage::CONSUMER_TOKEN_GRANT_TYPE => OAuthClient::DEFAULT_GRANT_TYPE,
-        ));
+        ]);
     }
 
     /**
@@ -83,17 +84,16 @@ class ImportOauthCredentials extends ImportConsumer
      */
     protected function provideOptions()
     {
-        return array_merge(parent::provideOptions(),
-            array(
+        return array_merge(
+            parent::provideOptions(),
+            [
                 'rootUrl' => [
                     'prefix' => 'u',
                     'longPrefix' => 'root-url',
                     'required' => true,
                     'description' => 'The endpoint of the synchronisation data with oauth consumer',
                 ],
-            )
+            ]
         );
     }
-
-
 }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -67,22 +68,22 @@ class FormFieldsService extends ConfigurableService
         ];
         $values = \common_session_SessionManager::getSession()->getUser()->getPropertyValues(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
         $organizationId = null;
-        if (count($values) > 0){
+        if (count($values) > 0) {
             $organizationId = $values[0];
         }
         $formFields = (array) $this->getOption(self::OPTION_INPUT);
 
-        foreach($formFields as $key => &$formField){
+        foreach ($formFields as $key => &$formField) {
             $formField = array_merge($defaults, $formField);
-            if(empty($formField['attributes']['name'])){
+            if (empty($formField['attributes']['name'])) {
                 $formField['attributes']['name'] = $key;
 
-                if ($organizationId){
+                if ($organizationId) {
                     $formField['attributes']['disabled'] = 'disabled';
                     $formField['attributes']['value'] = $organizationId;
                 }
             }
-            if(empty($formField['attributes']['id'])){
+            if (empty($formField['attributes']['id'])) {
                 $formField['attributes']['id'] = $key;
             }
         }

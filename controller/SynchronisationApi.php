@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -168,7 +169,6 @@ class SynchronisationApi extends \tao_actions_RestController
             }
 
             $this->returnJson($this->getSyncService()->fetchMissingClasses($type, $requestedClasses));
-
         } catch (\Exception $e) {
             $this->returnFailure($e);
         }
@@ -187,7 +187,7 @@ class SynchronisationApi extends \tao_actions_RestController
             $this->assertHttpMethod(\Request::HTTP_GET);
 
             if (!$this->hasRequestParameter(self::PARAM_DELIVERY_URI)) {
-                throw new \InvalidArgumentException('A valid "' . self::PARAM_DELIVERY_URI . '" parameter is required for ' . __METHOD__ .'.');
+                throw new \InvalidArgumentException('A valid "' . self::PARAM_DELIVERY_URI . '" parameter is required for ' . __METHOD__ . '.');
             }
 
             $deliveryPackage = $this->getDeliverySynchronisationService()->getDeliveryTestPackage(
@@ -196,7 +196,6 @@ class SynchronisationApi extends \tao_actions_RestController
 
             $body = $deliveryPackage['testPackage']->readPsrStream();
             \tao_helpers_Http::returnStream($body);
-
         } catch (\Exception $e) {
             $this->returnFailure($e);
         }

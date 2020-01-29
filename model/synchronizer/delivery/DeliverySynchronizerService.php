@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -71,7 +72,7 @@ class DeliverySynchronizerService extends ConfigurableService
         $deliveryFactory = $this->getServiceLocator()->get(DeliveryFactory::SERVICE_ID);
         $report = $deliveryFactory->create($deliveryClass, $test, $delivery->getLabel(), $delivery);
 
-        if ($report->getType() === \common_report_Report::TYPE_ERROR ) {
+        if ($report->getType() === \common_report_Report::TYPE_ERROR) {
             $delivery->delete(true);
 
             return $report;
@@ -150,11 +151,11 @@ class DeliverySynchronizerService extends ConfigurableService
             $exportFile = 'export.zip';
             $exporter = new \taoQtiTest_models_classes_export_TestExport();
             $report = $exporter->export(
-                array(
+                [
                     'filename' => $exportFile,
                     'instances' => $test->getUri(),
                     'uri' => $test->getUri(),
-                ),
+                ],
                 $exportDir
             );
             $reportData = $report->getData();
@@ -162,7 +163,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 throw new \common_Exception('Exported test path is not set in the export report for delivery ' . $delivery->getUri());
             }
             $path = $reportData['path'];
-            $this->logInfo('Exporting Test '.$test->getUri().' to synchronisation dir: ' . $path);
+            $this->logInfo('Exporting Test ' . $test->getUri() . ' to synchronisation dir: ' . $path);
             $source = fopen($path, 'r');
 
             /** @var File $file */
@@ -181,7 +182,6 @@ class DeliverySynchronizerService extends ConfigurableService
         } catch (\Exception $e) {
             throw new \common_Exception('An error has occurred during test package backup : ' . $e->getMessage(), 0, $e);
         }
-
     }
 
     /**
@@ -229,7 +229,7 @@ class DeliverySynchronizerService extends ConfigurableService
                 return $r->getData()->rdfsResource;
             }
         } else {
-            throw new \common_Exception($file->getBasename() . 'Unable to import test with message '. $report->getMessage());
+            throw new \common_Exception($file->getBasename() . 'Unable to import test with message ' . $report->getMessage());
         }
     }
 

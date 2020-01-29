@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -52,43 +53,43 @@ class RegisterSyncService extends InstallAction
 {
     public function __invoke($params)
     {
-        $options = array(
+        $options = [
             SyncService::OPTION_CHUNK_SIZE => SyncService::DEFAULT_CHUNK_SIZE,
             SyncService::OPTION_CHECK_ACTIVE_SESSIONS => false,
-            SyncService::OPTION_SYNCHRONIZERS => array(
-                TestCenterSynchronizer::SYNC_TEST_CENTER => new RdfTestCenterSynchronizer(array(
-                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
+            SyncService::OPTION_SYNCHRONIZERS => [
+                TestCenterSynchronizer::SYNC_TEST_CENTER => new RdfTestCenterSynchronizer([
+                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => [
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
-                    )
-                )),
-                AdministratorSynchronizer::SYNC_ADMINISTRATOR => new RdfAdministratorSynchronizer(array(
-                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
+                    ]
+                ]),
+                AdministratorSynchronizer::SYNC_ADMINISTRATOR => new RdfAdministratorSynchronizer([
+                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => [
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
-                    )
-                )),
-                ProctorSynchronizer::SYNC_PROCTOR => new RdfProctorSynchronizer(array(
-                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
+                    ]
+                ]),
+                ProctorSynchronizer::SYNC_PROCTOR => new RdfProctorSynchronizer([
+                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => [
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
                         ProctorManagementService::PROPERTY_AUTHORIZED_PROCTOR_URI,
-                    )
-                )),
-                TestTakerSynchronizer::SYNC_TEST_TAKER => new RdfTestTakerSynchronizer(array(
-                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
+                    ]
+                ]),
+                TestTakerSynchronizer::SYNC_TEST_TAKER => new RdfTestTakerSynchronizer([
+                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => [
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
-                    )
-                )),
-                EligibilitySynchronizer::SYNC_ELIGIBILITY => new RdfEligibilitySynchronizer(array(
-                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
+                    ]
+                ]),
+                EligibilitySynchronizer::SYNC_ELIGIBILITY => new RdfEligibilitySynchronizer([
+                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => [
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
-                    )
-                )),
-                DeliverySynchronizer::SYNC_DELIVERY => new RdfDeliverySynchronizer(array(
-                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => array(
+                    ]
+                ]),
+                DeliverySynchronizer::SYNC_DELIVERY => new RdfDeliverySynchronizer([
+                    AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS => [
                         TaoOntology::PROPERTY_UPDATED_AT,
                         Entity::CREATED_AT,
                         DeliveryAssemblyService::PROPERTY_ORIGIN,
@@ -96,13 +97,12 @@ class RegisterSyncService extends InstallAction
                         DeliveryAssemblyService::PROPERTY_DELIVERY_TIME,
                         DeliveryAssemblyService::PROPERTY_DELIVERY_RUNTIME,
                         ContainerRuntime::PROPERTY_CONTAINER,
-                    )
-                ))
-            )
-        );
+                    ]
+                ])
+            ]
+        ];
 
         $this->registerService(SyncService::SERVICE_ID, new SyncService($options));
         return \common_report_Report::createSuccess('SyncService successfully registered.');
     }
-
 }

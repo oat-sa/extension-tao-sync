@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -70,7 +71,8 @@ class SyncLogServiceTest extends TestCase
             1,
             'BOX_ID',
             '111',
-            [], SyncLogEntity::STATUS_IN_PROGRESS,
+            [],
+            SyncLogEntity::STATUS_IN_PROGRESS,
             \common_report_Report::createInfo(),
             new \DateTime()
         );
@@ -84,4 +86,3 @@ class SyncLogServiceTest extends TestCase
         $this->assertEquals($expectedEntityId, $syncLogEntity->getId(), 'Entity id must be as expected.');
     }
 }
-

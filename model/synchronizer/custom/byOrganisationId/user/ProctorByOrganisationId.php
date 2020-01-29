@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,7 +65,7 @@ class ProctorByOrganisationId extends RdfProctorSynchronizer
      * Get administrator associated to given $testcenter
      *
      * Fetch only proctor role
-     * 
+     *
      * @param \core_kernel_classes_Resource $testcenter
      * @param $params
      * @return array
@@ -75,7 +76,7 @@ class ProctorByOrganisationId extends RdfProctorSynchronizer
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
 
         $queryBuilder = $search->query();
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri(), true);
         $query->add(GenerisRdf::PROPERTY_USER_ROLES)->equals($this->getUserRole());
         $query->add(ProctorManagementService::PROPERTY_ASSIGNED_PROCTOR_URI)->equals($testcenter->getUri());
         if (isset($params['startCreatedAt'])) {

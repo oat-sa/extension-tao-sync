@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -75,7 +76,7 @@ class AdministratorByOrganisationId extends RdfAdministratorSynchronizer
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
 
         $queryBuilder = $search->query();
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri(), true);
         $query->add(GenerisRdf::PROPERTY_USER_ROLES)->equals($this->getUserRole());
         $query->add(ProctorManagementService::PROPERTY_ADMINISTRATOR_URI)->equals($testcenter->getUri());
         if (isset($params['startCreatedAt'])) {
@@ -94,7 +95,5 @@ class AdministratorByOrganisationId extends RdfAdministratorSynchronizer
             $this->logError('SQL error during processiong of ' . __METHOD__ . ' : ' . $e->getMessage());
             return [];
         }
-
     }
-
 }

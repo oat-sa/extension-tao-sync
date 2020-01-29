@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,5 +46,4 @@ class RegisterSyncPublishingAction extends InstallAction
 
         return \common_report_Report::createSuccess('Publishing service successfully updated.');
     }
-
 }
