@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -192,7 +193,7 @@ class Synchronizer extends \tao_actions_CommonModule
             'score' => $vmVersionChecker->isVmSupported($currentVmVersion) ? 100 : 0,
             'info'  => [
                 [
-                    'text' => __('Version')  .': ' . $currentVmVersion,
+                    'text' => __('Version')  . ': ' . $currentVmVersion,
                 ],
             ]
         ];
@@ -253,7 +254,7 @@ class Synchronizer extends \tao_actions_CommonModule
                 if ($report->getMessage() === 'Connection statistics') {
                     foreach ($report->getChildren() as $statsReport) {
                         $data[$statsReport->getMessage()] = $statsReport->getData();
-                        $info[] = ['text' => $statsReport->getMessage().': '.$statsReport->getData().' Mbit/s'];
+                        $info[] = ['text' => $statsReport->getMessage() . ': ' . $statsReport->getData() . ' Mbit/s'];
                     }
                 }
             }
@@ -264,10 +265,10 @@ class Synchronizer extends \tao_actions_CommonModule
 
         foreach ($data as $type => $speed) {
             if ($type === 'Download speed') {
-                $score[] = $speed/$synchronisationClient->getExpectedDownloadSpeed()*100;
+                $score[] = $speed / $synchronisationClient->getExpectedDownloadSpeed() * 100;
             }
             if ($type === 'Upload speed') {
-                $score[] = $speed/$synchronisationClient->getExpectedUploadSpeed()*100;
+                $score[] = $speed / $synchronisationClient->getExpectedUploadSpeed() * 100;
             }
         }
 

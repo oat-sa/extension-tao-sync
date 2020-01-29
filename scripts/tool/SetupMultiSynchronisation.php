@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,7 +65,7 @@ class SetupMultiSynchronisation extends InstallAction
             foreach ($queries as $query) {
                 $persistence->exec($query);
             }
-        } catch(SchemaException $e) {
+        } catch (SchemaException $e) {
             \common_Logger::i('Database Schema already up to date.');
         }
 
@@ -80,5 +81,4 @@ class SetupMultiSynchronisation extends InstallAction
 
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Multi synchronisation has been successfully enabled.');
     }
-
 }

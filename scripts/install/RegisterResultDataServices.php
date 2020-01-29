@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -25,7 +26,6 @@ use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoSync\model\Result\SyncResultDataFormatter;
 use oat\taoSync\model\Result\SyncResultDataProvider;
 
-
 /**
  * Class RegisterResultDataServices
  *
@@ -45,5 +45,4 @@ class RegisterResultDataServices extends InstallAction
         $this->registerService(SyncResultDataFormatter::SERVICE_ID, $syncResultsDataFormatter);
         return \common_report_Report::createSuccess('ResultData services successfully registered.');
     }
-
 }

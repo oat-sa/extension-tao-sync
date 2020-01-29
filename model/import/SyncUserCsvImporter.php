@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,7 +45,7 @@ sudo -u www-data php index.php 'oat\tao\scripts\tools\import\ImportUsersCsv' -t 
  */
 class SyncUserCsvImporter extends RdsUserImportService
 {
-    CONST USER_IMPORTER_TYPE = 'sync-manager';
+    const USER_IMPORTER_TYPE = 'sync-manager';
 
     /**
      * Add test taker role to user to import
@@ -62,10 +63,10 @@ class SyncUserCsvImporter extends RdsUserImportService
             'index',
             'Main',
             'tao',
-            array(
+            [
                 'structure' => 'synchronization',
                 'ext'       => 'taoSync'
-            )
+            ]
         );
 
         $extraProperties[UserRdf::PROPERTY_ROLES] = SyncService::TAO_SYNC_ROLE;

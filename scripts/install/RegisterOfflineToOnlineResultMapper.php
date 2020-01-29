@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,10 +41,10 @@ class RegisterOfflineToOnlineResultMapper extends InstallAction
         try {
             \common_persistence_Manager::getPersistence($persistenceId);
         } catch (\common_Exception $e) {
-            \common_persistence_Manager::addPersistence($persistenceId,  array(
+            \common_persistence_Manager::addPersistence($persistenceId, [
                 'driver' => 'SqlKvWrapper',
                 'sqlPersistence' => 'default',
-            ));
+            ]);
         }
 
         $mapper = new OfflineResultToOnlineResultMapper([

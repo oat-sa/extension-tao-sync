@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -66,9 +67,9 @@ class ResultSyncHistoryService extends ConfigurableService
         $qbBuilder = $this->getPersistence()->getPlatform()->getQueryBuilder();
         $qb = $qbBuilder
             ->update(static::SYNC_RESULT_TABLE, 'sr')
-            ->set('sr.'.static::SYNC_RESULT_STATUS, ':status')
-            ->set('sr.'.static::SYNC_SESSION_SYNCED, ':session_synced')
-            ->where('sr.'.static::SYNC_RESULT_ID .'=:id')
+            ->set('sr.' . static::SYNC_RESULT_STATUS, ':status')
+            ->set('sr.' . static::SYNC_SESSION_SYNCED, ':session_synced')
+            ->where('sr.' . static::SYNC_RESULT_ID . '=:id')
             ->setParameter('id', $resultId)
             ->setParameter('session_synced', 0)
             ->setParameter('status', static::STATUS_TO_BE_RE_SYNCED)

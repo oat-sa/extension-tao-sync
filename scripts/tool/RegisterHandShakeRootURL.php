@@ -18,8 +18,8 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
-namespace oat\taoSync\scripts\tool;
 
+namespace oat\taoSync\scripts\tool;
 
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\User\HandShakeClientService;
@@ -39,12 +39,12 @@ class RegisterHandShakeRootURL extends InstallAction
 
             switch ($option) {
                 case '--rootUrl':
-                   $rootUrl = $value;
-                break;
+                    $rootUrl = $value;
+                    break;
             }
         }
 
-        if (!isset($rootUrl)){
+        if (!isset($rootUrl)) {
             throw new \Exception('Please specify the --rootUrl=...');
         }
 

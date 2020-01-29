@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -20,11 +21,11 @@
 use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
 
-return new ExportService(array(
+return new ExportService([
     ExportService::OPTION_EXPORTERS => [
         ResultsExporter::TYPE => new ResultsExporter([
             ResultsExporter::OPTION_BATCH_SIZE => ResultsExporter::DEFAULT_BATCH_SIZE
         ])
     ],
     ExportService::OPTION_IS_ENABLED => false
-));
+]);

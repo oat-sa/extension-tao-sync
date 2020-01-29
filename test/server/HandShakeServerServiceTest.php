@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -81,7 +82,6 @@ class HandShakeServerServiceTest extends TestCase
             ->will($this->onConsecutiveCalls(
                 $this->mockEventManager(),
                 $this->mockSyncService()
-
             ));
         $service->setServiceLocator($serviceLocator);
 

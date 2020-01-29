@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -144,7 +145,7 @@ class Exporter extends \tao_actions_CommonModule
     private function getLastExportTask($orgId)
     {
         try {
-            $taskId = $this->getCacheService()->get(self::EXPORT_TASK_CACHE_KEY.$orgId);
+            $taskId = $this->getCacheService()->get(self::EXPORT_TASK_CACHE_KEY . $orgId);
             return $this->getTaskLogEntity($taskId);
         } catch (\common_cache_NotFoundException $e) {
         } catch (\common_exception_NotFound $e) {
@@ -159,7 +160,7 @@ class Exporter extends \tao_actions_CommonModule
      */
     private function setLastExportTask($task, $orgId)
     {
-        $this->getCacheService()->put($task->getId(), self::EXPORT_TASK_CACHE_KEY.$orgId);
+        $this->getCacheService()->put($task->getId(), self::EXPORT_TASK_CACHE_KEY . $orgId);
     }
 
     /**

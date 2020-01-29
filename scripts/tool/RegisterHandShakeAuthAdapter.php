@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -45,8 +46,8 @@ class RegisterHandShakeAuthAdapter extends InstallAction
         $extensionManager = $this->getServiceManager()->get(common_ext_ExtensionsManager::SERVICE_ID);
         $config = $extensionManager ->getExtensionById('generis')->getConfig('auth');
 
-        foreach ($config as $index => $adapter){
-            if ($adapter['driver'] === AuthAdapter::class){
+        foreach ($config as $index => $adapter) {
+            if ($adapter['driver'] === AuthAdapter::class) {
                 $adapter['driver'] = HandShakeAuthAdapter::class;
             }
             $config[$index] = $adapter;

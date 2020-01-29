@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -46,14 +47,14 @@ class HandShake extends \tao_actions_CommonModule
             }
         }
 
-        header('Content-Type: '.$this->responseEncoding);
+        header('Content-Type: ' . $this->responseEncoding);
     }
 
     /**
      * Authenticate the syncManager user and get his data along with the Sync HandShake
      * The request must be a POST, and it's body is application/json
      * that contains the credentials as :  { login : login, password : password }.
-     * -> 200 whith the handshake 
+     * -> 200 whith the handshake
      * -> 401 for wrong authentication
      * -> 412 for malformed requests (missing parameter)
      * -> 500 otherwise
@@ -62,7 +63,7 @@ class HandShake extends \tao_actions_CommonModule
     public function index()
     {
         //allow preflight requests
-        if($this->getRequest()->isOptions()){
+        if ($this->getRequest()->isOptions()) {
             header('HTTP/1.0 200 OK');
             return;
         }
@@ -74,7 +75,8 @@ class HandShake extends \tao_actions_CommonModule
 
             $parameters = file_get_contents('php://input');
 
-            if (is_array($parameters = json_decode($parameters, true))
+            if (
+                is_array($parameters = json_decode($parameters, true))
                 && json_last_error() === JSON_ERROR_NONE
                 && isset($parameters[self::USER_IDENTIFIER])
                 && isset($parameters[self::USER_PASSWORD])
@@ -83,20 +85,20 @@ class HandShake extends \tao_actions_CommonModule
                 $userPassword   = $parameters[self::USER_PASSWORD];
             } else {
                 return $this->returnJson([
-                    'success'	=> false,
-                    'errorCode'	=> '412',
-                    'errorMsg'	=> 'Valid "' . self::USER_IDENTIFIER . '" and "'. self::USER_PASSWORD .'" parameters are required to access ' . __FUNCTION__,
-                    'version'	=> TAO_VERSION
+                    'success'   => false,
+                    'errorCode' => '412',
+                    'errorMsg'  => 'Valid "' . self::USER_IDENTIFIER . '" and "' . self::USER_PASSWORD . '" parameters are required to access ' . __FUNCTION__,
+                    'version'   => TAO_VERSION
                 ], 412);
             }
 
             //check identity
-            if(!$this->isAllowedUser($userIdentifier, $userPassword)){
+            if (!$this->isAllowedUser($userIdentifier, $userPassword)) {
                 return $this->returnJson([
-                    'success'	=> false,
-                    'errorCode'	=> '401',
-                    'errorMsg'	=> 'You are not authorized to access this functionality.',
-                    'version'	=> TAO_VERSION
+                    'success'   => false,
+                    'errorCode' => '401',
+                    'errorMsg'  => 'You are not authorized to access this functionality.',
+                    'version'   => TAO_VERSION
                 ], 401);
             }
 
@@ -125,5 +127,4 @@ class HandShake extends \tao_actions_CommonModule
             return false;
         }
     }
-
 }

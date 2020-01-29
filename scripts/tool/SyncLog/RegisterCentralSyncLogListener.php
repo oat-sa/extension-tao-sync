@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  *
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA ;
  */
+
 namespace oat\taoSync\scripts\tool\SyncLog;
 
 use oat\oatbox\extension\InstallAction;
@@ -25,6 +27,7 @@ use oat\taoSync\model\event\SyncRequestEvent;
 use oat\taoSync\model\event\SyncResponseEvent;
 use oat\taoSync\model\listener\CentralSyncLogListener;
 use oat\taoSync\model\SyncLog\SyncLogDataParser;
+
 /**
  * Class RegisterCentralSyncLogListener
  */

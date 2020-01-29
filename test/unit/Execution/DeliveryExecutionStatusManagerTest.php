@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -129,4 +130,3 @@ class DeliveryExecutionStatusManagerTest extends TestCase
         $this->assertTrue($result, 'Method must return expected value.');
     }
 }
-

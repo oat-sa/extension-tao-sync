@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -59,7 +60,8 @@ class SyncUserFormFactory extends FormFactory
                 http_build_query(['filterProperties' => [
                     UserRdf::PROPERTY_ROLES => [SyncService::TAO_SYNC_ROLE]
                 ]])
-            ));
+            )
+        );
         return $form;
     }
 }

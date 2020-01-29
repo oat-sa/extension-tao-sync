@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,6 +17,7 @@
  *
  * Copyright (c) 2019. (original work) Open Assessment Technologies SA;
  */
+
 namespace oat\taoSync\model\monitoring;
 
 use oat\oatbox\filesystem\FileSystemService;
@@ -34,8 +36,10 @@ class DataSpaceUsageService extends SpaceUsageStatsService
     {
         $size = 0;
         $dir = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($this->getTargetVolume(),
-                RecursiveDirectoryIterator::SKIP_DOTS)
+            new RecursiveDirectoryIterator(
+                $this->getTargetVolume(),
+                RecursiveDirectoryIterator::SKIP_DOTS
+            )
         );
         foreach ($dir as $fileInfo) {
             $size += $fileInfo->getSize();

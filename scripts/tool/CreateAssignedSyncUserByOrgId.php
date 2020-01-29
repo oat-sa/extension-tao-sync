@@ -25,7 +25,6 @@ class CreateAssignedSyncUserByOrgId extends AbstractAction
 
         /** @var \core_kernel_classes_Resource $testCenter */
         foreach ($testCenters as $testCenter) {
-
             $id = $testCenter->getOnePropertyValue($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
             if (is_null($id)) {
                 continue;
@@ -47,7 +46,8 @@ class CreateAssignedSyncUserByOrgId extends AbstractAction
                         $i++;
                     }
                 }
-            } catch (SearchGateWayExeption $e) {}
+            } catch (SearchGateWayExeption $e) {
+            }
         }
 
         if ($success) {
@@ -56,5 +56,4 @@ class CreateAssignedSyncUserByOrgId extends AbstractAction
             return \common_report_Report::createFailure('An error has occurred during sync users migration.');
         }
     }
-
 }

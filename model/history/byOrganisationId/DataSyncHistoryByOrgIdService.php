@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -58,7 +59,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
             ->where($exprBuilder->eq('a.' . self::SYNC_ENTITY_ID, 'b.' . self::SYNC_ENTITY_ID))
             ->andWhere($exprBuilder->neq('b.' . self::SYNC_ORG_ID, ':orgId'))
             ->andWhere($exprBuilder->neq('b.' . self::SYNC_ACTION, ':action'))
-            ->setParameter('orgId',  $orgId)
+            ->setParameter('orgId', $orgId)
             ->setParameter('action', self::ACTION_DELETED)
         ;
 
@@ -72,7 +73,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
             ->andWhere($exprBuilder->eq('a.' . self::SYNC_ENTITY_TYPE, ':type'))
             ->andWhere($exprBuilder->neq('a.' . self::SYNC_ACTION, ':action'))
             ->andWhere($exprBuilder->eq('a.' . self::SYNC_ORG_ID, ':orgId'))
-            ->setParameter('sync_number',  $this->getCurrentSynchroId())
+            ->setParameter('sync_number', $this->getCurrentSynchroId())
             ->setParameter('type', $type)
             ->setParameter('action', self::ACTION_DELETED)
             ->setParameter('orgId', $orgId)
@@ -108,10 +109,10 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
     {
         $lastId = $this->getCurrentSynchroId();
         $this->synchroId = $lastId + 1;
-        $this->getResource(self::SYNCHRO_URI)->setPropertiesValues(array(
+        $this->getResource(self::SYNCHRO_URI)->setPropertiesValues([
             self::SYNCHRO_ID => $this->synchroId,
             TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY => $this->getOrganisationIdFromOption($params)
-        ));
+        ]);
 
         return $this->synchroId;
     }
@@ -196,7 +197,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
                 ->from(self::SYNC_TABLE)
                 ->where(self::SYNC_ENTITY_ID . ' = :id')
                 ->andWhere(self::SYNC_ORG_ID . ' = :orgId')
-                ->setParameter('id',  $id)
+                ->setParameter('id', $id)
                 ->setParameter('orgId', $orgId)
             ;
 
@@ -245,7 +246,7 @@ class DataSyncHistoryByOrgIdService extends DataSyncHistoryService
         $query1 = $queryBuilder1->select(self::SYNC_ORG_ID)
             ->from(self::SYNC_TABLE, 'a')
             ->where($exprBuilder->eq('a.' . self::SYNC_ENTITY_ID, ':entity'))
-            ->setParameter('entity',  $entity)
+            ->setParameter('entity', $entity)
             ->orderBy(self::SYNC_TIME, 'DESC')
             ->setMaxResults(1)
         ;

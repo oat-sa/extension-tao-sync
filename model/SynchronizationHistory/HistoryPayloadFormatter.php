@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -32,7 +33,7 @@ class HistoryPayloadFormatter extends ConfigurableService implements HistoryPayl
 {
     const OPTION_DATA_MODEL = 'dataModel';
 
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         parent::__construct($options);
 

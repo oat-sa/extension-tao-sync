@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -49,7 +50,7 @@ class HandShakeServerResponse
         \core_kernel_classes_Resource $consumerOauth,
         \core_kernel_classes_Resource $user,
         SynchronizerFormatter $formatter
-    ){
+    ) {
         $this->consumerOauth = $consumerOauth;
         $this->user = $user;
         $this->formatter = $formatter;

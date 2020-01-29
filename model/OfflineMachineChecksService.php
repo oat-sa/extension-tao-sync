@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,7 +19,6 @@
  */
 
 namespace oat\taoSync\model;
-
 
 use common_report_Report as Report;
 use Exception;
@@ -46,7 +46,6 @@ class OfflineMachineChecksService extends ConfigurableService
     public function listen(AbstractSyncEvent $event)
     {
         if ($this->getCheckServices() && in_array(get_class($event), [SyncFinishedEvent::class, SyncFailedEvent::class], true)) {
-
             try {
                 $params = $event->getSyncParameters();
                 $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -27,14 +28,14 @@ use oat\taoSync\controller\SynchronizationHistory;
 use oat\taoSync\scripts\install\RegisterRdsSyncLogStorage;
 use oat\taoSync\controller\RestSupportedVm;
 
-return array(
+return [
     'name' => 'taoSync',
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
     'version' => '7.2.0',
     'author' => 'Open Assessment Technologies SA',
-    'requires' => array(
+    'requires' => [
         'generis'         => '>=12.5.0',
         'tao'             => '>=38.8.0',
         'taoOauth'        => '>=2.0.0',
@@ -46,10 +47,10 @@ return array(
         'taoProctoring'   => '>=12.7.0',
         'taoPublishing'   => '>=2.0.0',
         'taoClientDiagnostic' => '>=5.0.1',
-    ),
+    ],
     'managementRole' => 'http://www.tao.lu/Ontologies/generis.rdf#taoSyncManager',
     'acl' => [
-        ['grant', SyncService::TAO_SYNC_ROLE, ['ext'=>'taoSync']],
+        ['grant', SyncService::TAO_SYNC_ROLE, ['ext' => 'taoSync']],
         ['grant', SyncService::TAO_SYNC_ROLE, SynchronizationHistory::class],
         ['grant', TaoRoles::ANONYMOUS, HandShake::class],
         ['grant', TaoRoles::ANONYMOUS, RestSupportedVm::class],
@@ -77,21 +78,21 @@ return array(
             \oat\taoSync\scripts\install\CreateFileSystemStorage::class
         ]
     ],
-    'uninstall' => array(
-    ),
+    'uninstall' => [
+    ],
     'update' => oat\taoSync\scripts\update\Updater::class,
-    'routes' => array(
+    'routes' => [
         '/taoSync/api' => ['class' => \oat\taoSync\model\routing\ApiRoute::class],
         '/taoSync' => 'oat\\taoSync\\controller'
-    ),
-    'constants' => array(
+    ],
+    'constants' => [
         # views directory
-        "DIR_VIEWS" => __DIR__ . DIRECTORY_SEPARATOR."views".DIRECTORY_SEPARATOR,
+        "DIR_VIEWS" => __DIR__ . DIRECTORY_SEPARATOR . "views" . DIRECTORY_SEPARATOR,
 
         #BASE URL (usually the domain root)
-        'BASE_URL' => ROOT_URL.'taoSync/',
-    ),
-    'extra' => array(
-        'structures' => __DIR__ . DIRECTORY_SEPARATOR.'controller'.DIRECTORY_SEPARATOR.'structures.xml',
-    ),
-);
+        'BASE_URL' => ROOT_URL . 'taoSync/',
+    ],
+    'extra' => [
+        'structures' => __DIR__ . DIRECTORY_SEPARATOR . 'controller' . DIRECTORY_SEPARATOR . 'structures.xml',
+    ],
+];

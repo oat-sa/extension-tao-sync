@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -117,7 +118,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             }
 
             if (!empty($syncSuccess) && isset($syncSuccess[$id])) {
-                $this->report(count($syncSuccess[$id]). ' result logs exports have been acknowledged.', LogLevel::INFO);
+                $this->report(count($syncSuccess[$id]) . ' result logs exports have been acknowledged.', LogLevel::INFO);
                 $logData[self::SYNC_ENTITY]['uploaded'] = count($syncSuccess);
             }
         }
@@ -144,7 +145,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         foreach ($logs as $resultId => $resultLogs) {
             $logsToBeInserted = [];
             $logsSynced       = [];
-            foreach ($resultLogs  as $resultLog) {
+            foreach ($resultLogs as $resultLog) {
                 try {
                     $this->checkResultLogFormat($resultLog);
                     $onlineResultId = $this->getOnlineIdOfOfflineResultId($resultLog['delivery_execution_id']);
@@ -276,7 +277,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
             throw new \InvalidArgumentException('Result Log is not correctly formatted, should be an array.');
         }
 
-        $global = array('delivery_execution_id', 'event_id', 'data', 'created_at', 'created_by');
+        $global = ['delivery_execution_id', 'event_id', 'data', 'created_at', 'created_by'];
         if (!empty(array_diff_key(array_flip($global), $data))) {
             throw new \InvalidArgumentException('Result Log is not correctly formatted, should contains : ' . implode(', ', $global));
         }
@@ -287,7 +288,8 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
      */
     protected function postImportDeliverLogProcess(array $deliveryLog)
     {
-        if (isset($deliveryLog[DeliveryLog::EVENT_ID])
+        if (
+            isset($deliveryLog[DeliveryLog::EVENT_ID])
             && $deliveryLog[DeliveryLog::EVENT_ID] === 'TEST_IRREGULARITY'
             && isset($deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED])
             && $deliveryLog[EnhancedDeliveryLogService::LOG_IS_AFTER_SESSION_SYNCED] === true
@@ -324,7 +326,7 @@ class SyncDeliveryLogService extends ConfigurableService implements SyncDelivery
         foreach ($syncSuccess as $resultId => $logsSynced) {
             if (!empty($logsSynced)) {
                 $deliveryLogService->markLogsAsSynced($logsSynced);
-                $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: '. $resultId);
+                $this->report(count($logsSynced) . ' delivery logs has been sync with success for result: ' . $resultId);
             }
         }
     }

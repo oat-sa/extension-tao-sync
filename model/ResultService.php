@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -208,7 +209,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                             $resultVariable,
                             $callIdTest
                         );
-
                     } else {
                         $item = $variable['item'];
                         $this->getResultStorage($deliveryId)->storeItemVariable(
@@ -219,7 +219,6 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
                             $callIdItem
                         );
                     }
-
                 }
 
                 $this->mapOfflineResultIdToOnlineResultId($resultId, $deliveryExecution->getIdentifier());
@@ -273,12 +272,12 @@ class ResultService extends ConfigurableService implements SyncResultServiceInte
             throw new \InvalidArgumentException('Result is not correctly formatted, should be an array.');
         }
 
-        $global = array('deliveryId', 'deliveryExecutionId', 'details', 'variables',);
+        $global = ['deliveryId', 'deliveryExecutionId', 'details', 'variables',];
         if (!empty(array_diff_key(array_flip($global), $data))) {
             throw new \InvalidArgumentException('Result is not correctly formatted, should contains : ' . implode(', ', $global));
         }
 
-        $details = array('identifier', 'label', 'test-taker', 'starttime', 'finishtime', 'state',);
+        $details = ['identifier', 'label', 'test-taker', 'starttime', 'finishtime', 'state',];
         if (!empty(array_diff_key(array_flip($details), $data['details']))) {
             throw new \InvalidArgumentException('Result details are not correctly formatted, should contains : ' . implode(', ', $details));
         }

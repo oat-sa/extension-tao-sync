@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -73,7 +74,8 @@ class SynchronizationHistory extends tao_actions_CommonModule
      * @throws \common_exception_MissingParameter
      * @throws \common_exception_NotFound
      */
-    public function viewReport() {
+    public function viewReport()
+    {
         if (!$this->hasRequestParameter('id')) {
             throw new \common_exception_MissingParameter('id');
         }

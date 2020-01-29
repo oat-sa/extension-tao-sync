@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -23,4 +24,7 @@ namespace oat\taoSync\model\event;
  * Class SyncRequestEvent
  * @package oat\taoSync\model\event
  */
-class SyncRequestEvent extends AbstractSyncEvent {}
+class SyncRequestEvent extends AbstractSyncEvent
+{
+
+}

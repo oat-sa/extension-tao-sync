@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -70,7 +71,8 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      *
      * @param DataTablePayload $payload
      */
-    private function setPayloadCustomizer(DataTablePayload $payload) {
+    private function setPayloadCustomizer(DataTablePayload $payload)
+    {
         $historyFormatter = $this->getServiceLocator()->get(HistoryPayloadFormatterInterface::SERVICE_ID);
 
         $payload->customiseRowBy(function ($row) use ($historyFormatter) {
@@ -83,7 +85,8 @@ class SynchronizationHistoryService extends ConfigurableService implements Synch
      * @return \JsonSerializable
      * @throws \common_exception_NotFound
      */
-    public function getSyncReport($id) {
+    public function getSyncReport($id)
+    {
         /** @var SyncLogServiceInterface $syncLogService */
         $syncLogService = $this->getServiceLocator()->get(SyncLogServiceInterface::SERVICE_ID);
         $syncLogEntity = $syncLogService->getById($id);
