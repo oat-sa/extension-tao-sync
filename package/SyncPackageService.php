@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -50,9 +51,9 @@ class SyncPackageService extends ConfigurableService
         }
 
         try {
-             if ($file->write(json_encode($data))) {
-                 return self::FILESYSTEM_ID . DIRECTORY_SEPARATOR . $file->getPrefix();
-             }
+            if ($file->write(json_encode($data))) {
+                return self::FILESYSTEM_ID . DIRECTORY_SEPARATOR . $file->getPrefix();
+            }
         } catch (Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }
@@ -101,7 +102,7 @@ class SyncPackageService extends ConfigurableService
     public function getSyncDirectory()
     {
         try {
-           return $this->getFileSystemService()->getDirectory(self::FILESYSTEM_ID);
+            return $this->getFileSystemService()->getDirectory(self::FILESYSTEM_ID);
         } catch (Exception $e) {
             throw new SyncPackageException($e->getMessage());
         }

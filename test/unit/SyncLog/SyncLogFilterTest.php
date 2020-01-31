@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -263,4 +264,3 @@ class SyncLogFilterTest extends TestCase
         $this->assertEquals($expectedFilters, $filters, 'List of filters must be as expected for "notIn" method.');
     }
 }
-

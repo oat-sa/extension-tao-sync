@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,12 +30,11 @@ class SetupSyncUserCsvImporter extends InstallAction
     {
         $importerFactory = $this->getServiceLocator()->get(UserCsvImporterFactory::SERVICE_ID);
         $typeOptions = $importerFactory->getOption(UserCsvImporterFactory::OPTION_MAPPERS);
-        $typeOptions[SyncUserCsvImporter::USER_IMPORTER_TYPE] = array(
+        $typeOptions[SyncUserCsvImporter::USER_IMPORTER_TYPE] = [
             UserCsvImporterFactory::OPTION_MAPPERS_IMPORTER => new SyncUserCsvImporter()
-        );
+        ];
         $importerFactory->setOption(UserCsvImporterFactory::OPTION_MAPPERS, $typeOptions);
         $this->registerService(UserCsvImporterFactory::SERVICE_ID, $importerFactory);
         return \common_report_Report::createSuccess('SyncUser csv importer successfully registered.');
     }
-
 }

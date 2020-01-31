@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -43,7 +44,7 @@ class SyncDataProviderCollection extends ConfigurableService
     public function getData(array $params)
     {
         $this->initDataProviders();
-       return $this->getProvidersData($this->dataProviders, $params);
+        return $this->getProvidersData($this->dataProviders, $params);
     }
 
     /**

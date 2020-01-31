@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,7 +17,6 @@
  *
  * Copyright (c) 2019 (original work) Open Assessment Technologies SA ;
  */
-
 
 namespace oat\taoSync\model\import;
 
@@ -50,7 +50,7 @@ class ImportService extends ConfigurableService
         $results = [];
         foreach ($data as $key => $syncData) {
             if (!isset($importers[$key])) {
-                throw new SyncImportException($key .' importer is not configured');
+                throw new SyncImportException($key . ' importer is not configured');
             }
             $results[$key] = $importers[$key]->import($syncData, $manifest);
         }
@@ -71,7 +71,7 @@ class ImportService extends ConfigurableService
 
         foreach ($importers as $key => $importerParams) {
             if (!is_subclass_of($importerParams[EntityImporterInterface::OPTION_CLASS], EntityImporterInterface::class)) {
-                throw new SyncImportException('Importer is not instance of '.EntityImporterInterface::class);
+                throw new SyncImportException('Importer is not instance of ' . EntityImporterInterface::class);
             }
             $importer = new $importerParams[EntityImporterInterface::OPTION_CLASS](
                 $importerParams[EntityImporterInterface::OPTION_PARAMETERS]

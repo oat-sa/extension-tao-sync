@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -73,7 +74,7 @@ class SyncResultDataFormatter extends ConfigurableService
             list($testIdentifier,$itemIdentifier) = $this->detectTestAndItemIdentifiers($deliveryId, $variable);
             $deliveryExecutionVariables[] = [
                 'type' => $variable['class'],
-                'callIdTest' => isset($variable['callIdTest'])? $variable['callIdTest'] : null,
+                'callIdTest' => isset($variable['callIdTest']) ? $variable['callIdTest'] : null,
                 'callIdItem' => isset($variable['callIdItem']) ? $variable['callIdItem'] : null,
                 'test' => $testIdentifier,
                 'item' => $itemIdentifier,

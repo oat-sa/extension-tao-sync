@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -17,6 +18,7 @@
  * Copyright (c) 2018 (original work) Open Assessment Technologies SA;
  *
  */
+
 namespace oat\taoSync\model\DeliveryLog;
 
 use Doctrine\DBAL\Query\QueryBuilder;
@@ -73,7 +75,7 @@ class EnhancedDeliveryLogService extends ConfigurableService
         $qbBuilder
             ->update(RdsDeliveryLogService::TABLE_NAME)
             ->set(static::COLUMN_IS_SYNCED, ':value')
-            ->where(RdsDeliveryLogService::ID. ' IN (:ids)')
+            ->where(RdsDeliveryLogService::ID . ' IN (:ids)')
             ->setParameter('ids', $ids, \Doctrine\DBAL\Connection::PARAM_INT_ARRAY)
             ->setParameter('value', 1)
         ;

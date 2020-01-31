@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -61,9 +62,9 @@ class SynchronizeAll extends AbstractAction
         try {
             $this->checkSyncPreconditions($params);
 
-            foreach ($actionsToRun as $action){
-                if (is_subclass_of($action, Action::class)){
-                    $report->add(call_user_func($this->propagate(new $action), $params));
+            foreach ($actionsToRun as $action) {
+                if (is_subclass_of($action, Action::class)) {
+                    $report->add(call_user_func($this->propagate(new $action()), $params));
                 }
             }
         } catch (\Exception $e) {

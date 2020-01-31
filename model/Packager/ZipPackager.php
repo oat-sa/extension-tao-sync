@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -18,7 +19,6 @@
  */
 
 namespace oat\taoSync\model\Packager;
-
 
 use oat\oatbox\filesystem\File;
 use oat\oatbox\service\ConfigurableService;
@@ -61,7 +61,7 @@ class ZipPackager extends ConfigurableService implements PackagerInterface
             return;
         }
 
-        $filename = $type . '_' .microtime(true) . '.json';
+        $filename = $type . '_' . microtime(true) . '.json';
         $contents = json_encode([$type => $data]);
 
         $this->createFileInPackage($filename, $contents);

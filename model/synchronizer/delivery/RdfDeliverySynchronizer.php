@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +41,7 @@ class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements De
      * RdfDeliverySynchronizer constructor.
      * @param array $options
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         parent::__construct($options);
 
@@ -133,5 +134,4 @@ class RdfDeliverySynchronizer extends AbstractResourceSynchronizer implements De
     {
         return $this->getServiceLocator()->get(DeliverySynchronizerService::SERVICE_ID);
     }
-
 }

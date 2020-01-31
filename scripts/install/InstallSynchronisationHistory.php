@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -33,16 +34,16 @@ class InstallSynchronisationHistory extends InstallAction
 
         $this->registerService(
             DataSyncHistoryService::SERVICE_ID,
-            new DataSyncHistoryService(array(
+            new DataSyncHistoryService([
                 DataSyncHistoryService::OPTION_PERSISTENCE => $persistenceId
-            ))
+            ])
         );
 
         $this->registerService(
             ResultSyncHistoryService::SERVICE_ID,
-            new ResultSyncHistoryService(array(
+            new ResultSyncHistoryService([
                 ResultSyncHistoryService::OPTION_PERSISTENCE => $persistenceId
-            ))
+            ])
         );
 
         $persistence = $this->getServiceLocator()->get(\common_persistence_Manager::SERVICE_ID)->getPersistenceById($persistenceId);
@@ -62,7 +63,7 @@ class InstallSynchronisationHistory extends InstallAction
             $tableData->addColumn(DataSyncHistoryService::SYNC_ENTITY_TYPE, 'string', ['notnull' => true, 'length' => 32]);
             $tableData->addColumn(DataSyncHistoryService::SYNC_TIME, 'datetime', ['notnull' => true,]);
 
-            $tableData->setPrimaryKey(array(DataSyncHistoryService::SYNC_ID));
+            $tableData->setPrimaryKey([DataSyncHistoryService::SYNC_ID]);
 
             $tableData->addIndex([DataSyncHistoryService::SYNC_NUMBER], 'idx_sync_data_number');
             $tableData->addIndex([DataSyncHistoryService::SYNC_ENTITY_ID], 'idx_sync_data_entity_id');
@@ -78,7 +79,7 @@ class InstallSynchronisationHistory extends InstallAction
             $tableResults->addColumn(ResultSyncHistoryService::SYNC_RESULT_TIME, 'datetime', ['notnull' => true,]);
             $tableResults->addColumn(ResultSyncHistoryService::SYNC_SESSION_SYNCED, 'integer', ['notnull' => true, 'length' => 1, 'default' => 0]);
 
-            $tableResults->setPrimaryKey(array(ResultSyncHistoryService::SYNC_RESULT_ID));
+            $tableResults->setPrimaryKey([ResultSyncHistoryService::SYNC_RESULT_ID]);
 
             $tableResults->addIndex([ResultSyncHistoryService::SYNC_RESULT_ID], 'idx_sync_result_id');
             $tableResults->addIndex([ResultSyncHistoryService::SYNC_RESULT_STATUS], 'idx_sync_result_status');
@@ -87,13 +88,11 @@ class InstallSynchronisationHistory extends InstallAction
             foreach ($queries as $query) {
                 $persistence->exec($query);
             }
-
-        } catch(SchemaException $e) {
+        } catch (SchemaException $e) {
             $this->logDebug($e->getMessage());
             $this->logDebug('Database Schema already up to date.');
         }
 
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronisation storage successfully created');
     }
-
 }

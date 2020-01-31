@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -86,7 +87,8 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             foreach ($missingClasses as $remoteEntity) {
                 try {
                     $this->createClassRecursively($remoteEntity['id'], $remoteEntity['properties'], $missingClasses);
-                } catch (\common_Exception $e) {}
+                } catch (\common_Exception $e) {
+                }
             }
         }
     }
@@ -98,7 +100,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      */
     public function after(array $entities)
     {
-
     }
 
     /**
@@ -137,7 +138,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
         $queryBuilder = $search->query();
 
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri(), true);
 
         if (isset($params['startCreatedAt'])) {
             $query->addCriterion(Entity::CREATED_AT, SupportedOperatorHelper::GREATER_THAN_EQUAL, $params['startCreatedAt']);
@@ -157,7 +158,8 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
                     $values[$instance['id']] = $instance;
                 }
             }
-        } catch (SearchGateWayExeption $e) {}
+        } catch (SearchGateWayExeption $e) {
+        }
 
         return $values;
     }
@@ -237,7 +239,6 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
     public function updateMultiple(array $entities)
     {
         foreach ($entities as $entity) {
-
             $properties = isset($entity['properties']) ? $entity['properties'] : [];
             $resource = $this->getResource($entity['id']);
             $triples = $resource->getRdfTriples();
@@ -295,7 +296,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
      * @param array $missingClasses
      * @throws \common_exception_NotFound If parent class does not exist
      */
-    protected function createClassRecursively($id, array $params,  array &$missingClasses = [])
+    protected function createClassRecursively($id, array $params, array &$missingClasses = [])
     {
         $parent = $this->getClass($params[OntologyRdfs::RDFS_SUBCLASSOF]);
         if ($this->getRootClass()->getUri() != $parent->getUri() && !$parent->exists()) {
@@ -328,7 +329,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
         if (isset($params['order']) && is_array($params['order'])) {
             $sorting = [];
             foreach ($params['order'] as $sort => $order) {
-                if (in_array($order, array('desc','asc'))) {
+                if (in_array($order, ['desc','asc'])) {
                     $sorting[$sort] = $order;
                 }
             }
@@ -364,7 +365,7 @@ abstract class AbstractResourceSynchronizer extends ConfigurableService implemen
             $formatterClass = $this->getOption(self::OPTIONS_FORMATTER_CLASS);
             if (is_a($formatterClass, SynchronizerFormatter::class, true)) {
                 return new $formatterClass();
-            } else if ($this->getServiceLocator()->has($this->getOption(self::OPTIONS_FORMATTER_CLASS))){
+            } elseif ($this->getServiceLocator()->has($this->getOption(self::OPTIONS_FORMATTER_CLASS))) {
                 return $this->getServiceLocator()->get($this->getOption(self::OPTIONS_FORMATTER_CLASS));
             }
         }

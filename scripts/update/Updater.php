@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -120,7 +121,7 @@ class Updater extends \common_ext_ExtensionUpdater
      */
     public function update($initialVersion)
     {
-        $this->skip('0.0.1','0.1.0');
+        $this->skip('0.0.1', '0.1.0');
 
         if ($this->isVersion('0.1.0')) {
             $this->getServiceManager()->register(FormFieldsService::SERVICE_ID, new FormFieldsService());
@@ -152,7 +153,7 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('0.3.0', '0.9.0');
-        if ($this->isVersion('0.9.0')){
+        if ($this->isVersion('0.9.0')) {
             $handShakeService = new HandShakeClientService([
                 HandShakeClientService::OPTION_ROOT_URL => 'http://tao.dev/',
                 HandShakeClientService::OPTION_REMOTE_AUTH_URL => 'http://tao.dev/taoSync/HandShake'
@@ -167,22 +168,22 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.10.0');
         }
 
-        $this->skip('0.10.0','0.10.3');
+        $this->skip('0.10.0', '0.10.3');
 
         if ($this->isVersion('0.10.3')) {
             /** @var UserCsvImporterFactory $importerFactory */
             $importerFactory = $this->getServiceManager()->get(UserCsvImporterFactory::SERVICE_ID);
             $typeOptions = $importerFactory->getOption(UserCsvImporterFactory::OPTION_MAPPERS);
-            $typeOptions[SyncUserCsvImporter::USER_IMPORTER_TYPE] = array(
+            $typeOptions[SyncUserCsvImporter::USER_IMPORTER_TYPE] = [
                 UserCsvImporterFactory::OPTION_MAPPERS_IMPORTER => new SyncUserCsvImporter()
-            );
+            ];
             $importerFactory->setOption(UserCsvImporterFactory::OPTION_MAPPERS, $typeOptions);
             $this->getServiceManager()->register(UserCsvImporterFactory::SERVICE_ID, $importerFactory);
 
             $this->setVersion('0.11.0');
         }
 
-        $this->skip('0.11.0','0.11.1');
+        $this->skip('0.11.0', '0.11.1');
 
         if ($this->isVersion('0.11.1')) {
             /** @var FileSystemService $fileSystemService */
@@ -197,15 +198,16 @@ class Updater extends \common_ext_ExtensionUpdater
 
         if ($this->isVersion('0.11.2')) {
             AclProxy::applyRule(new AccessRule(
-                'grant', 'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole', HandShake::class
+                'grant',
+                'http://www.tao.lu/Ontologies/generis.rdf#AnonymousRole',
+                HandShake::class
             ));
             $this->setVersion('0.12.0');
         }
 
-        $this->skip('0.12.0','0.12.1');
+        $this->skip('0.12.0', '0.12.1');
 
-        if ($this->isVersion('0.12.1')){
-
+        if ($this->isVersion('0.12.1')) {
             $service = new SynchronizeAllTaskBuilderService([
                 SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC => [
                     SynchronizeData::class,
@@ -225,10 +227,9 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.12.2');
         }
 
-        $this->skip('0.12.2','0.14.1');
+        $this->skip('0.12.2', '0.14.1');
 
-        if ($this->isVersion('0.14.1')){
-
+        if ($this->isVersion('0.14.1')) {
             $service = new SynchronizeAllTaskBuilderService([
                 SynchronizeAllTaskBuilderService::OPTION_TASKS_TO_RUN_ON_SYNC => [
                     SynchronizeData::class,
@@ -248,7 +249,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('0.14.2');
         }
 
-        $this->skip('0.14.2','1.0.0');
+        $this->skip('0.14.2', '1.0.0');
 
         if ($this->isVersion('1.0.0')) {
             $service = $this->getServiceManager()->get(SyncService::SERVICE_ID);
@@ -267,7 +268,7 @@ class Updater extends \common_ext_ExtensionUpdater
                 if (isset($deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS])) {
                     $excludedFields =
                         $deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS]
-                        + array(
+                        + [
                             TaoOntology::PROPERTY_UPDATED_AT,
                             Entity::CREATED_AT,
                             DeliveryAssemblyService::PROPERTY_ORIGIN,
@@ -275,7 +276,7 @@ class Updater extends \common_ext_ExtensionUpdater
                             DeliveryAssemblyService::PROPERTY_DELIVERY_TIME,
                             DeliveryAssemblyService::PROPERTY_DELIVERY_RUNTIME,
                             ContainerRuntime::PROPERTY_CONTAINER,
-                        );
+                        ];
                 }
                 $deliverySynchronizerOptions[AbstractResourceSynchronizer::OPTIONS_EXCLUDED_FIELDS] = $excludedFields;
                 $deliverySynchronizer->setOptions($deliverySynchronizerOptions);
@@ -315,7 +316,6 @@ class Updater extends \common_ext_ExtensionUpdater
                         $this->getServiceManager()->register(SyncService::SERVICE_ID, $service);
                     }
                 }
-
             }
 
             $this->setVersion('1.1.0');
@@ -354,10 +354,10 @@ class Updater extends \common_ext_ExtensionUpdater
             try {
                 \common_persistence_Manager::getPersistence($persistenceId);
             } catch (\common_Exception $e) {
-                \common_persistence_Manager::addPersistence($persistenceId,  array(
+                \common_persistence_Manager::addPersistence($persistenceId, [
                     'driver' => 'SqlKvWrapper',
                     'sqlPersistence' => 'default',
-                ));
+                ]);
             }
 
             $mapper = new OfflineResultToOnlineResultMapper([
@@ -752,7 +752,6 @@ class Updater extends \common_ext_ExtensionUpdater
         $this->skip('6.4.0', '6.5.4');
 
         if ($this->isVersion('6.5.4')) {
-
             $resultService = $this->getServiceManager()->get(ResultService::SERVICE_ID);
             $currentOptionValue = $resultService->getOption(SyncResultDataProvider::OPTION_STATUS_EXECUTIONS_TO_SYNC);
             $resultService->setOptions([
@@ -836,7 +835,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('7.1.0');
         }
 
-        $this->skip('7.1.0', '7.2.0');
+        $this->skip('7.1.0', '7.2.1');
     }
 
     /**

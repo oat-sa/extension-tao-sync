@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -51,7 +52,7 @@ class EligibilityByOrganisationId extends RdfEligibilitySynchronizer
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
 
         $queryBuilder = $search->query();
-        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri() , true);
+        $query = $search->searchType($queryBuilder, $this->getRootClass()->getUri(), true);
         if (isset($params['startCreatedAt'])) {
             $query->addCriterion(Entity::CREATED_AT, SupportedOperatorHelper::GREATER_THAN_EQUAL, $params['startCreatedAt']);
         }
@@ -81,5 +82,4 @@ class EligibilityByOrganisationId extends RdfEligibilitySynchronizer
 
         return $values;
     }
-
 }

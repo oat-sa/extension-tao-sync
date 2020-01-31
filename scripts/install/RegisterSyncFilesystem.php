@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,5 +41,4 @@ class RegisterSyncFilesystem extends InstallAction
         $this->registerService(FileSystemService::SERVICE_ID, $fileSystemService);
         return new \common_report_Report(\common_report_Report::TYPE_SUCCESS, 'Synchronization filesystem was registered.');
     }
-
 }

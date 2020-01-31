@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -66,7 +67,7 @@ class DataTablePayload implements DataTablePayloadInterface
      *
      * @param SyncLogFilter $filters
      */
-    public function setFilters (SyncLogFilter $filters)
+    public function setFilters(SyncLogFilter $filters)
     {
         $this->syncLogFilter = $filters;
     }

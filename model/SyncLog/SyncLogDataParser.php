@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -19,7 +20,6 @@
 
 namespace oat\taoSync\model\SyncLog;
 
-
 use oat\oatbox\service\ConfigurableService;
 use common_report_Report as Report;
 
@@ -37,7 +37,8 @@ class SyncLogDataParser extends ConfigurableService
      * @param Report $report
      * @return array
      */
-    public function parseSyncData(Report $report) {
+    public function parseSyncData(Report $report)
+    {
         $this->parsedData = [];
 
         $this->parseSynchronizedEntities($report);
@@ -48,7 +49,8 @@ class SyncLogDataParser extends ConfigurableService
     /**
      * @param Report $report
      */
-    private function parseSynchronizedEntities(Report $report) {
+    private function parseSynchronizedEntities(Report $report)
+    {
         if ($report->hasChildren()) {
             foreach ($report->getIterator() as $child) {
                 $this->parseSynchronizedEntities($child);

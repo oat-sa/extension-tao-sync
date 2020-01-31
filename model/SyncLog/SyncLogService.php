@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -58,7 +59,8 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
     /**
      * @return SyncLogStorageInterface
      */
-    private function getStorage() {
+    private function getStorage()
+    {
         if (empty($this->storage)) {
             $this->storage = $this->getServiceLocator()->get($this->getOption(self::OPTION_STORAGE));
         }
@@ -126,7 +128,6 @@ class SyncLogService extends ConfigurableService implements SyncLogServiceInterf
         } catch (common_exception_NotFound $e) {
             throw new SyncLogEntityNotFound($e->getMessage());
         }
-
     }
 
     /**

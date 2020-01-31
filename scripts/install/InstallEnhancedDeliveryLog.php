@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -49,8 +50,7 @@ class InstallEnhancedDeliveryLog extends InstallAction
                     $persistence->exec($query);
                 }
             }
-
-        } catch(SchemaException $e) {
+        } catch (SchemaException $e) {
             $this->logDebug($e->getMessage());
             $this->logDebug('Database Schema already up to date.');
         }

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,7 +29,9 @@ use oat\generis\model\OntologyRdfs;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\log\LoggerAwareTrait;
 use oat\oatbox\service\ConfigurableService;
+
 use function GuzzleHttp\Psr7\stream_for;
+
 use oat\tao\model\TaoOntology;
 use oat\taoOauth\model\bootstrap\OAuth2Type;
 use oat\taoOauth\model\OAuthClient;
@@ -56,7 +59,8 @@ class HandShakeClientService extends ConfigurableService
     public function execute(HandShakeClientRequest $handShakeRequest)
     {
         $client = $this->getClient();
-        $request = new Request('POST',
+        $request = new Request(
+            'POST',
             $this->getOption(static::OPTION_REMOTE_AUTH_URL)
         );
         $body = stream_for(json_encode($handShakeRequest->toArray()));
@@ -72,11 +76,11 @@ class HandShakeClientService extends ConfigurableService
 
         $responseParsed = json_decode($response->getBody()->getContents(), true);
 
-        if (!isset($responseParsed['oauthInfo'])
+        if (
+            !isset($responseParsed['oauthInfo'])
             || !isset($responseParsed['syncUser'])
             || count(array_diff(['key', 'secret', 'tokenUrl'], array_keys($responseParsed['oauthInfo']))) !== 0
         ) {
-
             $this->logError('Oauth information not received');
 
             return false;
@@ -149,7 +153,7 @@ class HandShakeClientService extends ConfigurableService
         }
 
         /** @var \core_kernel_classes_Resource $connection */
-        foreach ($foundRemoteConnections as $connection){
+        foreach ($foundRemoteConnections as $connection) {
             $connection->editPropertyValues($this->getProperty(PlatformService::PROPERTY_AUTH_TYPE), $this->getOAuth2ClassUri());
             $connection->editPropertyValues($this->getProperty(PlatformService::PROPERTY_ROOT_URL), $this->getOption(static::OPTION_ROOT_URL));
             $connection->editPropertyValues($this->getProperty(ConsumerStorage::CONSUMER_CLIENT_KEY), $oauthData['key']);
@@ -170,7 +174,7 @@ class HandShakeClientService extends ConfigurableService
         $secret = $oauthData['secret'];
         $tokenUrl = $oauthData['tokenUrl'];
 
-        $this->getPlatformService()->getRootClass()->createInstanceWithProperties(array(
+        $this->getPlatformService()->getRootClass()->createInstanceWithProperties([
             OntologyRdfs::RDFS_LABEL => 'Synchronization client',
             PlatformService::PROPERTY_AUTH_TYPE => $this->getOAuth2ClassUri(),
             PublishingService::PUBLISH_ACTIONS => 'oat\\\\taoSync\\\\scripts\\\\tool\\\\synchronisation\\\\SynchronizeData',
@@ -180,7 +184,7 @@ class HandShakeClientService extends ConfigurableService
             ConsumerStorage::CONSUMER_TOKEN_URL => $tokenUrl,
             ConsumerStorage::CONSUMER_TOKEN_TYPE => OAuthClient::DEFAULT_TOKEN_TYPE,
             ConsumerStorage::CONSUMER_TOKEN_GRANT_TYPE => OAuthClient::DEFAULT_GRANT_TYPE,
-        ));
+        ]);
     }
 
     /**
@@ -196,7 +200,7 @@ class HandShakeClientService extends ConfigurableService
             $class = $this->getClass(TaoOntology::CLASS_URI_TAO_USER);
         }
 
-        if (isset($syncUser['id'])){
+        if (isset($syncUser['id'])) {
             $resource = $this->getResource($syncUser['id']);
             if ($resource->exists() && isset($properties[TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY])) {
                 $resource->editPropertyValues(

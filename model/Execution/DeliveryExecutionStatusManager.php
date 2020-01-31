@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -74,7 +75,7 @@ class DeliveryExecutionStatusManager extends ConfigurableService
 
             foreach ($executions as $execution) {
                 $executionStateService->terminateExecution($execution, [
-                    'reasons' =>[
+                    'reasons' => [
                         'category' => 'Technical'
                     ],
                     'comment' => 'Terminated to proceed with synchronization.'

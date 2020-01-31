@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -53,7 +54,6 @@ class HandShakeAuthAdapter extends AuthAdapter
                 throw new \core_kernel_users_InvalidLoginException(
                     'Fail to login or hand shake has already been done.'
                 );
-
             } catch (\Exception $exception) {
                 $this->logError($exception->getMessage());
                 throw new \core_kernel_users_InvalidLoginException();
@@ -79,12 +79,12 @@ class HandShakeAuthAdapter extends AuthAdapter
         $handShakeService = ServiceManager::getServiceManager()->get(HandShakeClientService::SERVICE_ID);
 
         if (!$handShakeService->isHandShakeAlreadyDone()) {
-
             $flag = $handShakeService->execute(new HandShakeClientRequest(
-                $this->username, $this->password
+                $this->username,
+                $this->password
             ));
 
-            if ($flag){
+            if ($flag) {
                 $handShakeService->markHandShakeAlreadyDone();
             }
 
@@ -93,5 +93,4 @@ class HandShakeAuthAdapter extends AuthAdapter
 
         return false;
     }
-
 }
