@@ -45,7 +45,7 @@ class SupportedVmServiceTest extends TestCase
      */
     private $rootClassMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

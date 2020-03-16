@@ -33,7 +33,7 @@ class SyncLogFilterTest extends TestCase
      */
     private $object;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->object = new SyncLogFilter();

@@ -43,7 +43,7 @@ class SyncParamsValidatorTest extends TestCase
         'VERSION_2'
     ];
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->supportedVmServiceMock = $this->createMock(SupportedVmService::class);
@@ -82,7 +82,7 @@ class SyncParamsValidatorTest extends TestCase
         $syncParams = [
             'tao_version' => 'VERSION_1'
         ];
-
         $this->object->validate($syncParams);
+        $this->assertTrue(true);
     }
 }

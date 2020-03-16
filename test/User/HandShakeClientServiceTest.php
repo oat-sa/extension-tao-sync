@@ -23,6 +23,7 @@ namespace oat\taoSync\test\User;
 
 use core_kernel_classes_Class;
 use core_kernel_classes_Resource;
+use Exception;
 use GuzzleHttp\Client;
 use oat\generis\test\TestCase;
 use oat\oatbox\filesystem\Directory;
@@ -49,7 +50,7 @@ class HandShakeClientServiceTest extends TestCase
      */
     private $platformServiceMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -68,10 +69,10 @@ class HandShakeClientServiceTest extends TestCase
 
     /**
      * @dataProvider dataFailedProvider
-     * @expectedException \Exception
      */
     public function testFailed($data)
     {
+        $this->expectException(Exception::class);
         $service = $this->getService($data);
         $this->assertTrue($service->execute($this->getRequest()));
     }

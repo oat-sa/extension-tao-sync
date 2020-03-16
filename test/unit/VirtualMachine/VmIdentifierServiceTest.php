@@ -37,7 +37,7 @@ class VmIdentifierServiceTest extends TestCase
      */
     private $publishingServiceMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
