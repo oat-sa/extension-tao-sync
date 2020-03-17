@@ -77,6 +77,9 @@ class SyncParamsValidatorTest extends TestCase
         $this->object->validate($syncParams);
     }
 
+    /**
+     * @doesNotPerformAssertions
+     */
     public function testValidateCorrectRequestData()
     {
         $syncParams = [

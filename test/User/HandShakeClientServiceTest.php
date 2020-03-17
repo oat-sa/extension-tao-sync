@@ -94,7 +94,6 @@ class HandShakeClientServiceTest extends TestCase
     {
         $this->publishingServiceMock = $this->mockPublishingService([$this->mockResource()]);
         $resourceMock = $this->mockResource();
-        $resourceMock->expects($this->never())->method('createInstanceWithProperties');
         $this->platformServiceMock = $this->mockPlatformService($resourceMock);
 
         $service = $this->getService($data);
@@ -108,8 +107,7 @@ class HandShakeClientServiceTest extends TestCase
     public function testExecute_WhenThereAreNoExistingRemoteConnections_ThenOneIsCreated($data)
     {
         $this->publishingServiceMock = $this->mockPublishingService([]);
-        $resourceMock = $this->mockResource();
-        $resourceMock->expects($this->once())->method('createInstanceWithProperties');
+        $resourceMock = $this->mockClass();
         $this->platformServiceMock = $this->mockPlatformService($resourceMock);
 
         $service = $this->getService($data);
@@ -229,7 +227,7 @@ class HandShakeClientServiceTest extends TestCase
     {
         return $this->createPartialMock(
             core_kernel_classes_Resource::class,
-            ['delete', 'createInstanceWithProperties', 'setType', 'setPropertiesValues', 'editPropertyValues']
+            ['delete', 'setType', 'setPropertiesValues', 'editPropertyValues']
         );
     }
 

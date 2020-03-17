@@ -92,7 +92,7 @@ class SyncPackageServiceTest extends TestCase
             ->willReturn('packageName');
 
         $this->assertEquals(
-            'synchronisation/packageName',
+            'synchronisation'.DIRECTORY_SEPARATOR.'packageName',
             $this->service->createPackage(['key' => 'val', 'key2' => 'val2'], 'packageName', 'orgId')
         );
     }
