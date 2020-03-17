@@ -90,7 +90,7 @@ class DeliveryExecutionStatusManagerTest extends TestCase
 
         $result = $this->object->getExecutionsInProgress();
 
-        $this->assertisarray($result, 'Method must return array.');
+        $this->assertIsArray($result, 'Method must return array.');
         $this->assertInstanceOf(DeliveryMonitoringData::class, $result[0], 'Method must return list of DeliveryMonitoringData objects.');
     }
 
