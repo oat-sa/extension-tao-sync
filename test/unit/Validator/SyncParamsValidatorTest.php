@@ -83,6 +83,5 @@ class SyncParamsValidatorTest extends TestCase
             'tao_version' => 'VERSION_1'
         ];
         $this->object->validate($syncParams);
-        $this->assertTrue(true);
     }
 }
