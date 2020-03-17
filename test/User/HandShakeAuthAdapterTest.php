@@ -53,11 +53,11 @@ class HandShakeAuthAdapterTest extends TestCase
 
 
     /**
-     * @expectedException \core_kernel_users_InvalidLoginException
      * @throws \Exception
      */
     public function testAuthenticateRemoteFailed()
     {
+        $this->expectException(core_kernel_users_InvalidLoginException::class);
         /** @var HandShakeAuthAdapter $handShakeAdapter */
         $handShakeAdapter = $this->getMockBuilder(HandShakeAuthAdapter::class)->setMethods([
             'callParentAuthenticate', 'handShakeWithServer', 'logError'
@@ -113,11 +113,11 @@ class HandShakeAuthAdapterTest extends TestCase
     }
 
     /**
-     * @expectedException \core_kernel_users_InvalidLoginException
      * @throws \Exception
      */
     public function testAuthenticateLocallyFailed()
     {
+        $this->expectException(core_kernel_users_InvalidLoginException::class);
         /** @var HandShakeAuthAdapter $handShakeAdapter */
         $handShakeAdapter = $this->getMockBuilder(HandShakeAuthAdapter::class)->setMethods([
             'callParentAuthenticate', 'handShakeWithServer', 'logError'

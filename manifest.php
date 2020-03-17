@@ -33,10 +33,10 @@ return [
     'label' => 'Tao Sync',
     'description' => 'TAO synchronisation for offline client data.',
     'license' => 'GPL-2.0',
-    'version' => '7.2.1',
+    'version' => '7.3.0',
     'author' => 'Open Assessment Technologies SA',
     'requires' => [
-        'generis'         => '>=12.5.0',
+        'generis'         => '>=12.15.0',
         'tao'             => '>=38.8.0',
         'taoOauth'        => '>=2.0.0',
         'taoTestCenter'   => '>=4.6.0',

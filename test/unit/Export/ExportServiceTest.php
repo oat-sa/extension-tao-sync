@@ -22,6 +22,7 @@ namespace oat\taoSync\test\unit\Export;
 
 use oat\generis\test\TestCase;
 use oat\oatbox\log\LoggerService;
+use oat\taoSync\model\Exception\SyncExportException;
 use oat\taoSync\model\Export\Exporter\ResultsExporter;
 use oat\taoSync\model\Export\ExportService;
 use oat\taoSync\model\Packager\PackagerInterface;
@@ -42,7 +43,7 @@ class ExportServiceTest extends TestCase
     /** @var MockObject */
     private $loggerMock;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->resultsExporterMock = $this->createMock(ResultsExporter::class);
@@ -62,22 +63,18 @@ class ExportServiceTest extends TestCase
     }
 
 
-    /**
-     * @expectedException \oat\taoSync\model\Exception\SyncExportException
-     */
     public function testExport_WhenExportersNotConfigured_ThenExceptionThrown()
     {
+        $this->expectException(SyncExportException::class);
         $this->service->setOptions([
             ExportService::OPTION_IS_ENABLED => true,
         ]);
         $this->service->export([]);
     }
 
-    /**
-     * @expectedException \oat\taoSync\model\Exception\SyncExportException
-     */
     public function testExport_WhenIncorrectExporterConfigured_ThenExceptionThrown()
     {
+        $this->expectException(SyncExportException::class);
         $this->service->setOptions([
             ExportService::OPTION_IS_ENABLED => true,
             ExportService::OPTION_EXPORTERS => [

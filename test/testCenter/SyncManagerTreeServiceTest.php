@@ -90,7 +90,7 @@ class SyncManagerTreeServiceTest extends TestCase
 
     public function testGetAssignedSyncManagers()
     {
-        $userServiceMock = $this->getMock(\tao_models_classes_UserService::class);
+        $userServiceMock = $this->createMock(\tao_models_classes_UserService::class);
 
         $serviceLocatorMock = $this->getServiceLocatorMock(
             [\tao_models_classes_UserService::SERVICE_ID => $userServiceMock]

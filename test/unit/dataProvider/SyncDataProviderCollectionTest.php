@@ -39,7 +39,7 @@ class SyncDataProviderCollectionTest extends TestCase
             ]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
-            ['generis/log' => $this->getMock(LoggerService::class)]
+            ['generis/log' => $this->createMock(LoggerService::class)]
         ));
 
         $this->assertEquals($dataProvider, $syncDataProviderCollection->getProvider('test'));
@@ -113,7 +113,7 @@ class SyncDataProviderCollectionTest extends TestCase
             ]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
-            ['generis/log' => $this->getMock(LoggerService::class)]
+            ['generis/log' => $this->createMock(LoggerService::class)]
         ));
 
         $this->assertEquals(
@@ -146,7 +146,7 @@ class SyncDataProviderCollectionTest extends TestCase
             ]
         );
         $syncDataProviderCollection->setServiceLocator($this->getServiceLocatorMock(
-            ['generis/log' => $this->getMock(LoggerService::class)]
+            ['generis/log' => $this->createMock(LoggerService::class)]
         ));
         $this->expectException(SyncDataProviderException::class);
         $syncDataProviderCollection->getData(['key' => 'value']);

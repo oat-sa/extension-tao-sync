@@ -73,7 +73,7 @@ class SynchronizeAllTest extends TestCase implements Action
      */
     private static $report;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

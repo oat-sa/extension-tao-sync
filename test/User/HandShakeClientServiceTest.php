@@ -23,6 +23,7 @@ namespace oat\taoSync\test\User;
 
 use core_kernel_classes_Class;
 use core_kernel_classes_Resource;
+use Exception;
 use GuzzleHttp\Client;
 use oat\generis\test\TestCase;
 use oat\oatbox\filesystem\Directory;
@@ -49,7 +50,7 @@ class HandShakeClientServiceTest extends TestCase
      */
     private $platformServiceMock;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -68,10 +69,10 @@ class HandShakeClientServiceTest extends TestCase
 
     /**
      * @dataProvider dataFailedProvider
-     * @expectedException \Exception
      */
     public function testFailed($data)
     {
+        $this->expectException(Exception::class);
         $service = $this->getService($data);
         $this->assertTrue($service->execute($this->getRequest()));
     }
@@ -93,7 +94,6 @@ class HandShakeClientServiceTest extends TestCase
     {
         $this->publishingServiceMock = $this->mockPublishingService([$this->mockResource()]);
         $resourceMock = $this->mockResource();
-        $resourceMock->expects($this->never())->method('createInstanceWithProperties');
         $this->platformServiceMock = $this->mockPlatformService($resourceMock);
 
         $service = $this->getService($data);
@@ -107,8 +107,7 @@ class HandShakeClientServiceTest extends TestCase
     public function testExecute_WhenThereAreNoExistingRemoteConnections_ThenOneIsCreated($data)
     {
         $this->publishingServiceMock = $this->mockPublishingService([]);
-        $resourceMock = $this->mockResource();
-        $resourceMock->expects($this->once())->method('createInstanceWithProperties');
+        $resourceMock = $this->mockClass();
         $this->platformServiceMock = $this->mockPlatformService($resourceMock);
 
         $service = $this->getService($data);
@@ -228,7 +227,7 @@ class HandShakeClientServiceTest extends TestCase
     {
         return $this->createPartialMock(
             core_kernel_classes_Resource::class,
-            ['delete', 'createInstanceWithProperties', 'setType', 'setPropertiesValues', 'editPropertyValues']
+            ['delete', 'setType', 'setPropertiesValues', 'editPropertyValues']
         );
     }
 

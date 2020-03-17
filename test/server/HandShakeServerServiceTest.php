@@ -27,6 +27,7 @@ use oat\oatbox\event\EventManager;
 use oat\taoSync\model\formatter\SynchronizerFormatter;
 use oat\taoSync\model\server\HandShakeServerResponse;
 use oat\taoSync\model\server\HandShakeServerService;
+use oat\taoSync\model\server\InvalidRoleForSync;
 use oat\taoSync\model\synchronizer\Synchronizer;
 use oat\taoSync\model\SyncService;
 use oat\taoSync\scripts\tool\oauth\GenerateOauthCredentials;
@@ -44,11 +45,9 @@ class HandShakeServerServiceTest extends TestCase
         $this->assertInstanceOf(HandShakeServerResponse::class, $response);
     }
 
-    /**
-     * @expectedException \oat\taoSync\model\server\InvalidRoleForSync
-     */
     public function testHandShakeNotASyncManager()
     {
+        $this->expectException(InvalidRoleForSync::class);
         $service = $this->getService();
         $response = $service->execute('123456');
 

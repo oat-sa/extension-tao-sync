@@ -46,7 +46,7 @@ class SyncStatusListenerTest extends TestCase
      */
     private $loggerMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
