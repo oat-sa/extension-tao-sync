@@ -54,7 +54,7 @@ class SyncPackageServiceTest extends TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->fileSystemServiceMock = $this->createMock(FileSystemService::class);
@@ -92,7 +92,7 @@ class SyncPackageServiceTest extends TestCase
             ->willReturn('packageName');
 
         $this->assertEquals(
-            'synchronisation/packageName',
+            'synchronisation'.DIRECTORY_SEPARATOR.'packageName',
             $this->service->createPackage(['key' => 'val', 'key2' => 'val2'], 'packageName', 'orgId')
         );
     }

@@ -42,7 +42,7 @@ class SyncLogServiceTest extends TestCase
      */
     private $storageMock;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -81,7 +81,7 @@ class SyncLogServiceTest extends TestCase
             ->willReturn($expectedEntityId);
 
         $this->assertNull($syncLogEntity->getId(), "Entity id must be null until it's stored.");
-        
+
         $syncLogEntity = $this->object->create($syncLogEntity);
         $this->assertEquals($expectedEntityId, $syncLogEntity->getId(), 'Entity id must be as expected.');
     }

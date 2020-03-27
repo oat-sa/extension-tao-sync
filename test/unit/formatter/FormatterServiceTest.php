@@ -31,7 +31,7 @@ class FormatterServiceTest extends \oat\generis\test\TestCase
     /** @var array */
     private $tripleFixture;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->service = new FormatterService();
