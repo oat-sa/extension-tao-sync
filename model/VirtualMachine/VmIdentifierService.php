@@ -23,10 +23,16 @@ namespace oat\taoSync\model\VirtualMachine;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoPublishing\model\publishing\PublishingService;
 use oat\taoSync\scripts\tool\synchronisation\SynchronizeData;
+use core_kernel_classes_Resource;
+use oat\generis\model\OntologyAwareTrait;
 
 class VmIdentifierService extends ConfigurableService
 {
+    use OntologyAwareTrait;
+
     const SERVICE_ID = 'taoSync/VmIdentifierService';
+
+    const PROPERTY_SENDING_BOX_ID = 'http://www.tao.lu/Ontologies/TAO.rdf#TaoPlatformSendingBoxId';
 
     /**
      * Return Virtual Machine identifier: BoxId
@@ -36,9 +42,57 @@ class VmIdentifierService extends ConfigurableService
     public function getBoxId()
     {
         try {
-            return $this->getServiceLocator()->get(PublishingService::SERVICE_ID)->getBoxIdByAction(SynchronizeData::class);
+            $environment = $this->findEnvironmentByAction(SynchronizeData::class);
+            return $this->getEnvironmentBoxId($environment);
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    /**
+     * @throws \common_exception_NotFound
+     */
+    protected function findEnvironmentByAction(string $action) : core_kernel_classes_Resource
+    {
+        $publishingService =  $this->getServiceLocator()->get(PublishingService::SERVICE_ID);
+        $environmentsFound = $publishingService->findByAction($action);
+        if (count($environmentsFound) === 0) {
+            throw new \common_exception_NotFound('No environment found for action "' . $action . '".');
+        }
+        return reset($environmentsFound);
+    }
+
+    /**
+     * Get box ID for environment. If does not exist create a new one.
+     *
+     * @param $environment
+     * @return \core_kernel_classes_Container
+     * @throws \common_Exception
+     * @throws \core_kernel_classes_EmptyProperty
+     */
+    private function getEnvironmentBoxId($environment)
+    {
+        try {
+            $boxId = $environment->getUniquePropertyValue($this->getProperty(self::PROPERTY_SENDING_BOX_ID));
+        } catch (\core_kernel_classes_EmptyProperty $e) {
+            $boxId = $this->setBoxId($environment);
+        }
+        return $boxId;
+    }
+
+    /**
+     * Set unique boc identifier for given environment
+     *
+     * @param \core_kernel_classes_Resource $environment
+     * @return \core_kernel_classes_Container
+     * @throws \common_Exception
+     * @throws \core_kernel_classes_EmptyProperty
+     */
+    private function setBoxId(\core_kernel_classes_Resource $environment)
+    {
+        $boxId = uniqid();
+        $boxIdProp = $this->getProperty(self::PROPERTY_SENDING_BOX_ID);
+        $environment->setPropertyValue($this->getProperty(self::PROPERTY_SENDING_BOX_ID), $boxId);
+        return $environment->getUniquePropertyValue($boxIdProp);
     }
 }

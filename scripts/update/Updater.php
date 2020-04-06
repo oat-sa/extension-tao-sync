@@ -836,6 +836,11 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('7.1.0', '7.3.0');
+
+        if ($this->isVersion('7.3.0')) {
+            OntologyUpdater::syncModels();
+            $this->setVersion('7.4.0');
+        }
     }
 
     /**
