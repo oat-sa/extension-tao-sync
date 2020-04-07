@@ -58,7 +58,7 @@ Set the `chunkSize` parameter in the `taoSync/syncService` configuration to defi
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeData' [--type=$type]
 ```
 
-_Note: The delivery has an exported package sent to server to be synchronized to be compiled._
+When a delivery is published it exports a sanpshot of a QTI test package. This snapshot will be used during synchronization.
 
 ### Result synchronization
 
@@ -66,6 +66,7 @@ Once the Client Server has the delivery result, a script sends it to the Central
 
 To configure the amount of data per request, use the `chunkSize` parameter in the `taoSync/resultService` configuration.
 
+Execute the following command to synchronize the result:
 ```bash
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeResult'
 ```
@@ -82,7 +83,7 @@ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\Sync
 
 ### Generating credentials to allow a user to connect to the platform
 
-This command creates a consumer with OAuth credentials and associates a user to authenticate connection
+This command creates a consumer with OAuth credentials.
 
 ```bash
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\OAuth\GenerateOAuthCredentials'
@@ -105,8 +106,8 @@ $ sudo -u www-data php index.php 'oat\taoSync\scripts\tool\OAuth\ImportOAuthCred
 
 ### Scoping synchronization to a test center identifier
 
-To scope synchronization to test center orgId property the platform needs to register a test-center property. 
-SyncService has also to register new synchronizers to process by organisation id.
+To be able to bind a synchronization to the organzition ID of a test center, the platform needs to register a `test-center` property. The SyncService has also to register new synchronizers to process by organisation id.
+
 ```bash
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\RegisterSyncServiceByOrgId'
 ```
