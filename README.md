@@ -53,7 +53,8 @@ In preparation of a delivery execution, the synchronization process needs to fet
 Set the `chunkSize` parameter in the `taoSync/syncService` configuration to define the amount of data per request:
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeData' [--type=$type]
+# $type in this context is any of the type above, e. g. test-center
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeData' [--type=$type]
 ```
 
 _Note: The delivery has an exported package sent to server to be synchronized to be compiled._
@@ -69,7 +70,7 @@ To configure the amount of data by request, use `chunkSize` parameter in `taoSyn
 
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeResult'
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeResult'
 ```
 
 ### 3. Synchronize All
@@ -77,7 +78,7 @@ To configure the amount of data by request, use `chunkSize` parameter in `taoSyn
 To synchronize data and results in the same time:
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeAll'
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeAll'
 ```
 
 ## OAuth credentials
@@ -87,7 +88,7 @@ To synchronize data and results in the same time:
 This command creates a consumer with OAuth credentials and associates a user to authenticate connection
 
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\OAuth\GenerateOAuthCredentials'
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\OAuth\GenerateOAuthCredentials'
 ```
 
 The output will contain:
@@ -102,7 +103,7 @@ _Note: Add `-cmd` flag to this command to execute it on the Client Server._
 To import the previously created consumer, connect to the Client Server and execute the following command:
 
 ```bash
- $ sudo -u www-data php index.php 'oat\taoSync\scripts\tool\OAuth\ImportOAuthCredentials' -k $key -s $secret -tu $tokenUrl -u $rootUrl
+$ sudo -u www-data php index.php 'oat\taoSync\scripts\tool\OAuth\ImportOAuthCredentials' -k $key -s $secret -tu $tokenUrl -u $rootUrl
 ```
 
 Arguments come from created consumer. The `$rootUrl` is the domain name of the host server.
@@ -112,7 +113,7 @@ Arguments come from created consumer. The `$rootUrl` is the domain name of the h
 To scope synchronization to test center orgId property the platform needs to register a test-center property. 
 SyncService has also to register new synchronizers to process by organisation id.
 ```bash
- $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\RegisterSyncServiceByOrgId'
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\RegisterSyncServiceByOrgId'
 ```
 
 _Note_ The test center organization id is http://www.taotesting.com/ontologies/synchro.rdf#organisationId_
