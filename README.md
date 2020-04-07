@@ -39,6 +39,8 @@ As a system administrator you can also install it through the TAO Extension Mana
 
 ## Synchronization
 
+**Important note: While this article uses American Spelling the commands are in British Spelling for historical reasons, e. g. `synchronisation` instead of `synchronization`!**
+
 ### Data synchronization
 
 In preparation of a delivery execution, the synchronization process needs to fetch data objects of the following types from the central server:
@@ -54,7 +56,7 @@ Set the `chunkSize` parameter in the `taoSync/syncService` configuration to defi
 
 ```bash
 # $type in this context is any of the type above, e. g. test-center
-$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeData' [--type=$type]
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeData' [--type=$type]
 ```
 
 _Note: The delivery has an exported package sent to server to be synchronized to be compiled._
@@ -70,7 +72,7 @@ To configure the amount of data by request, use `chunkSize` parameter in `taoSyn
 
 
 ```bash
-$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeResult'
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeResult'
 ```
 
 ### 3. Synchronize All
@@ -78,7 +80,7 @@ $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\Sync
 To synchronize data and results in the same time:
 
 ```bash
-$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronization\SynchronizeAll'
+$ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeAll'
 ```
 
 ## OAuth credentials
