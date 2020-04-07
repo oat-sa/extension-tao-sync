@@ -10,6 +10,8 @@
 
 All types of data and results can be synchronized. All HTTP requests are required to be signed following the OAuth 2 standard, also are all data encrypted.
 
+**Important note: While this article uses American spelling, some of the commands are in British spelling for historical reasons, e. g. `synchronisation` instead of `synchronization`!**
+
 ## Installation instructions
 
 These instructions assume that you already have a TAO installation on your system. If you don't, go to
@@ -38,8 +40,6 @@ As a system administrator you can also install it through the TAO Extension Mana
 - Select _taoSync_ on the right-hand side, check the box and hit _install_
 
 ## Synchronization
-
-**Important note: While this article uses American Spelling the commands are in British Spelling for historical reasons, e. g. `synchronisation` instead of `synchronization`!**
 
 ### Data synchronization
 
