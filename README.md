@@ -52,7 +52,7 @@ In preparation of a delivery execution, the synchronization process needs to fet
 * `eligibility`
 * `delivery`
 
-Set the `chunkSize` parameter in the `taoSync/syncService` configuration to define the amount of data per request, `$type` in this context refers to the types above, e. g. test-center
+Set the `chunkSize` parameter in the `taoSync/syncService` configuration to define the amount of data per request, `$type` refers to the list above, e. g. _test-center_
 
 ```bash
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeData' [--type=$type]
