@@ -1,3 +1,42 @@
+# TAO _taoSync_ extension
+
+![TAO Logo](https://github.com/oat-sa/taohub-developer-guide/raw/master/resources/tao-logo.png)
+
+![GitHub](https://img.shields.io/github/license/oat-sa/extension-tao-sync.svg)
+![GitHub release](https://img.shields.io/github/release/oat-sa/extension-tao-sync.svg)
+![GitHub commit activity](https://img.shields.io/github/commit-activity/y/oat-sa/extension-tao-sync.svg)
+
+> Short description of `oat-sa/extension-tao-sync`
+
+Long description of `oat-sa/extension-tao-sync`
+
+## Installation instructions
+
+These instructions assume that you have already a TAO installation on your system. If you don't, go to
+[package/tao](https://github.com/oat-sa/package-tao) and follow the installation instructions.
+
+
+Add the extension to your TAO composer and to the autoloader:
+```bash
+composer require oat-sa/extension-tao-sync
+```
+
+Install the extension on the CLI from the project root:
+
+**Linux:**
+```bash
+sudo php tao/scripts/installExtension oat-sa/extension-tao-sync
+```
+
+**Windows:**
+```bash
+php tao\scripts\installExtension oat-sa/extension-tao-sync
+```
+
+As a system administrator you can also install it through the TAO Extension Manager:
+- Settings (the gears on the right hand side of the menu) -> Extension manager
+- Select _taoSync_ on the right hand side, check the box and hit _install_
+
 # Tao Sync extension
 
 The purpose of this extension is to synchronize a local server against a remote.
