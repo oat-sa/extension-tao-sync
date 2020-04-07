@@ -10,7 +10,7 @@
 
 All types of data and results can be synchronized. All HTTP requests are required to be signed following the OAuth 2 standard, also are all data encrypted.
 
-**Important note: While this article uses American spelling, some of the commands are in British spelling for historical reasons, e. g. `synchronisation` instead of `synchronization`!**
+**Important note: While this article uses American spelling, some of the command line instructions are in British spelling for historical reasons, e. g. `synchronisation` instead of `synchronization`!**
 
 ## Installation instructions
 
@@ -63,21 +63,17 @@ _Note: The delivery has an exported package sent to server to be synchronized to
 
 ### Result synchronization
 
-Once the Client Server has the delivery result, a script sends it to the Central Server. Only completed delivery executions will be sent.
-Results have been submitted only once.
-When a delivery execution is send, sync history will be updated to log the action.
-`deleteAfterSend` parameter can be set to true to delete results after synchronization.
+Once the Client Server has the delivery result, a script sends it to the Central Server. Only completed delivery executions will be sent, results will be submitted only once. When a delivery execution is sent, the synchronization history will be updated to log the action. You can set the `deleteAfterSend` parameter to `true` to delete results after the synchronization.
 
-To configure the amount of data by request, use `chunkSize` parameter in `taoSync/resultService` config
-
+To configure the amount of data per request, use the `chunkSize` parameter in the `taoSync/resultService` configuration.
 
 ```bash
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeResult'
 ```
 
-### 3. Synchronize All
+### Synchronizing all data and results
 
-To synchronize data and results in the same time:
+To synchronize data and results at the same time, use the following command:
 
 ```bash
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\synchronisation\SynchronizeAll'
@@ -93,24 +89,22 @@ This command creates a consumer with OAuth credentials and associates a user to 
 $ sudo -u www-data php index.php '\oat\taoSync\scripts\tool\OAuth\GenerateOAuthCredentials'
 ```
 
-The output will contain:
-- key
-- secret
-- tokenUrl
+The output of this command will contain the following data:
+- `key`
+- `secret`
+- `tokenUrl`
 
-_Note: Add `-cmd` flag to this command to execute it on the Client Server._
+_Note: Add the `-cmd` flag to this command to execute it on the Client Server._
 
 ### Importing OAuth credentials to Client Server
 
-To import the previously created consumer, connect to the Client Server and execute the following command:
+The following command will import the consumer you have created above into the Client Server. The arguments are the output from the previous command, `$rootUrl` is the domain name of the host server.
 
 ```bash
 $ sudo -u www-data php index.php 'oat\taoSync\scripts\tool\OAuth\ImportOAuthCredentials' -k $key -s $secret -tu $tokenUrl -u $rootUrl
 ```
 
-Arguments come from created consumer. The `$rootUrl` is the domain name of the host server.
-
-### Scope synchronization to a test center identifier
+### Scoping synchronization to a test center identifier
 
 To scope synchronization to test center orgId property the platform needs to register a test-center property. 
 SyncService has also to register new synchronizers to process by organisation id.
