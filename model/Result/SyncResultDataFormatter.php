@@ -24,7 +24,7 @@ namespace oat\taoSync\model\Result;
 use oat\oatbox\service\ConfigurableService;
 use oat\taoDelivery\model\execution\DeliveryExecution;
 use oat\taoDelivery\model\execution\ServiceProxy;
-use oat\taoDeliveryRdf\helper\DetectTestAndItemIdentifiersHelper;
+use oat\taoSync\helper\DetectTestAndItemIdentifiersHelper;
 use oat\taoResultServer\models\classes\ResultManagement;
 use oat\taoResultServer\models\classes\ResultServerService;
 
