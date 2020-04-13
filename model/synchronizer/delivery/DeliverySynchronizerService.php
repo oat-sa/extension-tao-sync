@@ -25,16 +25,13 @@ use oat\generis\model\fileReference\UrlFileSerializer;
 use oat\generis\model\OntologyAwareTrait;
 use oat\generis\model\OntologyRdf;
 use oat\generis\model\OntologyRdfs;
-use oat\oatbox\filesystem\Directory;
 use oat\oatbox\filesystem\File;
 use oat\oatbox\filesystem\FileSystemService;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\import\ImportersService;
-use oat\tao\model\TaoOntology;
 use oat\taoDeliveryRdf\model\DeliveryAssemblyService;
 use oat\taoDeliveryRdf\model\DeliveryFactory;
 use oat\taoQtiTest\models\import\QtiTestImporter;
-use oat\taoResultServer\models\classes\implementation\OntologyService;
 use oat\taoSync\model\client\SynchronisationClient;
 use oat\taoSync\model\SyncService;
 
@@ -80,8 +77,7 @@ class DeliverySynchronizerService extends ConfigurableService
 
         $properties = [
             OntologyRdf::RDF_TYPE,
-            OntologyRdfs::RDFS_LABEL,
-            OntologyService::PROPERTY_RESULT_SERVER
+            OntologyRdfs::RDFS_LABEL
         ];
         foreach ($properties as $uri) {
             $value = $delivery->getOnePropertyValue($this->getProperty($uri));
