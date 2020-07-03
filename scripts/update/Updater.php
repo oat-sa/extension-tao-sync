@@ -111,6 +111,7 @@ use oat\taoSync\model\client\ConnectionStatsHandler;
  *
  * @author Moyon Camille <camille@taotesting.com>
  * @author Dieter Raber <dieter@taotesting.com>
+ * @deprecated use migrations instead. See https://github.com/oat-sa/generis/wiki/Tao-Update-Process
  */
 class Updater extends \common_ext_ExtensionUpdater
 {
@@ -836,6 +837,11 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('7.1.0', '7.6.0');
+        
+        //Updater files are deprecated. Please use migrations.
+        //See: https://github.com/oat-sa/generis/wiki/Tao-Update-Process
+
+        $this->setVersion($this->getExtension()->getManifest()->getVersion());
     }
 
     /**
