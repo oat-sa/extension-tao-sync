@@ -42,6 +42,7 @@ use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\EntityChecksumCacheService;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
@@ -825,6 +826,15 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('6.12.0', '6.13.0.2');
+
+        if ($this->isVersion('6.13.0.2')) {
+            $service = new EntityChecksumCacheService([
+                EntityChecksumCacheService::OPTION_PERSISTENCE => 'default_kv',
+            ]);
+            $this->getServiceManager()->register(EntityChecksumCacheService::SERVICE_ID, $service);
+
+            $this->setVersion('6.13.0.3');
+        }
     }
 
     /**
