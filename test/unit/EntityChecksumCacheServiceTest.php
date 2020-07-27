@@ -24,6 +24,7 @@ namespace oat\taoSync\test\unit;
 use common_persistence_KeyValuePersistence;
 use common_persistence_Manager;
 use core_kernel_classes_Resource;
+use oat\generis\model\data\event\ResourceDeleted;
 use oat\generis\model\data\Ontology;
 use oat\generis\test\TestCase;
 use oat\taoSync\model\EntityChecksumCacheService;
@@ -38,9 +39,6 @@ class EntityChecksumCacheServiceTest extends TestCase
     /** @var common_persistence_KeyValuePersistence|PHPUnit_Framework_MockObject_MockObject */
     private $persistenceMock;
 
-    /** @var Ontology|PHPUnit_Framework_MockObject_MockObject */
-    private $ontologyMock;
-
     public function setUp(): void
     {
         $this->persistenceMock = $this->createMock(common_persistence_KeyValuePersistence::class);
@@ -49,43 +47,41 @@ class EntityChecksumCacheServiceTest extends TestCase
         $serviceLocatorMock = $this->getServiceLocatorMock([
             common_persistence_Manager::SERVICE_ID => $persistenceManagerMock,
         ]);
-        $this->ontologyMock = $this->createMock(Ontology::class);
         $this->service = new EntityChecksumCacheService([
             'persistence' => 'default'
         ]);
         $this->service->setServiceLocator($serviceLocatorMock);
-        $this->service->setModel($this->ontologyMock);
     }
 
     public function testGet_WhenPersistenceNotConfigured_ThenExceptionThrown(): void
     {
         $this->service->setOptions([]);
         $this->expectException(\InvalidArgumentException::class);
-        $this->service->get('RANDOM_URI');
+        $this->service->get('TEST_URI');
     }
 
     public function testGet_WhenPersistenceConfigured_ThenFoundValueIsReturned(): void
     {
         $cachedChecksum = 'CACHED_CHECKSUM';
         $this->persistenceMock->expects($this->once())->method('get')->willReturn($cachedChecksum);
-        $this->assertSame($cachedChecksum, $this->service->get('RANDOM_URI'));
+        $this->assertSame($cachedChecksum, $this->service->get('TEST_URI'));
     }
 
-    public function testUpdate_WhenEntityIdListProvided_ThenSynchronizerFormattedChecksumsAreStored()
+    public function testSet_WhenEntityIdAndChecksumProvided_ThenStoredInPersistence(): void
     {
-        $this->ontologyMock->method('getResource')
-            ->willReturn($this->createMock(core_kernel_classes_Resource::class));
-        $synchronizerMock = $this->createMock(AbstractResourceSynchronizer::class);
-        $synchronizerMock->method('format')
-            ->willReturn(['checksum' => 'TEST CHECKSUM']);
-
-        $this->persistenceMock->expects($this->exactly(2))->method('set');
-        $this->service->update($synchronizerMock, ['URI1', 'URI2']);
+        $this->persistenceMock->expects($this->once())->method('set')->willReturn(true);
+        $this->service->set('TEST_URI', 'TEST_CHECKSUM');
     }
 
-    public function testDelete_WhenEntityIdListProvided_ThenEachIsRemovedFromPersistence()
+    public function testDelete_WhenEntityIdProvided_ThenChecksumRemovedFromPersistence()
     {
-        $this->persistenceMock->expects($this->exactly(2))->method('del');
-        $this->service->delete(['URI1', 'URI2']);
+        $this->persistenceMock->expects($this->once())->method('del');
+        $this->service->delete('TEST_URI');
+    }
+
+    public function testEntityDeleted_WhenResourceDeletedTriggered_ThenChecksumDeletedFromPersistence()
+    {
+        $this->persistenceMock->expects($this->once())->method('del');
+        $this->service->entityDeleted(new ResourceDeleted('TEST_URI'));
     }
 }
