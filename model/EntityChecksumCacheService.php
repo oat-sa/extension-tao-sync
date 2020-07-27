@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 namespace oat\taoSync\model;
 
+use common_Exception;
 use common_persistence_KeyValuePersistence;
 use common_persistence_Manager as PersistenceManager;
 use InvalidArgumentException;
@@ -35,6 +36,10 @@ class EntityChecksumCacheService extends ConfigurableService
 
     private const PREFIX = 'entity-checksum-';
 
+    /**
+     * @param string $id
+     * @return bool|int|string|null
+     */
     public function get(string $id)
     {
         if (empty($id)) {
@@ -44,6 +49,12 @@ class EntityChecksumCacheService extends ConfigurableService
         return $this->getPersistence()->get($this->makeKey($id));
     }
 
+    /**
+     * @param string $id
+     * @param string $checksum
+     * @return bool
+     * @throws common_Exception
+     */
     public function set(string $id, string $checksum): bool
     {
         if (empty($id)) {
@@ -53,6 +64,9 @@ class EntityChecksumCacheService extends ConfigurableService
         return $this->getPersistence()->set($this->makeKey($id), $checksum);
     }
 
+    /**
+     * @param string $id
+     */
     public function delete(string $id): void
     {
         if (empty($id)) {
@@ -62,6 +76,9 @@ class EntityChecksumCacheService extends ConfigurableService
         $this->getPersistence()->del($this->makeKey($id));
     }
 
+    /**
+     * @param ResourceDeleted $event
+     */
     public function entityDeleted(ResourceDeleted $event): void
     {
         $this->delete($event->getId());

@@ -23,7 +23,6 @@ namespace oat\taoSync\scripts\install;
 use common_Exception;
 use common_report_Report;
 use oat\generis\model\data\event\ResourceDeleted;
-use oat\generis\model\data\event\ResourceUpdated;
 use oat\oatbox\extension\InstallAction;
 use oat\taoSync\model\EntityChecksumCacheService;
 
