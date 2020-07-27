@@ -21,6 +21,8 @@
 namespace oat\taoSync\scripts\update;
 
 use Doctrine\DBAL\Types\Type;
+use oat\generis\model\data\event\ResourceDeleted;
+use oat\generis\model\data\event\ResourceUpdated;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
@@ -832,6 +834,11 @@ class Updater extends \common_ext_ExtensionUpdater
                 EntityChecksumCacheService::OPTION_PERSISTENCE => 'default_kv',
             ]);
             $this->getServiceManager()->register(EntityChecksumCacheService::SERVICE_ID, $service);
+
+            /** @var EventManager $eventManager */
+            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
+            $eventManager->attach(ResourceDeleted::class, [EntityChecksumCacheService::SERVICE_ID, 'entityDeleted']);
+            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
 
             $this->setVersion('6.13.0.3');
         }
