@@ -24,14 +24,11 @@ namespace oat\taoSync\model;
 use common_persistence_KeyValuePersistence;
 use common_persistence_Manager;
 use InvalidArgumentException;
-use oat\generis\model\OntologyAwareTrait;
+use oat\generis\model\data\event\ResourceDeleted;
 use oat\oatbox\service\ConfigurableService;
-use oat\taoSync\model\synchronizer\AbstractResourceSynchronizer;
 
 class EntityChecksumCacheService extends ConfigurableService
 {
-    use OntologyAwareTrait;
-
     public const SERVICE_ID = 'taoSync/EntityChecksumCacheService';
     public const OPTION_PERSISTENCE = 'persistence';
 
@@ -39,22 +36,34 @@ class EntityChecksumCacheService extends ConfigurableService
 
     public function get(string $id)
     {
+        if (empty($id)) {
+            return false;
+        }
+
         return $this->getPersistence()->get($this->makeKey($id));
     }
 
-    public function update(AbstractResourceSynchronizer $synchronizer, array $entityIds): void
+    public function set(string $id, string $checksum): bool
     {
-        foreach ($entityIds as $id) {
-            $formatted = $synchronizer->format($this->getResource($id));
-            $this->getPersistence()->set($this->makeKey($id), $formatted['checksum']);
+        if (empty($id)) {
+            return false;
         }
+
+        return $this->getPersistence()->set($this->makeKey($id), $checksum);
     }
 
-    public function delete(array $entityIds): void
+    public function delete(string $id): void
     {
-        foreach ($entityIds as $id) {
-            $this->getPersistence()->del($this->makeKey($id));
+        if (empty($id)) {
+            return;
         }
+
+        $this->getPersistence()->del($this->makeKey($id));
+    }
+
+    public function entityDeleted(ResourceDeleted $event): void
+    {
+        $this->delete($event->getId());
     }
 
     private function makeKey(string $id): string

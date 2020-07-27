@@ -22,6 +22,8 @@
 namespace oat\taoSync\scripts\update;
 
 use Doctrine\DBAL\Types\Type;
+use oat\generis\model\data\event\ResourceDeleted;
+use oat\generis\model\data\event\ResourceUpdated;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
@@ -837,7 +839,7 @@ class Updater extends \common_ext_ExtensionUpdater
         }
 
         $this->skip('7.1.0', '7.6.0');
-        
+
         //Updater files are deprecated. Please use migrations.
         //See: https://github.com/oat-sa/generis/wiki/Tao-Update-Process
 

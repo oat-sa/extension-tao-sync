@@ -313,7 +313,6 @@ class SyncService extends ConfigurableService
     {
         $entityIds = $this->getSyncHistoryService()->getNotUpdatedEntityIds($type);
         $this->getSynchronizer($type)->deleteMultiple($entityIds);
-        $this->getEntityChecksumCacheService()->delete($entityIds);
         $this->getSyncHistoryService()->logDeletedEntities($type, $entityIds);
         $this->report(count($entityIds) . ' deleted.', LogLevel::INFO);
         if (!empty($entityIds)) {
@@ -389,7 +388,7 @@ class SyncService extends ConfigurableService
             $this->report('(' . $synchronizer->getId() . ') ' . count($created) . ' entities created.', LogLevel::INFO);
             $logData[$synchronizer->getId()]['created'] = count($created);
             $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $created);
-            $this->getEntityChecksumCacheService()->update($synchronizer, $created);
+            $this->storeEntityCheckums($entities['create'], $created);
         }
 
         if (!empty($entities['update'])) {
@@ -398,7 +397,7 @@ class SyncService extends ConfigurableService
             $entityIds = array_column($entities['update'], 'id');
             $logData[$synchronizer->getId()]['updated'] = count($entityIds);
             $this->getSyncHistoryService()->logUpdatedEntities($synchronizer->getId(), $entityIds);
-            $this->getEntityChecksumCacheService()->update($synchronizer, $entityIds);
+            $this->storeEntityCheckums($entities['update']);
         }
         $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
@@ -533,6 +532,16 @@ class SyncService extends ConfigurableService
         }
 
         return $params[DataSyncHistoryService::SYNC_NUMBER];
+    }
+
+    private function storeEntityCheckums($entities, array $ids = [])
+    {
+        foreach ($entities as $entity) {
+            if (empty($entity['checksum']) || (!empty($ids) && !in_array($entity['id'], $ids))) {
+                continue;
+            }
+            $this->getEntityChecksumCacheService()->set($entity['id'], $entity['checksum']);
+        }
     }
 
     private function getEntityChecksumCacheService(): EntityChecksumCacheService
