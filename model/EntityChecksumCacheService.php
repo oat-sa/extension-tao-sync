@@ -38,15 +38,16 @@ class EntityChecksumCacheService extends ConfigurableService
 
     /**
      * @param string $id
-     * @return bool|int|string|null
+     * @return null|string
      */
-    public function get(string $id)
+    public function get(string $id): ?string
     {
         if (empty($id)) {
-            return false;
+            return null;
         }
+        $result =  $this->getPersistence()->get($this->makeKey($id));
 
-        return $this->getPersistence()->get($this->makeKey($id));
+        return !empty($result) ? $result : null;
     }
 
     /**
