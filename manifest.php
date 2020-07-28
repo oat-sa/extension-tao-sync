@@ -73,8 +73,7 @@ return array(
             InstallEnhancedDeliveryLog::class,
             RegisterRdsSyncLogStorage::class,
             \oat\taoSync\scripts\install\RegisterTestCenterService::class,
-            \oat\taoSync\scripts\install\RegisterResultDataServices::class,
-            \oat\taoSync\scripts\install\RegisterEntityChecksumCache::class
+            \oat\taoSync\scripts\install\RegisterResultDataServices::class
         ]
     ],
     'uninstall' => array(

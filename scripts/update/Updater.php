@@ -827,21 +827,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.12.0');
         }
 
-        $this->skip('6.12.0', '6.13.0.2');
-
-        if ($this->isVersion('6.13.0.2')) {
-            $service = new EntityChecksumCacheService([
-                EntityChecksumCacheService::OPTION_PERSISTENCE => 'default_kv',
-            ]);
-            $this->getServiceManager()->register(EntityChecksumCacheService::SERVICE_ID, $service);
-
-            /** @var EventManager $eventManager */
-            $eventManager = $this->getServiceManager()->get(EventManager::SERVICE_ID);
-            $eventManager->attach(ResourceDeleted::class, [EntityChecksumCacheService::SERVICE_ID, 'entityDeleted']);
-            $this->getServiceManager()->register(EventManager::SERVICE_ID, $eventManager);
-
-            $this->setVersion('6.13.0.3');
-        }
+        $this->skip('6.12.0', '6.13.0.3');
     }
 
     /**
