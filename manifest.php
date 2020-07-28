@@ -75,8 +75,7 @@ return [
             RegisterRdsSyncLogStorage::class,
             \oat\taoSync\scripts\install\RegisterTestCenterService::class,
             \oat\taoSync\scripts\install\RegisterResultDataServices::class,
-            \oat\taoSync\scripts\install\CreateFileSystemStorage::class,
-            \oat\taoSync\scripts\install\RegisterEntityChecksumCache::class
+            \oat\taoSync\scripts\install\CreateFileSystemStorage::class
         ]
     ],
     'uninstall' => [
