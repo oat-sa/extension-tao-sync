@@ -21,6 +21,8 @@
 namespace oat\taoSync\scripts\update;
 
 use Doctrine\DBAL\Types\Type;
+use oat\generis\model\data\event\ResourceDeleted;
+use oat\generis\model\data\event\ResourceUpdated;
 use oat\oatbox\event\EventManager;
 use oat\oatbox\service\ConfigurableService;
 use oat\tao\model\accessControl\func\AccessRule;
@@ -42,6 +44,7 @@ use oat\taoSync\model\DeliveryLog\DeliveryLogFormatterService;
 use oat\taoSync\model\DeliveryLog\EnhancedDeliveryLogService;
 use oat\taoSync\model\DeliveryLog\SyncDeliveryLogService;
 use oat\taoSync\model\Entity;
+use oat\taoSync\model\EntityChecksumCacheService;
 use oat\taoSync\model\event\SyncFailedEvent;
 use oat\taoSync\model\event\SyncFinishedEvent;
 use oat\taoSync\model\event\SyncRequestEvent;
@@ -824,7 +827,7 @@ class Updater extends \common_ext_ExtensionUpdater
             $this->setVersion('6.12.0');
         }
 
-        $this->skip('6.12.0', '6.13.0.2');
+        $this->skip('6.12.0', '6.13.0.3');
     }
 
     /**
