@@ -22,7 +22,6 @@ namespace oat\taoSync\controller;
 
 use common_report_Report;
 use oat\generis\model\OntologyAwareTrait;
-use oat\tao\model\security\xsrf\TokenService;
 use oat\tao\model\service\ApplicationService;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
@@ -163,13 +162,6 @@ class Synchronizer extends \tao_actions_CommonModule
             $serviceLocator = $this->getServiceLocator();
             $activeSessions = $serviceLocator->get(DeliveryExecutionStatusManager::SERVICE_ID)->getExecutionsInProgress();
             $activeSessionsData = $serviceLocator->get(DeliveryExecutionContextParser::SERVICE_ID)->parseExecutionContextDetails($activeSessions);
-
-            /** @var TokenService $tokenService */
-            $tokenService = $serviceLocator->get(TokenService::SERVICE_ID);
-            $data['token'] = [
-                'name' => $tokenService->getTokenName(),
-                'token' => $tokenService->createToken()->getValue(),
-            ];
         }
 
         $data['activeSessionsData'] = $activeSessionsData;
