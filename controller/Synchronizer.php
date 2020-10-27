@@ -270,10 +270,12 @@ class Synchronizer extends \tao_actions_CommonModule
                 $score[] = $speed/$synchronisationClient->getExpectedUploadSpeed()*100;
             }
         }
+        
+        $score = $score ?? 0;
 
         return [
             'title' => __('Connectivity'),
-            'score' => min(min($score), 100),
+            'score' => min(min([$score]), 100),
             'info'  => $info,
         ];
     }
