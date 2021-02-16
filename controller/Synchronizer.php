@@ -50,6 +50,11 @@ class Synchronizer extends \tao_actions_CommonModule
     use OntologyAwareTrait;
 
     /**
+     * Do not delete, this one is used to translate sync form orgId input label
+     * __('Organisation identifier')
+     */
+
+    /**
      * Extension ID
      */
     const EXTENSION_ID = 'taoSync';

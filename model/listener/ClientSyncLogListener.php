@@ -151,13 +151,13 @@ class ClientSyncLogListener extends ConfigurableService
         $report = \common_report_Report::createInfo(__('Connection statistics'));
         $report->add(
             \common_report_Report::createInfo(
-                'Download speed',
+                __('Download speed'),
                 $this->getDownloadSpeed()
             )
         );
         $report->add(
             \common_report_Report::createInfo(
-                'Upload speed',
+                __('Upload speed'),
                 $this->getUploadSpeed()
             )
         );
