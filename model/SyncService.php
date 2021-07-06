@@ -268,8 +268,7 @@ class SyncService extends ConfigurableService
         foreach ($remoteEntities as $remoteEntity) {
             $id = $remoteEntity['id'];
             try {
-                $localEntity = $synchronizer->fetchOne($id, $params);
-                if ($localEntity['checksum'] == $remoteEntity['checksum']) {
+                if ($this->isLocalEntityUpToDate($synchronizer, $remoteEntity, $params)) {
                     // up to date
                     $this->report('(' . $synchronizer->getId() . ') Entity "' . $id . '" is already up to date.');
                     $entities['existing'][] = $id;
@@ -286,6 +285,17 @@ class SyncService extends ConfigurableService
         }
 
         return $this->persist($synchronizer, $this->getEntityDetails($synchronizer->getId(), $entities, $params));
+    }
+
+    private function isLocalEntityUpToDate($synchronizer, $remoteEntity, $params)
+    {
+        $cachedChecksum = $this->getEntityChecksumCacheService()->get($remoteEntity['id']);
+        if (!empty($cachedChecksum) && $cachedChecksum === $remoteEntity['checksum']) {
+            return true;
+        }
+        $localEntity = $synchronizer->fetchOne($remoteEntity['id'], $params);
+
+        return $localEntity['checksum'] == $remoteEntity['checksum'];
     }
 
     /**
@@ -378,6 +388,7 @@ class SyncService extends ConfigurableService
             $this->report('(' . $synchronizer->getId() . ') ' . count($created) . ' entities created.', LogLevel::INFO);
             $logData[$synchronizer->getId()]['created'] = count($created);
             $this->getSyncHistoryService()->logCreatedEntities($synchronizer->getId(), $created);
+            $this->storeEntityCheckums($entities['create'], $created);
         }
 
         if (!empty($entities['update'])) {
@@ -386,6 +397,7 @@ class SyncService extends ConfigurableService
             $entityIds = array_column($entities['update'], 'id');
             $logData[$synchronizer->getId()]['updated'] = count($entityIds);
             $this->getSyncHistoryService()->logUpdatedEntities($synchronizer->getId(), $entityIds);
+            $this->storeEntityCheckums($entities['update']);
         }
         $this->report->setData(SyncLogDataHelper::mergeSyncData($this->report->getData(), $logData));
 
@@ -520,5 +532,20 @@ class SyncService extends ConfigurableService
         }
 
         return $params[DataSyncHistoryService::SYNC_NUMBER];
+    }
+
+    private function storeEntityCheckums($entities, array $ids = [])
+    {
+        foreach ($entities as $entity) {
+            if (empty($entity['checksum']) || (!empty($ids) && !in_array($entity['id'], $ids))) {
+                continue;
+            }
+            $this->getEntityChecksumCacheService()->set($entity['id'], $entity['checksum']);
+        }
+    }
+
+    private function getEntityChecksumCacheService(): EntityChecksumCacheService
+    {
+        return $this->getServiceLocator()->get(EntityChecksumCacheService::SERVICE_ID);
     }
 }

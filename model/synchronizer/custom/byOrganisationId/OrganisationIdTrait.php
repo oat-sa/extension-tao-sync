@@ -44,7 +44,7 @@ trait OrganisationIdTrait
     protected function getOrganisationIdFromOption(array $options = [])
     {
         if (!isset($options[TestCenterByOrganisationId::OPTION_ORGANISATION_ID])) {
-            $ids = \common_session_SessionManager::getSession()->getUserPropertyValues($this->getProperty(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY));
+            $ids = \common_session_SessionManager::getSession()->getUserPropertyValues(TestCenterByOrganisationId::ORGANISATION_ID_PROPERTY);
             $id = reset($ids);
             if (empty($id)) {
                 $this->logError('Organisation id cannot be retrieved from parameters. Current synchronisation aborted.');
