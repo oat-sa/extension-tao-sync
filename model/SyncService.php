@@ -436,7 +436,7 @@ class SyncService extends ConfigurableService
     /**
      * Get all available synchronizer from the config
      *
-     * @return Synchronizer[]
+     * @return string[]
      */
     protected function getAllTypes()
     {
