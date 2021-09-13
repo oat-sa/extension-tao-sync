@@ -30,6 +30,8 @@ use oat\taoTestCenter\model\TestCenterService;
 
 trait OrganisationIdTrait
 {
+    private $eligibilities = [];
+
     abstract public function getServiceLocator();
 
     /**
@@ -93,6 +95,10 @@ trait OrganisationIdTrait
      */
     protected function getEligibilitiesByOrganisationId($orgId)
     {
+        if (isset($this->eligibilities[$orgId])) {
+            return $this->eligibilities[$orgId];
+        }
+
         /** @var ComplexSearchService $search */
         $search = $this->getServiceLocator()->get(ComplexSearchService::SERVICE_ID);
 
@@ -119,6 +125,8 @@ trait OrganisationIdTrait
                 $values[$resource->getUri()] = $resource;
             }
         }
+
+        $this->eligibilities[$orgId] = $values;
 
         return $values;
     }
