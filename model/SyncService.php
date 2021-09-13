@@ -129,21 +129,16 @@ class SyncService extends ConfigurableService
             OntologyRdfs::RDFS_LABEL => 'asc',
         ];
 
-        $limit = $this->getChunkSize() + 1;
+        $limit = $this->getChunkSize();
         $options['limit'] = $limit;
-
-        if (isset($options['nextResource'])) {
-            $startEpoch = $this->getSynchronizer($type)->getEntityProperty($options['nextResource'], Entity::CREATED_AT);
-            if (!is_null($startEpoch)) {
-                $options['startCreatedAt'] = $startEpoch;
-            }
+        if (!isset($options['offset'])) {
+            $options['offset'] = 0;
         }
 
         $entities = $this->getSynchronizer($type)->fetch($options);
 
-        if (count($entities) == $limit) {
-            $nextEntity = array_pop($entities);
-            $params['nextResource'] = $nextEntity['id'];
+        if (count($entities) === $limit) {
+            $params['offset'] = $options['offset'] + $limit;
             $response['nextCallUrl'] = '/taoSync/SynchronisationApi/fetchEntityChecksums?' . http_build_query([
                 SynchronisationApi::PARAM_TYPE => $type,
                 SynchronisationApi::PARAM_PARAMETERS => $params,

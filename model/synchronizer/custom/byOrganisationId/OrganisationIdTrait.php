@@ -24,7 +24,6 @@ namespace oat\taoSync\model\synchronizer\custom\byOrganisationId;
 use oat\generis\model\kernel\persistence\smoothsql\search\ComplexSearchService;
 use oat\generis\model\kernel\persistence\smoothsql\search\QueryJoiner;
 use oat\search\base\exception\SearchGateWayExeption;
-use oat\taoSync\model\Entity;
 use oat\taoSync\model\synchronizer\custom\byOrganisationId\testcenter\TestCenterByOrganisationId;
 use oat\taoTestCenter\model\EligibilityService;
 use oat\taoTestCenter\model\TestCenterService;
@@ -127,45 +126,18 @@ trait OrganisationIdTrait
     /**
      * Post apply options in $params to set of resources
      *
-     * @param $resources
-     * @param $params
+     * @param \core_kernel_classes_Resource[] $resources
+     * @param array $params
      * @return array
      * @throws \common_Exception
      */
     protected function postApplyQueryOptions($resources, $params)
     {
-        $sortedInstances = $values = [];
-        $withProperties = isset($params['withProperties']) && (int) $params['withProperties'] == 1;
-        /** @var \core_kernel_classes_Resource $resource */
+        $withProperties = isset($params['withProperties']) && (int)$params['withProperties'] === 1;
+        $values = [];
+
         foreach ($resources as $resource) {
-            if (!$resource->exists()) {
-                continue;
-            }
-            $createdAt = $resource->getUniquePropertyValue($this->getProperty(Entity::CREATED_AT))->literal;
-            $sortedInstances[$createdAt] = $this->format($resource, $withProperties, $params);
-        }
-
-        ksort($sortedInstances);
-
-        $startCreatedAt = isset($params['startCreatedAt']) ? $params['startCreatedAt'] : false;
-        $limit = isset($params['limit']) ? $params['limit'] : false;
-        $offset = isset($params['offset']) ? $params['offset'] : 0;
-
-        $current = 1;
-        foreach ($sortedInstances as $createdAt => $instance) {
-            if ($startCreatedAt !== false && $createdAt < $startCreatedAt) {
-                continue;
-            }
-            if ($current < $offset) {
-                continue;
-            }
-
-            $values[$instance['id']] = $instance;
-
-            if ($limit !== false && ($current - $offset) == $limit) {
-                break;
-            }
-            $current++;
+            $values[$resource->getUri()] = $this->format($resource, $withProperties, $params);
         }
 
         return $values;
