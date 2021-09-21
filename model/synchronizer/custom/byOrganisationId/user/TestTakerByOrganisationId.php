@@ -54,6 +54,10 @@ class TestTakerByOrganisationId extends RdfTestTakerSynchronizer
             }
         }
 
+        $limit = $params['limit'] ?? 100;
+        $offset = $params['offset'] ?? 0;
+        $testtakerResources = array_slice($testtakerResources, $offset, $limit);
+
         return $this->postApplyQueryOptions($testtakerResources, $params);
     }
 }
