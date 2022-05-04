@@ -37,7 +37,7 @@ class RegisterSyncPublishingAction extends InstallAction
     public function __invoke($params)
     {
         $service = $this->getServiceLocator()->get(PublishingService::SERVICE_ID);
-        $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS);
+        $actions = $service->getOption(PublishingService::OPTIONS_ACTIONS, []);
         if (!in_array(SynchronizeData::class, $actions)) {
             $actions[] = SynchronizeData::class;
             $service->setOption(PublishingService::OPTIONS_ACTIONS, $actions);
