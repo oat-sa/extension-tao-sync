@@ -22,7 +22,7 @@
 define([
     'i18n',
     'lodash',
-    'core/dataProvider/request',
+    'core/request',
     'ui/component',
     'tpl!taoSync/component/terminateExecutions/notification',
 ], function (__, _, request, component, listTpl) {
@@ -41,21 +41,17 @@ define([
             throw new TypeError('The configuration is required');
         }
 
-        if (config.terminateUrl == undefined) {
-            throw new TypeError('terminateUrl configuration parameter is required');
-        }
-
-        if (config.csrfToken == undefined) {
-            throw new TypeError('CSRF token is missing');
-        }
-
         function terminateDeliveryExecutions() {
-            var requestData = {
+            var data = {
                 executionsId: config.activeExecutions
             };
-            requestData[config.csrfToken.name] = config.csrfToken.token;
 
-            return request(config.terminateUrl, requestData, 'POST');
+            return request({
+                url: config.terminateUrl,
+                data: data,
+                method: 'POST',
+                noToken: false
+              });
         }
 
         /**

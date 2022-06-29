@@ -22,7 +22,6 @@ namespace oat\taoSync\controller;
 
 use common_report_Report;
 use oat\generis\model\OntologyAwareTrait;
-use oat\tao\model\security\xsrf\TokenService;
 use oat\tao\model\service\ApplicationService;
 use oat\tao\model\taskQueue\Task\TaskInterface;
 use oat\tao\model\taskQueue\TaskLog\Entity\EntityInterface;
@@ -157,26 +156,18 @@ class Synchronizer extends \tao_actions_CommonModule
         /** @var SyncService $syncService */
         $syncService = $this->getServiceLocator()->get(SyncService::SERVICE_ID);
 
-        $data = [];
         $activeSessionsData = [];
         if ($syncService->getOption(SyncService::OPTION_CHECK_ACTIVE_SESSIONS)) {
             $serviceLocator = $this->getServiceLocator();
             $activeSessions = $serviceLocator->get(DeliveryExecutionStatusManager::SERVICE_ID)->getExecutionsInProgress();
             $activeSessionsData = $serviceLocator->get(DeliveryExecutionContextParser::SERVICE_ID)->parseExecutionContextDetails($activeSessions);
-
-            /** @var TokenService $tokenService */
-            $tokenService = $serviceLocator->get(TokenService::SERVICE_ID);
-            $data['token'] = [
-                'name' => $tokenService->getTokenName(),
-                'token' => $tokenService->createToken()->getValue(),
-            ];
         }
-
-        $data['activeSessionsData'] = $activeSessionsData;
 
         return $this->returnJson([
             'success' => true,
-            'data' => $data
+            'data' => [
+                'activeSessionsData' => $activeSessionsData
+            ]
         ]);
     }
 
@@ -191,9 +182,9 @@ class Synchronizer extends \tao_actions_CommonModule
         return [
             'title' => __('Virtual machine version'),
             'score' => $vmVersionChecker->isVmSupported($currentVmVersion) ? 100 : 0,
-            'info'  => [
+            'info' => [
                 [
-                    'text' => __('Version')  . ': ' . $currentVmVersion,
+                    'text' => __('Version') . ': ' . $currentVmVersion,
                 ],
             ]
         ];
@@ -225,7 +216,7 @@ class Synchronizer extends \tao_actions_CommonModule
         $result = [
             'title' => __('Disk & DB space:'),
             'score' => $freePercent ? floor(min($freePercent)) : 1,
-            'info'  => $info
+            'info' => $info
         ];
 
         return $result;
@@ -271,13 +262,13 @@ class Synchronizer extends \tao_actions_CommonModule
                 $score[] = $speed / $synchronisationClient->getExpectedUploadSpeed() * 100;
             }
         }
-        
+
         $score = $score ?? 0;
 
         return [
             'title' => __('Connectivity'),
             'score' => min(min([$score]), 100),
-            'info'  => $info,
+            'info' => $info,
         ];
     }
 
@@ -286,7 +277,10 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     protected function setLastSyncTask($task)
     {
-        $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->setPropertyValue($this->getProperty(DataSyncHistoryService::SYNCHRO_TASK), $task->getId());
+        $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->setPropertyValue(
+            $this->getProperty(DataSyncHistoryService::SYNCHRO_TASK),
+            $task->getId()
+        );
     }
 
     /**
@@ -295,7 +289,9 @@ class Synchronizer extends \tao_actions_CommonModule
      */
     protected function getLastSyncTask()
     {
-        $taskId = $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->getOnePropertyValue($this->getProperty(DataSyncHistoryService::SYNCHRO_TASK));
+        $taskId = $this->getResource(DataSyncHistoryService::SYNCHRO_URI)->getOnePropertyValue(
+            $this->getProperty(DataSyncHistoryService::SYNCHRO_TASK)
+        );
         if ($taskId) {
             try {
                 return $this->getTaskLogEntity($taskId->uriResource);
@@ -346,7 +342,9 @@ class Synchronizer extends \tao_actions_CommonModule
         $vmVersionChecker = $this->getServiceLocator()->get(VmVersionChecker::SERVICE_ID);
 
         if (!$vmVersionChecker->isVmSupported($currentVmVersion)) {
-            throw new NotSupportedVmVersionException(__('Current version of Tao Local is not compatible with Tao Cloud.'), 409);
+            throw new NotSupportedVmVersionException(
+                __('Current version of Tao Local is not compatible with Tao Cloud.'), 409
+            );
         }
     }
 

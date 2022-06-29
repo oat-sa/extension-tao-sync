@@ -306,7 +306,6 @@ define([
                 var $syncActionContainer = $container.find('.sync-action');
                 var dialogConfig = {
                     data: data.activeSessionsData,
-                    csrfToken: data.token,
                     terminateUrl: webservices.terminateExecutions
                 };
 
