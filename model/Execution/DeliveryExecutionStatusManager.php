@@ -57,7 +57,7 @@ class DeliveryExecutionStatusManager extends ConfigurableService
 
         return $deliveryMonitoringService->find([
             DeliveryMonitoringService::STATUS => $this->getNotFinalStatuses()
-        ], [], true);
+        ], []);
     }
 
 
